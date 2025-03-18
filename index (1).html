@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Наш Личный Сайт</title>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.2.0/fullcalendar.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.2.0/fullcalendar.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
+          authDomain: "misha-and-anna-48e4c.firebaseapp.com",
+          projectId: "misha-and-anna-48e4c",
+          storageBucket: "misha-and-anna-48e4c.firebasestorage.app",
+          messagingSenderId: "822036073579",
+          appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
+          measurementId: "G-XR86X6PXMX"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
+        // Initialize Firestore
+        const db = getFirestore(app);
+
+        function setGreeting() {
+            const hours = new Date().getHours();
+            let greeting = '';
+
+            if (hours >= 5 && hours < 12) {
+                greeting = 'Hola, Misha and Anna!';
+            } else if (hours >= 12 && hours < 18) {
+                greeting = 'Добрый день, Аня и Миша!';
+            } else {
+                greeting = 'Good evening, Misha and Anna!';
+            }
+
+            document.getElementById('greeting').innerText = greeting;
+        }
+
+        setGreeting();
+
+        const SECRET_PASSWORD = "любовь2025";
+        const passwordSection = document.getElementById("password-section");
+        const contentSection = document.getElementById("content-section");
+        const submitPasswordButton = document.getElementById("submit-password");
+
+        submitPasswordButton.addEventListener("click", function() {
+            const enteredPassword = document.getElementById("password").value;
+
+            if (enteredPassword === SECRET_PASSWORD) {
+                passwordSection.style.display = "none";
+                contentSection.style.display = "block";  // Показываем контент сайта
+                loadData();
+            } else {
+                alert("Неверный пароль");
+            }
+        });
+
+        const dateForm = document.getElementById("date-form");
+        dateForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const title = document.getElementById("date-title").value;
+            const date = document.getElementById("date-date").value;
+
+            const newDate = {
+                title: title,
+                date: date
+            };
+            addDate(newDate);
+            dateForm.reset();
+        });
+
+        const letterForm = document.getElementById("letter-form");
+        letterForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const recipient = document.getElementById("letter-recipient").value;
+            const text = document.getElementById("letter-text").value;
+            const date = document.getElementById("letter-date").value;
+
+            const newLetter = {
+                recipient: recipient,
+                text: text,
+                date: date
+            };
+
+            addLetter(newLetter);
+            letterForm.reset();
+        });
+
+        const memoryForm = document.getElementById("memory-form");
+        memoryForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const title = document.getElementById("memory-title").value;
+            const text = document.getElementById("memory-text").value;
+
+            const newMemory = {
+                title: title,
+                text: text
+            };
+            addMemory(newMemory);
+            memoryForm.reset();
+        });
+
+        // Firestore functions
+        async function addDate(date) {
+            try {
+                await addDoc(collection(db, "dates"), date);
+                displayImportantDates();
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            }
+        }
+
+        async function addLetter(letter) {
+            try {
+                await addDoc(collection(db, "letters"), letter);
+                displaySavedLetters();
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            }
+        }
+
+        async function addMemory(memory) {
+            try {
+                await addDoc(collection(db, "memories"), memory);
+                displaySavedMemories();
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            }
+        }
+
+        async function deleteDate(id) {
+            try {
+                await deleteDoc(doc(db, "dates", id));
+                displayImportantDates();
+            } catch (e) {
+                console.error("Error deleting document: ", e);
+            }
+        }
+
+        async function deleteLetter(id) {
+            try {
+                await deleteDoc(doc(db, "letters", id));
+                displaySavedLetters();
+            } catch (e) {
+                console.error("Error deleting document: ", e);
+            }
+        }
+
+        async function deleteMemory(id) {
+            try {
+                await deleteDoc(doc(db, "memories", id));
+                displaySavedMemories();
+            } catch (e) {
+                console.error("Error deleting document: ", e);
+            }
+        }
+
+        async function loadData() {
+            await displayImportantDates();
+            await displaySavedLetters();
+            await displaySavedMemories();
+        }
+
+        async function displayImportantDates() {
+            const datesList = document.getElementById("calendar-container");
+            datesList.innerHTML = "";
+        
+            const querySnapshot = await getDocs(collection(db, "dates"));
+            querySnapshot.forEach((doc) => {
+                const date = doc.data();
+                const dateItem = document.createElement("div");
+                dateItem.classList.add('date-item');
+                dateItem.innerHTML = `
+                    <h4>${date.title}</h4>
+                    <p>${date.date}</p>
+                `;
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Удалить';
+                deleteButton.addEventListener('click', () => deleteDate(doc.id));
+                dateItem.appendChild(deleteButton);
+                datesList.appendChild(dateItem);
+
+            });
+        }
+        
+         const quotes = [
+    "Любовь — это не то, что мы чувствуем, а то, что мы делаем. — П. Д. Джеймс",
+    "Любовь — это всегда открытие чего-то нового в другом человеке. — Антуан де Сент-Экзюпери",
+    "Самое лучшее, что мы можем подарить друг другу, — это любовь. — Пауло Коэльо",
+    "Жизнь — это всего лишь момент, но если ты любишь, этот момент вечен. — М. Д. Джордж",
+    "Надежда — это не то, что мы ждем, а то, что мы видим и понимаем. — В. Г. Белинский",
+    "Любовь — это единственное, что растет, когда мы ею делимся. — Анн Ламотт",
+    "Любовь — это не судьба, а выбор. — Ричард Бах",
+    "Любовь — это когда счастье другого человека важнее твоего. — Х. Джексон Браун",
+    "Чтобы жить, нужно любить. Чтобы любить, нужно верить. — Дэниел Киз",
+    "Счастье — это не цель, а способ существования. — Ральф Уолдо Эмерсон",
+    "Надежда — это тот свет, который горит в конце туннеля. — Марио Фернандес",
+    "Счастье не в том, чтобы делать все, что хочешь, а в том, чтобы хотеть того, что делаешь. — Лев Толстой",
+    "Счастье — это когда каждый день — это шаг в сторону твоей мечты. — Дж. Р. Р. Толкин",
+    "Все великие дела совершаются через любовь и веру в себя. — Вильям Шекспир",
+    "Надежда — это не обещание, а возможность. — Шарлотта Бронте",
+    "Счастье не в обладании, а в ощущении, что ты живешь. — Вольтер",
+    "Верь в чудеса, но не забудь, что чудеса — это твои действия. — Пауло Коэльо",
+    "Счастье — это когда ты можешь улыбаться даже в самые трудные моменты. — Джон Грей",
+    "Счастье — это не что-то готовое, оно приходит из твоих собственных действий. — Далай-лама",
+    "Надежда — это не умирает, а прячется. — Эдгар Аллан По",
+    "Любовь всегда побеждает, но иногда она берет время. — Эрих Мария Ремарк",
+    "Счастье — это когда ты знаешь, что ты на правильном пути. — Генри Дэвид Торо",
+    "Любовь — это когда счастье другого человека становится твоим счастьем. — Генри Дэвид Торо",
+    "Надежда — это верить в то, что невозможное возможно. — Дж. К. Роулинг",
+    "Счастье приходит не тогда, когда ты получаешь все, а когда ты ценишь то, что у тебя есть. — Нельсон Мандела",
+    "Когда ты счастлив, мир становится светлее. — Джеймс Мэтью Бэрри",
+    "Надежда — это единственное, что не обманывает нас в этом мире. — Виктор Гюго",
+    "Сила любви преображает мир. — Лев Толстой",
+    "Никогда не теряй надежду, потому что каждый день — это новый шанс. — Ричард Бах",
+    "Счастье — это когда ты чувствуешь, что живешь по-настоящему. — Стивен Кови",
+    "Судьба — это не то, что с нами происходит, а то, как мы реагируем. — Р. Бах",
+    "Любовь — это когда два сердца понимают друг друга без слов. — П. Г. Вудхаус",
+    "Надежда — это свет, который ведет нас через темные времена. — Мартин Лютер Кинг",
+    "Счастье — это когда ты можешь находить радость даже в самых маленьких вещах. — Джон Грей",
+    "Надежда — это сияющий свет в темные времена. — Р. Бах",
+    "Любовь не измеряется словами, а действиями. — Нина Симон",
+    "Счастье — это то, что ты можешь создать из своих собственных мыслей. — Стивен Р. Кови",
+    "Все счастливые семьи похожи, но каждая несчастливая — несчастлива по-своему. — Лев Толстой",
+    "Счастье — это когда ты любишь себя. — Луиза Хей",
+    "Каждый день — это новый шанс, чтобы изменить свою жизнь. — Далай-лама",
+    "Любовь делает нас сильными, но иногда она также делает нас уязвимыми. — Шекспир",
+    "Любовь — это когда ты даришь частичку себя. — Пауло Коэльо",
+    "Счастье — это не то, что приходит, а то, что мы создаем сами. — Аристотель",
+    "Надежда — это вера, которая дает силы двигаться вперед. — Г. Лорка",
+    "Любовь не требует ничего, она дает все. — Тони Моррисон",
+    "Счастье — это когда ты понимаешь, что все в твоих руках. — Пауло Коэльо",
+    "Счастье — это когда ты переживаешь каждый момент, а не ждешь его окончания. — Далай-лама",
+    "Любовь — это когда сердце поет, а душа поет в унисон. — Леонардо да Винчи",
+    "Счастье — это путь, а не пункт назначения. — Ральф Уолдо Эмерсон",
+    "Любовь — это когда ты видишь мир через глаза другого человека. — Габриэль Гарсиа Маркес",
+    "Счастье — это когда ты ценишь каждое мгновение. — Джеймс Мэтью Бэрри",
+    "Надежда — это вера в чудеса. — Пауло Коэльо",
+    "Любовь — это когда ты готов измениться ради другого. — Лев Толстой",
+    "Счастье — это способность радоваться простым вещам. — Сенека",
+    "Счастье — это когда ты сам становишься тем человеком, о котором мечтал. — С. Кови",
+    "Любовь — это когда ты отдаешь что-то важное без сожаления. — Шекспир",
+    "Надежда — это вера, что после темной ночи всегда наступает светлый день. — Дж. К. Роулинг",
+    "Счастье — это когда ты не ищешь его, а оно находит тебя. — Вильям Шекспир",
+    "Любовь — это свет, который не угасает. — Л. Толстой"
+];
+
+
+   function changeQuote() {
+    const quoteElement = document.getElementById('quote');
+    quoteElement.style.opacity = 0; // Сделаем цитату невидимой для плавного перехода
+
+    setTimeout(() => {
+        const randomIndex = Math.floor(Math.random() * quotes.length); // Генерируем случайный индекс
+        quoteElement.innerHTML = quotes[randomIndex]; // Показываем случайную цитату
+
+        quoteElement.style.opacity = 1; // Плавно делаем цитату видимой
+    }, 1000); // Задержка перед изменением цитаты
+}
+
+// Запуск смены цитат через каждые 5 секунд
+setInterval(changeQuote, 5000);
+
+    // Получаем кнопку для переключения темы
+    const themeToggle = document.getElementById('themeToggle');
+
+    // Проверяем, есть ли у нас сохранённая тема в localStorage
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+    }
+
+    // Обработчик клика по кнопке
+    themeToggle.addEventListener('click', function() {
+        // Переключаем класс dark-mode
+        document.body.classList.toggle('dark-mode');
+
+        // Сохраняем текущую тему в localStorage
+        if (document.body.classList.contains('dark-mode')) {
+            localStorage.setItem('theme', 'dark');
+        } else {
+            localStorage.setItem('theme', 'light');
+        }
+    });
+
+
+// Отображаем первую цитату сразу
+changeQuote();
+        
+        async function displaySavedLetters() {
+    const lettersList = document.getElementById("saved-letters-list");
+    lettersList.innerHTML = "";
+
+    const querySnapshot = await getDocs(collection(db, "letters"));
+    querySnapshot.forEach((doc) => {
+        const letter = doc.data();
+        const letterItem = document.createElement("div");
+        letterItem.classList.add("letter-item");
+
+        // Покажем только заголовок письма и дату
+        letterItem.innerHTML = `
+            <h4>${letter.recipient}</h4>
+            <p>Дата: ${letter.date}</p>
+        `;
+
+        // Клик по элементу откроет содержимое письма, если дата настала
+       letterItem.addEventListener('click', function() {
+    const currentDate = moment().format("YYYY-MM-DD");
+    if (currentDate < letter.date) {
+        alert("Ай-ай-ай, ещё рано!!!");
+    } else {
+        // Если дата наступила, проверим, отображается ли уже текст письма
+        const existingText = letterItem.querySelector('.letter-text');
+        if (existingText) {
+            // Если текст уже отображается, скрываем его
+            letterItem.removeChild(existingText);
+        } else {
+            // Если текста нет, показываем его
+            const letterText = document.createElement("p");
+            letterText.classList.add('letter-text'); // добавляем класс для удобства удаления
+            letterText.innerHTML = letter.text;
+            letterItem.appendChild(letterText);
+        }
+    }
+});
+
+       
+        // Кнопка удаления письма
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Удалить';
+        deleteButton.addEventListener('click', () => deleteLetter(doc.id));
+        letterItem.appendChild(deleteButton);
+        
+        // Добавляем письмо в список
+        lettersList.appendChild(letterItem);
+    });
+}
+
+const wishForm = document.getElementById("wish-form");
+wishForm.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const title = document.getElementById("wish-title").value;
+    const date = document.getElementById("wish-date").value;
+
+    const newWish = {
+        title: title,
+        date: date
+    };
+
+    addWish(newWish);
+    wishForm.reset();
+});
+
+
+// Список ID видео YouTube
+const videos = [
+    "b3GoZMfHJT4",  // Видео 1
+    "EYG4ROejmyI",   // Видео 2
+    "FxB6_qaqHlY",   // Видео 3
+    "c_yCRwh97M8",   // Видео 4
+    "cFm8fTRW_so",   // Видео 5
+    "jDQ4-C4AHmA",   // Видео 6
+    "KCT3ZagR9-M",   // Видео 7
+    "8DrQDURiYeQ",   // Видео 8
+    "Q_TzqcWKz00",   // Видео 9
+    "u1Wp2coFDB4",   // Видео 10
+    "zlJDTxahav0",  // Видео 11
+    "MxBQEGMFeEU",   // Видео 12
+    "sGk520me6Ik",   // Видео 13
+];
+
+// Функция для случайной смены видео
+function changeVideo() {
+    // Случайный индекс из массива
+    const randomIndex = Math.floor(Math.random() * videos.length);
+    const videoId = videos[randomIndex];
+    
+    // Обновляем источник iframe
+    document.getElementById('youtube-video').src = `https://www.youtube.com/embed/${videoId}`;
+}
+
+// Меняем видео каждые 6 минут
+setInterval(changeVideo, 360000); // 6 минут
+
+// Functions for modal windows management
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'block';
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeModal(modalId);
+            }
+        });
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal(modalId);
+            }
+        });
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Event listeners for section headers
+document.addEventListener('DOMContentLoaded', function() {
+    // Calendar section
+    const calendarSection = document.querySelector('#calendar');
+    if (calendarSection) {
+        calendarSection.addEventListener('click', function() {
+            openModal('datesModal');
+        });
+    }
+
+    // Letters section
+    const lettersSection = document.querySelector('#saved-letters');
+    if (lettersSection) {
+        lettersSection.addEventListener('click', function() {
+            openModal('lettersModal');
+        });
+    }
+
+    // Memories section
+    const memoriesSection = document.querySelector('#saved-memories');
+    if (memoriesSection) {
+        memoriesSection.addEventListener('click', function() {
+            openModal('memoriesModal');
+        });
+    }
+
+    // Close buttons
+    const closeButtons = document.querySelectorAll('.close');
+    closeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const modal = this.closest('.modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+});
+
+// Firestore функция для добавления желания
+async function addWish(wish) {
+    try {
+        await addDoc(collection(db, "wishes"), wish);
+        displaySavedWishes();
+    } catch (e) {
+        console.error("Ошибка при добавлении документа: ", e);
+    }
+}
+
+
+// Функция для отображения списка желаемых целей
+async function displaySavedWishes() {
+    const wishesList = document.getElementById("saved-wishes-list");
+    wishesList.innerHTML = "";
+
+    const querySnapshot = await getDocs(collection(db, "wishes"));
+    querySnapshot.forEach((doc) => {
+        const wish = doc.data();
+        const wishItem = document.createElement("div");
+        wishItem.classList.add("wish-item");
+
+        wishItem.innerHTML = `
+            <h4>${wish.title}</h4>
+            <p>Дата: ${wish.date}</p>
+        `;
+
+        // Кнопка удаления желания
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Удалить';
+        deleteButton.addEventListener('click', () => deleteWish(doc.id));
+        wishItem.appendChild(deleteButton);
+        
+        wishesList.appendChild(wishItem);
+    });
+}
+
+// Функция для удаления желания
+async function deleteWish(id) {
+    try {
+        await deleteDoc(doc(db, "wishes", id));
+        displaySavedWishes();
+    } catch (e) {
+        console.error("Ошибка при удалении документа: ", e);
+    }
+}
+
+// Инициализация отображения желаемых целей
+displaySavedWishes();
+
+        async function displaySavedMemories() {
+    const memoriesList = document.getElementById("saved-memories-list");
+    memoriesList.innerHTML = "";
+
+    const querySnapshot = await getDocs(collection(db, "memories"));
+    querySnapshot.forEach((doc) => {
+        const memory = doc.data();
+        const memoryItem = document.createElement("div");
+        memoryItem.classList.add("memory-item");
+
+        // Сначала отображаем только заголовок воспоминания
+        memoryItem.innerHTML = `<h4>${memory.title}</h4>`;
+
+        // Добавляем обработчик клика на элемент воспоминания
+        memoryItem.addEventListener('click', function() {
+            // Проверяем, отображается ли уже текст воспоминания
+            const existingText = memoryItem.querySelector('.memory-text');
+            if (existingText) {
+                // Если текст уже отображается, скрываем его
+                memoryItem.removeChild(existingText);
+            } else {
+                // Если текста нет, показываем его
+                const memoryText = document.createElement("p");
+                memoryText.classList.add('memory-text'); // добавляем класс для удобства удаления
+                memoryText.innerHTML = memory.text;
+                memoryItem.appendChild(memoryText);
+            }
+        });
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Удалить';
+        deleteButton.addEventListener('click', () => deleteMemory(doc.id));
+        memoryItem.appendChild(deleteButton);
+
+        memoriesList.appendChild(memoryItem);
+    });
+}
+    </script>
+
+  <style>
+  
+  :root {
+        --primary-color: #ff69b4; /* Ярко-розовый */
+        --secondary-color: #f08080; /* Светло-красный */
+        --accent-color: #e91e63; /* Маджента */
+        --text-color: #333;
+        --bg-light: #fef2f4; /* Очень светло-розовый */
+        --bg-dark: #2c2c2c;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+        --transition-duration: 0.3s;
+    }
+    
+   body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #fff5f8, #ffe6ee); /* Более мягкий градиент */
+        color: var(--text-color);
+        text-align: center;
+        padding: 20px;
+        transition: background var(--transition-duration) ease;
+    }
+    
+     .content-container {
+        margin: 20px 0;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    body.dark-mode .content-container {
+        background: rgba(58, 58, 58, 0.9);
+    }
+
+    .items-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .no-items-message {
+        text-align: center;
+        color: var(--primary-color);
+        font-style: italic;
+        padding: 20px;
+    }
+
+    /* Обновляем стили для секций */
+    #dates-section,
+    #letters-section,
+    #memories-section {
+        margin-bottom: 40px;
+    }
+
+
+   body.dark-mode {
+        background: linear-gradient(135deg, #1e1e1e, #222);
+        color: #e0e0e0;
+    }
+
+   #password-section {
+        margin-top: 60px;
+    }
+
+   #password {
+        padding: 12px;
+        font-size: 18px;
+        border: 2px solid var(--primary-color);
+        border-radius: 8px;
+        margin-bottom: 15px;
+        transition: border-color var(--transition-duration) ease;
+        width: 300px;
+        max-width: 100%;
+    }
+
+    #password:focus {
+        border-color: var(--accent-color);
+        outline: none;
+        box-shadow: 0 0 8px rgba(255, 105, 180, 0.3);
+    }
+
+    #submit-password {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #ff4081;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    #submit-password:hover {
+        background-color: var(--accent-color);
+        transform: scale(1.08);
+        box-shadow: 0 4px 6px var(--shadow-color);
+    }
+
+    #content-section {
+        max-width: 950px;
+        margin: 30px auto;
+        background-color: var(--bg-light);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px var(--shadow-color);
+        display: none;
+        opacity: 1;
+        transition: opacity 0.7s ease;
+    }
+
+   body.dark-mode #content-section {
+        background-color: var(--bg-dark);
+        color: #e0e0e0;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    #content-section.visible {
+        display: block;
+        opacity: 1;
+    }
+    
+   #greeting-section {
+        margin-bottom: 40px;
+    }
+
+    #greeting {
+        font-size: 3em;
+        color: var(--primary-color);
+        animation: fadeInUp 1.5s ease-out;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Цитаты о любви */
+    #love-quotes {
+        background: linear-gradient(135deg, #ffebee, #ffcdd2); /* Еще более нежные цвета */
+        padding: 25px;
+        border-radius: 20px;
+        box-shadow: 0 7px 15px var(--shadow-color);
+        margin: 30px auto;
+        max-width: 700px;
+        text-align: center;
+        transition: background var(--transition_duration) ease;
+        animation: breathe 5s infinite alternate;
+}
+
+@keyframes breathe {
+    0% {
+        box-shadow: 0 7px 15px var(--shadow-color); /* Исходная тень */
+    }
+    100% {
+        box-shadow: 0 7px 15px rgba(255, 105, 180, 0.4); /* Увеличенная тень с розовым оттенком */
+    }
+}
+
+    body.dark-mode #love-quotes {
+        background: linear-gradient(135deg, #333, #3a3a3a);
+    }
+
+    #love-quotes p {
+        font-size: 22px;
+        font-style: italic;
+        color: var(--secondary-color);
+        opacity: 0;
+        animation: fadeInQuote 2s forwards;
+    }
+
+    @keyframes fadeInQuote {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Видео */
+    .video-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 950px;
+        padding-bottom: 56.25%; /* Соотношение сторон 16:9 */
+        height: 0;
+        overflow: hidden;
+        background-color: #000;
+        border-radius: 20px;
+        margin: 30px auto;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    #youtube-video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 20px;
+    }
+
+    /* Элементы контента (письма, воспоминания и т.д.) */
+    .letter-item, .memory-item, .date-item, .wish-item {
+    background-color: var(--bg-light);
+    padding: 25px;
+    margin-bottom: 20px;
+    border-radius: 15px;
+    box-shadow: 0 6px 15px var(--shadow-color);
+    transition: transform var(--transition-duration) ease, box-shadow var(--transition-duration) ease, background-color var(--transition-duration) ease, color var(--transition-duration) ease; /* Добавляем переход для background-color и color */
+    color: var(--text-color); /* Явное указание цвета текста */
+}
+
+body.dark-mode .letter-item,
+body.dark-mode .memory-item,
+body.dark-mode .date-item,
+body.dark-mode .wish-item {
+    background-color: #3a3a3a; /* Темный фон */
+    color: #e0e0e0; /* Светлый цвет текста */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5); /* Более выраженная тень */
+    border: 1px solid #555; /* Добавляем тонкую границу для лучшей видимости */
+}
+
+body.dark-mode .letter-item h4,
+body.dark-mode .memory-item h4,
+body.dark-mode .date-item h4,
+body.dark-mode .wish-item h4 {
+    color: var(--primary-color); /* Или другой подходящий цвет для заголовка */
+}
+
+.letter-item:hover, .memory-item:hover, .date-item:hover, .wish-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* Добавляем подсветку при наведении и в темном режиме */
+.letter-item:hover, .memory-item:hover, .date-item:hover, .wish-item:hover,
+body.dark-mode .letter-item:hover,
+body.dark-mode .memory-item:hover,
+body.dark-mode .date-item:hover,
+body.dark-mode .wish-item:hover {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3),
+                0 0 0 5px rgba(255, 105, 180, 0.2); /* Подсветка при наведении */
+}
+
+@keyframes fadeInSlideUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+    .letter-item:hover,
+    .memory-item:hover,
+    .date-item:hover,
+    .wish-item:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    h4 {
+        color: var(--primary-color);
+        font-size: 24px;
+        margin-bottom: 12px;
+    }
+
+    small {
+        font-size: 15px;
+        color: #777;
+    }
+
+    /* Кнопки */
+    button {
+        padding: 12px 24px;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color var(--transition-duration) ease, transform 0.2s ease;
+    }
+
+    button:hover {
+        background-color: var(--accent-color);
+        transform: scale(1.08);
+        box-shadow: 0 4px 6px var(--shadow-color);
+    }
+    
+    .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: var(--bg-light);
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 15px;
+    width: 80%;
+    max-width: 600px;
+    position: relative;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+body.dark-mode .modal-content {
+    background-color: var(--bg-dark);
+}
+
+@keyframes modalSlideIn {
+    from {transform: translateY(-50px); opacity: 0;}
+    to {transform: translateY(0); opacity: 1;}
+}
+
+.close {
+    position: absolute;
+    right: 25px;
+    top: 10px;
+    font-size: 35px;
+    cursor: pointer;
+}
+
+.section-header {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 15px;
+    border-radius: 10px;
+    background: rgba(255,105,180,0.1);
+}
+
+.section-header:hover {
+    background: rgba(255,105,180,0.2);
+    transform: scale(1.02);
+}
+
+    /* Формы */
+    input[type="text"],
+    textarea,
+    input[type="date"],
+    input[type="file"] {
+        width: 100%;
+        padding: 12px;
+        font-size: 17px;
+        margin-bottom: 18px;
+        border-radius: 8px;
+        border: 2px solid #ddd;
+        transition: border-color var(--transition-duration) ease;
+        font-family: inherit; /* Наследование шрифта от body */
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    input[type="date"]:focus,
+    input[type="file"]:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 8px rgba(255, 105, 180, 0.3);
+    }
+
+    /* Выпадающие блоки */
+    .collapsible-header {
+        cursor: pointer;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 18px;
+        font-size: 19px;
+        text-align: center;
+        transition: background-color var(--transition-duration) ease;
+    }
+
+    .collapsible-header:hover {
+        background-color: var(--accent-color);
+    }
+
+    .collapsible-content {
+        display: none;
+        padding: 25px;
+        background-color: var(--bg-light);
+        border-radius: 15px;
+        box-shadow: 0 6px 15px var(--shadow-color);
+        margin-bottom: 20px;
+        font-size: 17px;
+        line-height: 1.6;
+    }
+
+    /* Таймер */
+    .timer {
+        color: var(--primary-color);
+        font-weight: bold;
+        margin-top: 15px;
+        font-size: 20px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Календарь */
+    #calendar-container {
+        max-width: 950px;
+        margin: 30px auto;
+        background-color: var(--bg-light);
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px var(--shadow-color);
+    }
+
+    body.dark-mode #calendar-container {
+        background-color: var(--bg-dark);
+    }
+
+    /* Раздел желаний */
+    #wishes-section {
+        margin-top: 60px;
+    }
+
+    #wishes-section form {
+        margin-bottom: 25px;
+    }
+
+    #wishes-section input,
+    #wishes-section button {
+        padding: 12px;
+        font-size: 17px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+
+    #wishes-section #saved-wishes-list {
+        margin-top: 25px;
+    }
+
+    .wish-item {
+        background-color: var(--bg-light);
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 15px;
+        box-shadow: 0 6px 15px var(--shadow-color);
+        transition: transform var(--transition-duration) ease, box-shadow var(--transition-duration) ease;
+    }
+
+    .wish-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .wish-item h4 {
+        color: var(--primary-color);
+        font-size: 22px;
+    }
+
+    .wish-item button {
+        padding: 12px 24px;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .wish-item button:hover {
+        background-color: var(--accent-color);
+    }
+
+    /* Переключатель темы */
+    #themeToggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color var(--transition-duration) ease, transform 0.2s ease;
+        z-index: 100; /* Чтобы всегда быть поверх контента */
+    }
+
+    #themeToggle:hover {
+        background-color: var(--accent-color);
+        transform: scale(1.08);
+        box-shadow: 0 4px 6px var(--shadow-color);
+    }
+</style>
+</head>
+<body>
+
+    <div id="password-section">
+        <h2>Введите пароль</h2>
+        <div id="notification" style="margin-bottom: 20px; color: #ff4081; font-size: 16px;">
+            Этот сайт только для Анюты и Михаила.
+        </div>
+        <input type="password" id="password" placeholder="Пароль" />
+        <button id="submit-password">Войти</button>
+    </div>
+    
+    <button id="themeToggle">Переключить тему</button>   
+
+    <div id="greeting-section">
+        <h1 id="greeting"></h1>
+    </div>
+
+    <div id="content-section">
+        <h1>Наш Личный Сайт</h1>
+        
+        <section id="love-quotes">
+    <h2></h2>
+    <p id="quote">"Любовь — это когда счастье другого человека важнее твоего."</p>
+</section>
+
+<div class="video-wrapper">
+    <iframe id="youtube-video" width="560" height="315" 
+            src="https://www.youtube.com/embed/b3GoZMfHJT4" 
+            frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+    </iframe>
+</div>
+
+
+
+     <section id="dates-section">
+            <div class="content-container">
+                <div id="calendar-container" class="items-container"></div>
+            </div>
+            <div id="calendar" class="section-header" onclick="openModal('datesModal')">
+                <h2>🎉 Наши важные даты</h2>
+            </div>
+        </section>
+
+        <!-- Обновленная секция писем -->
+        <section id="letters-section">
+            <div class="content-container">
+                <div id="saved-letters-list" class="items-container"></div>
+            </div>
+            <div id="saved-letters" class="section-header" onclick="openModal('lettersModal')">
+                <h2>💌 Наши сохраненные письма</h2>
+            </div>
+        </section>
+
+        <!-- Обновленная секция воспоминаний -->
+        <section id="memories-section">
+            <div class="content-container">
+                <div id="saved-memories-list" class="items-container"></div>
+            </div>
+            <div id="saved-memories" class="section-header" onclick="openModal('memoriesModal')">
+                <h2>📔 Наши сохраненные воспоминания</h2>
+            </div>
+        </section>
+
+
+        <!-- Блок для отображения челленджа -->
+<div id="challenge-container" style="text-align: center; margin-top: 20px;">
+   <h2>Получите ваш романтический или веселый челлендж на сегодня!</h2>
+  <div id="challenge"></div>
+  <button id="challengeButton">Получить новый челлендж</button>
+</div>
+
+ <script>
+  const challenges = [
+  { id: 1, title: "Напиши письмо с максимально древними словами английского, которые ты только знаешь" },
+  { id: 2, title: "Сделай сюрприз, не сообщая о нем заранее." },
+  { id: 3, title: "Придумай 10 комплиментов и отправь ему/ей" },
+  { id: 4, title: "Каждый день на протяжении недели записывайте один момент, который вас порадовал, а потом пришли Мише/Анне." },
+  { id: 5, title: "Позвони Мише/Анне." },
+  { id: 6, title: "Скажи друг другу три вещи, которые ты ценишь в ней//нём." },
+  { id: 7, title: "Напиши друг другу поэму, вдохновленную тем, что вы вместе пережили." },
+  { id: 8, title: "Отправь письмо на сайт, записав то, что думаешь о Мише/Анне." },
+  { id: 9, title: "Сходите на прогулку в день, который устраивает вас обоих." },
+  { id: 10, title: "Проведите вечер, отключив все гаджеты, и сосредоточьтесь друг на друге." },
+  { id: 11, title: "Запиши видеосообщения и расскажи о том, что делаешь." },
+  { id: 12, title: "Скажи в гс что-то приятное для Мишы/Анни." },
+  { id: 13, title: "Вспомни самое приятное, что слышал от него/неё." },
+  { id: 14, title: "Сделайте совместное фото." },
+  { id: 15, title: "Организуйте для другого день сюрпризов." },
+  { id: 16, title: "Напишите открытку с благодарностью за что-то особенное." },
+  { id: 17, title: "Посмотрите старые фотографии и расскажите друг другу истории о них." },
+  { id: 18, title: "Опиши поездку, которую мы хотели бы совершить вместе." },
+  { id: 19, title: "Попробуйте новый вид активности, выбирает он/она." },
+  { id: 20, title: "Устроить поход в кино." },
+  { id: 21, title: "Каждому из вас нужно придумать свою уникальную песню и спеть друг другу." },
+  { id: 22, title: "Сделать список мечт, которые ты хочешь осуществить вместе/одна/один." },
+  { id: 23, title: "Вспомните самые смешные моменты, когда вы смеялись до слез." },
+  { id: 24, title: "Прочитайте книгу или статью, которая интересует вашего партнера, и обсудите." },
+  { id: 25, title: "Устроьте вечер просмотра фильмов, выбрав только те, которые нравятся вашему партнеру." },
+  { id: 26, title: "Запишите видео с шуткой и отправьте его друг другу." },
+  { id: 27, title: "Создайте 'капсулу времени' с предметами, которые важны для вас." },
+  { id: 28, title: "Сделайте друг другу сюрприз, подготовив маленькие подарки без повода." },
+  { id: 29, title: "Подарите друг другу ежедневник, в который будете записывать самые милые моменты." },
+  { id: 30, title: "Проведите день без разговоров и используйте только жесты и мимику для общения." },
+  { id: 31, title: "Сыграйте в игру на знание друг друга (например, кто больше знает о своем друге)." },
+  { id: 32, title: "Запланируйте  отпуск, который вы хотите провести." },
+  { id: 33, title: "Сделайте друг другу 5 неожиданных комплиментов." },
+  { id: 34, title: "Напишите стихотворение, вдохновленное вашей историей." },
+  { id: 35, title: "Подготовьте совместное интервью, где отвечаете друг за друга." },
+  { id: 36, title: "Попробуйте рисовать друг другу портреты, даже если у вас нет художественного опыта." },
+  { id: 37, title: "Составьте список песен, которые напоминают вам друг о друге." },
+  { id: 38, title: "Забудьте про все проблемы и целый день проводите в релаксе и спокойствии." },
+  { id: 39, title: "Напишите друг другу перечень вещей, за которые вы благодарны." },
+  { id: 40, title: "Сделайте план на месяц и впишите в него важные моменты для вас." },
+  { id: 41, title: "Проведите день вдвоем, делая что-то, что всегда хотели попробовать, но откладывали." },
+  { id: 42, title: "Придумайте свою собственную традицию, которую будете выполнять каждый месяц." },
+  { id: 43, title: "Посмотрите фильм с вашим любимым актором или актрисой." },
+  { id: 44, title: "Запланируйте день, посвященный одному из ваших хобби." },
+  { id: 45, title: "Напишите друг другу маленькие записки с вдохновляющими цитатами." },
+  { id: 46, title: "Придумайте дату, которая станет вашей новой традицией." },
+  { id: 47, title: "Посетите новое место в вашем городе." },
+  { id: 48, title: "Устроить вечер настольных игр или видеоигр." },
+  { id: 49, title: "Создайте свою собственную романтическую традицию." },
+  { id: 50, title: "Напишите списки «5 вещей, которые ты хочешь сделать»." },
+  { id: 51, title: "Придумайте смешную историю на основе ваших совместных воспоминаний." },
+  { id: 52, title: "Устроить спонтанный вечер кино по тематике стран, которые хотите посетить." },
+  { id: 53, title: "Организуйте свой мини-фестиваль (пикник, игры, музыка)." },
+  { id: 54, title: "Создайте вечерний ритуал, который будете выполнять каждую неделю." },
+  { id: 55, title: "Подготовьте сюрприз для друг друга на случайный день." },
+  { id: 56, title: "Подарите друг другу совместный день отдыха и расслабления." },
+  { id: 57, title: "Напишите креативные «обещания» для друг друга на будущее." },
+  { id: 58, title: "Подготовьте совместную фотографию с вашей историей." },
+  { id: 59, title: "Создайте карту ваших путешествий и отметьте места, которые хотите посетить." },
+  { id: 60, title: "Организуйте вечер, посвященный вашей любимой теме." },
+  { id: 61, title: "Обсудите, что вам обоим важно в жизни и в отношениях." },
+  { id: 62, title: "Создайте playlist с вашими любимыми песнями." },
+  { id: 63, title: "Посетите новый музей или выставку." },
+  { id: 64, title: "Соберите фотографии и сделайте альбом о ваших приключениях." },
+  { id: 65, title: "Запланируйте совместный день без смартфонов." },
+  { id: 66, title: "Сделайте план на неделю, включив в него совместные активности." },
+  { id: 67, title: "Сделайте совместное путешествие в ближайший город или деревню." },
+];
+
+    // Функция для выбора случайного челленджа
+    function getRandomChallenge() {
+      const randomIndex = Math.floor(Math.random() * challenges.length);
+      return challenges[randomIndex];
+    }
+
+    // Функция для отображения челленджа на сайте
+    function displayChallenge() {
+      const challenge = getRandomChallenge();
+      const challengeDiv = document.getElementById("challenge");
+      challengeDiv.innerHTML = `<h2>Сегодняшний челлендж</h2><p>${challenge.title}</p>`;
+      console.log("Челлендж показан:", challenge.title); // Проверка, что вызвалась функция
+    }
+
+    // Добавляем обработчик на кнопку
+    document.getElementById("challengeButton").addEventListener("click", function() {
+      console.log("Кнопка нажата!"); // Отладочная информация
+      displayChallenge(); // Показать новый челлендж
+    });
+
+    // Вызываем функцию, чтобы показать челлендж при загрузке страницы
+    window.onload = displayChallenge;
+
+  </script>
+
+
+       <!-- Модальные окна -->
+<div id="datesModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('datesModal')">&times;</span>
+        <h3>Добавить важную дату</h3>
+        <form id="date-form">
+            <input type="text" id="date-title" placeholder="Название события" required />
+            <input type="date" id="date-date" required />
+            <button type="submit">Добавить дату</button>
+        </form>
+    </div>
+</div>
+
+<div id="lettersModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('lettersModal')">&times;</span>
+        <h3>Написать письмо</h3>
+        <form id="letter-form">
+            <label for="letter-recipient">Выберите получателя:</label>
+            <select id="letter-recipient" required>
+                <option value="Михаилу">Для Михаила</option>
+                <option value="Анюте">Для Анюты</option>
+            </select>
+            <textarea id="letter-text" placeholder="Ваше письмо" required></textarea>
+            <input type="date" id="letter-date" required />
+            <button type="submit">Сохранить письмо</button>
+        </form>
+    </div>
+</div>
+
+<div id="memoriesModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('memoriesModal')">&times;</span>
+        <h3>Записать воспоминание</h3>
+        <form id="memory-form">
+            <input type="text" id="memory-title" placeholder="Название воспоминания" required />
+            <textarea id="memory-text" placeholder="Ваше воспоминание" required></textarea>
+            <button type="submit">Сохранить воспоминание</button>
+        </form>
+    </div>
+</div>
+        
+        <div id="wishes-section">
+    <h2>Добавить желания и мечты</h2>
+    <form id="wish-form">
+        <input type="text" id="wish-title" placeholder="Название желания и мечты" required />
+        <input type="date" id="wish-date" required />
+        <button type="submit">Добавить желание и мечту</button>
+    </form>
+
+    <div id="saved-wishes-list"></div>
+</div>
+
+<button onclick="window.location.href='universe.html';">Перейти в 3D вселенную</button>
+<button onclick="window.location.href='movie.html';">Перейти на сайт с фильмами</button>
+
+
+
+    </div>
+</body>
+</html>

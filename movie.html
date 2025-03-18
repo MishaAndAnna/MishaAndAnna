@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат с Firebase и просмотр фильмов</title>
+    <style>
+        :root {
+            --primary-color: #2c3639;
+            --primary-dark: #1a1d1f;
+            --gold-accent: #c6a868;
+            --gold-light: #d4bc8b;
+            --cream-color: #f5f2eb;
+            --text-color: #2c3639;
+            --border-radius: 12px;
+            --spacing: 24px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --elegant-font: 'Cormorant Garamond', 'Times New Roman', serif;
+        }
+
+          .dark-theme {
+            --primary-color: #1a1d1f;
+            --primary-dark: #121314;
+            --gold-accent: #b59452;
+            --gold-light: #c8a95d;
+            --cream-color: #2a2d2f;
+            --text-color: #f5f2eb;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--elegant-font);
+            background: linear-gradient(135deg, #2c3639 0%, #1a1d1f 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: var(--spacing);
+            color: var(--text-color);
+            letter-spacing: 0.3px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1800px;
+            margin: 0 auto;
+            display: flex;
+            gap: var(--spacing);
+            height: 92vh;
+            position: relative;
+        }
+
+        .movie-container {
+            width: 50%;  /* Половина экрана */
+            height: 92vh;  /* Высота экрана */
+            overflow: hidden;  /* Обрезать лишнюю часть */
+            border-radius: 12px; /* Закругленные углы */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);  /* Тень */
+            position: relative;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;  /* Убираем рамку */
+        }
+
+        .chat-box {
+            flex: 1;
+            background-color: var(--cream-color);
+            border-radius: var(--border-radius);
+            padding: var(--spacing);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            position: relative;
+            border: 1px solid rgba(198, 168, 104, 0.3);
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(198, 168, 104, 0.3);
+        }
+
+        .chat-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--primary-color);
+            letter-spacing: 0.5px;
+        }
+        
+        .theme-toggle-btn {
+            background-color: var(--gold-accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle-btn:hover {
+            background-color: var(--gold-light);
+            transform: translateY(-2px);
+        }
+
+        .theme-toggle-btn:active {
+            transform: translateY(0);
+        }
+
+        .online-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--gold-accent);
+            font-size: 0.95rem;
+            font-style: italic;
+        }
+
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--gold-accent);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: var(--spacing);
+            padding-right: 12px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background-color: var(--gold-accent);
+            border-radius: 2px;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            max-width: 85%;
+            animation: messageAppear 0.4s ease;
+        }
+
+        .message.sent {
+            margin-left: auto;
+        }
+
+        .message.received {
+            margin-right: auto;
+        }
+
+        .message-content {
+            padding: 14px 18px;
+            border-radius: 12px;
+            position: relative;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            font-size: 1.05rem;
+            line-height: 1.5;
+        }
+
+        .sent .message-content {
+    background-color: var(--primary-color);
+    color: white; /* Белый цвет для текста */
+    border-bottom-right-radius: 4px;
+}
+
+        .received .message-content {
+            background-color: white;
+            color: var(--text-color);
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(198, 168, 104, 0.2);
+        }
+
+        .message-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            margin-top: 6px;
+            color: var(--gold-accent);
+            font-style: italic;
+        }
+
+        .chat-input-container {
+            position: relative;
+            margin-top: auto;
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 4px;
+            border: 1px solid rgba(198, 168, 104, 0.3);
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 16px;
+            padding-right: 60px;
+            border-radius: var(--border-radius);
+            border: none;
+            font-size: 1.05rem;
+            resize: none;
+            transition: all 0.3s ease;
+            background-color: transparent;
+            font-family: var(--elegant-font);
+            color: var(--text-color);
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--gold-accent);
+            box-shadow: 0 0 0 3px rgba(198, 168, 104, 0.1);
+        }
+
+        #sendBtn {
+            position: absolute;
+            right: 12px;
+            bottom: 12px;
+            background-color: var(--gold-accent);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #sendBtn:hover {
+            background-color: var(--gold-light);
+            transform: translateY(-1px);
+        }
+
+        #sendBtn:active {
+            transform: translateY(0);
+        }
+
+        .styled-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6f42c1, #ff8a00); /* Градиентный фон */
+            color: white;
+            border: none;
+            border-radius: 25px; /* Закругленные углы */
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease; /* Плавный переход для эффектов */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Легкая тень */
+        }
+
+        .styled-button:hover {
+            background: linear-gradient(135deg, #ff8a00, #6f42c1); /* Изменение фона при наведении */
+            transform: translateY(-2px); /* Подъем кнопки */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Увеличение тени */
+        }
+
+        .styled-button:active {
+            transform: translateY(2px); /* Легкое опускание кнопки при клике */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Меньшая тень */
+        }
+
+        @keyframes messageAppear {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .movie-container {
+                height: 50vh;
+                flex: none;
+                width: 100%;
+            }
+
+            .chat-box {
+                width: 100%;
+                height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Видео -->
+        <div class="movie-container">
+            <!-- Вставка iframe с сайтом Kinogo -->
+            <iframe src="https://kinogo-films.biz/filmy/" title="Просмотр фильмов"></iframe>
+        </div>
+
+        <!-- Чат -->
+        <div class="chat-box">
+         <div class="chat-header">
+                <div class="chat-title">Чат</div>
+                <button class="theme-toggle-btn" id="themeToggleBtn">Переключить тему</button>
+            </div>
+            <div class="chat-messages" id="messages"></div>
+            <div class="chat-input-container">
+                <textarea id="messageInput" class="chat-input" placeholder="Введите сообщение..."></textarea>
+                <button id="sendBtn" class="send-btn">Отправить</button>
+            </div>
+            <button onclick="window.location.href='index.html';" class="styled-button">Вернуться на главную</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Импорт необходимых функций Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+        import { 
+            getDatabase, 
+            ref, 
+            push, 
+            onValue, 
+            set 
+        } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
+
+        // Конфигурация Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
+            authDomain: "misha-and-anna-48e4c.firebaseapp.com",
+            databaseURL: "https://misha-and-anna-48e4c-default-rtdb.europe-west1.firebasedatabase.app/",
+            projectId: "misha-and-anna-48e4c",
+            storageBucket: "misha-and-anna-48e4c.appspot.com",
+            messagingSenderId: "822036073579",
+            appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
+            measurementId: "G-XR86X6PXMX"
+        };
+
+        // Инициализация Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const messagesRef = ref(db, 'messages');
+
+        // Элементы страницы
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const messagesContainer = document.getElementById('messages');
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        
+        // Получаем имя пользователя (например, можно спросить у пользователя)
+        const username = prompt("Введите ваше имя:");
+
+        // Прослушивание изменений в сообщениях
+        onValue(messagesRef, (snapshot) => {
+            messagesContainer.innerHTML = '';
+            const messages = snapshot.val();
+            if (messages) {
+                Object.entries(messages).forEach(([id, message]) => {
+                    const messageElement = document.createElement('div');
+                    
+                    // Если сообщение отправлено пользователем, то класс 'sent', если другим - 'received'
+                    messageElement.className = message.sender === username ? 'message sent' : 'message received';
+
+                    const time = new Date(message.timestamp).toLocaleTimeString('ru-RU', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    messageElement.innerHTML = `
+                        <div class="message-content">${message.text}</div>
+                        <div class="message-meta">
+                            <span>${message.sender}</span>
+                            <span>${time}</span>
+                        </div>
+                    `;
+
+                    messagesContainer.appendChild(messageElement);
+                });
+
+                // Прокрутка к последнему сообщению
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        });
+
+        // Функция отправки сообщения
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message) {
+                const messageData = {
+                    sender: username,  // Используем имя пользователя
+                    text: message,
+                    timestamp: Date.now()
+                };
+
+                try {
+                    const newMessageRef = push(messagesRef);
+                    await set(newMessageRef, messageData);
+                    messageInput.value = '';
+                } catch (error) {
+                    console.error('Ошибка при отправке сообщения:', error);
+                    alert('Не удалось отправить сообщение');
+                }
+            }
+        }
+
+        // Отправка сообщения по кнопке
+        sendBtn.addEventListener('click', sendMessage);
+
+        // Отправка сообщения по нажатию клавиши Enter
+        messageInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+        
+                // Переключение между светлой и темной темой
+        themeToggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-theme');
+        });
+    </script>
+</body>
+</html>
