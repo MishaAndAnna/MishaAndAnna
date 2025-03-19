@@ -810,7 +810,13 @@ body.fullscreen .movie-container {
         });
 
         let localStream;
-        const peerConnectionConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+        const peerConnectionConfig = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+                { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
+            ]
+        };
         let peerConnection;
 
         async function startScreenShare() {
@@ -820,15 +826,21 @@ body.fullscreen .movie-container {
             }
             try {
                 localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                console.log('Захват экрана успешен:', localStream);
                 peerConnection = new RTCPeerConnection(peerConnectionConfig);
                 localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
                 peerConnection.onicecandidate = (event) => {
                     if (event.candidate) {
+                        console.log('ICE candidate отправлен:', event.candidate);
                         push(signalingRef, { type: 'candidate', candidate: event.candidate, sender: username });
                     }
                 };
+                peerConnection.oniceconnectionstatechange = () => {
+                    console.log('ICE connection state:', peerConnection.iceConnectionState);
+                };
                 const offer = await peerConnection.createOffer();
                 await peerConnection.setLocalDescription(offer);
+                console.log('Offer отправлен:', offer);
                 push(signalingRef, { type: 'offer', sdp: offer, sender: username });
             } catch (error) {
                 console.error('Ошибка при захвате экрана:', error);
@@ -836,29 +848,48 @@ body.fullscreen .movie-container {
             }
         }
 
-        onValue(signalingRef, (snapshot) => {
+        onValue(signalingRef, async (snapshot) => {
             const data = snapshot.val();
+            console.log('Получены сигнальные данные:', data);
             if (!data || isHost) return;
-            Object.values(data).forEach(async (signal) => {
-                if (signal.sender === username) return;
-                if (signal.type === 'offer') {
-                    peerConnection = new RTCPeerConnection(peerConnectionConfig);
-                    await peerConnection.setRemoteDescription(signal.sdp);
-                    const answer = await peerConnection.createAnswer();
-                    await peerConnection.setLocalDescription(answer);
-                    push(signalingRef, { type: 'answer', sdp: answer, sender: username });
-                    peerConnection.ontrack = (event) => {
-                        screenShareVideo.srcObject = event.streams[0];
-                    };
-                } else if (signal.type === 'answer' && peerConnection.signalingState !== 'stable') {
-                    await peerConnection.setRemoteDescription(signal.sdp);
-                } else if (signal.type === 'candidate') {
-                    await peerConnection.addIceCandidate(signal.candidate);
+            for (const signal of Object.values(data)) {
+                if (signal.sender === username) continue;
+                try {
+                    if (signal.type === 'offer') {
+                        peerConnection = new RTCPeerConnection(peerConnectionConfig);
+                        peerConnection.ontrack = (event) => {
+                            console.log('Получен поток:', event.streams[0]);
+                            screenShareVideo.srcObject = event.streams[0];
+                        };
+                        peerConnection.oniceconnectionstatechange = () => {
+                            console.log('ICE connection state:', peerConnection.iceConnectionState);
+                        };
+                        peerConnection.onicecandidate = (event) => {
+                            if (event.candidate) {
+                                console.log('ICE candidate отправлен:', event.candidate);
+                                push(signalingRef, { type: 'candidate', candidate: event.candidate, sender: username });
+                            }
+                        };
+                        await peerConnection.setRemoteDescription(signal.sdp);
+                        const answer = await peerConnection.createAnswer();
+                        await peerConnection.setLocalDescription(answer);
+                        console.log('Answer отправлен:', answer);
+                        push(signalingRef, { type: 'answer', sdp: answer, sender: username });
+                    } else if (signal.type === 'answer' && peerConnection.signalingState !== 'stable') {
+                        await peerConnection.setRemoteDescription(signal.sdp);
+                        console.log('Answer установлен');
+                    } else if (signal.type === 'candidate') {
+                        await peerConnection.addIceCandidate(signal.candidate);
+                        console.log('ICE candidate добавлен:', signal.candidate);
+                    }
+                } catch (error) {
+                    console.error('Ошибка обработки сигнала:', error);
                 }
-            });
+            }
         });
 
         localStream?.getTracks().forEach(track => track.onended = () => {
+            console.log('Трансляция завершена');
             peerConnection?.close();
             if (screenShareVideo) screenShareVideo.srcObject = null;
         });
@@ -875,6 +906,7 @@ body.fullscreen .movie-container {
             try {
                 const newCommandRef = push(playbackRef);
                 await set(newCommandRef, commandData);
+                console.log(`Команда ${command} отправлена`);
             } catch (error) {
                 console.error('Ошибка при отправке команды:', error);
             }
@@ -888,6 +920,7 @@ body.fullscreen .movie-container {
             if (!data || isHost) return;
             Object.values(data).forEach((commandData) => {
                 if (commandData.sender === username) return;
+                console.log('Получена команда воспроизведения:', commandData.command);
                 if (commandData.command === 'play') {
                     screenShareVideo.play();
                 } else if (commandData.command === 'pause') {
