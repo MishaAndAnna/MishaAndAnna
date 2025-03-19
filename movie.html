@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Чат с Firebase и просмотр фильмов</title>
     <style>
-        /* Вставьте ваш CSS из предыдущих версий сюда */
         :root {
             --bg-primary: #06080f;
             --bg-secondary: #0f172a;
@@ -359,7 +358,7 @@
         }
 
         .message.sent::after {
-            right: -8px;
+            right: -8 PX;
             border-right: 10px solid transparent;
             border-top: 10px solid transparent;
             border-left: 10px solid var(--accent-secondary);
@@ -646,7 +645,6 @@
     <div class="container">
         <div class="movie-container" id="movieContainer">
             <button id="fullscreenBtn" class="styled-button fullscreen-btn">Полный экран</button>
-            <button id="startPlaybackBtn" class="styled-button" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">Начать просмотр</button>
             <div class="chat-overlay" id="chatOverlay">
                 <button id="toggleChatBtn" class="styled-button chat-toggle-btn">Показать чат</button>
                 <div class="chat-box fullscreen-chat" id="fullscreenChatBox">
@@ -673,10 +671,13 @@
                 <textarea id="messageInput" class="chat-input" placeholder="Введите сообщение..."></textarea>
                 <button id="sendBtn" class="send-btn">Отправить</button>
             </div>
-            <button id="startShareBtn" class="styled-button">Начать трансляцию экрана</button>
-            <button id="playBtn" class="styled-button">Play</button>
-            <button id="pauseBtn" class="styled-button">Pause</button>
-            <button onclick="window.location.href='index.html';" class="styled-button">Вернуться на главную</button>
+            <div id="chatControls" style="margin: var(--space-lg); display: flex; flex-direction: column; gap: var(--space-md);">
+                <button id="startShareBtn" class="styled-button">Начать трансляцию экрана</button>
+                <button id="playBtn" class="styled-button">Play</button>
+                <button id="pauseBtn" class="styled-button">Pause</button>
+                <button id="startPlaybackBtn" class="styled-button" style="display: none;">Начать просмотр</button>
+                <button onclick="window.location.href='index.html';" class="styled-button">Вернуться на главную</button>
+            </div>
         </div>
     </div>
 
