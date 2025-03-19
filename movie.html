@@ -672,249 +672,253 @@ iframe, #screenShareVideo {
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
-        import { 
-            getDatabase, 
-            ref, 
-            push, 
-            onValue, 
-            set 
-        } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
+   <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+    import { 
+        getDatabase, 
+        ref, 
+        push, 
+        onValue, 
+        set 
+    } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
-            authDomain: "misha-and-anna-48e4c.firebaseapp.com",
-            databaseURL: "https://misha-and-anna-48e4c-default-rtdb.europe-west1.firebasedatabase.app/",
-            projectId: "misha-and-anna-48e4c",
-            storageBucket: "misha-and-anna-48e4c.appspot.com",
-            messagingSenderId: "822036073579",
-            appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
-            measurementId: "G-XR86X6PXMX"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
+        authDomain: "misha-and-anna-48e4c.firebaseapp.com",
+        databaseURL: "https://misha-and-anna-48e4c-default-rtdb.europe-west1.firebasedatabase.app/",
+        projectId: "misha-and-anna-48e4c",
+        storageBucket: "misha-and-anna-48e4c.appspot.com",
+        messagingSenderId: "822036073579",
+        appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
+        measurementId: "G-XR86X6PXMX"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const messagesRef = ref(db, 'messages');
-        const signalingRef = ref(db, 'signaling');
-        const playbackRef = ref(db, 'playback');
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const messagesRef = ref(db, 'messages');
+    const signalingRef = ref(db, 'signaling');
+    const playbackRef = ref(db, 'playback');
 
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const messagesContainer = document.getElementById('messages');
-        const themeToggleBtn = document.getElementById('themeToggleBtn');
-        const startShareBtn = document.getElementById('startShareBtn');
-        const playBtn = document.getElementById('playBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const movieContainer = document.getElementById('movieContainer');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const messagesContainer = document.getElementById('messages');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const startShareBtn = document.getElementById('startShareBtn');
+    const playBtn = document.getElementById('playBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const movieContainer = document.getElementById('movieContainer');
 
-        const username = prompt("Введите ваше имя:");
-        const isHost = username.toLowerCase() === "Михаил";
+    // Запрашиваем имя и проверяем права хоста
+    let username = prompt("Введите ваше имя:").trim();
+    const isHost = username.toLowerCase() === "михаил"; // Приводим к нижнему регистру для надёжности
 
-        // Настройка интерфейса в зависимости от роли
+    // Защита от пустого имени
+    while (!username) {
+        username = prompt("Имя не может быть пустым. Введите ваше имя:").trim();
+    }
+
+    // Инициализация интерфейса в зависимости от роли
+    function initializeInterface() {
         if (isHost) {
+            // Интерфейс для хоста (Михаил)
             const iframe = document.createElement('iframe');
             iframe.src = "https://kinogo-films.biz/filmy/";
             iframe.title = "Просмотр фильмов";
             movieContainer.appendChild(iframe);
+            
+            // Показываем кнопки управления только хосту
             playBtn.style.display = 'block';
             pauseBtn.style.display = 'block';
             startShareBtn.style.display = 'block';
         } else {
+            // Интерфейс для зрителя
             const video = document.createElement('video');
             video.id = 'screenShareVideo';
             video.autoplay = true;
             video.playsinline = true;
             movieContainer.appendChild(video);
-            playBtn.style.display = 'none'; // Зритель не управляет воспроизведением
+            
+            // Скрываем кнопки управления для зрителей
+            playBtn.style.display = 'none';
             pauseBtn.style.display = 'none';
-            startShareBtn.style.display = 'none'; // Зритель не транслирует
+            startShareBtn.style.display = 'none';
         }
-
-        const screenShareVideo = document.getElementById('screenShareVideo');
-
-        // Чат
-        onValue(messagesRef, (snapshot) => {
-            messagesContainer.innerHTML = '';
-            const messages = snapshot.val();
-            if (messages) {
-                Object.entries(messages).forEach(([id, message]) => {
-                    const messageElement = document.createElement('div');
-                    messageElement.className = message.sender === username ? 'message sent' : 'message received';
-                    const time = new Date(message.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-                    messageElement.innerHTML = `
-                        <div class="message-content">${message.text}</div>
-                        <div class="message-meta">
-                            <span>${message.sender}</span>
-                            <span>${time}</span>
-                        </div>
-                    `;
-                    messagesContainer.appendChild(messageElement);
-                });
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
-        });
-
-        async function sendMessage() {
-            const message = messageInput.value.trim();
-            if (message) {
-                const messageData = { sender: username, text: message, timestamp: Date.now() };
-                try {
-                    const newMessageRef = push(messagesRef);
-                    await set(newMessageRef, messageData);
-                    messageInput.value = '';
-                } catch (error) {
-                    console.error('Ошибка при отправке сообщения:', error);
-                    alert('Не удалось отправить сообщение');
-                }
-            }
-        }
-
-        sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
-            }
-        });
-
-        // WebRTC для трансляции экрана
-        let localStream;
-        const peerConnectionConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-        let peerConnection;
-
-        async function startScreenShare() {
-            if (!isHost) return; // Только ведущий может транслировать
-
-            try {
-                localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-
-                peerConnection = new RTCPeerConnection(peerConnectionConfig);
-                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        push(signalingRef, { type: 'candidate', candidate: event.candidate, sender: username });
-                    }
-                };
-
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-                push(signalingRef, { type: 'offer', sdp: offer, sender: username });
-
-            } catch (error) {
-                console.error('Ошибка при захвате экрана:', error);
-                alert('Не удалось начать трансляцию');
-            }
-        }
-
-        onValue(signalingRef, (snapshot) => {
-            const data = snapshot.val();
-            if (!data || isHost) return; // Ведущий не принимает трансляцию
-
-            Object.values(data).forEach(async (signal) => {
-                if (signal.sender === username) return;
-
-                if (signal.type === 'offer') {
-                    peerConnection = new RTCPeerConnection(peerConnectionConfig);
-                    await peerConnection.setRemoteDescription(signal.sdp);
-                    const answer = await peerConnection.createAnswer();
-                    await peerConnection.setLocalDescription(answer);
-                    push(signalingRef, { type: 'answer', sdp: answer, sender: username });
-
-                    peerConnection.ontrack = (event) => {
-                        screenShareVideo.srcObject = event.streams[0];
-                    };
-                } else if (signal.type === 'answer' && peerConnection.signalingState !== 'stable') {
-                    await peerConnection.setRemoteDescription(signal.sdp);
-                } else if (signal.type === 'candidate') {
-                    await peerConnection.addIceCandidate(signal.candidate);
-                }
-            });
-        });
-
-        localStream?.getTracks().forEach(track => track.onended = () => {
-            peerConnection?.close();
-            if (screenShareVideo) screenShareVideo.srcObject = null;
-        });
-
-        startShareBtn.addEventListener('click', startScreenShare);
-
-        // Синхронизация воспроизведения (только для ведущего)
-        async function sendPlaybackCommand(command) {
-            if (!isHost) return; // Только ведущий отправляет команды
-
-            const iframe = movieContainer.querySelector('iframe');
-            const commandData = {
-                sender: username,
-                command: command,
-                timestamp: Date.now()
-            };
-
-            try {
-                const newCommandRef = push(playbackRef);
-                await set(newCommandRef, commandData);
-            } catch (error) {
-                console.error('Ошибка при отправке команды:', error);
-            }
-        }
-
-        playBtn.addEventListener('click', () => {
-            sendPlaybackCommand('play');
-        });
-
-        pauseBtn.addEventListener('click', () => {
-            sendPlaybackCommand('pause');
-        });
-
-        onValue(playbackRef, (snapshot) => {
-            const data = snapshot.val();
-            if (!data || isHost) return; // Ведущий не обрабатывает команды
-
-            Object.values(data).forEach((commandData) => {
-                if (commandData.sender === username) return;
-
-                if (commandData.command === 'play') {
-                    screenShareVideo.play();
-                } else if (commandData.command === 'pause') {
-                    screenShareVideo.pause();
-                }
-            });
-        });
-
-       document.addEventListener('DOMContentLoaded', function() {
-    // Получаем кнопку переключения темы
-    const themeToggleBtn = document.querySelector('.theme-toggle-btn');
-    
-    // Проверяем сохраненную тему в localStorage
-    const savedTheme = localStorage.getItem('theme');
-    
-    // Устанавливаем тему при загрузке страницы
-    if (savedTheme === 'light') {
-        document.documentElement.setAttribute('data-theme', 'light');
-        themeToggleBtn.textContent = 'Темная тема';
-    } else {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        themeToggleBtn.textContent = 'Светлая тема';
     }
-    
-    // Добавляем обработчик клика для переключения темы
-    themeToggleBtn.addEventListener('click', function() {
-        // Получаем текущую тему
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        
-        // Переключаем тему
-        if (currentTheme === 'light') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-            themeToggleBtn.textContent = 'Светлая тема';
-        } else {
-            document.documentElement.setAttribute('data-theme', 'light');
-            localStorage.setItem('theme', 'light');
-            themeToggleBtn.textContent = 'Темная тема';
+
+    initializeInterface();
+    const screenShareVideo = document.getElementById('screenShareVideo');
+
+    // Чат
+    onValue(messagesRef, (snapshot) => {
+        messagesContainer.innerHTML = '';
+        const messages = snapshot.val();
+        if (messages) {
+            Object.entries(messages).forEach(([id, message]) => {
+                const messageElement = document.createElement('div');
+                messageElement.className = message.sender === username ? 'message sent' : 'message received';
+                const time = new Date(message.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+                messageElement.innerHTML = `
+                    <div class="message-content">${message.text}</div>
+                    <div class="message-meta">
+                        <span>${message.sender}</span>
+                        <span>${time}</span>
+                    </div>
+                `;
+                messagesContainer.appendChild(messageElement);
+            });
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
     });
-});
-    </script>
-</body>
-</html>
+
+    async function sendMessage() {
+        const message = messageInput.value.trim();
+        if (message) {
+            const messageData = { sender: username, text: message, timestamp: Date.now() };
+            try {
+                const newMessageRef = push(messagesRef);
+                await set(newMessageRef, messageData);
+                messageInput.value = '';
+            } catch (error) {
+                console.error('Ошибка при отправке сообщения:', error);
+                alert('Не удалось отправить сообщение');
+            }
+        }
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // WebRTC для трансляции экрана
+    let localStream;
+    const peerConnectionConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+    let peerConnection;
+
+    async function startScreenShare() {
+        if (!isHost) {
+            alert("Только Михаил может начать трансляцию экрана!");
+            return;
+        }
+
+        try {
+            localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            peerConnection = new RTCPeerConnection(peerConnectionConfig);
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    push(signalingRef, { type: 'candidate', candidate: event.candidate, sender: username });
+                }
+            };
+
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            push(signalingRef, { type: 'offer', sdp: offer, sender: username });
+
+        } catch (error) {
+            console.error('Ошибка при захвате экрана:', error);
+            alert('Не удалось начать трансляцию');
+        }
+    }
+
+    onValue(signalingRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data || isHost) return;
+
+        Object.values(data).forEach(async (signal) => {
+            if (signal.sender === username) return;
+
+            if (signal.type === 'offer') {
+                peerConnection = new RTCPeerConnection(peerConnectionConfig);
+                await peerConnection.setRemoteDescription(signal.sdp);
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                push(signalingRef, { type: 'answer', sdp: answer, sender: username });
+
+                peerConnection.ontrack = (event) => {
+                    screenShareVideo.srcObject = event.streams[0];
+                };
+            } else if (signal.type === 'answer' && peerConnection.signalingState !== 'stable') {
+                await peerConnection.setRemoteDescription(signal.sdp);
+            } else if (signal.type === 'candidate') {
+                await peerConnection.addIceCandidate(signal.candidate);
+            }
+        });
+    });
+
+    localStream?.getTracks().forEach(track => track.onended = () => {
+        peerConnection?.close();
+        if (screenShareVideo) screenShareVideo.srcObject = null;
+    });
+
+    startShareBtn.addEventListener('click', startScreenShare);
+
+    // Синхронизация воспроизведения
+    async function sendPlaybackCommand(command) {
+        if (!isHost) {
+            alert("Только Михаил может управлять воспроизведением!");
+            return;
+        }
+
+        const iframe = movieContainer.querySelector('iframe');
+        const commandData = {
+            sender: username,
+            command: command,
+            timestamp: Date.now()
+        };
+
+        try {
+            const newCommandRef = push(playbackRef);
+            await set(newCommandRef, commandData);
+        } catch (error) {
+            console.error('Ошибка при отправке команды:', error);
+        }
+    }
+
+    playBtn.addEventListener('click', () => sendPlaybackCommand('play'));
+    pauseBtn.addEventListener('click', () => sendPlaybackCommand('pause'));
+
+    onValue(playbackRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data || isHost) return;
+
+        Object.values(data).forEach((commandData) => {
+            if (commandData.sender === username) return;
+
+            if (commandData.command === 'play') {
+                screenShareVideo.play();
+            } else if (commandData.command === 'pause') {
+                screenShareVideo.pause();
+            }
+        });
+    });
+
+    // Переключение темы
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+            themeToggleBtn.textContent = 'Темная тема';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeToggleBtn.textContent = 'Светлая тема';
+        }
+
+        themeToggleBtn.addEventListener('click', function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeToggleBtn.textContent = 'Светлая тема';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+                themeToggleBtn.textContent = 'Темная тема';
+            }
+        });
+    });
+</script>
