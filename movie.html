@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -321,7 +322,7 @@
 
         .message-content {
             position: relative;
-            padding: var(--space-lgvoc);
+            padding: var(--space-lg);
             border-radius: var(--border-radius-md);
             color: var(--message-color);
             font-size: 1rem;
@@ -611,12 +612,6 @@
             }
         }
 
-        @keyframes gradientFlow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
         @media (max-width: 1200px) {
             .container {
                 grid-template-columns: 1fr;
@@ -733,6 +728,7 @@
         video.id = 'screenShareVideo';
         video.autoplay = true;
         video.playsinline = true;
+        video.muted = isHost; // Хост не слышит собственный звук, чтобы избежать эха
         movieContainer.appendChild(video);
         fullscreenBtn.style.display = 'block';
 
@@ -820,9 +816,14 @@
     const peerConnectionConfig = {
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' },
             { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-            { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
-        ]
+            { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+            { urls: 'turn:turn.anyfirewall.com:443?transport=tcp', username: 'webrtc', credential: 'webrtc' }
+        ],
+        iceTransportPolicy: 'all',
+        iceCandidatePoolSize: 10
     };
 
     async function startScreenShare() {
@@ -831,34 +832,52 @@
             return;
         }
         try {
+            console.log('Хост: Начало трансляции');
             await remove(signalingRef); // Очистка предыдущих данных
             localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
             screenShareVideo.srcObject = localStream;
             screenShareVideo.play();
 
             peerConnection = new RTCPeerConnection(peerConnectionConfig);
-            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
+                console.log('Хост: Добавлен трек:', track.kind);
+            });
 
             peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
-                    set(push(signalingRef), { type: 'candidate', candidate: event.candidate, sender: username });
+                    console.log('Хост: Отправка ICE кандидата:', event.candidate);
+                    set(push(ref(db, 'signaling/candidates')), { type: 'candidate', candidate: event.candidate, sender: username });
                 }
             };
 
             peerConnection.oniceconnectionstatechange = () => {
-                console.log('ICE состояние:', peerConnection.iceConnectionState);
+                console.log('Хост: ICE состояние:', peerConnection.iceConnectionState);
                 if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
                     stopScreenShare();
                     alert('Трансляция прервана. Попробуйте начать заново.');
+                } else if (peerConnection.iceConnectionState === 'connected') {
+                    console.log('Хост: Соединение установлено');
                 }
             };
 
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
+            console.log('Хост: Отправка offer:', offer);
             await set(ref(db, 'signaling/offer'), { type: 'offer', sdp: offer, sender: username });
+
+            // Ожидание ответа от клиента
+            onValue(ref(db, 'signaling/answer'), async (snapshot) => {
+                const answerData = snapshot.val();
+                if (answerData && answerData.sender !== username && !peerConnection.remoteDescription) {
+                    console.log('Хост: Получен answer:', answerData.sdp);
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(answerData.sdp));
+                }
+            }, { onlyOnce: true });
 
             localStream.getTracks().forEach(track => {
                 track.onended = () => {
+                    console.log('Хост: Трек завершён');
                     stopScreenShare();
                 };
             });
@@ -866,12 +885,13 @@
             document.getElementById('startShareBtn').style.display = 'none';
             document.getElementById('stopShareBtn').style.display = 'block';
         } catch (error) {
-            console.error('Ошибка захвата экрана:', error);
+            console.error('Хост: Ошибка захвата экрана:', error);
             alert('Не удалось начать трансляцию: ' + error.message);
         }
     }
 
     async function stopScreenShare() {
+        console.log('Хост: Остановка трансляции');
         if (localStream) {
             localStream.getTracks().forEach(track => track.stop());
         }
@@ -887,55 +907,72 @@
     async function startPlayback() {
         if (isHost) return;
 
+        console.log('Клиент: Начало подключения к трансляции');
         peerConnection = new RTCPeerConnection(peerConnectionConfig);
 
         peerConnection.ontrack = (event) => {
+            console.log('Клиент: Получен трек:', event.track.kind);
             if (!screenShareVideo.srcObject) {
                 screenShareVideo.srcObject = event.streams[0];
                 screenShareVideo.oncanplay = () => {
-                    screenShareVideo.play().catch(error => console.error('Ошибка воспроизведения:', error));
+                    console.log('Клиент: Видео готово к воспроизведению');
+                    screenShareVideo.play().catch(error => console.error('Клиент: Ошибка воспроизведения:', error));
                 };
             }
         };
 
         peerConnection.onicecandidate = (event) => {
             if (event.candidate) {
-                set(push(signalingRef), { type: 'candidate', candidate: event.candidate, sender: username });
+                console.log('Клиент: Отправка ICE кандидата:', event.candidate);
+                set(push(ref(db, 'signaling/candidates')), { type: 'candidate', candidate: event.candidate, sender: username });
             }
         };
 
         peerConnection.oniceconnectionstatechange = () => {
-            console.log('ICE состояние:', peerConnection.iceConnectionState);
+            console.log('Клиент: ICE состояние:', peerConnection.iceConnectionState);
             if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
                 screenShareVideo.srcObject = null;
                 document.getElementById('startPlaybackBtn').style.display = 'block';
                 alert('Трансляция отключена.');
+            } else if (peerConnection.iceConnectionState === 'connected') {
+                console.log('Клиент: Соединение установлено');
             }
         };
 
         onValue(ref(db, 'signaling/offer'), async (snapshot) => {
             const offerData = snapshot.val();
             if (offerData && offerData.sender !== username && !peerConnection.remoteDescription) {
+                console.log('Клиент: Получен offer:', offerData.sdp);
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(offerData.sdp));
                 const answer = await peerConnection.createAnswer();
                 await peerConnection.setLocalDescription(answer);
+                console.log('Клиент: Отправка answer:', answer);
                 await set(ref(db, 'signaling/answer'), { type: 'answer', sdp: answer, sender: username });
             }
         }, { onlyOnce: true });
 
-        onValue(ref(db, 'signaling'), (snapshot) => {
+        onValue(ref(db, 'signaling/candidates'), (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
             Object.values(data).forEach(async (signal) => {
                 if (signal.sender === username || signal.type !== 'candidate' || !signal.candidate) return;
                 if (peerConnection && peerConnection.remoteDescription) {
                     try {
+                        console.log('Клиент: Добавление ICE кандидата:', signal.candidate);
                         await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
                     } catch (error) {
-                        console.error('Ошибка добавления ICE candidate:', error);
+                        console.error('Клиент: Ошибка добавления ICE кандидата:', error);
                     }
                 }
             });
+        });
+
+        onValue(ref(db, 'signaling/offer'), (snapshot) => {
+            if (!snapshot.val()) {
+                console.log('Клиент: Трансляция завершена хостом');
+                screenShareVideo.srcObject = null;
+                document.getElementById('startPlaybackBtn').style.display = 'block';
+            }
         });
 
         document.getElementById('startPlaybackBtn').style.display = 'none';
