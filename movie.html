@@ -826,54 +826,57 @@
         ]
     };
 
-    async function startScreenShare() {
-        if (!isHost) {
-            alert("Только Михаил может начать трансляцию экрана!");
-            return;
-        }
-        try {
-            await remove(signalingRef);
-            console.log('Signaling очищен');
-
-            localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-            console.log('Захват экрана успешен:', localStream);
-
-            peerConnection = new RTCPeerConnection(peerConnectionConfig);
-            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) {
-                    console.log('Отправлен ICE candidate:', event.candidate);
-                    set(push(signalingRef), { type: 'candidate', candidate: event.candidate, sender: username });
-                }
-            };
-
-            peerConnection.oniceconnectionstatechange = () => {
-                console.log('ICE состояние:', peerConnection.iceConnectionState);
-                if (peerConnection.iceConnectionState === 'disconnected') {
-                    alert('Трансляция прервана');
-                }
-            };
-
-            const offer = await peerConnection.createOffer();
-            await peerConnection.setLocalDescription(offer);
-            console.log('Offer отправлен:', offer);
-            await set(ref(db, 'signaling/offer'), { type: 'offer', sdp: offer, sender: username });
-
-            // Очистка при завершении трансляции
-            localStream.getTracks().forEach(track => {
-                track.onended = () => {
-                    console.log('Трансляция завершена');
-                    peerConnection?.close();
-                    if (screenShareVideo) screenShareVideo.srcObject = null;
-                    if (!isHost) startPlaybackBtn.style.display = 'block';
-                };
-            });
-        } catch (error) {
-            console.error('Ошибка захвата экрана:', error);
-            alert('Не удалось начать трансляцию: ' + error.message);
-        }
+   async function startScreenShare() {
+    if (!isHost) {
+        alert("Только Михаил может начать трансляцию экрана!");
+        return;
     }
+    try {
+        await remove(signalingRef);
+        console.log('Signaling очищен');
+
+        localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        console.log('Захват экрана успешен:', localStream);
+        console.log('Треки в потоке хоста:', localStream.getTracks());
+
+        peerConnection = new RTCPeerConnection(peerConnectionConfig);
+        localStream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, localStream);
+            console.log('Добавлен трек:', track);
+        });
+
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                console.log('Отправлен ICE candidate:', event.candidate);
+                set(push(signalingRef), { type: 'candidate', candidate: event.candidate, sender: username });
+            }
+        };
+
+        peerConnection.oniceconnectionstatechange = () => {
+            console.log('ICE состояние:', peerConnection.iceConnectionState);
+            if (peerConnection.iceConnectionState === 'disconnected') {
+                alert('Трансляция прервана');
+            }
+        };
+
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        console.log('Offer отправлен:', offer);
+        await set(ref(db, 'signaling/offer'), { type: 'offer', sdp: offer, sender: username });
+
+        localStream.getTracks().forEach(track => {
+            track.onended = () => {
+                console.log('Трансляция завершена');
+                peerConnection?.close();
+                if (screenShareVideo) screenShareVideo.srcObject = null;
+                if (!isHost) startPlaybackBtn.style.display = 'block';
+            };
+        });
+    } catch (error) {
+        console.error('Ошибка захвата экрана:', error);
+        alert('Не удалось начать трансляцию: ' + error.message);
+    }
+}
 
     async function startPlayback() {
     if (isHost) return;
