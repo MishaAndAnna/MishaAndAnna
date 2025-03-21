@@ -884,12 +884,25 @@
         console.log('Получен поток:', event.streams[0]);
         screenShareVideo.srcObject = event.streams[0];
         console.log('Назначен srcObject, проверка video-элемента:', screenShareVideo);
-        console.log('Video размеры:', screenShareVideo.videoWidth, screenShareVideo.videoHeight);
-        screenShareVideo.play().then(() => {
-            console.log('Видео воспроизводится');
-        }).catch(error => {
-            console.error('Ошибка воспроизведения видео:', error);
-        });
+
+        screenShareVideo.onloadedmetadata = () => {
+            console.log('Метаданные загружены, размеры видео:', screenShareVideo.videoWidth, screenShareVideo.videoHeight);
+            screenShareVideo.play().then(() => {
+                console.log('Видео воспроизводится');
+            }).catch(error => {
+                console.error('Ошибка воспроизведения видео:', error);
+            });
+        };
+
+        screenShareVideo.onerror = (error) => {
+            console.error('Ошибка в video-элементе:', error);
+        };
+
+        // Проверяем размеры сразу после назначения потока
+        setTimeout(() => {
+            console.log('Размеры видео через 1 сек:', screenShareVideo.videoWidth, screenShareVideo.videoHeight);
+        }, 1000);
+
         startPlaybackBtn.style.display = 'none';
     };
 
