@@ -152,12 +152,16 @@
         }
 
         iframe, #screenShareVideo {
-            width: 100%;
-            height: 100%;
-            border: none;
-            object-fit: contain;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
+    width: 100%;
+    height: 100%;
+    border: none;
+    object-fit: contain;
+    background-color: black; /* Полностью чёрный фон для видимости */
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1; /* Убедимся, что видео поверх других элементов */
+}
 
         .chat-box {
             display: flex;
@@ -837,14 +841,18 @@
 
         localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
         console.log('Захват экрана успешен:', localStream);
-        console.log('Треки в потоке хоста:', localStream.getTracks());
-
-        peerConnection = new RTCPeerConnection(peerConnectionConfig);
-        localStream.getTracks().forEach(track => {
+        const tracks = localStream.getTracks();
+        console.log('Треки в потоке хоста:', tracks);
+        tracks.forEach(track => {
+            console.log('Детали трека хоста:', track.kind, track.enabled, track.muted, track.readyState);
+            track.onmute = () => console.log('Трек хоста заглушен:', track.kind);
+            track.onunmute = () => console.log('Трек хоста включён:', track.kind);
+            track.onended = () => console.log('Трек хоста завершён:', track.kind);
             peerConnection.addTrack(track, localStream);
             console.log('Добавлен трек:', track);
         });
 
+        peerConnection = new RTCPeerConnection(peerConnectionConfig);
         peerConnection.onicecandidate = (event) => {
             if (event.candidate) {
                 console.log('Отправлен ICE candidate:', event.candidate);
@@ -990,7 +998,6 @@
         });
     });
 }
-
     startShareBtn.addEventListener('click', startScreenShare);
     startPlaybackBtn.addEventListener('click', startPlayback);
 
