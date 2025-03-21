@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Чат с Firebase и трансляция экрана</title>
+    <title>Чат с Firebase и просмотр фильмов</title>
     <style>
         /* Ваш оригинальный CSS остаётся без изменений */
         :root {
@@ -152,7 +152,7 @@
             filter: blur(1px);
         }
 
-        video {
+        iframe {
             width: 100%;
             height: 100%;
             border: none;
@@ -597,6 +597,49 @@
             z-index: 1000;
         }
 
+        /* Индикатор статуса соединения */
+        .status-indicator {
+            position: absolute;
+            top: var(--space-md);
+            left: var(--space-md);
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 20px;
+            z-index: 15;
+            font-size: 0.8rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .status-dot.connected {
+            background-color: #4CAF50;
+            box-shadow: 0 0 5px #4CAF50;
+        }
+
+        .status-dot.disconnected {
+            background-color: #F44336;
+            box-shadow: 0 0 5px #F44336;
+        }
+
+        .status-dot.syncing {
+            background-color: #FFC107;
+            box-shadow: 0 0 5px #FFC107;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
         @keyframes messageSlide {
             from {
                 opacity: 0;
@@ -606,6 +649,12 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         @media (max-width: 1200px) {
@@ -640,6 +689,10 @@
     <div class="container">
         <div class="movie-container" id="movieContainer">
             <button id="fullscreenBtn" class="styled-button fullscreen-btn">Полный экран</button>
+            <div class="status-indicator" id="statusIndicator">
+                <div class="status-dot disconnected" id="statusDot"></div>
+                <span id="statusText">Отключено</span>
+            </div>
             <div class="chat-overlay" id="chatOverlay">
                 <button id="toggleChatBtn" class="styled-button chat-toggle-btn">Показать чат</button>
                 <div class="chat-box fullscreen-chat" id="fullscreenChatBox">
@@ -667,8 +720,9 @@
                 <button id="sendBtn" class="send-btn">Отправить</button>
             </div>
             <div id="chatControls" style="margin: var(--space-lg); display: flex; flex-direction: column; gap: var(--space-md);">
-                <button id="startShareBtn" class="styled-button">Начать трансляцию</button>
-                <button id="startPlaybackBtn" class="styled-button" style="display: none;">Начать просмотр</button>
+                <button id="playBtn" class="styled-button">Play</button>
+                <button id="pauseBtn" class="styled-button">Pause</button>
+                <button id="syncBtn" class="styled-button">Синхронизировать</button>
                 <button onclick="window.location.href='index.html';" class="styled-button">Вернуться на главную</button>
             </div>
         </div>
@@ -681,7 +735,11 @@
             ref, 
             push, 
             onValue, 
-            set 
+            set,
+            onDisconnect,
+            serverTimestamp,
+            update,
+            get
         } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 
         const firebaseConfig = {
@@ -695,17 +753,22 @@
             measurementId: "G-XR86X6PXMX"
         };
 
+        // Инициализация Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const messagesRef = ref(db, 'messages');
-        const signalingRef = ref(db, 'signaling');
+        const movieRef = ref(db, 'movie');
+        const playbackRef = ref(db, 'playback');
+        const presenceRef = ref(db, 'presence');
 
+        // DOM-элементы
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
         const messagesContainer = document.getElementById('messages');
         const themeToggleBtn = document.getElementById('themeToggleBtn');
-        const startShareBtn = document.getElementById('startShareBtn');
-        const startPlaybackBtn = document.getElementById('startPlaybackBtn');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const syncBtn = document.getElementById('syncBtn');
         const movieContainer = document.getElementById('movieContainer');
         const fullscreenBtn = document.getElementById('fullscreenBtn');
         const chatOverlay = document.getElementById('chatOverlay');
@@ -715,290 +778,355 @@
         const sendBtnFullscreen = document.getElementById('sendBtnFullscreen');
         const messagesFullscreen = document.getElementById('messagesFullscreen');
         const themeToggleBtnFullscreen = document.getElementById('themeToggleBtnFullscreen');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
 
+        // Получение имени пользователя
         let username = prompt("Введите ваше имя:").trim();
         const isHost = username.toLowerCase() === "михаил";
         while (!username) {
             username = prompt("Имя не может быть пустым. Введите ваше имя:").trim();
         }
 
-        let videoElement;
+        let movieIframe;
+        let currentMovieUrl = ''; // Хранение текущего URL фильма
+        let syncInterval; // Интервал для периодической синхронизации
+        let isConnected = false; // Статус соединения
 
+        // Инициализация интерфейса
         function initializeInterface() {
-            videoElement = document.createElement('video');
-            videoElement.id = 'screenShareVideo';
-            videoElement.autoplay = true;
-            videoElement.playsinline = true;
-            movieContainer.appendChild(videoElement);
+            movieIframe = document.createElement('iframe');
+            movieIframe.id = 'movieIframe';
+            movieIframe.title = "Просмотр фильмов";
+            movieIframe.allowFullscreen = true;
+            movieIframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+movieContainer.appendChild(movieIframe);
 
-            if (isHost) {
-                startShareBtn.style.display = 'block';
-                startPlaybackBtn.style.display = 'none';
-            } else {
-                startShareBtn.style.display = 'none';
-                startPlaybackBtn.style.display = 'block';
-            }
-            fullscreenBtn.style.display = 'block';
-        }
+// Регистрация присутствия пользователя
+const userPresenceRef = ref(db, `presence/${username}`);
+set(userPresenceRef, {
+    online: true,
+    lastSeen: serverTimestamp()
+});
 
-        initializeInterface();
+// Установка статуса оффлайн при отключении
+onDisconnect(userPresenceRef).update({
+    online: false,
+    lastSeen: serverTimestamp()
+});
 
-        function renderMessages(messagesContainerTarget) {
-            return function(snapshot) {
-                messagesContainerTarget.innerHTML = '';
-                const messages = snapshot.val();
-                if (messages) {
-                    Object.entries(messages).forEach(([id, message]) => {
-                        const messageElement = document.createElement('div');
-                        messageElement.className = message.sender === username ? 'message sent' : 'message received';
-                        const time = new Date(message.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-                        messageElement.innerHTML = `
-                            <div class="message-content">${message.text}</div>
-                            <div class="message-meta">
-                                <span>${message.sender}</span>
-                                <span>${time}</span>
-                            </div>
-                        `;
-                        messagesContainerTarget.appendChild(messageElement);
-                    });
-                    messagesContainerTarget.scrollTop = messagesContainerTarget.scrollHeight;
-                }
-            };
-        }
+// Обновление статуса соединения
+const connectedRef = ref(db, '.info/connected');
+onValue(connectedRef, (snap) => {
+    isConnected = snap.val();
+    if (isConnected) {
+        statusDot.className = 'status-dot connected';
+        statusText.textContent = 'Подключено';
+    } else {
+        statusDot.className = 'status-dot disconnected';
+        statusText.textContent = 'Отключено';
+    }
+});
 
-        onValue(messagesRef, renderMessages(messagesContainer));
-        onValue(messagesRef, renderMessages(messagesFullscreen));
-
-        async function sendMessage(inputElement) {
-            const message = inputElement.value.trim();
-            if (message) {
-                const messageData = { sender: username, text: message, timestamp: Date.now() };
-                try {
-                    const newMessageRef = push(messagesRef);
-                    await set(newMessageRef, messageData);
-                    inputElement.value = '';
-                } catch (error) {
-                    console.error('Ошибка при отправке сообщения:', error);
-                    alert('Не удалось отправить сообщение');
-                }
-            }
-        }
-
-        sendBtn.addEventListener('click', () => sendMessage(messageInput));
-        sendBtnFullscreen.addEventListener('click', () => sendMessage(messageInputFullscreen));
-        messageInput.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage(messageInput);
-            }
+// Получение и отображение сообщений из Firebase
+onValue(messagesRef, (snapshot) => {
+    const messagesData = snapshot.val();
+    messagesContainer.innerHTML = '';
+    messagesFullscreen.innerHTML = '';
+    
+    if (messagesData) {
+        Object.entries(messagesData).forEach(([id, msgData]) => {
+            const messageDiv = createMessageElement(msgData);
+            messagesContainer.appendChild(messageDiv);
+            
+            const messageClone = messageDiv.cloneNode(true);
+            messagesFullscreen.appendChild(messageClone);
         });
-        messageInputFullscreen.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage(messageInputFullscreen);
-            }
-        });
+        
+        // Прокрутка к последнему сообщению
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        messagesFullscreen.scrollTop = messagesFullscreen.scrollHeight;
+    }
+});
 
-        const peerConnectionConfig = {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-                { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
-            ]
-        };
+// Получение URL фильма и синхронизация
+onValue(movieRef, (snapshot) => {
+    const movieData = snapshot.val();
+    if (movieData && movieData.url) {
+        currentMovieUrl = movieData.url;
+        updateMovie(currentMovieUrl);
+    }
+});
 
-        let localStream;
-        let peerConnection;
-        let hasProcessedOffer = false;
-        let hasInteracted = false;
+// Синхронизация воспроизведения
+onValue(playbackRef, (snapshot) => {
+    const playbackData = snapshot.val();
+    if (!playbackData) return;
+    
+    statusDot.className = 'status-dot syncing';
+    statusText.textContent = 'Синхронизация...';
+    
+    if (playbackData.isPlaying !== undefined) {
+        if (playbackData.isPlaying) {
+            playVideo();
+        } else {
+            pauseVideo();
+        }
+    }
+    
+    if (playbackData.timestamp) {
+        seekTo(playbackData.timestamp);
+    }
+    
+    setTimeout(() => {
+        if (isConnected) {
+            statusDot.className = 'status-dot connected';
+            statusText.textContent = 'Подключено';
+        }
+    }, 1000);
+});
 
-        async function startScreenShare() {
-            if (!isHost) {
-                alert("Только Михаил может начать трансляцию!");
-                return;
-            }
+// Создание элемента сообщения
+function createMessageElement(msgData) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${msgData.sender === username ? 'sent' : 'received'}`;
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+    contentDiv.textContent = msgData.text;
+    messageDiv.appendChild(contentDiv);
+    
+    const metaDiv = document.createElement('div');
+    metaDiv.className = 'message-meta';
+    
+    const senderSpan = document.createElement('span');
+    senderSpan.textContent = msgData.sender;
+    metaDiv.appendChild(senderSpan);
+    
+    const timeSpan = document.createElement('span');
+    const date = msgData.timestamp ? new Date(msgData.timestamp) : new Date();
+    timeSpan.textContent = `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+    metaDiv.appendChild(timeSpan);
+    
+    messageDiv.appendChild(metaDiv);
+    return messageDiv;
+}
 
+// Отправка сообщения
+function sendMessage(text) {
+    if (!text.trim()) return;
+    
+    push(messagesRef, {
+        sender: username,
+        text: text,
+        timestamp: Date.now()
+    });
+}
+
+// Обновление видео
+function updateMovie(url) {
+    movieIframe.src = url;
+}
+
+// Функции управления воспроизведением
+function playVideo() {
+    if (movieIframe.contentWindow) {
+        movieIframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    }
+}
+
+function pauseVideo() {
+    if (movieIframe.contentWindow) {
+        movieIframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+    }
+}
+
+function seekTo(seconds) {
+    if (movieIframe.contentWindow) {
+        movieIframe.contentWindow.postMessage(`{"event":"command","func":"seekTo","args":[${seconds}, true]}`, '*');
+    }
+}
+
+// Обновление статуса воспроизведения
+function updatePlaybackStatus(isPlaying, timestamp = null) {
+    const updates = { isPlaying };
+    if (timestamp !== null) {
+        updates.timestamp = timestamp;
+    }
+    update(playbackRef, updates);
+}
+
+// Получение текущего времени видео
+function getCurrentTime() {
+    return new Promise((resolve) => {
+        if (!movieIframe.contentWindow) {
+            resolve(0);
+            return;
+        }
+        
+        const messageId = Date.now().toString();
+        window.addEventListener('message', function onMessage(event) {
             try {
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-                    throw new Error('Ваш браузер не поддерживает трансляцию экрана');
+                const data = JSON.parse(event.data);
+                if (data.id === messageId) {
+                    window.removeEventListener('message', onMessage);
+                    resolve(data.currentTime);
                 }
-
-                localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-                console.log('Захват экрана успешен:', localStream);
-                videoElement.srcObject = localStream; // Показываем локальный поток у хоста
-
-                peerConnection = new RTCPeerConnection(peerConnectionConfig);
-                localStream.getTracks().forEach(track => {
-                    peerConnection.addTrack(track, localStream);
-                    console.log('Добавлен трек:', track);
-                });
-
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        console.log('Отправлен ICE candidate:', event.candidate);
-                        push(signalingRef, { type: 'candidate', candidate: event.candidate, sender: username });
-                    }
-                };
-
-                peerConnection.oniceconnectionstatechange = () => {
-                    console.log('ICE connection state:', peerConnection.iceConnectionState);
-                    if (peerConnection.iceConnectionState === 'failed') {
-                        alert('Не удалось установить соединение. Проверьте сеть или попробуйте снова.');
-                    }
-                };
-
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-                console.log('Offer создан и установлен:', offer);
-                push(signalingRef, { type: 'offer', sdp: offer, sender: username });
-            } catch (error) {
-                console.error('Ошибка при захвате экрана:', error);
-                alert('Не удалось начать трансляцию: ' + error.message);
-            }
-        }
-
-        onValue(signalingRef, async (snapshot) => {
-            const data = snapshot.val();
-            if (!data) return;
-
-            for (const signal of Object.values(data)) {
-                if (signal.sender === username) continue;
-
-                try {
-                    if (isHost && signal.type === 'answer' && peerConnection) {
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
-                        console.log('Answer установлен:', signal.sdp);
-                    } else if (!isHost && signal.type === 'offer' && !hasProcessedOffer) {
-                        if (!peerConnection) {
-                            peerConnection = new RTCPeerConnection(peerConnectionConfig);
-                            peerConnection.ontrack = (event) => {
-                                console.log('Получен поток:', event.streams[0]);
-                                videoElement.srcObject = event.streams[0];
-                            };
-                            peerConnection.onicecandidate = (event) => {
-                                if (event.candidate) {
-                                    console.log('Отправлен ICE candidate:', event.candidate);
-                                    push(signalingRef, { type: 'candidate', candidate: event.candidate, sender: username });
-                                }
-                            };
-                            peerConnection.oniceconnectionstatechange = () => {
-                                console.log('ICE connection state:', peerConnection.iceConnectionState);
-                                if (peerConnection.iceConnectionState === 'failed') {
-                                    alert('Не удалось подключиться к трансляции. Проверьте сеть.');
-                                }
-                            };
-                        }
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
-                        const answer = await peerConnection.createAnswer();
-                        await peerConnection.setLocalDescription(answer);
-                        console.log('Answer создан и отправлен:', answer);
-                        push(signalingRef, { type: 'answer', sdp: answer, sender: username });
-                        hasProcessedOffer = true;
-                    } else if (signal.type === 'candidate' && peerConnection) {
-                        await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
-                        console.log('ICE candidate добавлен:', signal.candidate);
-                    }
-                } catch (error) {
-                    console.error('Ошибка обработки сигнала:', error);
-                }
+            } catch (e) {
+                // Not our message or not JSON
             }
         });
+        
+        movieIframe.contentWindow.postMessage(`{"event":"listening","id":"${messageId}"}`, '*');
+        movieIframe.contentWindow.postMessage(`{"event":"command","func":"getCurrentTime","args":"","id":"${messageId}"}`, '*');
+    });
+}
 
-        localStream?.getTracks().forEach(track => {
-            track.onended = () => {
-                console.log('Трансляция завершена');
-                peerConnection?.close();
-                videoElement.srcObject = null;
-                if (!isHost) startPlaybackBtn.style.display = 'block';
-            };
-        });
-
-        startShareBtn.addEventListener('click', startScreenShare);
-
-        if (!isHost) {
-            startPlaybackBtn.addEventListener('click', () => {
-                videoElement.play().then(() => {
-                    console.log('Воспроизведение начато');
-                    hasInteracted = true;
-                    startPlaybackBtn.style.display = 'none';
-                }).catch(error => {
-                    console.error('Ошибка воспроизведения:', error);
-                    alert('Не удалось начать просмотр: ' + error.message);
-                });
-            });
-        }
-
-        let isFullscreen = false;
-        fullscreenBtn.addEventListener('click', () => {
-            if (!isFullscreen) {
-                movieContainer.requestFullscreen();
-                document.body.classList.add('fullscreen');
-                chatOverlay.classList.add('active');
-                fullscreenBtn.textContent = 'Выход из полного экрана';
-                isFullscreen = true;
-            } else {
-                document.exitFullscreen();
-                document.body.classList.remove('fullscreen');
-                chatOverlay.classList.remove('active');
-                fullscreenChatBox.classList.remove('active');
-                fullscreenBtn.textContent = 'Полный экран';
-                toggleChatBtn.textContent = 'Показать чат';
-                isFullscreen = false;
-            }
-        });
-
-        toggleChatBtn.addEventListener('click', () => {
-            if (fullscreenChatBox.classList.contains('active')) {
-                fullscreenChatBox.classList.remove('active');
-                toggleChatBtn.textContent = 'Показать чат';
-            } else {
-                fullscreenChatBox.classList.add('active');
-                toggleChatBtn.textContent = 'Скрыть чат';
-            }
-        });
-
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                document.body.classList.remove('fullscreen');
-                chatOverlay.classList.remove('active');
-                fullscreenChatBox.classList.remove('active');
-                fullscreenBtn.textContent = 'Полный экран';
-                toggleChatBtn.textContent = 'Показать чат';
-                isFullscreen = false;
-            }
-        });
-
-        function setupThemeToggle(btn, altBtn) {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'light') {
-                document.documentElement.setAttribute('data-theme', 'light');
-                btn.textContent = 'Темная тема';
-                altBtn.textContent = 'Темная тема';
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                btn.textContent = 'Светлая тема';
-                altBtn.textContent = 'Светлая тема';
-            }
-            btn.addEventListener('click', () => {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                if (currentTheme === 'light') {
-                    document.documentElement.setAttribute('data-theme', 'dark');
-                    localStorage.setItem('theme', 'dark');
-                    btn.textContent = 'Светлая тема';
-                    altBtn.textContent = 'Светлая тема';
+// Синхронизация с хостом
+async function syncWithHost() {
+    if (!isConnected) return;
+    
+    statusDot.className = 'status-dot syncing';
+    statusText.textContent = 'Синхронизация...';
+    
+    try {
+        const playbackSnapshot = await get(playbackRef);
+        const playbackData = playbackSnapshot.val();
+        
+        if (playbackData) {
+            if (playbackData.isPlaying !== undefined) {
+                if (playbackData.isPlaying) {
+                    playVideo();
                 } else {
-                    document.documentElement.setAttribute('data-theme', 'light');
-                    localStorage.setItem('theme', 'light');
-                    btn.textContent = 'Темная тема';
-                    altBtn.textContent = 'Темная тема';
+                    pauseVideo();
                 }
+            }
+            
+            if (playbackData.timestamp) {
+                seekTo(playbackData.timestamp);
+            }
+        }
+        
+        setTimeout(() => {
+            if (isConnected) {
+                statusDot.className = 'status-dot connected';
+                statusText.textContent = 'Подключено';
+            }
+        }, 1000);
+    } catch (error) {
+        console.error("Sync error:", error);
+        statusDot.className = 'status-dot disconnected';
+        statusText.textContent = 'Ошибка синхронизации';
+    }
+}
+
+// Обработчики событий
+sendBtn.addEventListener('click', () => {
+    sendMessage(messageInput.value);
+    messageInput.value = '';
+});
+
+sendBtnFullscreen.addEventListener('click', () => {
+    sendMessage(messageInputFullscreen.value);
+    messageInputFullscreen.value = '';
+});
+
+messageInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage(messageInput.value);
+        messageInput.value = '';
+    }
+});
+
+messageInputFullscreen.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage(messageInputFullscreen.value);
+        messageInputFullscreen.value = '';
+    }
+});
+
+// Переключение темы
+function toggleTheme() {
+    const isDarkTheme = !document.body.hasAttribute('data-theme');
+    if (isDarkTheme) {
+        document.body.setAttribute('data-theme', 'light');
+    } else {
+        document.body.removeAttribute('data-theme');
+    }
+}
+
+themeToggleBtn.addEventListener('click', toggleTheme);
+themeToggleBtnFullscreen.addEventListener('click', toggleTheme);
+
+// Управление видео
+playBtn.addEventListener('click', () => {
+    playVideo();
+    if (isHost) {
+        updatePlaybackStatus(true);
+    }
+});
+
+pauseBtn.addEventListener('click', () => {
+    pauseVideo();
+    if (isHost) {
+        updatePlaybackStatus(false);
+    }
+});
+
+syncBtn.addEventListener('click', syncWithHost);
+
+// Полноэкранный режим
+fullscreenBtn.addEventListener('click', () => {
+    document.body.classList.add('fullscreen');
+    chatOverlay.classList.add('active');
+});
+
+toggleChatBtn.addEventListener('click', () => {
+    fullscreenChatBox.classList.toggle('active');
+    toggleChatBtn.textContent = fullscreenChatBox.classList.contains('active') ? 'Скрыть чат' : 'Показать чат';
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.body.classList.contains('fullscreen')) {
+        document.body.classList.remove('fullscreen');
+        chatOverlay.classList.remove('active');
+        fullscreenChatBox.classList.remove('active');
+    }
+});
+
+// Периодическая синхронизация для хоста
+if (isHost) {
+    syncInterval = setInterval(async () => {
+        if (!isConnected) return;
+        
+        try {
+            const currentTime = await getCurrentTime();
+            if (currentTime > 0) {
+                update(playbackRef, { timestamp: currentTime });
+            }
+        } catch (error) {
+            console.error("Host sync error:", error);
+        }
+    }, 30000); // каждые 30 секунд
+}
+
+// Инициализация с тестовым URL, если нет сохраненного
+if (isHost) {
+    get(movieRef).then((snapshot) => {
+        if (!snapshot.exists()) {
+            set(movieRef, {
+                url: 'https://www.youtube.com/embed/dQw4w9WgXcQ?enablejsapi=1',
+                title: 'Тестовое видео'
             });
         }
+    });
+}
+}
 
-        document.addEventListener('DOMContentLoaded', () => {
-            setupThemeToggle(themeToggleBtn, themeToggleBtnFullscreen);
-        });
-    </script>
+// Запуск приложения
+initializeInterface();
+</script>
 </body>
 </html>
