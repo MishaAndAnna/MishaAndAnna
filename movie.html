@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Чат с Firebase и трансляция экрана</title>
+    <title>Чат с Firebase и просмотр фильмов</title>
     <style>
         :root {
             --bg-primary: #06080f;
@@ -91,6 +91,16 @@
             overflow-x: hidden;
         }
 
+        a {
+            color: var(--accent-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        a:hover {
+            color: var(--accent-secondary);
+        }
+
         .container {
             width: 100%;
             max-width: var(--container-width);
@@ -109,14 +119,44 @@
             height: 100%;
             box-shadow: var(--shadow-lg);
             isolation: isolate;
-            background-color: #000;
+            transition: transform var(--transition-normal), box-shadow var(--transition-normal);
         }
 
-        video {
+        .movie-container:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+        }
+
+        .movie-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: inherit;
+            z-index: -1;
+        }
+
+        .movie-container::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 20%;
+            right: 20%;
+            height: 2px;
+            background: var(--gradient-accent);
+            border-radius: var(--border-radius-full);
+            filter: blur(1px);
+        }
+
+        iframe, #screenShareVideo {
             width: 100%;
             height: 100%;
+            border: none;
             object-fit: contain;
-            display: block;
+            background-color: rgba(0, 0, 0, 0.5);
         }
 
         .chat-box {
@@ -151,6 +191,18 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
+        .chat-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-accent);
+            opacity: 0.6;
+            filter: blur(2px);
+        }
+
         .chat-title {
             font-family: var(--font-display);
             font-size: 1.75rem;
@@ -158,25 +210,61 @@
             background: var(--gradient-accent);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-        }
-
-        .theme-toggle-btn, .styled-button {
+            background-clip: text;
+            text-fill-color: transparent;
             position: relative;
-            padding: var(--space-md) var(--space-xl);
-            border: none;
-            border-radius: var(--border-radius-full);
-            font-family: var(--font-primary);
-            font-size: 1rem;
-            font-weight: 600;
-            color: white;
-            background: var(--gradient-accent);
-            cursor: pointer;
-            transition: transform var(--transition-normal);
         }
 
-        .theme-toggle-btn:hover, .styled-button:hover {
-            transform: translateY(-3px);
-            filter: brightness(1.1);
+        .theme-toggle-btn {
+            position: relative;
+            background: none;
+            color: var(--text-primary);
+            font-family: var(--font-primary);
+            font-weight: 500;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            border-radius: var(--border-radius-full);
+            cursor: pointer;
+            overflow: hidden;
+            isolation: isolate;
+            user-select: none;
+        }
+
+        .theme-toggle-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-glass);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: inherit;
+            z-index: -1;
+            transition: all var(--transition-normal);
+        }
+
+        .theme-toggle-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-accent);
+            border-radius: inherit;
+            z-index: -2;
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+        }
+
+        .theme-toggle-btn:hover::before {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .theme-toggle-btn:hover::after {
+            opacity: 0.7;
+        }
+
+        .theme-toggle-btn:active {
+            transform: translateY(1px);
         }
 
         .chat-messages {
@@ -187,56 +275,165 @@
             flex-direction: column;
             gap: var(--space-md);
             scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-primary) transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius-full);
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, var(--accent-primary), var(--accent-secondary));
+            border-radius: var(--border-radius-full);
         }
 
         .message {
             position: relative;
             max-width: 80%;
             margin-bottom: var(--space-md);
+            transform-origin: bottom;
+            animation: messageSlide 0.4s var(--transition-normal);
         }
 
         .message.sent {
             align-self: flex-end;
             --message-gradient: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            --message-color: var(--text-primary);
+            --message-border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .message.received {
             align-self: flex-start;
             --message-gradient: var(--gradient-glass);
+            --message-color: var(--text-primary);
+            --message-border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .message-content {
+            position: relative;
             padding: var(--space-lg);
             border-radius: var(--border-radius-md);
-            color: var(--text-primary);
+            color: var(--message-color);
+            font-size: 1rem;
+            line-height: 1.6;
+            overflow: hidden;
+            isolation: isolate;
+            z-index: 1;
+        }
+
+        .message-content::before {
+            content: '';
+            position: absolute;
+            inset: 0;
             background: var(--message-gradient);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: var(--message-border);
+            border-radius: inherit;
+            z-index: -1;
+        }
+
+        .message.sent .message-content {
+            border-bottom-right-radius: 0;
+            color: white;
+        }
+
+        .message.received .message-content {
+            border-bottom-left-radius: 0;
+        }
+
+        .message::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            width: 20px;
+            height: 20px;
+            z-index: 0;
+        }
+
+        .message.sent::after {
+            right: -8 PX;
+            border-right: 10px solid transparent;
+            border-top: 10px solid transparent;
+            border-left: 10px solid var(--accent-secondary);
+            border-bottom: 10px solid transparent;
+            transform: rotate(-45deg);
+        }
+
+        .message.received::after {
+            left: -8px;
+            border-right: 10px solid transparent;
+            border-top: 10px solid transparent;
+            border-left: 10px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 10px solid transparent;
+            transform: rotate(135deg);
         }
 
         .message-meta {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
             font-size: 0.85rem;
-            color: var(--text-muted);
             margin-top: var(--space-xs);
+            color: var(--text-muted);
+            font-style: italic;
         }
 
         .chat-input-container {
+            position: relative;
             margin: var(--space-lg);
             border-radius: var(--border-radius-md);
+            overflow: hidden;
+            isolation: isolate;
+            transition: transform var(--transition-normal);
+        }
+
+        .chat-input-container:focus-within {
+            transform: translateY(-2px);
+        }
+
+        .chat-input-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
             background: var(--gradient-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
+            border-radius: inherit;
+            z-index: -1;
+        }
+
+        .chat-input-container:focus-within::before {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 1px var(--accent-primary), var(--shadow-glow);
         }
 
         .chat-input {
             width: 100%;
             padding: var(--space-lg);
-            border: none;
+            padding-right: 60px;
             background: transparent;
+            border: none;
             color: var(--text-primary);
+            font-size: 1rem;
+            font-family: var(--font-primary);
             resize: none;
+            line-height: 1.5;
         }
 
         .chat-input:focus {
             outline: none;
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-muted);
         }
 
         #sendBtn, #sendBtnFullscreen {
@@ -246,9 +443,21 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: var(--gradient-accent);
             border: none;
             cursor: pointer;
+            overflow: hidden;
+            isolation: isolate;
+            transition: all var(--transition-normal);
+        }
+
+        #sendBtn::before, #sendBtnFullscreen::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-accent);
+            border-radius: inherit;
+            z-index: -1;
+            transition: all var(--transition-normal);
         }
 
         #sendBtn::after, #sendBtnFullscreen::after {
@@ -261,6 +470,71 @@
             border: solid white;
             border-width: 0 3px 3px 0;
             transform: translate(-75%, -50%) rotate(-45deg);
+            transition: all var(--transition-normal);
+        }
+
+        #sendBtn:hover::before, #sendBtnFullscreen:hover::before {
+            background: var(--gradient-accent-hover);
+        }
+
+        #sendBtn:hover::after, #sendBtnFullscreen:hover::after {
+            transform: translate(-60%, -50%) rotate(-45deg);
+        }
+
+        #sendBtn:active, #sendBtnFullscreen:active {
+            transform: scale(0.95);
+        }
+
+        .styled-button {
+            position: relative;
+            padding: var(--space-md) var(--space-xl);
+            border: none;
+            border-radius: var(--border-radius-full);
+            font-family: var(--font-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            background: transparent;
+            cursor: pointer;
+            overflow: hidden;
+            isolation: isolate;
+            transition: transform var(--transition-normal);
+        }
+
+        .styled-button::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-accent);
+            border-radius: inherit;
+            z-index: -1;
+            transition: all var(--transition-normal);
+        }
+
+        .styled-button::after {
+            content: '';
+            position: absolute;
+            inset: -100% -200%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: rotate(45deg);
+            z-index: -1;
+            transition: all var(--transition-normal);
+        }
+
+        .styled-button:hover {
+            transform: translateY(-3px);
+        }
+
+        .styled-button:hover::before {
+            filter: brightness(1.1);
+        }
+
+        .styled-button:hover::after {
+            transform: rotate(45deg) translateX(100%);
+        }
+
+        .styled-button:active {
+            transform: translateY(-1px);
         }
 
         .fullscreen-btn {
@@ -301,6 +575,7 @@
             max-height: 80%;
             display: none;
             pointer-events: auto;
+            transition: transform var(--transition-normal);
         }
 
         .fullscreen-chat.active {
@@ -321,34 +596,21 @@
             z-index: 1000;
         }
 
-        .status-indicator {
-            position: absolute;
-            top: var(--space-md);
-            left: var(--space-md);
-            display: flex;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 5px 10px;
-            border-radius: 20px;
-            z-index: 15;
-            font-size: 0.8rem;
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-
-        .status-dot.connected {
-            background-color: #4CAF50;
-            box-shadow: 0 0 5px #4CAF50;
-        }
-
-        .status-dot.disconnected {
-            background-color: #F44336;
-            box-shadow: 0 0 5px #F44336;
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         @media (max-width: 1200px) {
@@ -362,7 +624,20 @@
         }
 
         @media (max-width: 768px) {
+            :root { --space-lg: 1rem; --space-xl: 1.5rem; }
+            body { padding: var(--space-md); }
+            .container { gap: var(--space-lg); }
+            .chat-title { font-size: 1.5rem; }
+            .movie-container, .chat-box { height: 500px; }
+            .message { max-width: 90%; }
+            .message-content { padding: var(--space-md); }
             .fullscreen-chat { width: 300px; }
+        }
+
+        @media (max-width: 480px) {
+            .movie-container, .chat-box { height: 400px; }
+            .chat-title { font-size: 1.25rem; }
+            .fullscreen-chat { width: 250px; }
         }
     </style>
 </head>
@@ -370,10 +645,6 @@
     <div class="container">
         <div class="movie-container" id="movieContainer">
             <button id="fullscreenBtn" class="styled-button fullscreen-btn">Полный экран</button>
-            <div class="status-indicator" id="statusIndicator">
-                <div class="status-dot disconnected" id="statusDot"></div>
-                <span id="statusText">Отключено</span>
-            </div>
             <div class="chat-overlay" id="chatOverlay">
                 <button id="toggleChatBtn" class="styled-button chat-toggle-btn">Показать чат</button>
                 <div class="chat-box fullscreen-chat" id="fullscreenChatBox">
@@ -401,7 +672,9 @@
                 <button id="sendBtn" class="send-btn">Отправить</button>
             </div>
             <div id="chatControls" style="margin: var(--space-lg); display: flex; flex-direction: column; gap: var(--space-md);">
-                <button id="startShareBtn" class="styled-button">Начать трансляцию</button>
+                <button id="startShareBtn" class="styled-button">Начать трансляцию экрана</button>
+                <button id="playBtn" class="styled-button">Play</button>
+                <button id="pauseBtn" class="styled-button">Pause</button>
                 <button id="startPlaybackBtn" class="styled-button" style="display: none;">Начать просмотр</button>
                 <button onclick="window.location.href='index.html';" class="styled-button">Вернуться на главную</button>
             </div>
@@ -415,10 +688,7 @@
             ref, 
             push, 
             onValue, 
-            set,
-            onDisconnect,
-            serverTimestamp,
-            remove
+            set 
         } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 
         const firebaseConfig = {
@@ -436,14 +706,15 @@
         const db = getDatabase(app);
         const messagesRef = ref(db, 'messages');
         const signalingRef = ref(db, 'signaling');
-        const presenceRef = ref(db, 'presence');
+        const playbackRef = ref(db, 'playback');
 
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
         const messagesContainer = document.getElementById('messages');
         const themeToggleBtn = document.getElementById('themeToggleBtn');
         const startShareBtn = document.getElementById('startShareBtn');
-        const startPlaybackBtn = document.getElementById('startPlaybackBtn');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
         const movieContainer = document.getElementById('movieContainer');
         const fullscreenBtn = document.getElementById('fullscreenBtn');
         const chatOverlay = document.getElementById('chatOverlay');
@@ -453,8 +724,7 @@
         const sendBtnFullscreen = document.getElementById('sendBtnFullscreen');
         const messagesFullscreen = document.getElementById('messagesFullscreen');
         const themeToggleBtnFullscreen = document.getElementById('themeToggleBtnFullscreen');
-        const statusDot = document.getElementById('statusDot');
-        const statusText = document.getElementById('statusText');
+        const startPlaybackBtn = document.getElementById('startPlaybackBtn');
 
         let username = prompt("Введите ваше имя:").trim();
         const isHost = username.toLowerCase() === "михаил";
@@ -462,40 +732,32 @@
             username = prompt("Имя не может быть пустым. Введите ваше имя:").trim();
         }
 
-        let videoElement;
-        let localStream;
-        let peerConnection;
-        let isConnected = false;
-        let sessionId = Date.now().toString(); // Уникальный ID сессии
-
         function initializeInterface() {
-            videoElement = document.createElement('video');
-            videoElement.id = 'screenShareVideo';
-            videoElement.autoplay = true;
-            videoElement.playsinline = true;
-
-            if (!isHost) {
-                movieContainer.appendChild(videoElement);
-                startShareBtn.style.display = 'none';
-                startPlaybackBtn.style.display = 'block';
-            } else {
+            if (isHost) {
+                const iframe = document.createElement('iframe');
+                iframe.src = "https://kinogo-films.biz/filmy/";
+                iframe.title = "Просмотр фильмов";
+                movieContainer.appendChild(iframe);
+                playBtn.style.display = 'block';
+                pauseBtn.style.display = 'block';
                 startShareBtn.style.display = 'block';
                 startPlaybackBtn.style.display = 'none';
+            } else {
+                const video = document.createElement('video');
+                video.id = 'screenShareVideo';
+                video.autoplay = false;
+                video.playsinline = true;
+                movieContainer.appendChild(video);
+                playBtn.style.display = 'none';
+                pauseBtn.style.display = 'none';
+                startShareBtn.style.display = 'none';
+                startPlaybackBtn.style.display = 'block';
             }
-
-            const userPresenceRef = ref(db, `presence/${username}`);
-            set(userPresenceRef, { online: true, lastSeen: serverTimestamp() });
-            onDisconnect(userPresenceRef).update({ online: false, lastSeen: serverTimestamp() });
-
-            const connectedRef = ref(db, '.info/connected');
-            onValue(connectedRef, (snap) => {
-                isConnected = snap.val();
-                statusDot.className = 'status-dot ' + (isConnected ? 'connected' : 'disconnected');
-                statusText.textContent = isConnected ? 'Подключено' : 'Отключено';
-            });
+            fullscreenBtn.style.display = 'block';
         }
 
         initializeInterface();
+        const screenShareVideo = document.getElementById('screenShareVideo');
 
         function renderMessages(messagesContainerTarget) {
             return function(snapshot) {
@@ -526,153 +788,172 @@
         async function sendMessage(inputElement) {
             const message = inputElement.value.trim();
             if (message) {
-                await set(push(messagesRef), { sender: username, text: message, timestamp: Date.now() });
-                inputElement.value = '';
+                const messageData = { sender: username, text: message, timestamp: Date.now() };
+                try {
+                    const newMessageRef = push(messagesRef);
+                    await set(newMessageRef, messageData);
+                    inputElement.value = '';
+                } catch (error) {
+                    console.error('Ошибка при отправке сообщения:', error);
+                    alert('Не удалось отправить сообщение');
+                }
             }
         }
 
         sendBtn.addEventListener('click', () => sendMessage(messageInput));
         sendBtnFullscreen.addEventListener('click', () => sendMessage(messageInputFullscreen));
-        messageInput.addEventListener('keypress', (e) => e.key === 'Enter' && !e.shiftKey && sendMessage(messageInput));
-        messageInputFullscreen.addEventListener('keypress', (e) => e.key === 'Enter' && !e.shiftKey && sendMessage(messageInputFullscreen));
+        messageInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage(messageInput);
+            }
+        });
+        messageInputFullscreen.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage(messageInputFullscreen);
+            }
+        });
 
+        let localStream;
         const peerConnectionConfig = {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
+                { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+                { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
             ]
         };
+        let peerConnection;
+        let hasProcessedOffer = false;
+        let hasInteracted = false;
 
         async function startScreenShare() {
             if (!isHost) {
-                alert("Только Михаил может начать трансляцию!");
+                alert("Только Михаил может начать трансляцию экрана!");
                 return;
             }
-
             try {
-                // Очистка старых сигналов перед началом новой сессии
-                await remove(signalingRef);
-
                 localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-                console.log('Экран захвачен:', localStream);
-
+                console.log('Захват экрана успешен:', localStream);
                 peerConnection = new RTCPeerConnection(peerConnectionConfig);
                 localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
                 peerConnection.onicecandidate = (event) => {
                     if (event.candidate) {
-                        console.log('Отправка ICE candidate:', event.candidate);
-                        push(signalingRef, { 
-                            type: 'candidate', 
-                            candidate: event.candidate, 
-                            sender: username, 
-                            sessionId: sessionId 
-                        });
+                        console.log('ICE candidate отправлен:', event.candidate);
+                        push(signalingRef, { type: 'candidate', candidate: event.candidate, sender: username });
                     }
                 };
-
                 peerConnection.oniceconnectionstatechange = () => {
-                    console.log('ICE state:', peerConnection.iceConnectionState);
-                    if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
-                        alert('Соединение потеряно. Проверьте сеть.');
-                    }
+                    console.log('ICE connection state:', peerConnection.iceConnectionState);
                 };
-
                 const offer = await peerConnection.createOffer();
                 await peerConnection.setLocalDescription(offer);
-                console.log('Offer создан:', offer);
-                await set(push(signalingRef), { 
-                    type: 'offer', 
-                    sdp: offer, 
-                    sender: username, 
-                    sessionId: sessionId 
-                });
+                console.log('Offer отправлен:', offer);
+                push(signalingRef, { type: 'offer', sdp: offer, sender: username });
             } catch (error) {
-                console.error('Ошибка трансляции:', error);
-                alert('Не удалось начать трансляцию: ' + error.message);
+                console.error('Ошибка при захвате экрана:', error);
+                alert('Не удалось начать трансляцию');
             }
         }
 
-        async function startPlayback() {
-            if (isHost) return;
-
-            peerConnection = new RTCPeerConnection(peerConnectionConfig);
-            peerConnection.ontrack = (event) => {
-                console.log('Получен поток:', event.streams[0]);
-                videoElement.srcObject = event.streams[0];
-                startPlaybackBtn.style.display = 'none';
-            };
-
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) {
-                    console.log('Отправка ICE candidate:', event.candidate);
-                    push(signalingRef, { 
-                        type: 'candidate', 
-                        candidate: event.candidate, 
-                        sender: username, 
-                        sessionId: sessionId 
-                    });
-                }
-            };
-
-            peerConnection.oniceconnectionstatechange = () => {
-                console.log('ICE state:', peerConnection.iceConnectionState);
-            };
-        }
-
-        onValue(signalingRef, (snapshot) => {
+        onValue(signalingRef, async (snapshot) => {
             const data = snapshot.val();
-            if (!data || !peerConnection) return;
+            console.log('Получены сигнальные данные:', data);
+            if (!data || isHost) return;
 
-            Object.entries(data).forEach(async ([key, signal]) => {
-                if (signal.sender === username || signal.sessionId !== sessionId) return;
+            if (!peerConnection) {
+                peerConnection = new RTCPeerConnection(peerConnectionConfig);
+                peerConnection.ontrack = (event) => {
+                    console.log('Получен поток:', event.streams[0]);
+                    screenShareVideo.srcObject = event.streams[0];
+                };
+                peerConnection.oniceconnectionstatechange = () => {
+                    console.log('ICE connection state:', peerConnection.iceConnectionState);
+                };
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        console.log('ICE candidate отправлен:', event.candidate);
+                        push(signalingRef, { type: 'candidate', candidate: event.candidate, sender: username });
+                    }
+                };
+            }
+
+            for (const signal of Object.values(data)) {
+                if (signal.sender === username) continue;
 
                 try {
-                    if (isHost && signal.type === 'answer' && peerConnection.signalingState === 'have-local-offer') {
-                        console.log('Установка answer:', signal.sdp);
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
-                        await remove(ref(db, `signaling/${key}`)); // Удаляем обработанный сигнал
-                    } else if (!isHost && signal.type === 'offer' && !peerConnection.localDescription) {
-                        await startPlayback();
-                        console.log('Установка offer:', signal.sdp);
+                    if (signal.type === 'offer' && !hasProcessedOffer) {
                         await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
                         const answer = await peerConnection.createAnswer();
                         await peerConnection.setLocalDescription(answer);
-                        console.log('Answer создан:', answer);
-                        await set(push(signalingRef), { 
-                            type: 'answer', 
-                            sdp: answer, 
-                            sender: username, 
-                            sessionId: sessionId 
-                        });
-                        await remove(ref(db, `signaling/${key}`)); // Удаляем обработанный сигнал
-                    } else if (signal.type === 'candidate') {
-                        const candidate = new RTCIceCandidate(signal.candidate);
-                        if (peerConnection.remoteDescription) {
-                            console.log('Добавление ICE candidate:', candidate);
-                            await peerConnection.addIceCandidate(candidate);
-                            await remove(ref(db, `signaling/${key}`)); // Удаляем обработанный сигнал
-                        }
+                        console.log('Answer отправлен:', answer);
+                        push(signalingRef, { type: 'answer', sdp: answer, sender: username });
+                        hasProcessedOffer = true;
+                    } else if (signal.type === 'candidate' && signal.candidate) {
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
+                        console.log('ICE candidate добавлен:', signal.candidate);
                     }
                 } catch (error) {
-                    console.error('Ошибка сигнализации:', error);
+                    console.error('Ошибка обработки сигнала:', error);
                 }
-            });
-        }, { onlyOnce: false });
+            }
+        });
+
+        localStream?.getTracks().forEach(track => track.onended = () => {
+            console.log('Трансляция завершена');
+            peerConnection?.close();
+            if (screenShareVideo) screenShareVideo.srcObject = null;
+            if (!isHost) startPlaybackBtn.style.display = 'block';
+        });
 
         startShareBtn.addEventListener('click', startScreenShare);
-        startPlaybackBtn.addEventListener('click', startPlayback);
 
-        if (localStream) {
-            localStream.getTracks().forEach(track => {
-                track.onended = () => {
-                    peerConnection?.close();
-                    videoElement.srcObject = null;
-                    if (!isHost) startPlaybackBtn.style.display = 'block';
-                };
+        if (!isHost) {
+            startPlaybackBtn.addEventListener('click', () => {
+                screenShareVideo.play().then(() => {
+                    console.log('Воспроизведение начато');
+                    hasInteracted = true;
+                    startPlaybackBtn.style.display = 'none';
+                }).catch(error => {
+                    console.error('Ошибка воспроизведения:', error);
+                    alert('Не удалось начать воспроизведение');
+                });
             });
         }
+
+        async function sendPlaybackCommand(command) {
+            if (!isHost) {
+                alert("Только Михаил может управлять воспроизведением!");
+                return;
+            }
+            const iframe = movieContainer.querySelector('iframe');
+            const commandData = { sender: username, command: command, timestamp: Date.now() };
+            try {
+                const newCommandRef = push(playbackRef);
+                await set(newCommandRef, commandData);
+                console.log(`Команда ${command} отправлена`);
+            } catch (error) {
+                console.error('Ошибка при отправке команды:', error);
+            }
+        }
+
+        playBtn.addEventListener('click', () => sendPlaybackCommand('play'));
+        pauseBtn.addEventListener('click', () => sendPlaybackCommand('pause'));
+
+        onValue(playbackRef, (snapshot) => {
+            const data = snapshot.val();
+            if (!data || isHost) return;
+
+            Object.values(data).forEach((commandData) => {
+                if (commandData.sender === username) return;
+                console.log('Получена команда воспроизведения:', commandData.command);
+                if (commandData.command === 'play' && hasInteracted) {
+                    screenShareVideo.play().catch(error => console.error('Ошибка воспроизведения:', error));
+                } else if (commandData.command === 'pause') {
+                    screenShareVideo.pause();
+                }
+            });
+        });
 
         let isFullscreen = false;
         fullscreenBtn.addEventListener('click', () => {
@@ -694,8 +975,13 @@
         });
 
         toggleChatBtn.addEventListener('click', () => {
-            fullscreenChatBox.classList.toggle('active');
-            toggleChatBtn.textContent = fullscreenChatBox.classList.contains('active') ? 'Скрыть чат' : 'Показать чат';
+            if (fullscreenChatBox.classList.contains('active')) {
+                fullscreenChatBox.classList.remove('active');
+                toggleChatBtn.textContent = 'Показать чат';
+            } else {
+                fullscreenChatBox.classList.add('active');
+                toggleChatBtn.textContent = 'Скрыть чат';
+            }
         });
 
         document.addEventListener('fullscreenchange', () => {
@@ -710,22 +996,35 @@
         });
 
         function setupThemeToggle(btn, altBtn) {
-            const savedTheme = localStorage.getItem('theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            btn.textContent = savedTheme === 'light' ? 'Темная тема' : 'Светлая тема';
-            altBtn.textContent = savedTheme === 'light' ? 'Темная тема' : 'Светлая тема';
-
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                btn.textContent = 'Темная тема';
+                altBtn.textContent = 'Темная тема';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                btn.textContent = 'Светлая тема';
+                altBtn.textContent = 'Светлая тема';
+            }
             btn.addEventListener('click', () => {
                 const currentTheme = document.documentElement.getAttribute('data-theme');
-                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-                document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                btn.textContent = newTheme === 'light' ? 'Темная тема' : 'Светлая тема';
-                altBtn.textContent = newTheme === 'light' ? 'Темная тема' : 'Светлая тема';
+                if (currentTheme === 'light') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    btn.textContent = 'Светлая тема';
+                    altBtn.textContent = 'Светлая тема';
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                    btn.textContent = 'Темная тема';
+                    altBtn.textContent = 'Темная тема';
+                }
             });
         }
 
-        setupThemeToggle(themeToggleBtn, themeToggleBtnFullscreen);
+        document.addEventListener('DOMContentLoaded', () => {
+            setupThemeToggle(themeToggleBtn, themeToggleBtnFullscreen);
+        });
     </script>
 </body>
 </html>
