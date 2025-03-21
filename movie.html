@@ -878,7 +878,7 @@
     }
 }
 
-    async function startPlayback() {
+   async function startPlayback() {
     if (isHost) return;
 
     console.log('Клиент начинает просмотр');
@@ -886,7 +886,11 @@
     peerConnection.ontrack = (event) => {
         console.log('Получен поток:', event.streams[0]);
         const stream = event.streams[0];
-        console.log('Треки в потоке:', stream.getTracks());
+        const tracks = stream.getTracks();
+        console.log('Треки в потоке:', tracks);
+        tracks.forEach(track => {
+            console.log('Детали трека:', track.kind, track.enabled, track.muted);
+        });
         screenShareVideo.srcObject = stream;
         console.log('Назначен srcObject, проверка video-элемента:', screenShareVideo);
 
@@ -903,13 +907,24 @@
             console.error('Ошибка в video-элементе:', error);
         };
 
-        // Проверяем размеры и состояние через 1 секунду
+        // Принудительный запуск воспроизведения
+        screenShareVideo.play().then(() => {
+            console.log('Видео воспроизводится (принудительный запуск)');
+        }).catch(error => {
+            console.error('Ошибка принудительного воспроизведения:', error);
+        });
+
+        // Проверка через 1 и 3 секунды
         setTimeout(() => {
             console.log('Размеры видео через 1 сек:', screenShareVideo.videoWidth, screenShareVideo.videoHeight);
-            console.log('Состояние воспроизведения:', screenShareVideo.paused ? 'paused' : 'playing');
+            console.log('Состояние воспроизведения через 1 сек:', screenShareVideo.paused ? 'paused' : 'playing');
         }, 1000);
+        setTimeout(() => {
+            console.log('Размеры видео через 3 сек:', screenShareVideo.videoWidth, screenShareVideo.videoHeight);
+            console.log('Состояние воспроизведения через 3 сек:', screenShareVideo.paused ? 'paused' : 'playing');
+        }, 3000);
 
-        // Добавляем кнопку для ручного воспроизведения
+        // Кнопка для ручного воспроизведения
         const playButton = document.createElement('button');
         playButton.textContent = 'Воспроизвести вручную';
         playButton.style.position = 'absolute';
