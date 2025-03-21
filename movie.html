@@ -922,8 +922,8 @@
             const data = snapshot.val();
             if (!data) return;
             Object.values(data).forEach(async (signal) => {
-                if (signal.sender === username || signal.type !== 'candidate') return;
-                if (peerConnection && peerConnection.remoteDescription && signal.candidate.candidate) { // Улучшенная фильтрация
+                if (signal.sender === username || signal.type !== 'candidate' || !signal.candidate || !signal.candidate.candidate) return; // Исправление
+                if (peerConnection && peerConnection.remoteDescription) {
                     try {
                         await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
                         console.log('ICE candidate добавлен:', signal.candidate);
@@ -953,8 +953,8 @@
             const data = snapshot.val();
             if (!data) return;
             Object.values(data).forEach(async (signal) => {
-                if (signal.sender === username || signal.type !== 'candidate') return;
-                if (peerConnection && peerConnection.remoteDescription && signal.candidate.candidate) { // Улучшенная фильтрация
+                if (signal.sender === username || signal.type !== 'candidate' || !signal.candidate || !signal.candidate.candidate) return; // Исправление
+                if (peerConnection && peerConnection.remoteDescription) {
                     try {
                         await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
                         console.log('ICE candidate добавлен:', signal.candidate);
