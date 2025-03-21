@@ -843,16 +843,18 @@
         console.log('Захват экрана успешен:', localStream);
         const tracks = localStream.getTracks();
         console.log('Треки в потоке хоста:', tracks);
+
+        peerConnection = new RTCPeerConnection(peerConnectionConfig); // Создаём peerConnection здесь
+
         tracks.forEach(track => {
             console.log('Детали трека хоста:', track.kind, track.enabled, track.muted, track.readyState);
             track.onmute = () => console.log('Трек хоста заглушен:', track.kind);
             track.onunmute = () => console.log('Трек хоста включён:', track.kind);
             track.onended = () => console.log('Трек хоста завершён:', track.kind);
-            peerConnection.addTrack(track, localStream);
+            peerConnection.addTrack(track, localStream); // Теперь addTrack вызывается после создания peerConnection
             console.log('Добавлен трек:', track);
         });
 
-        peerConnection = new RTCPeerConnection(peerConnectionConfig);
         peerConnection.onicecandidate = (event) => {
             if (event.candidate) {
                 console.log('Отправлен ICE candidate:', event.candidate);
@@ -885,7 +887,6 @@
         alert('Не удалось начать трансляцию: ' + error.message);
     }
 }
-
   async function startPlayback() {
     if (isHost) return;
 
