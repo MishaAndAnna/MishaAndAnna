@@ -837,7 +837,7 @@
             await remove(signalingRef); // Очистка предыдущих данных
             localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
             screenShareVideo.srcObject = localStream;
-            screenShareVideo.play();
+            screenShareVideo.play().catch(error => console.error('Хост: Ошибка воспроизведения локального видео:', error));
 
             peerConnection = new RTCPeerConnection(peerConnectionConfig);
             localStream.getTracks().forEach(track => {
@@ -930,11 +930,13 @@
 
         peerConnection.ontrack = (event) => {
             console.log('Клиент: Получен трек:', event.track.kind);
-            screenShareVideo.srcObject = event.streams[0];
-            screenShareVideo.play().catch(error => {
-                console.error('Клиент: Ошибка воспроизведения:', error);
-                alert('Не удалось воспроизвести видео: ' + error.message);
-            });
+            if (!screenShareVideo.srcObject) {
+                screenShareVideo.srcObject = event.streams[0];
+                screenShareVideo.play().catch(error => {
+                    console.error('Клиент: Ошибка воспроизведения:', error);
+                    alert('Не удалось воспроизвести видео: ' + error.message);
+                });
+            }
         };
 
         peerConnection.onicecandidate = (event) => {
@@ -952,6 +954,9 @@
                 alert('Трансляция отключена.');
             } else if (peerConnection.iceConnectionState === 'connected') {
                 console.log('Клиент: Соединение установлено');
+                if (screenShareVideo.srcObject && screenShareVideo.paused) {
+                    screenShareVideo.play().catch(error => console.error('Клиент: Ошибка повторного воспроизведения:', error));
+                }
             }
         };
 
