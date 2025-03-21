@@ -900,6 +900,8 @@
 
     console.log('Клиент начинает просмотр');
     peerConnection = new RTCPeerConnection(peerConnectionConfig);
+    let streamAssigned = false; // Флаг для предотвращения повторного назначения
+
     peerConnection.ontrack = (event) => {
         console.log('Получен поток:', event.streams[0]);
         const stream = event.streams[0];
@@ -914,36 +916,42 @@
             track.onunmute = () => console.log('Трек включён:', track.kind);
             track.onended = () => console.log('Трек завершён:', track.kind);
         });
-        screenShareVideo.srcObject = stream;
-        console.log('Назначен srcObject, проверка video-элемента:', screenShareVideo);
 
-        screenShareVideo.onloadedmetadata = () => {
-            console.log('Метаданные загружены, размеры видео:', screenShareVideo.videoWidth, screenShareVideo.videoHeight);
+        if (!streamAssigned) { // Назначаем srcObject только один раз
+            screenShareVideo.srcObject = stream;
+            streamAssigned = true;
+            console.log('Назначен srcObject, проверка video-элемента:', screenShareVideo);
+
+            screenShareVideo.onloadedmetadata = () => {
+                console.log('Метаданные загружены, размеры видео:', screenShareVideo.videoWidth, screenShareVideo.videoHeight);
+                screenShareVideo.play().then(() => {
+                    console.log('Видео воспроизводится');
+                }).catch(error => {
+                    console.error('Ошибка воспроизведения видео:', error);
+                });
+            };
+
+            screenShareVideo.onerror = (error) => {
+                console.error('Ошибка в video-элементе:', error);
+            };
+
             screenShareVideo.play().then(() => {
-                console.log('Видео воспроизводится');
+                console.log('Видео воспроизводится (принудительный запуск)');
             }).catch(error => {
-                console.error('Ошибка воспроизведения видео:', error);
+                console.error('Ошибка принудительного воспроизведения:', error);
             });
-        };
 
-        screenShareVideo.onerror = (error) => {
-            console.error('Ошибка в video-элементе:', error);
-        };
-
-        screenShareVideo.play().then(() => {
-            console.log('Видео воспроизводится (принудительный запуск)');
-        }).catch(error => {
-            console.error('Ошибка принудительного воспроизведения:', error);
-        });
-
-        setTimeout(() => {
-            console.log('Размеры видео через 1 сек:', screenShareVideo.videoWidth, screenShareVideo.videoHeight);
-            console.log('Состояние воспроизведения через 1 сек:', screenShareVideo.paused ? 'paused' : 'playing');
-        }, 1000);
-        setTimeout(() => {
-            console.log('Размеры видео через 3 сек:', screenShareVideo.videoWidth, screenShareVideo.videoHeight);
-            console.log('Состояние воспроизведения через 3 сек:', screenShareVideo.paused ? 'paused' : 'playing');
-        }, 3000);
+            setTimeout(() => {
+                console.log('Размеры видео через 1 сек:', screenShareVideo.videoWidth, screenShareVideo.videoHeight);
+                console.log('Состояние воспроизведения через 1 сек:', screenShareVideo.paused ? 'paused' : 'playing');
+            }, 1000);
+            setTimeout(() => {
+                console.log('Размеры видео через 3 сек:', screenShareVideo.videoWidth, screenShareVideo.videoHeight);
+                console.log('Состояние воспроизведения через 3 сек:', screenShareVideo.paused ? 'paused' : 'playing');
+            }, 3000);
+        } else {
+            console.log('Повторное событие ontrack, srcObject уже назначен');
+        }
 
         const playButton = document.createElement('button');
         playButton.textContent = 'Воспроизвести вручную';
@@ -971,7 +979,7 @@
 
     peerConnection.oniceconnectionstatechange = () => {
         console.log('ICE состояние:', peerConnection.iceConnectionState);
-        if (peerConnection.iceConnectionState === 'connected') {
+        if (peerConnection.iceConnectionstate === 'connected') {
             console.log('Соединение успешно установлено');
         }
     };
