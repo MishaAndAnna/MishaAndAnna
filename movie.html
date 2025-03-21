@@ -681,7 +681,7 @@
         </div>
     </div>
 
-    <script type="module">
+<script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
     import { 
         getDatabase, 
@@ -859,6 +859,16 @@
             await peerConnection.setLocalDescription(offer);
             console.log('Offer отправлен:', offer);
             await set(ref(db, 'signaling/offer'), { type: 'offer', sdp: offer, sender: username });
+
+            // Очистка при завершении трансляции
+            localStream.getTracks().forEach(track => {
+                track.onended = () => {
+                    console.log('Трансляция завершена');
+                    peerConnection?.close();
+                    if (screenShareVideo) screenShareVideo.srcObject = null;
+                    if (!isHost) startPlaybackBtn.style.display = 'block';
+                };
+            });
         } catch (error) {
             console.error('Ошибка захвата экрана:', error);
             alert('Не удалось начать трансляцию: ' + error.message);
@@ -913,7 +923,7 @@
             if (!data) return;
             Object.values(data).forEach(async (signal) => {
                 if (signal.sender === username || signal.type !== 'candidate') return;
-                if (peerConnection && peerConnection.remoteDescription) { // Добавлена проверка
+                if (peerConnection && peerConnection.remoteDescription && signal.candidate.candidate) { // Улучшенная фильтрация
                     try {
                         await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
                         console.log('ICE candidate добавлен:', signal.candidate);
@@ -944,7 +954,7 @@
             if (!data) return;
             Object.values(data).forEach(async (signal) => {
                 if (signal.sender === username || signal.type !== 'candidate') return;
-                if (peerConnection && peerConnection.remoteDescription) { // Добавлена проверка
+                if (peerConnection && peerConnection.remoteDescription && signal.candidate.candidate) { // Улучшенная фильтрация
                     try {
                         await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
                         console.log('ICE candidate добавлен:', signal.candidate);
@@ -958,18 +968,6 @@
 
     startShareBtn.addEventListener('click', startScreenShare);
     startPlaybackBtn.addEventListener('click', startPlayback);
-
-    // Очистка при завершении трансляции
-    if (localStream) {
-        localStream.getTracks().forEach(track => {
-            track.onended = () => {
-                console.log('Трансляция завершена');
-                peerConnection?.close();
-                if (screenShareVideo) screenShareVideo.srcObject = null;
-                if (!isHost) startPlaybackBtn.style.display = 'block';
-            };
-        });
-    }
 
     async function sendPlaybackCommand(command) {
         if (!isHost) {
