@@ -882,7 +882,9 @@
     peerConnection = new RTCPeerConnection(peerConnectionConfig);
     peerConnection.ontrack = (event) => {
         console.log('Получен поток:', event.streams[0]);
-        screenShareVideo.srcObject = event.streams[0];
+        const stream = event.streams[0];
+        console.log('Треки в потоке:', stream.getTracks());
+        screenShareVideo.srcObject = stream;
         console.log('Назначен srcObject, проверка video-элемента:', screenShareVideo);
 
         screenShareVideo.onloadedmetadata = () => {
@@ -898,10 +900,26 @@
             console.error('Ошибка в video-элементе:', error);
         };
 
-        // Проверяем размеры сразу после назначения потока
+        // Проверяем размеры и состояние через 1 секунду
         setTimeout(() => {
             console.log('Размеры видео через 1 сек:', screenShareVideo.videoWidth, screenShareVideo.videoHeight);
+            console.log('Состояние воспроизведения:', screenShareVideo.paused ? 'paused' : 'playing');
         }, 1000);
+
+        // Добавляем кнопку для ручного воспроизведения
+        const playButton = document.createElement('button');
+        playButton.textContent = 'Воспроизвести вручную';
+        playButton.style.position = 'absolute';
+        playButton.style.top = '10px';
+        playButton.style.left = '10px';
+        playButton.onclick = () => {
+            screenShareVideo.play().then(() => {
+                console.log('Видео воспроизведено вручную');
+            }).catch(error => {
+                console.error('Ошибка при ручном воспроизведении:', error);
+            });
+        };
+        document.body.appendChild(playButton);
 
         startPlaybackBtn.style.display = 'none';
     };
