@@ -417,7 +417,8 @@
             onValue, 
             set,
             onDisconnect,
-            serverTimestamp
+            serverTimestamp,
+            remove
         } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 
         const firebaseConfig = {
@@ -465,6 +466,7 @@
         let localStream;
         let peerConnection;
         let isConnected = false;
+        let sessionId = Date.now().toString(); // Уникальный ID сессии
 
         function initializeInterface() {
             videoElement = document.createElement('video');
@@ -473,7 +475,7 @@
             videoElement.playsinline = true;
 
             if (!isHost) {
-                movieContainer.appendChild(videoElement); // Клиент видит трансляцию
+                movieContainer.appendChild(videoElement);
                 startShareBtn.style.display = 'none';
                 startPlaybackBtn.style.display = 'block';
             } else {
@@ -549,6 +551,9 @@
             }
 
             try {
+                // Очистка старых сигналов перед началом новой сессии
+                await remove(signalingRef);
+
                 localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
                 console.log('Экран захвачен:', localStream);
 
@@ -557,7 +562,13 @@
 
                 peerConnection.onicecandidate = (event) => {
                     if (event.candidate) {
-                        push(signalingRef, { type: 'candidate', candidate: event.candidate, sender: username });
+                        console.log('Отправка ICE candidate:', event.candidate);
+                        push(signalingRef, { 
+                            type: 'candidate', 
+                            candidate: event.candidate, 
+                            sender: username, 
+                            sessionId: sessionId 
+                        });
                     }
                 };
 
@@ -570,7 +581,13 @@
 
                 const offer = await peerConnection.createOffer();
                 await peerConnection.setLocalDescription(offer);
-                await set(push(signalingRef), { type: 'offer', sdp: offer, sender: username });
+                console.log('Offer создан:', offer);
+                await set(push(signalingRef), { 
+                    type: 'offer', 
+                    sdp: offer, 
+                    sender: username, 
+                    sessionId: sessionId 
+                });
             } catch (error) {
                 console.error('Ошибка трансляции:', error);
                 alert('Не удалось начать трансляцию: ' + error.message);
@@ -589,7 +606,13 @@
 
             peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
-                    push(signalingRef, { type: 'candidate', candidate: event.candidate, sender: username });
+                    console.log('Отправка ICE candidate:', event.candidate);
+                    push(signalingRef, { 
+                        type: 'candidate', 
+                        candidate: event.candidate, 
+                        sender: username, 
+                        sessionId: sessionId 
+                    });
                 }
             };
 
@@ -598,32 +621,45 @@
             };
         }
 
-        onValue(signalingRef, async (snapshot) => {
+        onValue(signalingRef, (snapshot) => {
             const data = snapshot.val();
-            if (!data) return;
+            if (!data || !peerConnection) return;
 
-            for (const signal of Object.values(data)) {
-                if (signal.sender === username) continue;
+            Object.entries(data).forEach(async ([key, signal]) => {
+                if (signal.sender === username || signal.sessionId !== sessionId) return;
 
                 try {
-                    if (isHost && signal.type === 'answer' && peerConnection) {
+                    if (isHost && signal.type === 'answer' && peerConnection.signalingState === 'have-local-offer') {
+                        console.log('Установка answer:', signal.sdp);
                         await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
-                        console.log('Answer установлен');
-                    } else if (!isHost && signal.type === 'offer' && !peerConnection) {
+                        await remove(ref(db, `signaling/${key}`)); // Удаляем обработанный сигнал
+                    } else if (!isHost && signal.type === 'offer' && !peerConnection.localDescription) {
                         await startPlayback();
+                        console.log('Установка offer:', signal.sdp);
                         await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
                         const answer = await peerConnection.createAnswer();
                         await peerConnection.setLocalDescription(answer);
-                        await set(push(signalingRef), { type: 'answer', sdp: answer, sender: username });
-                    } else if (signal.type === 'candidate' && peerConnection) {
-                        await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
-                        console.log('ICE candidate добавлен');
+                        console.log('Answer создан:', answer);
+                        await set(push(signalingRef), { 
+                            type: 'answer', 
+                            sdp: answer, 
+                            sender: username, 
+                            sessionId: sessionId 
+                        });
+                        await remove(ref(db, `signaling/${key}`)); // Удаляем обработанный сигнал
+                    } else if (signal.type === 'candidate') {
+                        const candidate = new RTCIceCandidate(signal.candidate);
+                        if (peerConnection.remoteDescription) {
+                            console.log('Добавление ICE candidate:', candidate);
+                            await peerConnection.addIceCandidate(candidate);
+                            await remove(ref(db, `signaling/${key}`)); // Удаляем обработанный сигнал
+                        }
                     }
                 } catch (error) {
                     console.error('Ошибка сигнализации:', error);
                 }
-            }
-        });
+            });
+        }, { onlyOnce: false });
 
         startShareBtn.addEventListener('click', startScreenShare);
         startPlaybackBtn.addEventListener('click', startPlayback);
