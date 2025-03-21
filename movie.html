@@ -907,7 +907,10 @@
         console.log('Треки в потоке:', tracks);
         tracks.forEach(track => {
             console.log('Детали трека:', track.kind, track.enabled, track.muted, track.readyState);
-            track.onmute = () => console.log('Трек заглушен:', track.kind);
+            track.onmute = () => {
+                console.log('Трек заглушен:', track.kind);
+                console.log('Трек после заглушения:', track.enabled, track.muted, track.readyState);
+            };
             track.onunmute = () => console.log('Трек включён:', track.kind);
             track.onended = () => console.log('Трек завершён:', track.kind);
         });
