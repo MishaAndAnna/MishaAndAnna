@@ -883,6 +883,8 @@
     peerConnection.ontrack = (event) => {
         console.log('Получен поток:', event.streams[0]);
         screenShareVideo.srcObject = event.streams[0];
+        console.log('Назначен srcObject, проверка video-элемента:', screenShareVideo);
+        console.log('Video размеры:', screenShareVideo.videoWidth, screenShareVideo.videoHeight);
         screenShareVideo.play().then(() => {
             console.log('Видео воспроизводится');
         }).catch(error => {
