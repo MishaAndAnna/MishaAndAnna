@@ -152,16 +152,16 @@
         }
 
         iframe, #screenShareVideo {
-    width: 100%;
-    height: 100%;
-    border: none;
-    object-fit: contain;
-    background-color: black; /* Полностью чёрный фон для видимости */
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1; /* Убедимся, что видео поверх других элементов */
-}
+            width: 100%;
+            height: 100%;
+            border: none;
+            object-fit: contain;
+            background-color: black;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
 
         .chat-box {
             display: flex;
@@ -677,9 +677,8 @@
             </div>
             <div id="chatControls" style="margin: var(--space-lg); display: flex; flex-direction: column; gap: var(--space-md);">
                 <button id="startShareBtn" class="styled-button">Начать трансляцию экрана</button>
-                <button id="playBtn" class="styled-button">Play</button>
-                <button id="pauseBtn" class="styled-button">Pause</button>
-                <button id="startPlaybackBtn" class="styled-button" style="display: none;">Начать просмотр</button>
+                <button id="stopShareBtn" class="styled-button" style="display: none;">Остановить трансляцию</button>
+                <button id="startPlaybackBtn" class="styled-button" style="display: none;">Подключиться к трансляции</button>
                 <button onclick="window.location.href='index.html';" class="styled-button">Вернуться на главную</button>
             </div>
         </div>
@@ -711,15 +710,13 @@
     const db = getDatabase(app);
     const messagesRef = ref(db, 'messages');
     const signalingRef = ref(db, 'signaling');
-    const playbackRef = ref(db, 'playback');
 
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
     const messagesContainer = document.getElementById('messages');
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     const startShareBtn = document.getElementById('startShareBtn');
-    const playBtn = document.getElementById('playBtn');
-    const pauseBtn = document.getElementById('pauseBtn');
+    const stopShareBtn = document.getElementById('stopShareBtn');
     const movieContainer = document.getElementById('movieContainer');
     const fullscreenBtn = document.getElementById('fullscreenBtn');
     const chatOverlay = document.getElementById('chatOverlay');
@@ -737,15 +734,11 @@
         username = prompt("Имя не может быть пустым. Введите ваше имя:").trim();
     }
 
+    // Инициализация интерфейса
     function initializeInterface() {
         if (isHost) {
-            const iframe = document.createElement('iframe');
-            iframe.src = "https://kinogo-films.biz/filmy/";
-            iframe.title = "Просмотр фильмов";
-            movieContainer.appendChild(iframe);
-            playBtn.style.display = 'block';
-            pauseBtn.style.display = 'block';
             startShareBtn.style.display = 'block';
+            stopShareBtn.style.display = 'none';
             startPlaybackBtn.style.display = 'none';
         } else {
             const video = document.createElement('video');
@@ -753,9 +746,8 @@
             video.autoplay = true;
             video.playsinline = true;
             movieContainer.appendChild(video);
-            playBtn.style.display = 'none';
-            pauseBtn.style.display = 'none';
             startShareBtn.style.display = 'none';
+            stopShareBtn.style.display = 'none';
             startPlaybackBtn.style.display = 'block';
         }
         fullscreenBtn.style.display = 'block';
@@ -764,6 +756,7 @@
     initializeInterface();
     const screenShareVideo = document.getElementById('screenShareVideo');
 
+    // Рендеринг сообщений чата
     function renderMessages(messagesContainerTarget) {
         return function(snapshot) {
             messagesContainerTarget.innerHTML = '';
@@ -790,6 +783,7 @@
     onValue(messagesRef, renderMessages(messagesContainer));
     onValue(messagesRef, renderMessages(messagesFullscreen));
 
+    // Отправка сообщений
     async function sendMessage(inputElement) {
         const message = inputElement.value.trim();
         if (message) {
@@ -820,6 +814,7 @@
         }
     });
 
+    // WebRTC логика
     let localStream;
     let peerConnection;
     const peerConnectionConfig = {
@@ -830,226 +825,134 @@
         ]
     };
 
-   async function startScreenShare() {
-    if (!isHost) {
-        alert("Только Михаил может начать трансляцию экрана!");
-        return;
-    }
-    try {
-        await remove(signalingRef);
-        console.log('Signaling очищен');
+    async function startScreenShare() {
+        if (!isHost) {
+            alert("Только Михаил может начать трансляцию экрана!");
+            return;
+        }
+        try {
+            await remove(signalingRef); // Очистка предыдущих данных
+            localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            const videoElement = document.createElement('video');
+            videoElement.id = 'hostVideo';
+            videoElement.srcObject = localStream;
+            videoElement.autoplay = true;
+            videoElement.playsinline = true;
+            movieContainer.innerHTML = ''; // Очистка контейнера
+            movieContainer.appendChild(videoElement);
+            movieContainer.appendChild(fullscreenBtn); // Возвращаем кнопку полного экрана
 
-        localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-        console.log('Захват экрана успешен:', localStream);
-        const tracks = localStream.getTracks();
-        console.log('Треки в потоке хоста:', tracks);
+            peerConnection = new RTCPeerConnection(peerConnectionConfig);
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    set(push(signalingRef), { type: 'candidate', candidate: event.candidate, sender: username });
+                }
+            };
+
+            peerConnection.oniceconnectionstatechange = () => {
+                console.log('ICE состояние:', peerConnection.iceConnectionState);
+                if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
+                    alert('Трансляция прервана. Попробуйте начать заново.');
+                    stopScreenShare();
+                }
+            };
+
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            await set(ref(db, 'signaling/offer'), { type: 'offer', sdp: offer, sender: username });
+
+            localStream.getTracks().forEach(track => {
+                track.onended = () => {
+                    stopScreenShare();
+                };
+            });
+
+            startShareBtn.style.display = 'none';
+            stopShareBtn.style.display = 'block';
+        } catch (error) {
+            console.error('Ошибка захвата экрана:', error);
+            alert('Не удалось начать трансляцию: ' + error.message);
+        }
+    }
+
+    async function stopScreenShare() {
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+        }
+        if (peerConnection) {
+            peerConnection.close();
+        }
+        await remove(signalingRef);
+        movieContainer.innerHTML = '';
+        movieContainer.appendChild(fullscreenBtn);
+        startShareBtn.style.display = 'block';
+        stopShareBtn.style.display = 'none';
+    }
+
+    async function startPlayback() {
+        if (isHost) return;
 
         peerConnection = new RTCPeerConnection(peerConnectionConfig);
 
-        tracks.forEach(track => {
-            console.log('Детали трека хоста:', track.kind, track.enabled, track.muted, track.readyState);
-            track.onmute = () => console.log('Трек хоста заглушен:', track.kind);
-            track.onunmute = () => console.log('Трек хоста включён:', track.kind);
-            track.onended = () => console.log('Трек хоста завершён:', track.kind);
-            peerConnection.addTrack(track, localStream);
-            console.log('Добавлен трек:', track);
-        });
-
-        // Проверка состояния треков каждые 2 секунды
-        setInterval(() => {
-            localStream.getTracks().forEach(track => {
-                console.log('Состояние трека хоста во время трансляции:', track.kind, track.enabled, track.muted, track.readyState);
-            });
-        }, 2000);
+        peerConnection.ontrack = (event) => {
+            if (!screenShareVideo.srcObject) {
+                screenShareVideo.srcObject = event.streams[0];
+                screenShareVideo.oncanplay = () => {
+                    screenShareVideo.play().catch(error => console.error('Ошибка воспроизведения:', error));
+                };
+            }
+        };
 
         peerConnection.onicecandidate = (event) => {
             if (event.candidate) {
-                console.log('Отправлен ICE candidate:', event.candidate);
                 set(push(signalingRef), { type: 'candidate', candidate: event.candidate, sender: username });
             }
         };
 
         peerConnection.oniceconnectionstatechange = () => {
             console.log('ICE состояние:', peerConnection.iceConnectionState);
-            if (peerConnection.iceConnectionState === 'disconnected') {
-                alert('Трансляция прервана');
+            if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
+                alert('Трансляция отключена.');
+                screenShareVideo.srcObject = null;
+                startPlaybackBtn.style.display = 'block';
             }
         };
 
-        const offer = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offer);
-        console.log('Offer отправлен:', offer);
-        await set(ref(db, 'signaling/offer'), { type: 'offer', sdp: offer, sender: username });
-
-        localStream.getTracks().forEach(track => {
-            track.onended = () => {
-                console.log('Трансляция завершена');
-                peerConnection?.close();
-                if (screenShareVideo) screenShareVideo.srcObject = null;
-                if (!isHost) startPlaybackBtn.style.display = 'block';
-            };
-        });
-    } catch (error) {
-        console.error('Ошибка захвата экрана:', error);
-        alert('Не удалось начать трансляцию: ' + error.message);
-    }
-}
-    
-  async function startPlayback() {
-    if (isHost) return;
-
-    console.log('Клиент начинает просмотр');
-    peerConnection = new RTCPeerConnection(peerConnectionConfig);
-    let streamAssigned = false; // Флаг для предотвращения повторного назначения
-
-    peerConnection.ontrack = (event) => {
-        console.log('Получен поток:', event.streams[0]);
-        const stream = event.streams[0];
-        const tracks = stream.getTracks();
-        console.log('Треки в потоке:', tracks);
-        tracks.forEach(track => {
-            console.log('Детали трека:', track.kind, track.enabled, track.muted, track.readyState);
-            track.onmute = () => {
-                console.log('Трек заглушен:', track.kind);
-                console.log('Трек после заглушения:', track.enabled, track.muted, track.readyState);
-            };
-            track.onunmute = () => console.log('Трек включён:', track.kind);
-            track.onended = () => console.log('Трек завершён:', track.kind);
-        });
-
-        if (!streamAssigned) { // Назначаем srcObject только один раз
-            screenShareVideo.srcObject = stream;
-            streamAssigned = true;
-            console.log('Назначен srcObject, проверка video-элемента:', screenShareVideo);
-
-            screenShareVideo.onloadedmetadata = () => {
-                console.log('Метаданные загружены, размеры видео:', screenShareVideo.videoWidth, screenShareVideo.videoHeight);
-                screenShareVideo.play().then(() => {
-                    console.log('Видео воспроизводится');
-                }).catch(error => {
-                    console.error('Ошибка воспроизведения видео:', error);
-                });
-            };
-
-            screenShareVideo.onerror = (error) => {
-                console.error('Ошибка в video-элементе:', error);
-            };
-
-            screenShareVideo.play().then(() => {
-                console.log('Видео воспроизводится (принудительный запуск)');
-            }).catch(error => {
-                console.error('Ошибка принудительного воспроизведения:', error);
-            });
-
-            setTimeout(() => {
-                console.log('Размеры видео через 1 сек:', screenShareVideo.videoWidth, screenShareVideo.videoHeight);
-                console.log('Состояние воспроизведения через 1 сек:', screenShareVideo.paused ? 'paused' : 'playing');
-            }, 1000);
-            setTimeout(() => {
-                console.log('Размеры видео через 3 сек:', screenShareVideo.videoWidth, screenShareVideo.videoHeight);
-                console.log('Состояние воспроизведения через 3 сек:', screenShareVideo.paused ? 'paused' : 'playing');
-            }, 3000);
-        } else {
-            console.log('Повторное событие ontrack, srcObject уже назначен');
-        }
-
-        const playButton = document.createElement('button');
-        playButton.textContent = 'Воспроизвести вручную';
-        playButton.style.position = 'absolute';
-        playButton.style.top = '10px';
-        playButton.style.left = '10px';
-        playButton.onclick = () => {
-            screenShareVideo.play().then(() => {
-                console.log('Видео воспроизведено вручную');
-            }).catch(error => {
-                console.error('Ошибка при ручном воспроизведении:', error);
-            });
-        };
-        document.body.appendChild(playButton);
-
-        startPlaybackBtn.style.display = 'none';
-    };
-
-    peerConnection.onicecandidate = (event) => {
-        if (event.candidate) {
-            console.log('Отправлен ICE candidate:', event.candidate);
-            set(push(signalingRef), { type: 'candidate', candidate: event.candidate, sender: username });
-        }
-    };
-
-    peerConnection.oniceconnectionstatechange = () => {
-        console.log('ICE состояние:', peerConnection.iceConnectionState);
-        if (peerConnection.iceConnectionstate === 'connected') {
-            console.log('Соединение успешно установлено');
-        }
-    };
-
-    onValue(ref(db, 'signaling/offer'), async (snapshot) => {
-        const offerData = snapshot.val();
-        if (offerData && offerData.sender !== username) {
-            console.log('Получен offer:', offerData.sdp);
-            try {
+        onValue(ref(db, 'signaling/offer'), async (snapshot) => {
+            const offerData = snapshot.val();
+            if (offerData && offerData.sender !== username && !peerConnection.remoteDescription) {
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(offerData.sdp));
                 const answer = await peerConnection.createAnswer();
                 await peerConnection.setLocalDescription(answer);
-                console.log('Answer отправлен:', answer);
                 await set(ref(db, 'signaling/answer'), { type: 'answer', sdp: answer, sender: username });
-            } catch (error) {
-                console.error('Ошибка установки offer:', error);
             }
-        } else {
-            console.log('Offer не найден или от текущего пользователя');
-        }
-    }, { onlyOnce: true });
+        }, { onlyOnce: true });
 
-    onValue(ref(db, 'signaling'), (snapshot) => {
-        const data = snapshot.val();
-        if (!data) return;
-        Object.values(data).forEach(async (signal) => {
-            if (signal.sender === username || signal.type !== 'candidate' || !signal.candidate || !signal.candidate.candidate) return;
-            if (peerConnection && peerConnection.remoteDescription) {
-                try {
-                    await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
-                    console.log('ICE candidate добавлен:', signal.candidate);
-                } catch (error) {
-                    console.error('Ошибка добавления ICE candidate:', error);
+        onValue(ref(db, 'signaling'), (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
+            Object.values(data).forEach(async (signal) => {
+                if (signal.sender === username || signal.type !== 'candidate' || !signal.candidate) return;
+                if (peerConnection && peerConnection.remoteDescription) {
+                    try {
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
+                    } catch (error) {
+                        console.error('Ошибка добавления ICE candidate:', error);
+                    }
                 }
-            }
+            });
         });
-    });
-}
-    startShareBtn.addEventListener('click', startScreenShare);
-    startPlaybackBtn.addEventListener('click', startPlayback);
 
-    async function sendPlaybackCommand(command) {
-        if (!isHost) {
-            alert("Только Михаил может управлять воспроизведением!");
-            return;
-        }
-        const iframe = movieContainer.querySelector('iframe');
-        try {
-            const commandData = { sender: username, command: command, timestamp: Date.now() };
-            const newCommandRef = push(playbackRef);
-            await set(newCommandRef, commandData);
-            console.log(`Команда ${command} отправлена`);
-        } catch (error) {
-            console.error('Ошибка при отправке команды:', error);
-        }
+        startPlaybackBtn.style.display = 'none';
     }
 
-    playBtn.addEventListener('click', () => sendPlaybackCommand('play'));
-    pauseBtn.addEventListener('click', () => sendPlaybackCommand('pause'));
+    startShareBtn.addEventListener('click', startScreenShare);
+    stopShareBtn.addEventListener('click', stopScreenShare);
+    startPlaybackBtn.addEventListener('click', startPlayback);
 
-    onValue(playbackRef, (snapshot) => {
-        const data = snapshot.val();
-        if (!data || isHost) return;
-
-        Object.values(data).forEach((commandData) => {
-            if (commandData.sender === username) return;
-            console.log('Получена команда воспроизведения:', commandData.command);
-        });
-    });
-
+    // Полноэкранный режим
     let isFullscreen = false;
     fullscreenBtn.addEventListener('click', () => {
         if (!isFullscreen) {
@@ -1090,6 +993,7 @@
         }
     });
 
+    // Переключение темы
     function setupThemeToggle(btn, altBtn) {
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'light') {
