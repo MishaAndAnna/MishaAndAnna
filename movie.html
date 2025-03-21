@@ -876,95 +876,69 @@
     }
 
     async function startPlayback() {
-        if (isHost) return;
+    if (isHost) return;
 
-        console.log('Клиент начинает просмотр');
-        peerConnection = new RTCPeerConnection(peerConnectionConfig);
-        peerConnection.ontrack = (event) => {
-            console.log('Получен поток:', event.streams[0]);
-            screenShareVideo.srcObject = event.streams[0];
-            startPlaybackBtn.style.display = 'none';
-        };
-
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                console.log('Отправлен ICE candidate:', event.candidate);
-                set(push(signalingRef), { type: 'candidate', candidate: event.candidate, sender: username });
-            }
-        };
-
-        peerConnection.oniceconnectionstatechange = () => {
-            console.log('ICE состояние:', peerConnection.iceConnectionState);
-            if (peerConnection.iceConnectionState === 'connected') {
-                console.log('Соединение успешно установлено');
-            }
-        };
-
-        onValue(ref(db, 'signaling/offer'), async (snapshot) => {
-            const offerData = snapshot.val();
-            if (offerData && offerData.sender !== username) {
-                console.log('Получен offer:', offerData.sdp);
-                try {
-                    await peerConnection.setRemoteDescription(new RTCSessionDescription(offerData.sdp));
-                    const answer = await peerConnection.createAnswer();
-                    await peerConnection.setLocalDescription(answer);
-                    console.log('Answer отправлен:', answer);
-                    await set(ref(db, 'signaling/answer'), { type: 'answer', sdp: answer, sender: username });
-                } catch (error) {
-                    console.error('Ошибка установки offer:', error);
-                }
-            } else {
-                console.log('Offer не найден или от текущего пользователя');
-            }
-        }, { onlyOnce: true });
-
-        onValue(ref(db, 'signaling'), (snapshot) => {
-            const data = snapshot.val();
-            if (!data) return;
-            Object.values(data).forEach(async (signal) => {
-                if (signal.sender === username || signal.type !== 'candidate' || !signal.candidate || !signal.candidate.candidate) return; // Исправление
-                if (peerConnection && peerConnection.remoteDescription) {
-                    try {
-                        await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
-                        console.log('ICE candidate добавлен:', signal.candidate);
-                    } catch (error) {
-                        console.error('Ошибка добавления ICE candidate:', error);
-                    }
-                }
-            });
+    console.log('Клиент начинает просмотр');
+    peerConnection = new RTCPeerConnection(peerConnectionConfig);
+    peerConnection.ontrack = (event) => {
+        console.log('Получен поток:', event.streams[0]);
+        screenShareVideo.srcObject = event.streams[0];
+        screenShareVideo.play().then(() => {
+            console.log('Видео воспроизводится');
+        }).catch(error => {
+            console.error('Ошибка воспроизведения видео:', error);
         });
-    }
+        startPlaybackBtn.style.display = 'none';
+    };
 
-    if (isHost) {
-        onValue(ref(db, 'signaling/answer'), async (snapshot) => {
-            const answerData = snapshot.val();
-            if (answerData && answerData.sender !== username && peerConnection) {
-                console.log('Получен answer:', answerData.sdp);
+    peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+            console.log('Отправлен ICE candidate:', event.candidate);
+            set(push(signalingRef), { type: 'candidate', candidate: event.candidate, sender: username });
+        }
+    };
+
+    peerConnection.oniceconnectionstatechange = () => {
+        console.log('ICE состояние:', peerConnection.iceConnectionState);
+        if (peerConnection.iceConnectionState === 'connected') {
+            console.log('Соединение успешно установлено');
+        }
+    };
+
+    onValue(ref(db, 'signaling/offer'), async (snapshot) => {
+        const offerData = snapshot.val();
+        if (offerData && offerData.sender !== username) {
+            console.log('Получен offer:', offerData.sdp);
+            try {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(offerData.sdp));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                console.log('Answer отправлен:', answer);
+                await set(ref(db, 'signaling/answer'), { type: 'answer', sdp: answer, sender: username });
+            } catch (error) {
+                console.error('Ошибка установки offer:', error);
+            }
+        } else {
+            console.log('Offer не найден или от текущего пользователя');
+        }
+    }, { onlyOnce: true });
+
+    onValue(ref(db, 'signaling'), (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+        Object.values(data).forEach(async (signal) => {
+            if (signal.sender === username || signal.type !== 'candidate' || !signal.candidate || !signal.candidate.candidate) return;
+            if (peerConnection && peerConnection.remoteDescription) {
                 try {
-                    await peerConnection.setRemoteDescription(new RTCSessionDescription(answerData.sdp));
-                    console.log('Answer установлен');
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
+                    console.log('ICE candidate добавлен:', signal.candidate);
                 } catch (error) {
-                    console.error('Ошибка установки answer:', error);
+                    console.error('Ошибка добавления ICE candidate:', error);
                 }
             }
-        }, { onlyOnce: true });
-
-        onValue(ref(db, 'signaling'), (snapshot) => {
-            const data = snapshot.val();
-            if (!data) return;
-            Object.values(data).forEach(async (signal) => {
-                if (signal.sender === username || signal.type !== 'candidate' || !signal.candidate || !signal.candidate.candidate) return; // Исправление
-                if (peerConnection && peerConnection.remoteDescription) {
-                    try {
-                        await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
-                        console.log('ICE candidate добавлен:', signal.candidate);
-                    } catch (error) {
-                        console.error('Ошибка добавления ICE candidate:', error);
-                    }
-                }
-            });
         });
-    }
+    });
+}
 
     startShareBtn.addEventListener('click', startScreenShare);
     startPlaybackBtn.addEventListener('click', startPlayback);
