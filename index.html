@@ -1029,6 +1029,32 @@ body.dark-mode .modal-content {
     .wish-item button:hover {
         background-color: var(--accent-color);
     }
+      
+      .diary-btn {
+            background: linear-gradient(135deg, #ff6b95, #8e6bff);
+            color: white;
+            padding: 1.2rem 2.5rem;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.2rem;
+            box-shadow: 0 8px 20px rgba(255, 107, 149, 0.25);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .diary-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(255, 107, 149, 0.35);
+        }
+
+        .diary-btn i {
+            margin-right: 10px;
+            font-size: 1.4rem;
+        }
 
     /* Переключатель темы */
     #themeToggle {
@@ -1274,7 +1300,9 @@ body.dark-mode .modal-content {
 </div>
 
 <button onclick="window.location.href='movie.html';">Перейти на сайт с фильмами</button>
-<button onclick="window.location.href='diary.html';">Наш с тобой дневник!</button>
+<a href="diary.html" class="diary-btn">
+        <i class="fas fa-book-open"></i> Открыть Дневник Любви
+    </a>
 
 
     </div>
