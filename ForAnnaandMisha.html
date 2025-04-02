@@ -620,6 +620,80 @@
         
         .royal-crest.visible { opacity: 1; transform: translateX(-50%) scale(1); }
         
+        /* Романтическая финальная фраза */
+        .romantic-endnote {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Cinzel', serif;
+            font-size: 32px;
+            font-weight: 600;
+            color: #d4af37;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.7);
+            opacity: 0;
+            transition: opacity 2s ease;
+            z-index: 25;
+            white-space: nowrap;
+        }
+        
+        .romantic-endnote.visible { opacity: 1; }
+        
+        .romantic-endnote span {
+            display: inline-block;
+            opacity: 0;
+            animation: letterFade 0.5s ease forwards;
+        }
+        
+        @keyframes letterFade {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Декоративные завитки */
+        .endnote-ornament {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            opacity: 0;
+            transition: all 1.5s ease;
+        }
+        
+        .endnote-ornament.left { left: -80px; top: 50%; transform: translateY(-50%) scale(0); }
+        .endnote-ornament.right { right: -80px; top: 50%; transform: translateY(-50%) scale(0); }
+        
+        .endnote-ornament.visible { opacity: 0.6; transform: translateY(-50%) scale(1); }
+        
+        .endnote-ornament svg {
+            width: 100%;
+            height: 100%;
+            stroke: rgba(192, 156, 77, 0.5);
+            stroke-width: 1;
+            fill: none;
+        }
+        
+        /* Золотая линия */
+        .endnote-line {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 1px;
+            background: #d4af37;
+            opacity: 0;
+            transition: width 2s ease, opacity 0.5s ease;
+        }
+        
+        .endnote-line.visible { width: 80%; opacity: 0.7; }
+        
+        /* Обновляем стили для частиц */
+        .light-particle.endnote-particle {
+            width: 6px;
+            height: 6px;
+            animation: glow 2s ease-in-out infinite;
+        }
+        
         /* Медиа-запросы */
         @media (max-width: 768px) {
             #romantic-text p { font-size: 20px; }
@@ -629,6 +703,7 @@
             .medallion.right { right: 10%; }
             #heraldic svg { width: 200px; height: 200px; }
             .popup p { font-size: 18px; }
+            .romantic-endnote { font-size: 24px; }
         }
         
         @media (max-width: 480px) {
@@ -640,6 +715,10 @@
             .final-message { font-size: 30px; }
             .popup { padding: 20px; }
             .popup p { font-size: 16px; }
+            .romantic-endnote { font-size: 18px; }
+            .endnote-ornament { width: 40px; height: 40px; }
+            .endnote-ornament.left { left: -50px; }
+            .endnote-ornament.right { right: -50px; }
         }
     </style>
 </head>
@@ -744,6 +823,30 @@
         <!-- Финальное сообщение -->
         <div class="final-message">My dear beloved, shall we begin anew?</div>
         
+        <!-- Романтическая финальная фраза -->
+        <div class="romantic-endnote">
+            <span>O</span><span>u</span><span>r</span><span> </span>
+            <span>l</span><span>o</span><span>v</span><span>e</span><span> </span>
+            <span>i</span><span>s</span><span> </span>
+            <span>a</span><span> </span>
+            <span>f</span><span>l</span><span>a</span><span>m</span><span>e</span><span> </span>
+            <span>t</span><span>h</span><span>a</span><span>t</span><span> </span>
+            <span>t</span><span>i</span><span>m</span><span>e</span><span> </span>
+            <span>c</span><span>a</span><span>n</span><span>n</span><span>o</span><span>t</span><span> </span>
+            <span>e</span><span>x</span><span>t</span><span>i</span><span>n</span><span>g</span><span>u</span><span>i</span><span>s</span><span>h</span>
+            <div class="endnote-ornament left">
+                <svg viewBox="0 0 100 100">
+                    <path d="M 50 50 Q 30 20 10 50 Q 30 80 50 50" />
+                </svg>
+            </div>
+            <div class="endnote-ornament right">
+                <svg viewBox="0 0 100 100">
+                    <path d="M 50 50 Q 70 20 90 50 Q 70 80 50 50" />
+                </svg>
+            </div>
+            <div class="endnote-line"></div>
+        </div>
+        
         <!-- Кнопка повтора -->
         <button id="replay-button">Once More</button>
     </div>
@@ -809,6 +912,17 @@
                 document.querySelector('.final-message').classList.add('visible');
                 setTimeout(function() {
                     document.getElementById('replay-button').classList.add('visible');
+                    const endnote = document.querySelector('.romantic-endnote');
+                    endnote.classList.add('visible');
+                    endnote.querySelectorAll('span').forEach((span, index) => {
+                        span.style.animationDelay = `${index * 0.05}s`;
+                    });
+                    setTimeout(() => {
+                        document.querySelector('.endnote-ornament.left').classList.add('visible');
+                        document.querySelector('.endnote-ornament.right').classList.add('visible');
+                        document.querySelector('.endnote-line').classList.add('visible');
+                        createEndnoteParticles();
+                    }, 1000);
                 }, 2000);
             }, 29000);
             
@@ -832,6 +946,10 @@
             document.querySelectorAll('.star, .tea-leaf, .light-particle, .fog').forEach(el => el.remove());
             document.querySelector('.fog').style.opacity = '0';
             document.querySelectorAll('.popup').forEach(popup => popup.remove());
+            document.querySelector('.romantic-endnote').classList.remove('visible');
+            document.querySelector('.endnote-ornament.left').classList.remove('visible');
+            document.querySelector('.endnote-ornament.right').classList.remove('visible');
+            document.querySelector('.endnote-line').classList.remove('visible');
         }
         
         function setupClock() {
@@ -841,25 +959,21 @@
 
             function updateClock() {
                 const now = new Date();
-                const hours = now.getHours() % 12; // Convert to 12-hour format
+                const hours = now.getHours() % 12;
                 const minutes = now.getMinutes();
                 const seconds = now.getSeconds();
 
-                // Calculate rotation angles
-                const hourDeg = (hours * 30) + (minutes / 2); // 360°/12 = 30° per hour + 0.5° per minute
-                const minuteDeg = minutes * 6; // 360°/60 = 6° per minute
-                const secondDeg = seconds * 6; // 360°/60 = 6° per second
+                const hourDeg = (hours * 30) + (minutes / 2);
+                const minuteDeg = minutes * 6;
+                const secondDeg = seconds * 6;
 
-                // Apply rotations
                 hourHand.style.transform = `rotate(${hourDeg}deg)`;
                 minuteHand.style.transform = `rotate(${minuteDeg}deg)`;
                 secondHand.style.transform = `rotate(${secondDeg}deg)`;
 
-                // Request next frame
                 requestAnimationFrame(updateClock);
             }
 
-            // Start the clock
             updateClock();
         }
         
@@ -915,6 +1029,25 @@
             }
         }
         
+        function createEndnoteParticles() {
+            const container = document.getElementById('container');
+            const particleCount = 10;
+            const endnote = document.querySelector('.romantic-endnote');
+            const rect = endnote.getBoundingClientRect();
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'light-particle endnote-particle';
+                particle.style.left = `${rect.left + Math.random() * rect.width}px`;
+                particle.style.top = `${rect.top - 10 + Math.random() * (rect.height + 20)}px`;
+                particle.style.setProperty('--glow-min', '0.2');
+                particle.style.setProperty('--glow-max', '0.5');
+                particle.style.setProperty('--glow-scale-min', '0.4');
+                particle.style.setProperty('--glow-scale-max', '0.8');
+                container.appendChild(particle);
+                setTimeout(() => particle.style.opacity = 1, i * 100);
+            }
+        }
+        
         function setupMedallionPopups() {
             const mikhailMedallion = document.querySelector('.medallion.left');
             const annyutaMedallion = document.querySelector('.medallion.right');
@@ -946,19 +1079,6 @@
             });
         }
         
-        // Инициализация анимации
-        document.addEventListener('DOMContentLoaded', function() {
-            const fog = document.createElement('div');
-            fog.className = 'fog';
-            document.getElementById('container').appendChild(fog);
-            createClockNumbers();
-            startAnimation();
-            document.getElementById('replay-button').addEventListener('click', () => {
-                resetAnimation();
-                setTimeout(startAnimation, 500);
-            });
-        });
-        
         function createClockNumbers() {
             const numbers = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
             const clockNumbers = document.querySelector('.clock-numbers');
@@ -974,6 +1094,19 @@
                 clockNumbers.appendChild(numberElement);
             });
         }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const fog = document.createElement('div');
+            fog.className = 'fog';
+            document.getElementById('container').appendChild(fog);
+            createClockNumbers();
+            startAnimation();
+            document.getElementById('replay-button').addEventListener('click', () => {
+                resetAnimation();
+                setTimeout(startAnimation, 500);
+            });
+        });
     </script>
 </body>
 </html>
+
