@@ -40,21 +40,10 @@
         }
         
         /* Фазы анимации */
-        .phase-initial #container {
-            background: radial-gradient(ellipse at center, #000000 0%, #080010 100%);
-        }
-        
-        .phase-middle #container {
-            background: radial-gradient(ellipse at center, #0a0a2c 0%, #05051a 100%);
-        }
-        
-        .phase-romantic #container {
-            background: radial-gradient(ellipse at center, #1a0a34 0%, #0a051a 100%);
-        }
-        
-        .phase-final #container {
-            background: radial-gradient(ellipse at center, #240a2b 0%, #0a051a 100%);
-        }
+        .phase-initial #container { background: radial-gradient(ellipse at center, #000000 0%, #080010 100%); }
+        .phase-middle #container { background: radial-gradient(ellipse at center, #0a0a2c 0%, #05051a 100%); }
+        .phase-romantic #container { background: radial-gradient(ellipse at center, #1a0a34 0%, #0a051a 100%); }
+        .phase-final #container { background: radial-gradient(ellipse at center, #240a2b 0%, #0a051a 100%); }
         
         /* Звезды на фоне */
         .star {
@@ -98,9 +87,7 @@
             border: 12px solid #c09c4d;
             border-radius: 50%;
             z-index: 2;
-            box-shadow: 
-                0 0 20px rgba(192, 156, 77, 0.6),
-                inset 0 0 30px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 20px rgba(192, 156, 77, 0.6), inset 0 0 30px rgba(0, 0, 0, 0.7);
         }
         
         .clock-face::before {
@@ -148,29 +135,9 @@
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         }
         
-        .hour-hand {
-            width: 6px;
-            height: 60px;
-            margin-left: -3px;
-            border-radius: 4px;
-            transform: rotate(90deg);
-        }
-        
-        .minute-hand {
-            width: 4px;
-            height: 90px;
-            margin-left: -2px;
-            border-radius: 4px;
-            transform: rotate(45deg);
-        }
-        
-        .second-hand {
-            width: 2px;
-            height: 100px;
-            margin-left: -1px;
-            background: #d4af37;
-            transform: rotate(180deg);
-        }
+        .hour-hand { width: 6px; height: 60px; margin-left: -3px; border-radius: 4px; transform: rotate(90deg); }
+        .minute-hand { width: 4px; height: 90px; margin-left: -2px; border-radius: 4px; transform: rotate(45deg); }
+        .second-hand { width: 2px; height: 100px; margin-left: -1px; background: #d4af37; transform: rotate(180deg); }
         
         .clock-center {
             position: absolute;
@@ -215,10 +182,7 @@
             filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
         }
         
-        #heraldic.visible {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
+        #heraldic.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         
         #heraldic svg {
             width: 300px;
@@ -240,10 +204,7 @@
             max-width: 600px;
         }
         
-        #romantic-text.visible {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
+        #romantic-text.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
         
         #romantic-text p {
             font-family: 'EB Garamond', serif;
@@ -273,19 +234,8 @@
             opacity: 0.5;
         }
         
-        #romantic-text .quote::before {
-            top: 0;
-            left: 0;
-            border-top: 2px solid #D4AF37;
-            border-left: 2px solid #D4AF37;
-        }
-        
-        #romantic-text .quote::after {
-            bottom: 0;
-            right: 0;
-            border-bottom: 2px solid #D4AF37;
-            border-right: 2px solid #D4AF37;
-        }
+        #romantic-text .quote::before { top: 0; left: 0; border-top: 2px solid #D4AF37; border-left: 2px solid #D4AF37; }
+        #romantic-text .quote::after { bottom: 0; right: 0; border-bottom: 2px solid #D4AF37; border-right: 2px solid #D4AF37; }
         
         /* Эффект лондонского тумана */
         .fog {
@@ -345,14 +295,8 @@
             z-index: 100;
         }
         
-        #replay-button:hover {
-            background: rgba(212, 175, 55, 0.2);
-            transform: scale(1.05);
-        }
-        
-        #replay-button.visible {
-            opacity: 1;
-        }
+        #replay-button:hover { background: rgba(212, 175, 55, 0.2); transform: scale(1.05); }
+        #replay-button.visible { opacity: 1; }
         
         /* Декоративные углы */
         .decorative-corner {
@@ -413,6 +357,7 @@
             z-index: 7;
             overflow: hidden;
             box-shadow: 0 0 30px rgba(192, 156, 77, 0.2);
+            cursor: pointer;
         }
         
         .medallion.left { top: 50%; left: 15%; transform: translateY(-50%) scale(0); }
@@ -420,6 +365,8 @@
         
         .medallion.visible.left { opacity: 1; transform: translateY(-50%) scale(1); }
         .medallion.visible.right { opacity: 1; transform: translateY(-50%) scale(1); }
+        
+        .medallion:hover { transform: translateY(-50%) scale(1.05); box-shadow: 0 0 40px rgba(192, 156, 77, 0.4); }
         
         .medallion::before {
             content: '';
@@ -459,6 +406,50 @@
             text-shadow: 0 0 10px rgba(192, 156, 77, 0.5);
         }
         
+        /* Стили для всплывающего окна */
+        .popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 80%;
+            max-width: 500px;
+            padding: 30px;
+            background: rgba(10, 5, 26, 0.9);
+            border: 2px solid rgba(192, 156, 77, 0.5);
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(192, 156, 77, 0.3);
+            z-index: 200;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+        }
+        
+        .popup.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        
+        .popup p {
+            font-family: 'EB Garamond', serif;
+            font-size: 20px;
+            color: #fafafa;
+            line-height: 1.6;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+        
+        .popup button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            color: #d4af37;
+            font-family: 'EB Garamond', serif;
+            font-size: 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .popup button:hover { background: rgba(212, 175, 55, 0.2); transform: scale(1.05); }
+        
         /* Соединяющая линия */
         .connecting-line {
             position: absolute;
@@ -489,11 +480,7 @@
             z-index: 7;
         }
         
-        .heart-center.visible {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-            animation: pulse 2s infinite;
-        }
+        .heart-center.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); animation: pulse 2s infinite; }
         
         .heart-center svg {
             width: 100%;
@@ -514,10 +501,7 @@
             z-index: 7;
         }
         
-        .eternal-flame.visible {
-            opacity: 1;
-            transform: translateX(-50%) scale(1);
-        }
+        .eternal-flame.visible { opacity: 1; transform: translateX(-50%) scale(1); }
         
         .flame {
             position: absolute;
@@ -602,10 +586,7 @@
             -webkit-text-stroke: 1px rgba(192, 156, 77, 0.5);
         }
         
-        .final-message.visible {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
+        .final-message.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         
         /* Аура любви */
         .love-aura {
@@ -637,10 +618,7 @@
             z-index: 8;
         }
         
-        .royal-crest.visible {
-            opacity: 1;
-            transform: translateX(-50%) scale(1);
-        }
+        .royal-crest.visible { opacity: 1; transform: translateX(-50%) scale(1); }
         
         /* Медиа-запросы */
         @media (max-width: 768px) {
@@ -650,6 +628,7 @@
             .medallion.left { left: 10%; }
             .medallion.right { right: 10%; }
             #heraldic svg { width: 200px; height: 200px; }
+            .popup p { font-size: 18px; }
         }
         
         @media (max-width: 480px) {
@@ -659,6 +638,8 @@
             .medallion-content { font-size: 20px; }
             #heraldic svg { width: 150px; height: 150px; }
             .final-message { font-size: 30px; }
+            .popup { padding: 20px; }
+            .popup p { font-size: 16px; }
         }
     </style>
 </head>
@@ -754,7 +735,6 @@
             <div class="flame"></div>
         </div>
         
-        
         <!-- Аура любви -->
         <div class="love-aura"></div>
         
@@ -777,6 +757,7 @@
             });
             createStars();
             createTeaLeaves();
+            setupMedallionPopups();
         });
         
         function startAnimation() {
@@ -834,115 +815,154 @@
             setTimeout(createLightParticles, 19000);
         }
         
-function resetAnimation() {
-    document.body.className = 'phase-initial';
-    
-    // Сбрасываем видимость всех элементов
-    document.querySelectorAll('.decorative-corner, .golden-frame, .medallion, .royal-crest').forEach(el => {
-        el.classList.remove('visible');
-    });
-    
-    document.getElementById('heraldic').classList.remove('visible');
-    document.getElementById('romantic-text').classList.remove('visible');
-    document.querySelector('.connecting-line').classList.remove('visible');
-    document.querySelector('.heart-center').classList.remove('visible');
-    document.querySelector('.eternal-flame').classList.remove('visible');
-    document.querySelector('.final-message').classList.remove('visible');
-    document.querySelector('.love-aura').classList.remove('active');
-    document.getElementById('replay-button').classList.remove('visible');
-    
-    // Восстанавливаем начальное состояние часов
-    const clockContainer = document.getElementById('clock-container');
-    clockContainer.style.opacity = '1';
-    clockContainer.style.transform = 'scale(1)';
-    
-    // Удаляем временные элементы
-    document.querySelectorAll('.star, .tea-leaf, .light-particle, .fog').forEach(el => el.remove());
-    
-    // Сбрасываем туман
-    document.querySelector('.fog').style.opacity = '0';
-}
-
-function animateClockHands() {
-    const hourHand = document.querySelector('.hour-hand');
-    const minuteHand = document.querySelector('.minute-hand');
-    const secondHand = document.querySelector('.second-hand');
-    
-    // Анимация стрелок в викторианском стиле
-    hourHand.style.transform = 'rotate(90deg)';
-    minuteHand.style.transform = 'rotate(180deg)';
-    
-    let seconds = 0;
-    const clockAnimation = setInterval(() => {
-        seconds += 1;
-        secondHand.style.transform = `rotate(${180 + (seconds * 6)}deg)`;
-        
-        if (seconds >= 30) {
-            clearInterval(clockAnimation);
-            hourHand.style.transform = 'rotate(120deg)';
-            minuteHand.style.transform = 'rotate(270deg)';
+        function resetAnimation() {
+            document.body.className = 'phase-initial';
+            document.querySelectorAll('.decorative-corner, .golden-frame, .medallion, .royal-crest').forEach(el => el.classList.remove('visible'));
+            document.getElementById('heraldic').classList.remove('visible');
+            document.getElementById('romantic-text').classList.remove('visible');
+            document.querySelector('.connecting-line').classList.remove('visible');
+            document.querySelector('.heart-center').classList.remove('visible');
+            document.querySelector('.eternal-flame').classList.remove('visible');
+            document.querySelector('.final-message').classList.remove('visible');
+            document.querySelector('.love-aura').classList.remove('active');
+            document.getElementById('replay-button').classList.remove('visible');
+            const clockContainer = document.getElementById('clock-container');
+            clockContainer.style.opacity = '1';
+            clockContainer.style.transform = 'scale(1)';
+            document.querySelectorAll('.star, .tea-leaf, .light-particle, .fog').forEach(el => el.remove());
+            document.querySelector('.fog').style.opacity = '0';
+            document.querySelectorAll('.popup').forEach(popup => popup.remove());
         }
-    }, 1000);
-}
-
-function createTeaLeaves() {
-    const container = document.getElementById('container');
-    const leafCount = Math.min(window.innerWidth / 20, 30);
-    
-    for (let i = 0; i < leafCount; i++) {
-        setTimeout(() => {
-            const leaf = document.createElement('div');
-            leaf.className = 'tea-leaf';
-            leaf.style.left = `${Math.random() * 100}%`;
-            leaf.style.setProperty('--petal-sway', `${Math.random() * 200 - 100}px`);
-            leaf.style.animation = `floatPetal ${Math.random() * 8 + 7}s ease-in-out`;
-            container.appendChild(leaf);
+        
+        function animateClockHands() {
+            const hourHand = document.querySelector('.hour-hand');
+            const minuteHand = document.querySelector('.minute-hand');
+            const secondHand = document.querySelector('.second-hand');
+            hourHand.style.transform = 'rotate(90deg)';
+            minuteHand.style.transform = 'rotate(180deg)';
+            let seconds = 0;
+            const clockAnimation = setInterval(() => {
+                seconds += 1;
+                secondHand.style.transform = `rotate(${180 + (seconds * 6)}deg)`;
+                if (seconds >= 30) {
+                    clearInterval(clockAnimation);
+                    hourHand.style.transform = 'rotate(120deg)';
+                    minuteHand.style.transform = 'rotate(270deg)';
+                }
+            }, 1000);
+        }
+        
+        function createStars() {
+            const container = document.getElementById('container');
+            const starCount = Math.min(window.innerWidth / 10, 100);
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.setProperty('--twinkle-duration', `${Math.random() * 4 + 2}s`);
+                star.style.setProperty('--twinkle-delay', `${Math.random() * 2}s`);
+                container.appendChild(star);
+            }
+        }
+        
+        function createTeaLeaves() {
+            const container = document.getElementById('container');
+            const leafCount = Math.min(window.innerWidth / 20, 30);
+            for (let i = 0; i < leafCount; i++) {
+                setTimeout(() => {
+                    const leaf = document.createElement('div');
+                    leaf.className = 'tea-leaf';
+                    leaf.style.left = `${Math.random() * 100}%`;
+                    leaf.style.setProperty('--petal-sway', `${Math.random() * 200 - 100}px`);
+                    leaf.style.animation = `floatPetal ${Math.random() * 8 + 7}s ease-in-out`;
+                    container.appendChild(leaf);
+                    setTimeout(() => {
+                        if (leaf.parentNode) leaf.parentNode.removeChild(leaf);
+                    }, 15000);
+                }, i * 300);
+            }
+        }
+        
+        function createLightParticles() {
+            const container = document.getElementById('container');
+            const particleCount = 20;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'light-particle';
+                particle.style.width = `${Math.random() * 10 + 5}px`;
+                particle.style.height = particle.style.width;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.setProperty('--glow-min', '0.2');
+                particle.style.setProperty('--glow-max', '0.6');
+                particle.style.setProperty('--glow-scale-min', '0.5');
+                particle.style.setProperty('--glow-scale-max', '1');
+                particle.style.animation = `glow ${Math.random() * 3 + 2}s ease-in-out infinite`;
+                container.appendChild(particle);
+                setTimeout(() => particle.style.opacity = 1, i * 200);
+            }
+        }
+        
+        function setupMedallionPopups() {
+            const mikhailMedallion = document.querySelector('.medallion.left');
+            const annyutaMedallion = document.querySelector('.medallion.right');
             
-            setTimeout(() => {
-                if (leaf.parentNode) leaf.parentNode.removeChild(leaf);
-            }, 15000);
-        }, i * 300);
-    }
-}
-
-// Инициализация анимации
-document.addEventListener('DOMContentLoaded', function() {
-    // Создаем элементы тумана
-    const fog = document.createElement('div');
-    fog.className = 'fog';
-    document.getElementById('container').appendChild(fog);
-    
-    // Инициализируем часы
-    createClockNumbers();
-    
-    // Запускаем основную анимацию
-    startAnimation();
-    
-    // Обработчик кнопки повтора
-    document.getElementById('replay-button').addEventListener('click', () => {
-        resetAnimation();
-        setTimeout(startAnimation, 500);
-    });
-});
-
-function createClockNumbers() {
-    const numbers = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
-    const clockNumbers = document.querySelector('.clock-numbers');
-    
-    numbers.forEach((num, index) => {
-        const angle = (index * 30) * (Math.PI / 180);
-        const radius = 90;
-        const numberElement = document.createElement('div');
-        numberElement.className = 'clock-number';
-        numberElement.textContent = num;
+            const mikhailDescription = "You pay for both of us, caring, attentive to small details, you listen, take interest in my hobbies and me in general, willing to compromise, ready to drag medicine across half of Seoul at night because I have a headache, you don’t dismiss my 'almost-rape' experience, and so much more.";
+            const annyutaDescription = "Annyuta is a person of contrasts, blending independence with deep emotions. She values freedom and personal space, often hiding her feelings behind an outward reserve. Her thoughts can remain a mystery, but beneath this enigma lies a storm of emotions she rarely lets others see. She knows how to be sincere, but expresses it in her own way—through brief words, glances, and actions. It’s important to her that those around her don’t restrict her, but understand her need for silence and solitude. At times she may seem cold, but it’s just a protective shell. Deep down, she remembers those who stood by her, who understood and accepted her as she is.";
+            
+            mikhailMedallion.addEventListener('click', () => showPopup(mikhailDescription));
+            annyutaMedallion.addEventListener('click', () => showPopup(annyutaDescription));
+        }
         
-        numberElement.style.left = `${50 + Math.cos(angle) * radius}%`;
-        numberElement.style.top = `${50 + Math.sin(angle) * radius}%`;
-        numberElement.style.transform = 'translate(-50%, -50%)';
+        function showPopup(description) {
+            const existingPopup = document.querySelector('.popup');
+            if (existingPopup) existingPopup.remove();
+            
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.innerHTML = `
+                <p>${description}</p>
+                <button>Close</button>
+            `;
+            document.getElementById('container').appendChild(popup);
+            
+            setTimeout(() => popup.classList.add('visible'), 10);
+            
+            popup.querySelector('button').addEventListener('click', () => {
+                popup.classList.remove('visible');
+                setTimeout(() => popup.remove(), 500);
+            });
+        }
         
-        clockNumbers.appendChild(numberElement);
-    });
-}
-  </script>
+        // Инициализация анимации
+        document.addEventListener('DOMContentLoaded', function() {
+            const fog = document.createElement('div');
+            fog.className = 'fog';
+            document.getElementById('container').appendChild(fog);
+            createClockNumbers();
+            startAnimation();
+            document.getElementById('replay-button').addEventListener('click', () => {
+                resetAnimation();
+                setTimeout(startAnimation, 500);
+            });
+        });
+        
+        function createClockNumbers() {
+            const numbers = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+            const clockNumbers = document.querySelector('.clock-numbers');
+            numbers.forEach((num, index) => {
+                const angle = (index * 30) * (Math.PI / 180);
+                const radius = 90;
+                const numberElement = document.createElement('div');
+                numberElement.className = 'clock-number';
+                numberElement.textContent = num;
+                numberElement.style.left = `${50 + Math.cos(angle) * radius}%`;
+                numberElement.style.top = `${50 + Math.sin(angle) * radius}%`;
+                numberElement.style.transform = 'translate(-50%, -50%)';
+                clockNumbers.appendChild(numberElement);
+            });
+        }
+    </script>
 </body>
 </html>
