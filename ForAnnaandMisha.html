@@ -135,9 +135,9 @@
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         }
         
-        .hour-hand { width: 6px; height: 60px; margin-left: -3px; border-radius: 4px; transform: rotate(90deg); }
-        .minute-hand { width: 4px; height: 90px; margin-left: -2px; border-radius: 4px; transform: rotate(45deg); }
-        .second-hand { width: 2px; height: 100px; margin-left: -1px; background: #d4af37; transform: rotate(180deg); }
+        .hour-hand { width: 6px; height: 60px; margin-left: -3px; border-radius: 4px; }
+        .minute-hand { width: 4px; height: 90px; margin-left: -2px; border-radius: 4px; }
+        .second-hand { width: 2px; height: 100px; margin-left: -1px; background: #d4af37; }
         
         .clock-center {
             position: absolute;
@@ -757,6 +757,7 @@
             });
             createStars();
             createTeaLeaves();
+            setupClock();
             setupMedallionPopups();
         });
         
@@ -767,7 +768,6 @@
                 document.querySelectorAll('.decorative-corner').forEach(corner => corner.classList.add('visible'));
                 document.querySelector('.golden-frame').classList.add('visible');
                 document.querySelectorAll('.star').forEach(star => star.style.opacity = 1);
-                animateClockHands();
             }, 1000);
             
             setTimeout(function() {
@@ -834,22 +834,33 @@
             document.querySelectorAll('.popup').forEach(popup => popup.remove());
         }
         
-        function animateClockHands() {
+        function setupClock() {
             const hourHand = document.querySelector('.hour-hand');
             const minuteHand = document.querySelector('.minute-hand');
             const secondHand = document.querySelector('.second-hand');
-            hourHand.style.transform = 'rotate(90deg)';
-            minuteHand.style.transform = 'rotate(180deg)';
-            let seconds = 0;
-            const clockAnimation = setInterval(() => {
-                seconds += 1;
-                secondHand.style.transform = `rotate(${180 + (seconds * 6)}deg)`;
-                if (seconds >= 30) {
-                    clearInterval(clockAnimation);
-                    hourHand.style.transform = 'rotate(120deg)';
-                    minuteHand.style.transform = 'rotate(270deg)';
-                }
-            }, 1000);
+
+            function updateClock() {
+                const now = new Date();
+                const hours = now.getHours() % 12; // Convert to 12-hour format
+                const minutes = now.getMinutes();
+                const seconds = now.getSeconds();
+
+                // Calculate rotation angles
+                const hourDeg = (hours * 30) + (minutes / 2); // 360°/12 = 30° per hour + 0.5° per minute
+                const minuteDeg = minutes * 6; // 360°/60 = 6° per minute
+                const secondDeg = seconds * 6; // 360°/60 = 6° per second
+
+                // Apply rotations
+                hourHand.style.transform = `rotate(${hourDeg}deg)`;
+                minuteHand.style.transform = `rotate(${minuteDeg}deg)`;
+                secondHand.style.transform = `rotate(${secondDeg}deg)`;
+
+                // Request next frame
+                requestAnimationFrame(updateClock);
+            }
+
+            // Start the clock
+            updateClock();
         }
         
         function createStars() {
