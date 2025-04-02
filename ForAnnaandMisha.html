@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Миша и Анюта: Вечная любовь</title>
+    <style>
+        /* Основные стили и сброс */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Playfair Display', 'Times New Roman', serif;
+            background-color: #000;
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&display=swap');
+        
+        /* Основной контейнер */
+        #container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            overflow: hidden;
+            background: radial-gradient(ellipse at center, #000000 0%, #080010 100%);
+            transition: all 3s cubic-bezier(0.42, 0, 0.58, 1);
+        }
+        
+        /* Фазы анимации */
+        .phase-initial #container {
+            background: radial-gradient(ellipse at center, #000000 0%, #080010 100%);
+        }
+        
+        .phase-middle #container {
+            background: radial-gradient(ellipse at center, #000a2c 0%, #08001a 100%);
+        }
+        
+        .phase-romantic #container {
+            background: radial-gradient(ellipse at center, #1a0034 0%, #08001a 100%);
+        }
+        
+        .phase-final #container {
+            background: radial-gradient(ellipse at center, #24002b 0%, #08001a 100%);
+        }
+        
+        /* Звезды на фоне */
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.8);
+            animation: twinkle var(--twinkle-duration, 5s) ease-in-out infinite;
+            animation-delay: var(--twinkle-delay, 0s);
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.1; transform: scale(0.8); }
+            50% { opacity: 0.8; transform: scale(1.2); }
+        }
+        
+        /* Песочные часы */
+        #hourglass-container {
+            position: relative;
+            width: 260px;
+            height: 360px;
+            opacity: 1;
+            transition: all 2s cubic-bezier(0.6, -0.28, 0.735, 0.045);
+            transform: scale(1);
+            transform-origin: center center;
+            z-index: 10;
+            filter: drop-shadow(0 0 10px rgba(218, 165, 32, 0.4));
+        }
+        
+        .hourglass-outer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            z-index: 1;
+        }
+        
+        .hourglass-top, .hourglass-bottom {
+            position: absolute;
+            width: 180px;
+            height: 170px;
+            background: radial-gradient(circle at center, rgba(218, 165, 32, 0.15), rgba(0, 0, 0, 0.1));
+            border: 6px solid #c9a97c;
+            z-index: 2;
+            overflow: hidden;
+        }
+        
+        .hourglass-top {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 60% 60% 0 0 / 80% 80% 0 0;
+            border-bottom: none;
+            box-shadow: 0 -5px 20px rgba(218, 165, 32, 0.4), inset 0 10px 20px rgba(255, 215, 0, 0.2);
+        }
+        
+        .hourglass-bottom {
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 0 0 60% 60% / 0 0 80% 80%;
+            border-top: none;
+            box-shadow: 0 5px 20px rgba(218, 165, 32, 0.4), inset 0 -10px 20px rgba(255, 215, 0, 0.2);
+        }
+        
+        .hourglass-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            filter: blur(8px);
+            opacity: 0.4;
+            z-index: 1;
+            background: radial-gradient(circle, rgba(218, 165, 32, 0.3), transparent 70%);
+            animation: glowPulse 6s ease-in-out infinite;
+        }
+        
+        .hourglass-middle {
+            position: absolute;
+            top: 170px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(to bottom, rgba(201, 169, 124, 0.2), rgba(201, 169, 124, 0.5));
+            border-left: 6px solid #c9a97c;
+            border-right: 6px solid #c9a97c;
+            z-index: 2;
+            box-shadow: 0 0 15px rgba(218, 165, 32, 0.6);
+            border-radius: 10px;
+        }
+        
+        .hourglass-middle::before, .hourglass-middle::after {
+            content: '';
+            position: absolute;
+            left: -3px;
+            width: 60px;
+            height: 6px;
+            background: rgba(201, 169, 124, 0.7);
+            box-shadow: 0 0 5px rgba(218, 165, 32, 0.5);
+        }
+        
+        .hourglass-middle::before { top: -3px; }
+        .hourglass-middle::after { bottom: -3px; }
+        
+        .hourglass-sand-top {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, #e4cb9a, #d4b581, #c9a97c);
+            border-radius: 50% 50% 10px 10px;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 90%, 0 100%);
+            animation: emptySandTop 14s ease-out forwards;
+            z-index: 3;
+            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.3), 0 0 10px rgba(218, 165, 32, 0.5);
+        }
+        
+        .hourglass-sand-bottom {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 10px;
+            background: linear-gradient(135deg, #e4cb9a, #d4b581, #c9a97c);
+            border-radius: 10px 10px 50% 50%;
+            animation: fillSandBottom 14s ease-in forwards;
+            z-index: 3;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2), 0 0 10px rgba(218, 165, 32, 0.5);
+        }
+        
+        .sand-particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: radial-gradient(circle, #e4cb9a, #d4b581);
+            border-radius: 50%;
+            top: 170px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            z-index: 4;
+            box-shadow: 0 0 5px rgba(218, 165, 32, 0.7);
+        }
+        
+        .hourglass-ornament {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: none;
+            border: 2px solid rgba(218, 165, 32, 0.5);
+            border-radius: 50%;
+            z-index: 5;
+            opacity: 0.8;
+            animation: floatOrnament 4s ease-in-out infinite;
+        }
+        
+        .hourglass-ornament.top-left { top: 10px; left: 20px; }
+        .hourglass-ornament.top-right { top: 10px; right: 20px; }
+        .hourglass-ornament.bottom-left { bottom: 10px; left: 20px; }
+        .hourglass-ornament.bottom-right { bottom: 10px; right: 20px; }
+        
+        /* Геральдический щит */
+        #heraldic {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0;
+            transition: all 3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            z-index: 15;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
+        }
+        
+        #heraldic.visible {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        #heraldic svg {
+            width: 300px;
+            height: 300px;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
+        }
+        
+        /* Романтический текст */
+        #romantic-text {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%) translateY(50px);
+            opacity: 0;
+            transition: all 2.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            z-index: 15;
+            width: 90%;
+            max-width: 600px;
+        }
+        
+        #romantic-text.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        #romantic-text p {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-style: italic;
+            line-height: 1.5;
+            color: #fafafa;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            margin-bottom: 20px;
+        }
+        
+        #romantic-text .quote {
+            font-size: 20px;
+            color: #e0e0e0;
+            font-weight: 300;
+            position: relative;
+            padding: 15px 30px;
+            margin-top: 20px;
+        }
+        
+        #romantic-text .quote::before,
+        #romantic-text .quote::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            opacity: 0.5;
+        }
+        
+        #romantic-text .quote::before {
+            top: 0;
+            left: 0;
+            border-top: 2px solid #DAA520;
+            border-left: 2px solid #DAA520;
+        }
+        
+        #romantic-text .quote::after {
+            bottom: 0;
+            right: 0;
+            border-bottom: 2px solid #DAA520;
+            border-right: 2px solid #DAA520;
+        }
+        
+        /* Эффект дождя */
+        .rain {
+            position: absolute;
+            width: 2px;
+            background: linear-gradient(to bottom, transparent, rgba(174, 194, 224, 0.5), transparent);
+            opacity: 0;
+            top: -100px;
+            height: var(--rain-height, 30px);
+            filter: blur(0.5px);
+        }
+        
+        /* Цветочные лепестки */
+        .petal {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: radial-gradient(ellipse at center, #ff80ab 0%, #e91e63 100%);
+            border-radius: 15px 0;
+            opacity: 0;
+            transform: rotate(45deg) scale(0.7);
+            filter: blur(1px);
+            z-index: 5;
+        }
+        
+        /* Светящиеся частицы */
+        .light-particle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 70%);
+            opacity: 0;
+            transform: scale(0);
+            z-index: 6;
+        }
+        
+        /* Кнопка повторения анимации */
+        #replay-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-family: 'Cormorant Garamond', serif;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            z-index: 100;
+        }
+        
+        #replay-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        
+        #replay-button.visible {
+            opacity: 1;
+        }
+        
+        /* Декоративные углы */
+        .decorative-corner {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            opacity: 0;
+            transition: all 2s cubic-bezier(0, 0.55, 0.45, 1);
+            z-index: 5;
+        }
+        
+        .decorative-corner svg {
+            width: 100%;
+            height: 100%;
+            fill: none;
+            stroke: rgba(218, 165, 32, 0.4);
+            stroke-width: 1;
+        }
+        
+        .decorative-corner.top-left { top: 20px; left: 20px; transform: rotate(0deg) scale(0.8); }
+        .decorative-corner.top-right { top: 20px; right: 20px; transform: rotate(90deg) scale(0.8); }
+        .decorative-corner.bottom-left { bottom: 20px; left: 20px; transform: rotate(270deg) scale(0.8); }
+        .decorative-corner.bottom-right { bottom: 20px; right: 20px; transform: rotate(180deg) scale(0.8); }
+        
+        .decorative-corner.visible { opacity: 0.5; }
+        .decorative-corner.top-left.visible { transform: rotate(0deg) scale(1); }
+        .decorative-corner.top-right.visible { transform: rotate(90deg) scale(1); }
+        .decorative-corner.bottom-left.visible { transform: rotate(270deg) scale(1); }
+        .decorative-corner.bottom-right.visible { transform: rotate(180deg) scale(1); }
+        
+        /* Анимации */
+        @keyframes emptySandTop {
+            0% { height: 140px; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 90%, 0 100%); opacity: 1; }
+            20% { height: 120px; clip-path: polygon(5% 0, 95% 0, 95% 95%, 50% 85%, 5% 95%); }
+            50% { height: 80px; clip-path: polygon(15% 0, 85% 0, 85% 80%, 50% 70%, 15% 80%); }
+            80% { height: 40px; clip-path: polygon(30% 0, 70% 0, 70% 60%, 50% 50%, 30% 60%); }
+            100% { height: 0px; clip-path: polygon(40% 0, 60% 0, 60% 0%, 50% 0%, 40% 0%); opacity: 0; }
+        }
+        
+        @keyframes fillSandBottom {
+            0% { height: 10px; clip-path: polygon(40% 100%, 60% 100%, 60% 0, 50% 10%, 40% 0); opacity: 0.8; }
+            20% { height: 40px; clip-path: polygon(30% 100%, 70% 100%, 70% 0, 50% 10%, 30% 0); }
+            50% { height: 80px; clip-path: polygon(15% 100%, 85% 100%, 85% 0, 50% 10%, 15% 0); }
+            80% { height: 120px; clip-path: polygon(5% 100%, 95% 100%, 95% 0, 50% 10%, 5% 0); }
+            100% { height: 140px; clip-path: polygon(0 100%, 100% 100%, 100% 0, 50% 10%, 0 0); opacity: 1; }
+        }
+        
+        @keyframes fallParticle {
+            0% { top: 170px; opacity: 0.9; transform: translateX(-50%) rotate(0deg) scale(1); }
+            25% { transform: translateX(calc(-50% + var(--particle-sway, 5px))) rotate(60deg) scale(0.9); }
+            50% { transform: translateX(calc(-50% - var(--particle-sway, 3px))) rotate(120deg) scale(0.8); }
+            75% { transform: translateX(calc(-50% + var(--particle-sway, 2px))) rotate(180deg) scale(0.7); }
+            100% { top: 280px; opacity: 0; transform: translateX(-50%) rotate(360deg) scale(0.5); }
+        }
+        
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+        }
+        
+        @keyframes floatOrnament {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0); }
+        }
+        
+        @keyframes rainFall {
+            0% { transform: translateY(-100vh) translateX(0); opacity: 0; }
+            10% { opacity: var(--rain-opacity, 0.7); }
+            90% { opacity: var(--rain-opacity, 0.7); }
+            100% { transform: translateY(105vh) translateX(var(--rain-sway, 0)); opacity: 0; }
+        }
+        
+        @keyframes floatPetal {
+            0% { transform: translateY(-10vh) translateX(0) rotate(45deg) scale(0.7); opacity: 0; }
+            10% { opacity: 0.9; }
+            100% { transform: translateY(110vh) translateX(var(--petal-sway, 100px)) rotate(var(--petal-rotate, 360deg)) scale(var(--petal-scale, 0.5)); opacity: 0; }
+        }
+        
+        @keyframes glow {
+            0%, 100% { opacity: var(--glow-min, 0.3); transform: scale(var(--glow-scale-min, 0.8)); }
+            50% { opacity: var(--glow-max, 0.7); transform: scale(var(--glow-scale-max, 1.2)); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        /* Медальоны */
+        .medallion {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: rgba(128, 0, 32, 0.2);
+            border: 2px solid rgba(218, 165, 32, 0.3);
+            opacity: 0;
+            transition: all 2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 7;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(218, 165, 32, 0.2);
+        }
+        
+        .medallion.left { top: 50%; left: 15%; transform: translateY(-50%) scale(0); }
+        .medallion.right { top: 50%; right: 15%; transform: translateY(-50%) scale(0); }
+        
+        .medallion.visible.left { opacity: 1; transform: translateY(-50%) scale(1); }
+        .medallion.visible.right { opacity: 1; transform: translateY(-50%) scale(1); }
+        
+        .medallion::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(218, 165, 32, 0.2) 0%, transparent 70%);
+            animation: pulse 8s infinite;
+        }
+        
+        .medallion::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: calc(100% - 10px);
+            height: calc(100% - 10px);
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .medallion-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 30px;
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0 0 10px rgba(218, 165, 32, 0.5);
+        }
+        
+        /* Соединяющая линия */
+        .connecting-line {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 2px;
+            background: linear-gradient(to right, transparent, rgba(218, 165, 32, 0.6), transparent);
+            opacity: 0;
+            transition: all 3s ease;
+            z-index: 6;
+        }
+        
+        .connecting-line.visible { width: 30%; opacity: 1; }
+        
+        /* Сердце */
+        .heart-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 40px;
+            height: 40px;
+            opacity: 0;
+            transition: all 2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition-delay: 1s;
+            z-index: 7;
+        }
+        
+        .heart-center.visible {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            animation: pulse 2s infinite;
+        }
+        
+        .heart-center svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 5px rgba(218, 165, 32, 0.5));
+        }
+        
+        /* Вечное пламя */
+        .eternal-flame {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            opacity: 0;
+            width: 50px;
+            height: 60px;
+            transition: all 2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 7;
+        }
+        
+        .eternal-flame.visible {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+        
+        .flame {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 40px;
+            background: linear-gradient(to top, #ff9d00, #ff0000);
+            border-radius: 50% 50% 20% 20% / 60% 60% 40% 40%;
+            animation: flicker 1s infinite alternate;
+            filter: blur(1px);
+            transform-origin: center bottom;
+        }
+        
+        .flame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(255, 255, 0, 0.5), transparent);
+            border-radius: 50% 50% 20% 20% / 60% 60% 40% 40%;
+            filter: blur(3px);
+            animation: flicker 1.5s infinite alternate-reverse;
+            transform-origin: center bottom;
+        }
+        
+        .flame::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 60%;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            filter: blur(5px);
+            animation: flicker 0.8s infinite alternate;
+        }
+        
+        @keyframes flicker {
+            0%, 100% { transform: scaleY(1) scaleX(1); }
+            25% { transform: scaleY(1.1) scaleX(0.9); }
+            50% { transform: scaleY(0.95) scaleX(1.05); }
+            75% { transform: scaleY(1.05) scaleX(0.95); }
+        }
+        
+        /* Золотая рамка */
+        .golden-frame {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 2px solid rgba(218, 165, 32, 0.3);
+            opacity: 0;
+            transition: all 3s ease;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .golden-frame.visible { opacity: 1; }
+        
+        /* Финальный текст */
+        .final-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            font-family: 'Playfair Display', serif;
+            font-size: 50px;
+            font-weight: 700;
+            text-align: center;
+            color: transparent;
+            opacity: 0;
+            transition: all 2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 20;
+            text-shadow: 0 0 10px rgba(218, 165, 32, 0.8);
+            -webkit-text-stroke: 1px rgba(218, 165, 32, 0.5);
+        }
+        
+        .final-message.visible {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        /* Аура любви */
+        .love-aura {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 0, 108, 0.05) 0%, transparent 70%);
+            opacity: 0;
+            z-index: 3;
+            transition: all 8s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        
+        .love-aura.active { width: 800px; height: 800px; opacity: 0.5; }
+        
+        /* Медиа-запросы */
+        @media (max-width: 768px) {
+            #romantic-text p { font-size: 20px; }
+            #romantic-text .quote { font-size: 16px; }
+            .medallion { width: 100px; height: 100px; }
+            .medallion.left { left: 10%; }
+            .medallion.right { right: 10%; }
+            #heraldic svg { width: 200px; height: 200px; }
+        }
+        
+        @media (max-width: 480px) {
+            #hourglass-container { transform: scale(0.7); }
+            .connecting-line.visible { width: 40%; }
+            .medallion { width: 80px; height: 80px; }
+            .medallion-content { font-size: 20px; }
+            #heraldic svg { width: 150px; height: 150px; }
+            .final-message { font-size: 30px; }
+        }
+    </style>
+</head>
+<body class="phase-initial">
+    <div id="container">
+        <!-- Декоративные углы -->
+        <div class="decorative-corner top-left">
+            <svg viewBox="0 0 100 100">
+                <path d="M 0 30 Q 0 0 30 0" />
+                <path d="M 0 50 Q 0 10 50 0" />
+            </svg>
+        </div>
+        <div class="decorative-corner top-right">
+            <svg viewBox="0 0 100 100">
+                <path d="M 0 30 Q 0 0 30 0" />
+                <path d="M 0 50 Q 0 10 50 0" />
+            </svg>
+        </div>
+        <div class="decorative-corner bottom-left">
+            <svg viewBox="0 0 100 100">
+                <path d="M 0 30 Q 0 0 30 0" />
+                <path d="M 0 50 Q 0 10 50 0" />
+            </svg>
+        </div>
+        <div class="decorative-corner bottom-right">
+            <svg viewBox="0 0 100 100">
+                <path d="M 0 30 Q 0 0 30 0" />
+                <path d="M 0 50 Q 0 10 50 0" />
+            </svg>
+        </div>
+        
+        <!-- Золотая рамка -->
+        <div class="golden-frame"></div>
+        
+        <!-- Песочные часы -->
+        <div id="hourglass-container">
+            <div class="hourglass-glow"></div>
+            <div class="hourglass-outer">
+                <div class="hourglass-top"></div>
+                <div class="hourglass-middle"></div>
+                <div class="hourglass-bottom"></div>
+            </div>
+            <div class="hourglass-sand-top"></div>
+            <div class="hourglass-sand-bottom"></div>
+            <div class="hourglass-ornament top-left"></div>
+            <div class="hourglass-ornament top-right"></div>
+            <div class="hourglass-ornament bottom-left"></div>
+            <div class="hourglass-ornament bottom-right"></div>
+        </div>
+        
+        <!-- Геральдический щит -->
+        <div id="heraldic">
+            <svg viewBox="0 0 100 120">
+                <path d="M 50 0 C 20 0 0 20 0 50 L 0 100 L 50 120 L 100 100 L 100 50 C 100 20 80 0 50 0 Z" fill="rgba(128, 0, 32, 0.2)" stroke="rgba(218, 165, 32, 0.5)" stroke-width="1" />
+                <path d="M 50 10 C 25 10 10 25 10 50 L 10 95 L 50 110 L 90 95 L 90 50 C 90 25 75 10 50 10 Z" fill="none" stroke="rgba(255, 255, 255, 0.2)" stroke-width="0.5" />
+                <path d="M 50 40 L 60 55 L 75 60 L 60 70 L 65 85 L 50 75 L 35 85 L 40 70 L 25 60 L 40 55 Z" fill="rgba(218, 165, 32, 0.3)" stroke="rgba(255, 255, 255, 0.3)" stroke-width="0.5" />
+            </svg>
+        </div>
+        
+        <!-- Романтический текст -->
+        <div id="romantic-text">
+            <p>Анюта, ты была моим светом, моей радостью. Мы расстались, но моё сердце не отпустило тебя.</p>
+            <div class="quote">Я всё ещё люблю тебя, и каждый день мечтаю вернуть то, что было между нами.</div>
+        </div>
+        
+        <!-- Медальоны -->
+        <div class="medallion left">
+            <div class="medallion-content">Миша</div>
+        </div>
+        <div class="medallion right">
+            <div class="medallion-content">Анюта</div>
+        </div>
+        
+        <!-- Соединяющая линия -->
+        <div class="connecting-line"></div>
+        
+        <!-- Сердце -->
+        <div class="heart-center">
+            <svg viewBox="0 0 100 100">
+                <path d="M 50 30 L 65 15 A 17 17 0 1 1 95 40 L 50 85 L 5 40 A 17 17 0 1 1 35 15 L 50 30 Z" fill="rgba(220, 20, 60, 0.6)" stroke="rgba(255, 255, 255, 0.5)" stroke-width="1" />
+            </svg>
+        </div>
+        
+        <!-- Вечное пламя -->
+        <div class="eternal-flame">
+            <div class="flame"></div>
+        </div>
+        
+        <!-- Аура любви -->
+        <div class="love-aura"></div>
+        
+        <!-- Финальное сообщение -->
+        <div class="final-message">Анюта, давай начнём заново?</div>
+        
+        <!-- Кнопка повтора -->
+        <button id="replay-button">Повторить</button>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            startAnimation();
+            document.getElementById('replay-button').addEventListener('click', function() {
+                resetAnimation();
+                setTimeout(startAnimation, 500);
+            });
+            createStars();
+            createSandParticles();
+        });
+        
+        function startAnimation() {
+            setTimeout(function() {
+                document.body.classList.remove('phase-initial');
+                document.body.classList.add('phase-middle');
+                document.querySelectorAll('.decorative-corner').forEach(corner => corner.classList.add('visible'));
+                document.querySelector('.golden-frame').classList.add('visible');
+                document.querySelectorAll('.star').forEach(star => star.style.opacity = 1);
+                animateSandParticles();
+            }, 1000);
+            
+            setTimeout(function() {
+                document.getElementById('hourglass-container').style.opacity = 0;
+                document.getElementById('hourglass-container').style.transform = 'scale(0)';
+                setTimeout(function() {
+                    document.getElementById('heraldic').classList.add('visible');
+                }, 500);
+            }, 14000);
+            
+            setTimeout(function() {
+                document.body.classList.remove('phase-middle');
+                document.body.classList.add('phase-romantic');
+                document.getElementById('romantic-text').classList.add('visible');
+                createRain();
+                createPetals();
+            }, 17000);
+            
+            setTimeout(function() {
+                document.querySelector('.medallion.left').classList.add('visible');
+                document.querySelector('.medallion.right').classList.add('visible');
+                setTimeout(function() {
+                    document.querySelector('.connecting-line').classList.add('visible');
+                    setTimeout(function() {
+                        document.querySelector('.heart-center').classList.add('visible');
+                    }, 1000);
+                }, 2000);
+            }, 20000);
+            
+            setTimeout(function() {
+                document.body.classList.remove('phase-romantic');
+                document.body.classList.add('phase-final');
+                document.querySelector('.eternal-flame').classList.add('visible');
+                document.querySelector('.love-aura').classList.add('active');
+            }, 24000);
+            
+            setTimeout(function() {
+                document.querySelector('.final-message').classList.add('visible');
+                setTimeout(function() {
+                    document.getElementById('replay-button').classList.add('visible');
+                }, 2000);
+            }, 29000);
+            
+            setTimeout(createLightParticles, 19000);
+        }
+        
+        function resetAnimation() {
+            document.body.className = 'phase-initial';
+            document.querySelectorAll('.decorative-corner, .golden-frame, .medallion').forEach(el => el.classList.remove('visible'));
+            document.getElementById('heraldic').classList.remove('visible');
+            document.getElementById('romantic-text').classList.remove('visible');
+            document.querySelector('.connecting-line').classList.remove('visible');
+            document.querySelector('.heart-center').classList.remove('visible');
+            document.querySelector('.eternal-flame').classList.remove('visible');
+            document.querySelector('.final-message').classList.remove('visible');
+            document.querySelector('.love-aura').classList.remove('active');
+            document.getElementById('replay-button').classList.remove('visible');
+            document.getElementById('hourglass-container').style.opacity = 1;
+            document.getElementById('hourglass-container').style.transform = 'scale(1)';
+            document.querySelectorAll('.star, .sand-particle, .rain, .petal, .light-particle').forEach(el => el.remove());
+        }
+        
+        function createStars() {
+            const container = document.getElementById('container');
+            const starCount = Math.min(window.innerWidth / 3, 200);
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.opacity = 0;
+                const size = Math.random() * 3 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.setProperty('--twinkle-duration', `${Math.random() * 5 + 3}s`);
+                star.style.setProperty('--twinkle-delay', `${Math.random() * 5}s`);
+                container.appendChild(star);
+            }
+        }
+        
+        function createSandParticles() {
+            const container = document.getElementById('hourglass-container');
+            const particleCount = 40;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'sand-particle';
+                const size = Math.random() * 4 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.setProperty('--particle-sway', `${Math.random() * 12 - 6}px`);
+                container.appendChild(particle);
+            }
+        }
+        
+        function animateSandParticles() {
+            const particles = document.querySelectorAll('.sand-particle');
+            let index = 0;
+            const interval = setInterval(function() {
+                if (index < particles.length) {
+                    const particle = particles[index];
+                    particle.style.animation = `fallParticle ${Math.random() * 1.5 + 1}s ease-out`;
+                    index++;
+                } else {
+                    index = 0;
+                }
+            }, 250);
+            setTimeout(function() { clearInterval(interval); }, 14000);
+        }
+        
+        function createRain() {
+            const container = document.getElementById('container');
+            const rainCount = Math.min(window.innerWidth / 10, 50);
+            for (let i = 0; i < rainCount; i++) {
+                setTimeout(function() {
+                    const rain = document.createElement('div');
+                    rain.className = 'rain';
+                    rain.style.left = `${Math.random() * 100}%`;
+                    rain.style.setProperty('--rain-height', `${Math.random() * 50 + 30}px`);
+                    rain.style.setProperty('--rain-opacity', `${Math.random() * 0.3 + 0.4}`);
+                    rain.style.setProperty('--rain-sway', `${Math.random() * 50 - 25}px`);
+                    rain.style.animation = `rainFall ${Math.random() * 5 + 5}s linear`;
+                    container.appendChild(rain);
+                    setTimeout(function() { if (rain.parentNode) rain.parentNode.removeChild(rain); }, 10000);
+                }, i * 200);
+            }
+        }
+        
+        function createPetals() {
+            const container = document.getElementById('container');
+            const petalCount = Math.min(window.innerWidth / 20, 30);
+            for (let i = 0; i < petalCount; i++) {
+                setTimeout(function() {
+                    const petal = document.createElement('div');
+                    petal.className = 'petal';
+                    petal.style.left = `${Math.random() * 100}%`;
+                    petal.style.setProperty('--petal-sway', `${Math.random() * 200 - 100}px`);
+                    petal.style.setProperty('--petal-rotate', `${Math.random() * 720 - 360}deg`);
+                    petal.style.setProperty('--petal-scale', `${Math.random() * 0.5 + 0.3}`);
+                    const hue = Math.random() * 40 + 330;
+                    petal.style.background = `radial-gradient(ellipse at center, hsl(${hue}, 100%, 80%) 0%, hsl(${hue}, 100%, 50%) 100%)`;
+                    petal.style.animation = `floatPetal ${Math.random() * 8 + 7}s ease-in-out`;
+                    container.appendChild(petal);
+                    setTimeout(function() { if (petal.parentNode) petal.parentNode.removeChild(petal); }, 15000);
+                }, i * 300);
+            }
+        }
+        
+        function createLightParticles() {
+            const container = document.getElementById('container');
+            const particleCount = Math.min(window.innerWidth / 15, 40);
+            for (let i = 0; i < particleCount; i++) {
+                setTimeout(function() {
+                    const particle = document.createElement('div');
+                    particle.className = 'light-particle';
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = Math.random() * window.innerWidth * 0.4;
+                    const x = window.innerWidth / 2 + Math.cos(angle) * distance;
+                    const y = window.innerHeight / 2 + Math.sin(angle) * distance;
+                    particle.style.left = `${x}px`;
+                    particle.style.top = `${y}px`;
+                    const size = Math.random() * 20 + 5;
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    const hue = Math.random() * 60 + 20;
+                    particle.style.background = `radial-gradient(ellipse at center, hsla(${hue}, 100%, 70%, 0.8) 0%, hsla(${hue}, 100%, 70%, 0) 70%)`;
+                    particle.style.setProperty('--glow-min', `${Math.random() * 0.3}`);
+                    particle.style.setProperty('--glow-max', `${Math.random() * 0.3 + 0.4}`);
+                    particle.style.setProperty('--glow-scale-min', `${Math.random() * 0.3 + 0.6}`);
+                    particle.style.setProperty('--glow-scale-max', `${Math.random() * 0.5 + 1}`);
+                    particle.style.animation = `glow ${Math.random() * 5 + 3}s ease-in-out infinite`;
+                    particle.style.animationDelay = `${Math.random() * 2}s`;
+                    particle.style.opacity = 0;
+                    particle.style.transform = 'scale(0)';
+                    container.appendChild(particle);
+                    setTimeout(function() {
+                        particle.style.opacity = 1;
+                        particle.style.transform = 'scale(1)';
+                        particle.style.transition = 'all 1s ease-out';
+                    }, 10);
+                    setTimeout(function() {
+                        if (particle.parentNode) {
+                            particle.style.opacity = 0;
+                            particle.style.transform = 'scale(0)';
+                            setTimeout(function() { if (particle.parentNode) particle.parentNode.removeChild(particle); }, 1000);
+                        }
+                    }, Math.random() * 10000 + 20000);
+                }, i * 200);
+            }
+        }
+    </script>
+</body>
+</html>
