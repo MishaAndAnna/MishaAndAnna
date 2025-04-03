@@ -801,14 +801,37 @@
             padding: 2.5rem;
             width: 90%;
             max-width: 600px;
+            max-height: 80vh; /* Ограничение максимальной высоты */
+            overflow-y: auto; /* Включение вертикальной прокрутки */
             position: relative;
             box-shadow: 0 15px 40px rgba(255, 107, 149, 0.3);
             transform: translateY(-50px);
             transition: transform 0.3s ease;
+            scrollbar-width: thin; /* Тонкая полоса прокрутки для Firefox */
+            scrollbar-color: var(--primary-color) var(--accent-color); /* Цвет полосы и фона */
         }
 
         .modal.active .modal-content {
             transform: translateY(0);
+        }
+
+        /* Стилизация полосы прокрутки для WebKit-браузеров (Chrome, Safari) */
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: var(--accent-color);
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
         }
 
         .modal-close {
@@ -1311,7 +1334,6 @@
                     <i class="fas fa-heart"></i> Наш Дневник Любви
                 </div>
                 <p class="footer-text">Каждый день нашей любви особенный и заслуживает быть запечатленным.</p>
-           
                 <div class="copyright">
                     © 2025 Наш Дневник Любви. Создано с <span class="heart-icon"><i class="fas fa-heart"></i></span> для влюбленных.
                 </div>
@@ -1567,4 +1589,3 @@
     </script>
 </body>
 </html>
-    
