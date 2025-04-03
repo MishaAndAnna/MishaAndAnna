@@ -1234,7 +1234,7 @@
         }
     </style>
 </head>
-<body>
+<body onload="handleClientLoad()">
     <header class="header">
         <div class="container">
             <div class="header-content">
@@ -1437,6 +1437,8 @@
         </div>
     </footer>
 
+    <!-- Подключение Google API -->
+    <script src="https://apis.google.com/js/api.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('entryModal');
@@ -1453,6 +1455,35 @@
             const showEntryFormBtn = document.getElementById('showEntryForm');
             const showMemoryFormBtn = document.getElementById('showMemoryForm');
             let isSelecting = false;
+
+            // Google Drive API настройки
+            const CLIENT_ID = '822036073579-53mj21ufbgmvn4tnvfr3pulhvbrov480.apps.googleusercontent.com';
+            const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
+            const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
+            // Инициализация Google API
+            window.handleClientLoad = function() {
+                gapi.load('client:auth2', initClient);
+            };
+
+            function initClient() {
+                gapi.client.init({
+                    clientId: CLIENT_ID,
+                    discoveryDocs: DISCOVERY_DOCS,
+                    scope: SCOPES
+                }).then(() => {
+                    gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+                    updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+                }).catch(error => {
+                    console.error('Ошибка инициализации Google API:', error);
+                });
+            }
+
+            function updateSigninStatus(isSignedIn) {
+                if (!isSignedIn) {
+                    gapi.auth2.getAuthInstance().signIn();
+                }
+            }
 
             // Переключение между формами
             showEntryFormBtn.addEventListener('click', function() {
@@ -1513,7 +1544,9 @@
                 div.innerHTML = `
                     <div class="entry-from">От ${entry.from}</div>
                     <div class="entry-header">
-                        <button class="delete-btn" title="Удалить запись"><i class="fas fa-trash"></i></button>
+                        <button class="delete-btn" 
+   
+title="Удалить запись"><i class="fas fa-trash"></i></button>
                         <div class="entry-date">
                             <i class="far fa-calendar"></i> ${new Date(entry.date).toLocaleDateString('ru-RU', {
                                 day: 'numeric',
@@ -1563,7 +1596,6 @@
                 `;
                 memoryCards.insertBefore(div, memoryCards.firstChild);
 
-                // Обработчик индивидуального удаления
                 div.querySelector('.delete-btn').addEventListener('click', function() {
                     if (!isSelecting) {
                         if (confirm('Вы уверены, что хотите удалить этот момент?')) {
@@ -1572,7 +1604,6 @@
                     }
                 });
 
-                // Обработчик выбора для массового удаления
                 div.addEventListener('click', function(e) {
                     if (isSelecting && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'I') {
                         div.classList.toggle('selected');
@@ -1629,7 +1660,6 @@
                 confirmDeleteBtn.style.display = 'none';
             });
 
-            // Подтверждение удаления выбранных
             confirmDeleteBtn.addEventListener('click', deleteSelectedMemories);
 
             // Открытие модального окна для записи
@@ -1659,7 +1689,6 @@
                 resetSelections('entryMoodSelection');
             });
 
-            // Закрытие при клике вне окна
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
                     modal.classList.remove('active');
@@ -1685,7 +1714,6 @@
             setupSelection('entryFromSelection');
             setupSelection('entryMoodSelection');
 
-            // Сброс выбора до начального состояния
             function resetSelections(containerId) {
                 const options = document.querySelectorAll(`#${containerId} .mood-option`);
                 options.forEach(opt => opt.classList.remove('active'));
@@ -1727,24 +1755,36 @@
                 resetSelections('entryMoodSelection');
             });
 
-            // Сохранение воспоминания
+            // Сохранение воспоминания с загрузкой на Google Диск
             memoryForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 const title = document.getElementById('memory-title').value;
                 const date = document.getElementById('memory-date').value;
                 const description = document.getElementById('memory-description').value;
-                const imageInput = document.getElementById('memory-image');
-                const reader = new FileReader();
+                const fileInput = document.getElementById('memory-image');
+                const file = fileInput.files[0];
 
-                const memory = { title, date, description };
-
-                if (imageInput.files && imageInput.files[0]) {
-                    reader.onload = function(e) {
-                        memory.image = e.target.result;
+                if (file) {
+                    uploadFileToDrive(file).then(imageUrl => {
+                        const memory = { title, date, description, image: imageUrl };
                         saveMemory(memory);
-                    };
-                    reader.readAsDataURL(imageInput.files[0]);
+                    }).catch(error => {
+                        console.error('Ошибка при загрузке:', error);
+                        const memory = { 
+                            title, 
+                            date, 
+                            description, 
+                            image: 'https://via.placeholder.com/280x240/ffe0e8/fff9fb?text=Ошибка' 
+                        };
+                        saveMemory(memory);
+                    });
                 } else {
+                    const memory = { 
+                        title, 
+                        date, 
+                        description, 
+                        image: 'https://via.placeholder.com/280x240/ffe0e8/fff9fb?text=Момент' 
+                    };
                     saveMemory(memory);
                 }
             });
@@ -1761,6 +1801,35 @@
 
                 modal.classList.remove('active');
                 memoryForm.reset();
+            }
+
+            // Загрузка файла на Google Диск
+            function uploadFileToDrive(file) {
+                const metadata = {
+                    'name': file.name,
+                    'mimeType': file.type
+                };
+
+                const form = new FormData();
+                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                form.append('file', file);
+
+                return gapi.client.request({
+                    'path': '/upload/drive/v3/files?uploadType=multipart',
+                    'method': 'POST',
+                    'body': form
+                }).then(response => {
+                    const fileId = response.result.id;
+                    return gapi.client.drive.permissions.create({
+                        'fileId': fileId,
+                        'resource': {
+                            'role': 'reader',
+                            'type': 'anyone'
+                        }
+                    }).then(() => {
+                        return `https://drive.google.com/uc?export=view&id=${fileId}`;
+                    });
+                });
             }
 
             // Начальная загрузка
