@@ -1383,177 +1383,193 @@
         </div>
     </footer>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Инициализация Firebase
-            const firebaseConfig = {
-                apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
-                authDomain: "misha-and-anna-48e4c.firebaseapp.com",
-                projectId: "misha-and-anna-48e4c",
-                storageBucket: "misha-and-anna-48e4c.firebasestorage.app",
-                messagingSenderId: "822036073579",
-                appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
-                measurementId: "G-XR86X6PXMX"
-            };
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM полностью загружен'); // Отладка: проверяем загрузку DOM
 
-            // Инициализируем Firebase
-            firebase.initializeApp(firebaseConfig);
-            const db = firebase.firestore();
+    // Инициализация Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
+        authDomain: "misha-and-anna-48e4c.firebaseapp.com",
+        projectId: "misha-and-anna-48e4c",
+        storageBucket: "misha-and-anna-48e4c.firebasestorage.app",
+        messagingSenderId: "822036073579",
+        appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
+        measurementId: "G-XR86X6PXMX"
+    };
 
-            // Элементы DOM
-            const modal = document.querySelector('.modal');
-            const addEntryBtn = document.querySelector('.add-entry-btn');
-            const closeModalBtn = document.querySelector('.modal-close');
-            const entryForm = document.querySelector('.entry-form');
-            const entriesList = document.querySelector('.entries-list');
+    try {
+        // Инициализируем Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        console.log('Firebase успешно инициализирован'); // Отладка: проверяем Firebase
 
-            // Функция для отображения записи
-            function renderEntry(doc) {
-                const entry = document.createElement('div');
-                entry.className = 'entry';
-                entry.innerHTML = `
-                    <div class="entry-from">От ${doc.data().from}</div>
-                    <div class="entry-header">
-                        <div class="entry-date">
-                            <i class="far fa-calendar"></i> ${new Date(doc.data().date).toLocaleDateString('ru-RU', {
-                                day: 'numeric',
-                                month: 'long',
-                                year: 'numeric'
-                            })}
-                        </div>
+        // Элементы DOM
+        const modal = document.querySelector('.modal');
+        const addEntryBtn = document.querySelector('.add-entry-btn');
+        const closeModalBtn = document.querySelector('.modal-close');
+        const entryForm = document.querySelector('.entry-form');
+        const entriesList = document.querySelector('.entries-list');
+
+        if (!addEntryBtn) {
+            console.error('Кнопка "Добавить запись" не найдена');
+            return;
+        }
+        console.log('Кнопка "Добавить запись" найдена'); // Отладка: проверяем кнопку
+
+        // Функция для отображения записи
+        function renderEntry(doc) {
+            const entry = document.createElement('div');
+            entry.className = 'entry';
+            entry.innerHTML = `
+                <div class="entry-from">От ${doc.data().from}</div>
+                <div class="entry-header">
+                    <div class="entry-date">
+                        <i class="far fa-calendar"></i> ${new Date(doc.data().date).toLocaleDateString('ru-RU', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                        })}
                     </div>
-                    <h3>${doc.data().title}</h3>
-                    <div class="entry-content">${doc.data().content}</div>
-                    <div class="entry-footer">
-                        <div class="entry-mood">
-                            <i class="fas fa-heart"></i> ${doc.data().mood}
-                        </div>
+                </div>
+                <h3>${doc.data().title}</h3>
+                <div class="entry-content">${doc.data().content}</div>
+                <div class="entry-footer">
+                    <div class="entry-mood">
+                        <i class="fas fa-heart"></i> ${doc.data().mood}
                     </div>
-                `;
-                entriesList.insertBefore(entry, entriesList.firstChild);
-            }
+                </div>
+            `;
+            entriesList.insertBefore(entry, entriesList.firstChild);
+        }
 
-            // Загрузка записей из Firestore
-            function loadEntries() {
-                entriesList.innerHTML = ''; // Очищаем список перед загрузкой
-                db.collection('entries')
-                    .orderBy('date', 'desc') // Сортировка по дате (новые сверху)
-                    .get()
-                    .then((querySnapshot) => {
-                        if (querySnapshot.empty) {
-                            entriesList.innerHTML = `
-                                <div class="no-entries">
-                                    <i class="fas fa-heart"></i>
-                                    <h3>Пока нет записей</h3>
-                                    <p>Начните вашу историю любви, добавив первую запись с помощью кнопки выше!</p>
-                                </div>
-                            `;
-                        } else {
-                            querySnapshot.forEach((doc) => {
-                                renderEntry(doc);
-                            });
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Ошибка загрузки записей: ", error);
-                    });
-            }
-
-            // Загружаем записи при старте
-            loadEntries();
-
-            // Открытие модального окна
-            addEntryBtn.addEventListener('click', function() {
-                modal.classList.add('active');
-            });
-
-            // Закрытие модального окна
-            closeModalBtn.addEventListener('click', function() {
-                modal.classList.remove('active');
-                entryForm.reset();
-            });
-
-            // Закрытие при клике вне модального окна
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                    entryForm.reset();
-                }
-            });
-
-            // Обработка выбора настроения и автора
-            const moodOptions = document.querySelectorAll('.mood-option');
-            moodOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    const siblings = this.parentElement.querySelectorAll('.mood-option');
-                    siblings.forEach(opt => opt.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-
-            // Обработка фильтров записей
-            const filterButtons = document.querySelectorAll('.filter-btn');
-            filterButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    filterButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-
-                    const filter = this.textContent.trim();
-                    entriesList.innerHTML = '';
-                    let query = db.collection('entries').orderBy('date', 'desc');
-
-                    if (filter === 'Анна' || filter === 'Михаил') {
-                        query = query.where('from', '==', filter);
+        // Загрузка записей из Firestore
+        function loadEntries() {
+            entriesList.innerHTML = ''; // Очищаем список перед загрузкой
+            db.collection('entries')
+                .orderBy('date', 'desc') // Сортировка по дате (новые сверху)
+                .get()
+                .then((querySnapshot) => {
+                    if (querySnapshot.empty) {
+                        entriesList.innerHTML = `
+                            <div class="no-entries">
+                                <i class="fas fa-heart"></i>
+                                <h3>Пока нет записей</h3>
+                                <p>Начните вашу историю любви, добавив первую запись с помощью кнопки выше!</p>
+                            </div>
+                        `;
+                    } else {
+                        querySnapshot.forEach((doc) => {
+                            renderEntry(doc);
+                        });
                     }
-
-                    query.get().then((querySnapshot) => {
-                        if (querySnapshot.empty) {
-                            entriesList.innerHTML = `
-                                <div class="no-entries">
-                                    <i class="fas fa-heart"></i>
-                                    <h3>Пока нет записей</h3>
-                                    <p>Начните вашу историю любви, добавив первую запись с помощью кнопки выше!</p>
-                                </div>
-                            `;
-                        } else {
-                            querySnapshot.forEach((doc) => {
-                                renderEntry(doc);
-                            });
-                        }
-                    });
-                });
-            });
-
-            // Обработка отправки формы
-            entryForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                const title = document.getElementById('entry-title').value;
-                const content = document.getElementById('entry-content').value;
-                const mood = document.querySelector('.mood-selection:nth-child(4) .mood-option.active').textContent.trim();
-                const from = document.querySelector('.mood-selection:nth-child(3) .mood-option.active').getAttribute('data-from');
-                const date = new Date().getTime(); // Сохраняем timestamp для сортировки
-
-                // Сохранение в Firestore
-                db.collection('entries').add({
-                    title: title,
-                    content: content,
-                    mood: mood,
-                    from: from,
-                    date: date
-                })
-                .then(() => {
-                    modal.classList.remove('active');
-                    this.reset();
-                    alert('Запись успешно сохранена!');
-                    loadEntries(); // Перезагружаем записи
                 })
                 .catch((error) => {
-                    console.error("Ошибка сохранения записи: ", error);
-                    alert('Произошла ошибка при сохранении записи.');
+                    console.error("Ошибка загрузки записей: ", error);
+                });
+        }
+
+        // Загружаем записи при старте
+        loadEntries();
+
+        // Открытие модального окна
+        addEntryBtn.addEventListener('click', function() {
+            console.log('Клик по кнопке "Добавить запись"'); // Отладка: проверяем клик
+            modal.classList.add('active');
+        });
+
+        // Закрытие модального окна
+        closeModalBtn.addEventListener('click', function() {
+            modal.classList.remove('active');
+            entryForm.reset();
+        });
+
+        // Закрытие при клике вне модального окна
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                entryForm.reset();
+            }
+        });
+
+        // Обработка выбора настроения и автора
+        const moodOptions = document.querySelectorAll('.mood-option');
+        moodOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const siblings = this.parentElement.querySelectorAll('.mood-option');
+                siblings.forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Обработка фильтров записей
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                const filter = this.textContent.trim();
+                entriesList.innerHTML = '';
+                let query = db.collection('entries').orderBy('date', 'desc');
+
+                if (filter === 'Анна' || filter === 'Михаил') {
+                    query = query.where('from', '==', filter);
+                }
+
+                query.get().then((querySnapshot) => {
+                    if (querySnapshot.empty) {
+                        entriesList.innerHTML = `
+                            <div class="no-entries">
+                                <i class="fas fa-heart"></i>
+                                <h3>Пока нет записей</h3>
+                                <p>Начните вашу историю любви, добавив первую запись с помощью кнопки выше!</p>
+                            </div>
+                        `;
+                    } else {
+                        querySnapshot.forEach((doc) => {
+                            renderEntry(doc);
+                        });
+                    }
                 });
             });
         });
+
+        // Обработка отправки формы
+        entryForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const title = document.getElementById('entry-title').value;
+            const content = document.getElementById('entry-content').value;
+            const mood = document.querySelector('.mood-selection:nth-child(4) .mood-option.active').textContent.trim();
+            const from = document.querySelector('.mood-selection:nth-child(3) .mood-option.active').getAttribute('data-from');
+            const date = new Date().getTime(); // Сохраняем timestamp для сортировки
+
+            // Сохранение в Firestore
+            db.collection('entries').add({
+                title: title,
+                content: content,
+                mood: mood,
+                from: from,
+                date: date
+            })
+            .then(() => {
+                modal.classList.remove('active');
+                this.reset();
+                alert('Запись успешно сохранена!');
+                loadEntries(); // Перезагружаем записи
+            })
+            .catch((error) => {
+                console.error("Ошибка сохранения записи: ", error);
+                alert('Произошла ошибка при сохранении записи.');
+            });
+        });
+
+    } catch (error) {
+        console.error('Ошибка инициализации Firebase:', error);
+    }
+});
+</script>
     </script>
 </body>
 </html>
