@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Наш Дневник Любви</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
     <style>
         :root {
             --primary-color: #ff6b95;
@@ -35,7 +32,7 @@
             color: var(--dark-text);
             line-height: 1.6;
             min-height: 100vh;
-            background-image: url('/api/placeholder/200/200');
+            background-image: url('https://via.placeholder.com/200/ffe0e8/fff9fb?text=♥');
             background-size: 200px;
             background-attachment: fixed;
             background-repeat: repeat;
@@ -59,7 +56,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('/api/placeholder/800/400') center/cover;
+            background: url('https://via.placeholder.com/800/400/fff9fb/ffe0e8?text=Love') center/cover;
             opacity: 0.1;
             z-index: 0;
         }
@@ -324,31 +321,9 @@
             overflow: hidden;
         }
 
-        .stat::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
-            opacity: 0;
-            transition: var(--transition);
-        }
-
         .stat:hover {
             transform: translateY(-10px);
             box-shadow: 0 15px 30px rgba(255, 107, 149, 0.2);
-        }
-
-        .stat:hover::before {
-            opacity: 0.5;
-            animation: ripple 1.5s ease-out;
-        }
-
-        @keyframes ripple {
-            0% { transform: scale(0.3); opacity: 0.5; }
-            100% { transform: scale(2); opacity: 0; }
         }
 
         .stat-value {
@@ -365,211 +340,13 @@
             font-weight: 500;
         }
 
-        .entry-form {
-            margin-bottom: 3rem;
-            background-color: #fff9fb;
-            padding: 2.5rem;
-            border-radius: 20px;
-            border: 1px solid #ffe0e8;
-            position: relative;
-            z-index: 1;
-            box-shadow: 0 10px 25px rgba(255, 107, 149, 0.08);
-            transition: var(--transition);
-        }
-
-        .entry-form:hover {
-            box-shadow: 0 15px 35px rgba(255, 107, 149, 0.12);
-            transform: translateY(-5px);
-        }
-
-        .entry-form::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('/api/placeholder/100/100');
-            background-size: 100px;
-            opacity: 0.03;
-            border-radius: 20px;
-            z-index: -1;
-        }
-
-        .form-group {
-            margin-bottom: 2rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.8rem;
-            font-weight: 600;
-            color: var(--medium-text);
-            font-size: 1.1rem;
-        }
-
-        .form-input,
-        .form-textarea {
-            width: 100%;
-            padding: 1.2rem;
-            border: 2px solid #ffe0e8;
-            border-radius: 15px;
-            font-family: inherit;
-            font-size: 1.1rem;
-            transition: var(--transition);
-            background-color: white;
-            color: var(--dark-text);
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
-
-        .form-input:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(255, 107, 149, 0.2), inset 0 2px 5px rgba(0, 0, 0, 0.05);
-            transform: translateY(-2px);
-        }
-
-        .form-textarea {
-            height: 180px;
-            resize: vertical;
-            line-height: 1.8;
-        }
-
-        .mood-selection {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 0.8rem;
-        }
-
-        .mood-option {
-            background: none;
-            border: 2px solid #ffe0e8;
-            padding: 0.8rem 1.5rem;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            font-weight: 500;
-            font-size: 1rem;
-            color: var(--medium-text);
-        }
-
-        .mood-option:hover {
-            background-color: #fff0f5;
-            border-color: var(--primary-color);
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255, 107, 149, 0.15);
-        }
-
-        .mood-option.active {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            border-color: transparent;
-            box-shadow: 0 8px 20px rgba(255, 107, 149, 0.25);
-        }
-
-        .mood-option i {
-            margin-right: 10px;
-            font-size: 1.2rem;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-top: 2rem;
-        }
-
-        .btn {
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            box-shadow: 0 8px 20px rgba(255, 107, 149, 0.25);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
-            transform: translateX(-100%);
-            animation: shimmer 3s infinite;
-        }
-
-        @keyframes shimmer {
-            100% { transform: translateX(100%); }
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(255, 107, 149, 0.35);
-        }
-
-        .btn-secondary {
-            background-color: white;
-            border: 2px solid #ffe0e8;
-            color: var(--primary-color);
-            box-shadow: 0 5px 15px rgba(255, 107, 149, 0.1);
-        }
-
-        .btn-secondary:hover {
-            background-color: #fff0f5;
-            border-color: var(--primary-color);
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(255, 107, 149, 0.15);
-        }
-
-        .btn i {
-            margin-right: 12px;
-            font-size: 1.2rem;
-        }
-
-        .special-message {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: var(--medium-text);
-            font-size: 1rem;
-            font-style: italic;
-            position: relative;
-            padding: 1rem 0;
-        }
-
-        .special-message::before,
-        .special-message::after {
-            content: '❤';
-            color: var(--primary-color);
-            margin: 0 10px;
-            opacity: 0.5;
-        }
-
         .entries-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
             padding-bottom: 1.5rem;
-            border-bottom: 2px solid #ffe0e8;
+            border-bottom: 2px solid var(--accent-color);
             position: relative;
             z-index: 1;
         }
@@ -620,6 +397,32 @@
             transform: translateY(-2px);
         }
 
+        .add-entry-btn, .add-memory-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 8px 20px rgba(255, 107, 149, 0.25);
+            transition: var(--transition);
+            margin-bottom: 2rem;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .add-entry-btn:hover, .add-memory-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(255, 107, 149, 0.35);
+        }
+
+        .add-entry-btn i, .add-memory-btn i {
+            margin-right: 10px;
+        }
+
         .entries-list {
             position: relative;
             z-index: 1;
@@ -630,7 +433,7 @@
             margin-bottom: 2.5rem;
             border-radius: 20px;
             background-color: white;
-            border: 1px solid #ffe0e8;
+            border: 1px solid var(--accent-color);
             transition: var(--transition);
             position: relative;
             box-shadow: 0 8px 20px rgba(255, 107, 149, 0.08);
@@ -639,25 +442,6 @@
         .entry:hover {
             box-shadow: 0 15px 30px rgba(255, 107, 149, 0.15);
             transform: translateY(-8px);
-        }
-
-        .entry::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 10px;
-            left: 10px;
-            border-radius: 20px;
-            border: 1px dashed var(--primary-color);
-            opacity: 0.1;
-            z-index: -1;
-            transition: var(--transition);
-        }
-
-        .entry:hover::before {
-            top: 15px;
-            left: 15px;
         }
 
         .entry-from {
@@ -671,7 +455,6 @@
             padding: 0.4rem 1rem;
             border-radius: 20px;
             box-shadow: 0 5px 15px rgba(255, 107, 149, 0.2);
-            letter-spacing: 0.5px;
         }
 
         .entry-header {
@@ -685,7 +468,7 @@
             color: var(--light-text);
             display: flex;
             align-items: center;
-            background-color: #fff9fb;
+            background-color: var(--light-bg);
             padding: 0.5rem 1rem;
             border-radius: 15px;
         }
@@ -708,28 +491,6 @@
             line-height: 1.9;
             font-size: 1.1rem;
             text-align: justify;
-            position: relative;
-            padding: 0 0.5rem;
-        }
-
-        .entry-content::before, .entry-content::after {
-            content: '\201C';
-            font-size: 3rem;
-            color: var(--primary-color);
-            opacity: 0.2;
-            position: absolute;
-            font-family: serif;
-        }
-
-        .entry-content::before {
-            top: -1.5rem;
-            left: -1rem;
-        }
-
-        .entry-content::after {
-            bottom: -2.5rem;
-            right: -1rem;
-            transform: rotateZ(180deg);
         }
 
         .entry-footer {
@@ -743,7 +504,7 @@
         .entry-mood {
             display: flex;
             align-items: center;
-            background-color: #fff9fb;
+            background-color: var(--light-bg);
             padding: 0.5rem 1rem;
             border-radius: 15px;
             transition: var(--transition);
@@ -757,6 +518,47 @@
         .entry-mood i {
             margin-right: 8px;
             color: var(--primary-color);
+        }
+
+        .heart-divider {
+            text-align: center;
+            margin: 3rem 0;
+            color: var(--primary-color);
+            font-size: 2rem;
+            position: relative;
+        }
+
+        .heart-divider::before,
+        .heart-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--primary-color));
+        }
+
+        .heart-divider::before {
+            left: 0;
+        }
+
+        .heart-divider::after {
+            right: 0;
+            background: linear-gradient(to left, transparent, var(--primary-color));
+        }
+
+        .heart-divider i {
+            animation: pulse 1.5s infinite alternate;
+            position: relative;
+            z-index: 1;
+            background-color: white;
+            width: 50px;
+            height: 50px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(255, 107, 149, 0.15);
         }
 
         .memories-section {
@@ -784,7 +586,6 @@
             width: 80%;
             height: 3px;
             background: linear-gradient(to right, transparent, var(--primary-color), transparent);
-            border-radius: 2px;
         }
 
         .memory-cards {
@@ -829,24 +630,6 @@
             box-shadow: -10px 15px 30px rgba(255, 107, 149, 0.25);
         }
 
-        .memory-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(255,107,149,0.1) 0%, rgba(142,107,255,0.1) 100%);
-            opacity: 0;
-            transition: var(--transition);
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .memory-card:hover::before {
-            opacity: 1;
-        }
-
         .memory-image {
             height: 180px;
             width: 100%;
@@ -871,7 +654,7 @@
             color: var(--light-text);
             margin-bottom: 0.8rem;
             display: inline-block;
-            background-color: #fff9fb;
+            background-color: var(--light-bg);
             padding: 0.3rem 0.8rem;
             border-radius: 12px;
         }
@@ -895,7 +678,7 @@
             color: var(--light-text);
             background-color: rgba(255, 240, 245, 0.5);
             border-radius: 20px;
-            border: 2px dashed #ffe0e8;
+            border: 2px dashed var(--accent-color);
             transition: var(--transition);
         }
 
@@ -925,52 +708,11 @@
             margin: 0 auto;
         }
 
-        .heart-divider {
-            text-align: center;
-            margin: 3rem 0;
-            color: var(--primary-color);
-            font-size: 2rem;
-            position: relative;
-        }
-
-        .heart-divider::before,
-        .heart-divider::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 40%;
-            height: 1px;
-            background: linear-gradient(to right, transparent, var(--primary-color));
-        }
-
-        .heart-divider::before {
-            left: 0;
-        }
-
-        .heart-divider::after {
-            right: 0;
-            background: linear-gradient(to left, transparent, var(--primary-color));
-        }
-
-        .heart-divider i {
-            animation: pulse 1.5s infinite alternate;
-            position: relative;
-            z-index: 1;
-            background-color: white;
-            width: 50px;
-            height: 50px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            box-shadow: 0 5px 15px rgba(255, 107, 149, 0.15);
-        }
-
         .footer {
             background: linear-gradient(135deg, #ffeff5, #f9f0ff);
             padding: 3rem 0;
             margin-top: 3rem;
-            border-top: 2px solid #ffe0e8;
+            border-top: 2px solid var(--accent-color);
             position: relative;
         }
 
@@ -1031,6 +773,251 @@
             animation: beat 1.5s infinite alternate;
             display: inline-block;
             margin: 0 5px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            box-shadow: 0 15px 40px rgba(255, 107, 149, 0.3);
+            transform: translateY(-50px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--medium-text);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--primary-color);
+            transform: rotate(90deg);
+        }
+
+        .entry-form, .memory-form {
+            margin-bottom: 3rem;
+            background-color: var(--light-bg);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 1px solid var(--accent-color);
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 10px 25px rgba(255, 107, 149, 0.08);
+            transition: var(--transition);
+        }
+
+        .entry-form:hover, .memory-form:hover {
+            box-shadow: 0 15px 35px rgba(255, 107, 149, 0.12);
+            transform: translateY(-5px);
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            color: var(--medium-text);
+            font-size: 1.1rem;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 1.2rem;
+            border: 2px solid var(--accent-color);
+            border-radius: 15px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            transition: var(--transition);
+            background-color: white;
+            color: var(--dark-text);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(255, 107, 149, 0.2), inset 0 2px 5px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .form-textarea {
+            height: 180px;
+            resize: vertical;
+            line-height: 1.8;
+        }
+
+        .form-input[type="file"] {
+            padding: 0.5rem;
+        }
+
+        .mood-selection {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 0.8rem;
+        }
+
+        .mood-option {
+            background: none;
+            border: 2px solid var(--accent-color);
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            font-size: 1rem;
+            color: var(--medium-text);
+        }
+
+        .mood-option:hover {
+            background-color: #fff0f5;
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 107, 149, 0.15);
+        }
+
+        .mood-option.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 8px 20px rgba(255, 107, 149, 0.25);
+        }
+
+        .mood-option i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            box-shadow: 0 8px 20px rgba(255, 107, 149, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(255, 107, 149, 0.35);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            border: 2px solid var(--accent-color);
+            color: var(--primary-color);
+            box-shadow: 0 5px 15px rgba(255, 107, 149, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background-color: #fff0f5;
+            border-color: var(--primary-color);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(255, 107, 149, 0.15);
+        }
+
+        .btn i {
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+
+        .special-message {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--medium-text);
+            font-size: 1rem;
+            font-style: italic;
+            position: relative;
+            padding: 1rem 0;
+        }
+
+        .special-message::before,
+        .special-message::after {
+            content: '❤';
+            color: var(--primary-color);
+            margin: 0 10px;
+            opacity: 0.5;
+        }
+
+        .form-toggle {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .form-toggle button {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            transition: var(--transition);
+        }
+
+        .form-toggle button.active {
+            background: var(--accent-color);
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .form-toggle button:hover:not(.active) {
+            color: var(--primary-dark);
         }
 
         @media (max-width: 900px) {
@@ -1099,7 +1086,7 @@
                 height: 100px;
             }
 
-            .entry-form {
+            .entry-form, .memory-form {
                 padding: 1.5rem;
             }
 
@@ -1132,82 +1119,6 @@
                 gap: 15px;
             }
         }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .modal.active {
-            display: flex;
-            opacity: 1;
-        }
-
-        .modal-content {
-            background-color: white;
-            border-radius: 20px;
-            padding: 2.5rem;
-            width: 90%;
-            max-width: 600px;
-            position: relative;
-            box-shadow: 0 15px 40px rgba(255, 107, 149, 0.3);
-            transform: translateY(-50px);
-            transition: transform 0.3s ease;
-        }
-
-        .modal.active .modal-content {
-            transform: translateY(0);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--medium-text);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .modal-close:hover {
-            color: var(--primary-color);
-            transform: rotate(90deg);
-        }
-
-        .add-entry-btn {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 30px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1.1rem;
-            box-shadow: 0 8px 20px rgba(255, 107, 149, 0.25);
-            transition: var(--transition);
-            margin-bottom: 2rem;
-        }
-
-        .add-entry-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(255, 107, 149, 0.35);
-        }
-
-        .add-entry-btn i {
-            margin-right: 10px;
-        }
     </style>
 </head>
 <body>
@@ -1235,7 +1146,7 @@
 
             <div class="couple-info">
                 <div class="partner-profile">
-                    <img src="/api/placeholder/120/120" alt="Анна" class="profile-img">
+                    <img src="https://via.placeholder.com/120/ffe0e8/fff9fb?text=Анна" alt="Анна" class="profile-img">
                     <h2 class="profile-name">Анна</h2>
                 </div>
 
@@ -1244,22 +1155,22 @@
                 </div>
 
                 <div class="partner-profile">
-                    <img src="/api/placeholder/120/120" alt="Михаил" class="profile-img">
+                    <img src="https://via.placeholder.com/120/ffe0e8/fff9fb?text=Михаил" alt="Михаил" class="profile-img">
                     <h2 class="profile-name">Михаил</h2>
                 </div>
             </div>
 
             <div class="relationship-stats">
                 <div class="stat">
-                    <div class="stat-value">0</div>
+                    <div class="stat-value">365</div>
                     <div class="stat-label">дней вместе</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value">0</div>
+                    <div class="stat-value">52</div>
                     <div class="stat-label">свиданий</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value">0</div>
+                    <div class="stat-value">3</div>
                     <div class="stat-label">путешествий</div>
                 </div>
             </div>
@@ -1267,9 +1178,9 @@
             <div class="entries-header">
                 <h2 class="entries-title">Наши записи</h2>
                 <div class="entries-filter">
-                    <button class="filter-btn active">Все</button>
-                    <button class="filter-btn">Анна</button>
-                    <button class="filter-btn">Михаил</button>
+                    <button class="filter-btn active" data-filter="all">Все</button>
+                    <button class="filter-btn" data-filter="Анна">Анна</button>
+                    <button class="filter-btn" data-filter="Михаил">Михаил</button>
                 </div>
             </div>
 
@@ -1277,7 +1188,7 @@
                 <i class="fas fa-plus"></i> Добавить запись
             </button>
 
-            <div class="entries-list">
+            <div class="entries-list" id="entriesList">
                 <div class="no-entries">
                     <i class="fas fa-heart"></i>
                     <h3>Пока нет записей</h3>
@@ -1291,34 +1202,38 @@
 
             <div class="memories-section">
                 <h2 class="memories-title">Наши особенные моменты</h2>
-                <div class="memory-cards">
+                <button class="add-memory-btn">
+                    <i class="fas fa-camera"></i> Добавить момент
+                </button>
+                <div class="memory-cards" id="memoryCards">
                     <div class="no-entries">
                         <i class="fas fa-heart"></i>
                         <h3>Пока нет воспоминаний</h3>
-                        <p>Добавьте свои особенные моменты, чтобы они появились здесь!</p>
+                        <p>Добавьте свои особенные моменты с помощью кнопки выше!</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Модальное окно -->
-        <div class="modal">
+        <div class="modal" id="entryModal">
             <div class="modal-content">
-                <button class="modal-close">×</button>
-                <form class="entry-form">
+                <button class="modal-close" id="closeModal">×</button>
+                <div class="form-toggle">
+                    <button id="showEntryForm" class="active">Запись</button>
+                    <button id="showMemoryForm">Момент</button>
+                </div>
+                <form class="entry-form" id="entryForm">
                     <div class="form-group">
                         <label for="entry-title" class="form-label">Заголовок</label>
-                        <input type="text" id="entry-title" class="form-input" placeholder="Назови этот момент...">
+                        <input type="text" id="entry-title" class="form-input" placeholder="Назови этот момент..." required>
                     </div>
-
                     <div class="form-group">
                         <label for="entry-content" class="form-label">Запись</label>
-                        <textarea id="entry-content" class="form-textarea" placeholder="Опиши свои чувства, мысли или особенный момент, который ты хочешь сохранить..."></textarea>
+                        <textarea id="entry-content" class="form-textarea" placeholder="Опиши свои чувства, мысли или особенный момент..." required></textarea>
                     </div>
-
                     <div class="form-group">
                         <label class="form-label">От кого</label>
-                        <div class="mood-selection">
+                        <div class="mood-selection" id="entryFromSelection">
                             <button type="button" class="mood-option active" data-from="Анна">
                                 <i class="fas fa-user"></i> Анна
                             </button>
@@ -1327,10 +1242,9 @@
                             </button>
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label class="form-label">Настроение</label>
-                        <div class="mood-selection">
+                        <div class="mood-selection" id="entryMoodSelection">
                             <button type="button" class="mood-option active">
                                 <i class="fas fa-heart"></i> Любовь
                             </button>
@@ -1345,18 +1259,45 @@
                             </button>
                         </div>
                     </div>
-
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-feather"></i> Сохранить момент
+                            <i class="fas fa-feather"></i> Сохранить запись
                         </button>
                         <button type="reset" class="btn btn-secondary">
                             <i class="fas fa-redo"></i> Начать заново
                         </button>
                     </div>
-
                     <div class="special-message">
                         Каждая запись — ещё один шаг к вечности вместе
+                    </div>
+                </form>
+                <form class="memory-form" id="memoryForm" style="display: none;">
+                    <div class="form-group">
+                        <label for="memory-title" class="form-label">Заголовок</label>
+                        <input type="text" id="memory-title" class="form-input" placeholder="Назови этот момент..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="memory-date" class="form-label">Дата</label>
+                        <input type="date" id="memory-date" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="memory-description" class="form-label">Описание</label>
+                        <textarea id="memory-description" class="form-textarea" placeholder="Опиши этот особенный момент..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="memory-image" class="form-label">Изображение (опционально)</label>
+                        <input type="file" id="memory-image" class="form-input" accept="image/*">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-camera"></i> Сохранить момент
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="fas fa-redo"></i> Начать заново
+                        </button>
+                    </div>
+                    <div class="special-message">
+                        Каждый момент — сокровище нашей любви
                     </div>
                 </form>
             </div>
@@ -1369,11 +1310,10 @@
                 <div class="footer-logo">
                     <i class="fas fa-heart"></i> Наш Дневник Любви
                 </div>
-                <p class="footer-text">Каждый день нашей любви особенный и заслуживает быть запечатленным. Сохраняйте моменты, делитесь чувствами, создавайте историю вашей любви.</p>
+                <p class="footer-text">Каждый день нашей любви особенный и заслуживает быть запечатленным.</p>
                 <div class="footer-links">
                     <a href="#" class="footer-link">О дневнике</a>
                     <a href="#" class="footer-link">Помощь</a>
-                    <a href="#" class="footer-link">Конфиденциальность</a>
                     <a href="#" class="footer-link">Контакты</a>
                 </div>
                 <div class="copyright">
@@ -1383,192 +1323,252 @@
         </div>
     </footer>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM полностью загружен'); // Отладка: проверяем загрузку DOM
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('entryModal');
+            const addEntryBtn = document.querySelector('.add-entry-btn');
+            const addMemoryBtn = document.querySelector('.add-memory-btn');
+            const closeModalBtn = document.getElementById('closeModal');
+            const entryForm = document.getElementById('entryForm');
+            const memoryForm = document.getElementById('memoryForm');
+            const entriesList = document.getElementById('entriesList');
+            const memoryCards = document.getElementById('memoryCards');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const showEntryFormBtn = document.getElementById('showEntryForm');
+            const showMemoryFormBtn = document.getElementById('showMemoryForm');
 
-    // Инициализация Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
-        authDomain: "misha-and-anna-48e4c.firebaseapp.com",
-        projectId: "misha-and-anna-48e4c",
-        storageBucket: "misha-and-anna-48e4c.firebasestorage.app",
-        messagingSenderId: "822036073579",
-        appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
-        measurementId: "G-XR86X6PXMX"
-    };
+            // Переключение между формами
+            showEntryFormBtn.addEventListener('click', function() {
+                entryForm.style.display = 'block';
+                memoryForm.style.display = 'none';
+                showEntryFormBtn.classList.add('active');
+                showMemoryFormBtn.classList.remove('active');
+            });
 
-    try {
-        // Инициализируем Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        console.log('Firebase успешно инициализирован'); // Отладка: проверяем Firebase
+            showMemoryFormBtn.addEventListener('click', function() {
+                entryForm.style.display = 'none';
+                memoryForm.style.display = 'block';
+                showEntryFormBtn.classList.remove('active');
+                showMemoryFormBtn.classList.add('active');
+            });
 
-        // Элементы DOM
-        const modal = document.querySelector('.modal');
-        const addEntryBtn = document.querySelector('.add-entry-btn');
-        const closeModalBtn = document.querySelector('.modal-close');
-        const entryForm = document.querySelector('.entry-form');
-        const entriesList = document.querySelector('.entries-list');
+            // Загрузка записей из localStorage
+            function loadEntries(filter = 'all') {
+                const entries = JSON.parse(localStorage.getItem('diaryEntries') || '[]');
+                entriesList.innerHTML = '';
+                const filteredEntries = filter === 'all' ? entries : entries.filter(entry => entry.from === filter);
 
-        if (!addEntryBtn) {
-            console.error('Кнопка "Добавить запись" не найдена');
-            return;
-        }
-        console.log('Кнопка "Добавить запись" найдена'); // Отладка: проверяем кнопку
+                if (filteredEntries.length === 0) {
+                    entriesList.innerHTML = `
+                        <div class="no-entries">
+                            <i class="fas fa-heart"></i>
+                            <h3>Пока нет записей</h3>
+                            <p>Начните вашу историю любви, добавив первую запись с помощью кнопки выше!</p>
+                        </div>
+                    `;
+                } else {
+                    filteredEntries.sort((a, b) => b.date - a.date).forEach(entry => renderEntry(entry));
+                }
+            }
 
-        // Функция для отображения записи
-        function renderEntry(doc) {
-            const entry = document.createElement('div');
-            entry.className = 'entry';
-            entry.innerHTML = `
-                <div class="entry-from">От ${doc.data().from}</div>
-                <div class="entry-header">
-                    <div class="entry-date">
-                        <i class="far fa-calendar"></i> ${new Date(doc.data().date).toLocaleDateString('ru-RU', {
+            // Загрузка воспоминаний из localStorage
+            function loadMemories() {
+                const memories = JSON.parse(localStorage.getItem('diaryMemories') || '[]');
+                memoryCards.innerHTML = '';
+                if (memories.length === 0) {
+                    memoryCards.innerHTML = `
+                        <div class="no-entries">
+                            <i class="fas fa-heart"></i>
+                            <h3>Пока нет воспоминаний</h3>
+                            <p>Добавьте свои особенные моменты с помощью кнопки выше!</p>
+                        </div>
+                    `;
+                } else {
+                    memories.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(memory => renderMemory(memory));
+                }
+            }
+
+            // Отображение записи
+            function renderEntry(entry) {
+                const div = document.createElement('div');
+                div.className = 'entry';
+                div.innerHTML = `
+                    <div class="entry-from">От ${entry.from}</div>
+                    <div class="entry-header">
+                        <div class="entry-date">
+                            <i class="far fa-calendar"></i> ${new Date(entry.date).toLocaleDateString('ru-RU', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric'
+                            })}
+                        </div>
+                    </div>
+                    <h3>${entry.title}</h3>
+                    <div class="entry-content">${entry.content}</div>
+                    <div class="entry-footer">
+                        <div class="entry-mood">
+                            <i class="fas fa-heart"></i> ${entry.mood}
+                        </div>
+                    </div>
+                `;
+                entriesList.insertBefore(div, entriesList.firstChild);
+            }
+
+            // Отображение воспоминания
+            function renderMemory(memory) {
+                const div = document.createElement('div');
+                div.className = 'memory-card';
+                div.innerHTML = `
+                    <img src="${memory.image || 'https://via.placeholder.com/280x180/ffe0e8/fff9fb?text=Момент'}" class="memory-image" alt="${memory.title}">
+                    <div class="memory-content">
+                        <span class="memory-date">${new Date(memory.date).toLocaleDateString('ru-RU', {
                             day: 'numeric',
                             month: 'long',
                             year: 'numeric'
-                        })}
+                        })}</span>
+                        <h3 class="memory-title">${memory.title}</h3>
+                        <p class="memory-description">${memory.description}</p>
                     </div>
-                </div>
-                <h3>${doc.data().title}</h3>
-                <div class="entry-content">${doc.data().content}</div>
-                <div class="entry-footer">
-                    <div class="entry-mood">
-                        <i class="fas fa-heart"></i> ${doc.data().mood}
-                    </div>
-                </div>
-            `;
-            entriesList.insertBefore(entry, entriesList.firstChild);
-        }
+                `;
+                memoryCards.insertBefore(div, memoryCards.firstChild);
+            }
 
-        // Загрузка записей из Firestore
-        function loadEntries() {
-            entriesList.innerHTML = ''; // Очищаем список перед загрузкой
-            db.collection('entries')
-                .orderBy('date', 'desc') // Сортировка по дате (новые сверху)
-                .get()
-                .then((querySnapshot) => {
-                    if (querySnapshot.empty) {
-                        entriesList.innerHTML = `
-                            <div class="no-entries">
-                                <i class="fas fa-heart"></i>
-                                <h3>Пока нет записей</h3>
-                                <p>Начните вашу историю любви, добавив первую запись с помощью кнопки выше!</p>
-                            </div>
-                        `;
-                    } else {
-                        querySnapshot.forEach((doc) => {
-                            renderEntry(doc);
-                        });
-                    }
-                })
-                .catch((error) => {
-                    console.error("Ошибка загрузки записей: ", error);
-                });
-        }
+            // Открытие модального окна для записи
+            addEntryBtn.addEventListener('click', function() {
+                modal.classList.add('active');
+                entryForm.style.display = 'block';
+                memoryForm.style.display = 'none';
+                showEntryFormBtn.classList.add('active');
+                showMemoryFormBtn.classList.remove('active');
+            });
 
-        // Загружаем записи при старте
-        loadEntries();
+            // Открытие модального окна для воспоминания
+            addMemoryBtn.addEventListener('click', function() {
+                modal.classList.add('active');
+                entryForm.style.display = 'none';
+                memoryForm.style.display = 'block';
+                showEntryFormBtn.classList.remove('active');
+                showMemoryFormBtn.classList.add('active');
+            });
 
-        // Открытие модального окна
-        addEntryBtn.addEventListener('click', function() {
-            console.log('Клик по кнопке "Добавить запись"'); // Отладка: проверяем клик
-            modal.classList.add('active');
-        });
-
-        // Закрытие модального окна
-        closeModalBtn.addEventListener('click', function() {
-            modal.classList.remove('active');
-            entryForm.reset();
-        });
-
-        // Закрытие при клике вне модального окна
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
+            // Закрытие модального окна
+            closeModalBtn.addEventListener('click', function() {
                 modal.classList.remove('active');
                 entryForm.reset();
-            }
-        });
-
-        // Обработка выбора настроения и автора
-        const moodOptions = document.querySelectorAll('.mood-option');
-        moodOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                const siblings = this.parentElement.querySelectorAll('.mood-option');
-                siblings.forEach(opt => opt.classList.remove('active'));
-                this.classList.add('active');
+                memoryForm.reset();
+                resetSelections('entryFromSelection');
+                resetSelections('entryMoodSelection');
             });
-        });
 
-        // Обработка фильтров записей
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        filterButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                filterButtons.forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
-
-                const filter = this.textContent.trim();
-                entriesList.innerHTML = '';
-                let query = db.collection('entries').orderBy('date', 'desc');
-
-                if (filter === 'Анна' || filter === 'Михаил') {
-                    query = query.where('from', '==', filter);
+            // Закрытие при клике вне окна
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                    entryForm.reset();
+                    memoryForm.reset();
+                    resetSelections('entryFromSelection');
+                    resetSelections('entryMoodSelection');
                 }
+            });
 
-                query.get().then((querySnapshot) => {
-                    if (querySnapshot.empty) {
-                        entriesList.innerHTML = `
-                            <div class="no-entries">
-                                <i class="fas fa-heart"></i>
-                                <h3>Пока нет записей</h3>
-                                <p>Начните вашу историю любви, добавив первую запись с помощью кнопки выше!</p>
-                            </div>
-                        `;
-                    } else {
-                        querySnapshot.forEach((doc) => {
-                            renderEntry(doc);
-                        });
-                    }
+            // Настройка выбора "От кого" и "Настроение"
+            function setupSelection(containerId) {
+                const options = document.querySelectorAll(`#${containerId} .mood-option`);
+                options.forEach(option => {
+                    option.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        options.forEach(opt => opt.classList.remove('active'));
+                        this.classList.add('active');
+                    });
+                });
+            }
+
+            setupSelection('entryFromSelection');
+            setupSelection('entryMoodSelection');
+
+            // Сброс выбора до начального состояния
+            function resetSelections(containerId) {
+                const options = document.querySelectorAll(`#${containerId} .mood-option`);
+                options.forEach(opt => opt.classList.remove('active'));
+                options[0].classList.add('active');
+            }
+
+            // Фильтрация записей
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    const filter = this.getAttribute('data-filter');
+                    loadEntries(filter);
                 });
             });
-        });
 
-        // Обработка отправки формы
-        entryForm.addEventListener('submit', function(e) {
-            e.preventDefault();
+            // Сохранение записи
+            entryForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const title = document.getElementById('entry-title').value;
+                const content = document.getElementById('entry-content').value;
+                const from = document.querySelector('#entryFromSelection .mood-option.active').getAttribute('data-from');
+                const mood = document.querySelector('#entryMoodSelection .mood-option.active').textContent.trim();
+                const date = new Date().getTime();
 
-            const title = document.getElementById('entry-title').value;
-            const content = document.getElementById('entry-content').value;
-            const mood = document.querySelector('.mood-selection:nth-child(4) .mood-option.active').textContent.trim();
-            const from = document.querySelector('.mood-selection:nth-child(3) .mood-option.active').getAttribute('data-from');
-            const date = new Date().getTime(); // Сохраняем timestamp для сортировки
+                const entry = { title, content, from, mood, date };
+                const entries = JSON.parse(localStorage.getItem('diaryEntries') || '[]');
+                entries.push(entry);
+                localStorage.setItem('diaryEntries', JSON.stringify(entries));
 
-            // Сохранение в Firestore
-            db.collection('entries').add({
-                title: title,
-                content: content,
-                mood: mood,
-                from: from,
-                date: date
-            })
-            .then(() => {
+                renderEntry(entry);
+                if (entriesList.querySelector('.no-entries')) {
+                    entriesList.querySelector('.no-entries').remove();
+                }
+
                 modal.classList.remove('active');
                 this.reset();
-                alert('Запись успешно сохранена!');
-                loadEntries(); // Перезагружаем записи
-            })
-            .catch((error) => {
-                console.error("Ошибка сохранения записи: ", error);
-                alert('Произошла ошибка при сохранении записи.');
+                resetSelections('entryFromSelection');
+                resetSelections('entryMoodSelection');
             });
-        });
 
-    } catch (error) {
-        console.error('Ошибка инициализации Firebase:', error);
-    }
-});
-</script>
+            // Сохранение воспоминания
+            memoryForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const title = document.getElementById('memory-title').value;
+                const date = document.getElementById('memory-date').value;
+                const description = document.getElementById('memory-description').value;
+                const imageInput = document.getElementById('memory-image');
+                const reader = new FileReader();
+
+                const memory = { title, date, description };
+
+                if (imageInput.files && imageInput.files[0]) {
+                    reader.onload = function(e) {
+                        memory.image = e.target.result;
+                        saveMemory(memory);
+                    };
+                    reader.readAsDataURL(imageInput.files[0]);
+                } else {
+                    saveMemory(memory);
+                }
+            });
+
+            function saveMemory(memory) {
+                const memories = JSON.parse(localStorage.getItem('diaryMemories') || '[]');
+                memories.push(memory);
+                localStorage.setItem('diaryMemories', JSON.stringify(memories));
+
+                renderMemory(memory);
+                if (memoryCards.querySelector('.no-entries')) {
+                    memoryCards.querySelector('.no-entries').remove();
+                }
+
+                modal.classList.remove('active');
+                memoryForm.reset();
+            }
+
+            // Начальная загрузка
+            loadEntries();
+            loadMemories();
+        });
+    </script>
 </body>
 </html>
+    
