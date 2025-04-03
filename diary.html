@@ -397,7 +397,7 @@
             transform: translateY(-2px);
         }
 
-        .add-entry-btn, .add-memory-btn {
+        .add-entry-btn, .add-memory-btn, .select-delete-btn, .confirm-delete-btn {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             padding: 1rem 2rem;
@@ -408,19 +408,23 @@
             font-size: 1.1rem;
             box-shadow: 0 8px 20px rgba(255, 107, 149, 0.25);
             transition: var(--transition);
-            margin-bottom: 2rem;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
+            margin-bottom: 1rem;
+            display: inline-block;
+            margin-left: 10px;
         }
 
-        .add-entry-btn:hover, .add-memory-btn:hover {
+        .add-entry-btn:hover, .add-memory-btn:hover, .select-delete-btn:hover, .confirm-delete-btn:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 25px rgba(255, 107, 149, 0.35);
         }
 
-        .add-entry-btn i, .add-memory-btn i {
+        .add-entry-btn i, .add-memory-btn i, .select-delete-btn i, .confirm-delete-btn i {
             margin-right: 10px;
+        }
+
+        .confirm-delete-btn {
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            display: none;
         }
 
         .entries-list {
@@ -647,6 +651,11 @@
         .memory-card:hover {
             transform: perspective(800px) rotateY(10deg) translateY(-15px);
             box-shadow: -10px 15px 30px rgba(255, 107, 149, 0.25);
+        }
+
+        .memory-card.selected {
+            border: 3px solid var(--primary-dark);
+            background-color: rgba(255, 107, 149, 0.1);
         }
 
         .memory-image {
@@ -1309,6 +1318,12 @@
                 <button class="add-memory-btn">
                     <i class="fas fa-camera"></i> Добавить момент
                 </button>
+                <button class="select-delete-btn">
+                    <i class="fas fa-trash"></i> Выбрать для удаления
+                </button>
+                <button class="confirm-delete-btn">
+                    <i class="fas fa-check"></i> Удалить выбранное
+                </button>
                 <div class="memory-cards" id="memoryCards">
                     <div class="no-entries">
                         <i class="fas fa-heart"></i>
@@ -1427,6 +1442,8 @@
             const modal = document.getElementById('entryModal');
             const addEntryBtn = document.querySelector('.add-entry-btn');
             const addMemoryBtn = document.querySelector('.add-memory-btn');
+            const selectDeleteBtn = document.querySelector('.select-delete-btn');
+            const confirmDeleteBtn = document.querySelector('.confirm-delete-btn');
             const closeModalBtn = document.getElementById('closeModal');
             const entryForm = document.getElementById('entryForm');
             const memoryForm = document.getElementById('memoryForm');
@@ -1435,6 +1452,7 @@
             const filterButtons = document.querySelectorAll('.filter-btn');
             const showEntryFormBtn = document.getElementById('showEntryForm');
             const showMemoryFormBtn = document.getElementById('showMemoryForm');
+            let isSelecting = false;
 
             // Переключение между формами
             showEntryFormBtn.addEventListener('click', function() {
@@ -1545,10 +1563,20 @@
                 `;
                 memoryCards.insertBefore(div, memoryCards.firstChild);
 
-                // Добавляем обработчик удаления
+                // Обработчик индивидуального удаления
                 div.querySelector('.delete-btn').addEventListener('click', function() {
-                    if (confirm('Вы уверены, что хотите удалить этот момент?')) {
-                        deleteMemory(memory.date);
+                    if (!isSelecting) {
+                        if (confirm('Вы уверены, что хотите удалить этот момент?')) {
+                            deleteMemory(memory.date);
+                        }
+                    }
+                });
+
+                // Обработчик выбора для массового удаления
+                div.addEventListener('click', function(e) {
+                    if (isSelecting && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'I') {
+                        div.classList.toggle('selected');
+                        updateConfirmButtonVisibility();
                     }
                 });
             }
@@ -1568,6 +1596,41 @@
                 localStorage.setItem('diaryMemories', JSON.stringify(memories));
                 loadMemories();
             }
+
+            // Удаление выбранных воспоминаний
+            function deleteSelectedMemories() {
+                const selectedCards = document.querySelectorAll('.memory-card.selected');
+                if (selectedCards.length === 0) return;
+
+                if (confirm(`Вы уверены, что хотите удалить ${selectedCards.length} момент(ов)?`)) {
+                    let memories = JSON.parse(localStorage.getItem('diaryMemories') || '[]');
+                    const datesToDelete = Array.from(selectedCards).map(card => card.dataset.date);
+                    memories = memories.filter(memory => !datesToDelete.includes(memory.date));
+                    localStorage.setItem('diaryMemories', JSON.stringify(memories));
+                    loadMemories();
+                    isSelecting = false;
+                    selectDeleteBtn.textContent = 'Выбрать для удаления';
+                    confirmDeleteBtn.style.display = 'none';
+                }
+            }
+
+            // Обновление видимости кнопки подтверждения
+            function updateConfirmButtonVisibility() {
+                const selectedCards = document.querySelectorAll('.memory-card.selected');
+                confirmDeleteBtn.style.display = selectedCards.length > 0 ? 'inline-block' : 'none';
+            }
+
+            // Переключение режима выбора
+            selectDeleteBtn.addEventListener('click', function() {
+                isSelecting = !isSelecting;
+                this.textContent = isSelecting ? 'Отменить выбор' : 'Выбрать для удаления';
+                const cards = document.querySelectorAll('.memory-card');
+                cards.forEach(card => card.classList.remove('selected'));
+                confirmDeleteBtn.style.display = 'none';
+            });
+
+            // Подтверждение удаления выбранных
+            confirmDeleteBtn.addEventListener('click', deleteSelectedMemories);
 
             // Открытие модального окна для записи
             addEntryBtn.addEventListener('click', function() {
@@ -1703,9 +1766,6 @@
             // Начальная загрузка
             loadEntries();
             loadMemories();
-
-            // Для отладки: вывести все воспоминания в консоль
-            console.log("Текущие воспоминания в localStorage:", JSON.parse(localStorage.getItem('diaryMemories') || '[]'));
         });
     </script>
 </body>
