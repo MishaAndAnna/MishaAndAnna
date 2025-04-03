@@ -631,7 +631,7 @@
 
         .memory-card {
             min-width: 280px;
-            height: 600px; /* Увеличенная высота карточки */
+            height: 600px;
             background-color: white;
             border-radius: 20px;
             overflow: hidden;
@@ -650,7 +650,7 @@
         }
 
         .memory-image {
-            height: 240px; /* Примерно 40% от 600px */
+            height: 240px;
             width: 100%;
             object-fit: cover;
             border-bottom: 4px solid var(--accent-color);
@@ -693,8 +693,8 @@
             color: var(--medium-text);
             line-height: 1.7;
             flex-grow: 1;
-            max-height: 250px; /* Увеличенная зона текста */
-            overflow-y: auto; /* Прокрутка, если текст слишком длинный */
+            max-height: 250px;
+            overflow-y: auto;
             scrollbar-width: thin;
             scrollbar-color: var(--primary-color) var(--accent-color);
         }
@@ -1189,15 +1189,15 @@
             }
 
             .memory-card {
-                height: 500px; /* Увеличенная высота для мобильных */
+                height: 500px;
             }
 
             .memory-image {
-                height: 200px; /* Примерно 40% от 500px */
+                height: 200px;
             }
 
             .memory-description {
-                max-height: 200px; /* Уменьшенная зона текста для мобильных */
+                max-height: 200px;
             }
         }
     </style>
@@ -1520,6 +1520,7 @@
                 `;
                 memoryCards.insertBefore(div, memoryCards.firstChild);
 
+                // Добавляем обработчик удаления для каждой кнопки
                 div.querySelector('.delete-btn').addEventListener('click', function() {
                     if (confirm('Вы уверены, что хотите удалить этот момент?')) {
                         deleteMemory(memory.date);
