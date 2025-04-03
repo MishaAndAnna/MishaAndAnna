@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Наш Дневник Любви</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
     <style>
         :root {
             --primary-color: #ff6b95;
@@ -1301,7 +1304,7 @@
         <!-- Модальное окно -->
         <div class="modal">
             <div class="modal-content">
-                <button class="modal-close">&times;</button>
+                <button class="modal-close">×</button>
                 <form class="entry-form">
                     <div class="form-group">
                         <label for="entry-title" class="form-label">Заголовок</label>
@@ -1382,11 +1385,82 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Инициализация Firebase
+            const firebaseConfig = {
+                apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
+                authDomain: "misha-and-anna-48e4c.firebaseapp.com",
+                projectId: "misha-and-anna-48e4c",
+                storageBucket: "misha-and-anna-48e4c.firebasestorage.app",
+                messagingSenderId: "822036073579",
+                appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
+                measurementId: "G-XR86X6PXMX"
+            };
+
+            // Инициализируем Firebase
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
+
+            // Элементы DOM
             const modal = document.querySelector('.modal');
             const addEntryBtn = document.querySelector('.add-entry-btn');
             const closeModalBtn = document.querySelector('.modal-close');
             const entryForm = document.querySelector('.entry-form');
             const entriesList = document.querySelector('.entries-list');
+
+            // Функция для отображения записи
+            function renderEntry(doc) {
+                const entry = document.createElement('div');
+                entry.className = 'entry';
+                entry.innerHTML = `
+                    <div class="entry-from">От ${doc.data().from}</div>
+                    <div class="entry-header">
+                        <div class="entry-date">
+                            <i class="far fa-calendar"></i> ${new Date(doc.data().date).toLocaleDateString('ru-RU', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric'
+                            })}
+                        </div>
+                    </div>
+                    <h3>${doc.data().title}</h3>
+                    <div class="entry-content">${doc.data().content}</div>
+                    <div class="entry-footer">
+                        <div class="entry-mood">
+                            <i class="fas fa-heart"></i> ${doc.data().mood}
+                        </div>
+                    </div>
+                `;
+                entriesList.insertBefore(entry, entriesList.firstChild);
+            }
+
+            // Загрузка записей из Firestore
+            function loadEntries() {
+                entriesList.innerHTML = ''; // Очищаем список перед загрузкой
+                db.collection('entries')
+                    .orderBy('date', 'desc') // Сортировка по дате (новые сверху)
+                    .get()
+                    .then((querySnapshot) => {
+                        if (querySnapshot.empty) {
+                            entriesList.innerHTML = `
+                                <div class="no-entries">
+                                    <i class="fas fa-heart"></i>
+                                    <h3>Пока нет записей</h3>
+                                    <p>Начните вашу историю любви, добавив первую запись с помощью кнопки выше!</p>
+                                </div>
+                            `;
+                        } else {
+                            querySnapshot.forEach((doc) => {
+                                renderEntry(doc);
+                            });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Ошибка загрузки записей: ", error);
+                    });
+            }
+
+            // Загружаем записи при старте
+            loadEntries();
 
             // Открытие модального окна
             addEntryBtn.addEventListener('click', function() {
@@ -1423,7 +1497,30 @@
                 button.addEventListener('click', function() {
                     filterButtons.forEach(btn => btn.classList.remove('active'));
                     this.classList.add('active');
-                    // Логика фильтрации может быть добавлена здесь
+
+                    const filter = this.textContent.trim();
+                    entriesList.innerHTML = '';
+                    let query = db.collection('entries').orderBy('date', 'desc');
+
+                    if (filter === 'Анна' || filter === 'Михаил') {
+                        query = query.where('from', '==', filter);
+                    }
+
+                    query.get().then((querySnapshot) => {
+                        if (querySnapshot.empty) {
+                            entriesList.innerHTML = `
+                                <div class="no-entries">
+                                    <i class="fas fa-heart"></i>
+                                    <h3>Пока нет записей</h3>
+                                    <p>Начните вашу историю любви, добавив первую запись с помощью кнопки выше!</p>
+                                </div>
+                            `;
+                        } else {
+                            querySnapshot.forEach((doc) => {
+                                renderEntry(doc);
+                            });
+                        }
+                    });
                 });
             });
 
@@ -1435,38 +1532,26 @@
                 const content = document.getElementById('entry-content').value;
                 const mood = document.querySelector('.mood-selection:nth-child(4) .mood-option.active').textContent.trim();
                 const from = document.querySelector('.mood-selection:nth-child(3) .mood-option.active').getAttribute('data-from');
-                const date = new Date().toLocaleDateString('ru-RU', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
+                const date = new Date().getTime(); // Сохраняем timestamp для сортировки
+
+                // Сохранение в Firestore
+                db.collection('entries').add({
+                    title: title,
+                    content: content,
+                    mood: mood,
+                    from: from,
+                    date: date
+                })
+                .then(() => {
+                    modal.classList.remove('active');
+                    this.reset();
+                    alert('Запись успешно сохранена!');
+                    loadEntries(); // Перезагружаем записи
+                })
+                .catch((error) => {
+                    console.error("Ошибка сохранения записи: ", error);
+                    alert('Произошла ошибка при сохранении записи.');
                 });
-
-                if (entriesList.querySelector('.no-entries')) {
-                    entriesList.innerHTML = '';
-                }
-
-                const newEntry = document.createElement('div');
-                newEntry.className = 'entry';
-                newEntry.innerHTML = `
-                    <div class="entry-from">От ${from}</div>
-                    <div class="entry-header">
-                        <div class="entry-date">
-                            <i class="far fa-calendar"></i> ${date}
-                        </div>
-                    </div>
-                    <h3>${title}</h3>
-                    <div class="entry-content">${content}</div>
-                    <div class="entry-footer">
-                        <div class="entry-mood">
-                            <i class="fas fa-heart"></i> ${mood}
-                        </div>
-                    </div>
-                `;
-                entriesList.insertBefore(newEntry, entriesList.firstChild);
-
-                modal.classList.remove('active');
-                this.reset();
-                alert('Запись успешно сохранена!');
             });
         });
     </script>
