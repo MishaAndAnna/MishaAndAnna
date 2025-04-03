@@ -459,7 +459,8 @@
 
         .entry-header {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 1.2rem;
         }
 
@@ -495,7 +496,7 @@
 
         .entry-footer {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
             font-size: 0.95rem;
             color: var(--light-text);
@@ -518,6 +519,21 @@
         .entry-mood i {
             margin-right: 8px;
             color: var(--primary-color);
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--medium-text);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .delete-btn:hover {
+            color: var(--primary-dark);
+            transform: scale(1.2);
         }
 
         .heart-divider {
@@ -615,6 +631,7 @@
 
         .memory-card {
             min-width: 280px;
+            height: 450px; /* Фиксированная высота карточки для расчета 40% */
             background-color: white;
             border-radius: 20px;
             overflow: hidden;
@@ -623,6 +640,8 @@
             transform: perspective(800px) rotateY(0deg);
             transform-style: preserve-3d;
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
         .memory-card:hover {
@@ -631,7 +650,7 @@
         }
 
         .memory-image {
-            height: 180px;
+            height: 180px; /* Примерно 40% от 450px */
             width: 100%;
             object-fit: cover;
             border-bottom: 4px solid var(--accent-color);
@@ -646,7 +665,10 @@
         .memory-content {
             padding: 1.5rem;
             text-align: left;
-            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .memory-date {
@@ -670,6 +692,13 @@
             font-size: 1rem;
             color: var(--medium-text);
             line-height: 1.7;
+            flex-grow: 1;
+        }
+
+        .memory-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
         }
 
         .no-entries {
@@ -801,21 +830,20 @@
             padding: 2.5rem;
             width: 90%;
             max-width: 600px;
-            max-height: 80vh; /* Ограничение максимальной высоты */
-            overflow-y: auto; /* Включение вертикальной прокрутки */
+            max-height: 80vh;
+            overflow-y: auto;
             position: relative;
             box-shadow: 0 15px 40px rgba(255, 107, 149, 0.3);
             transform: translateY(-50px);
             transition: transform 0.3s ease;
-            scrollbar-width: thin; /* Тонкая полоса прокрутки для Firefox */
-            scrollbar-color: var(--primary-color) var(--accent-color); /* Цвет полосы и фона */
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) var(--accent-color);
         }
 
         .modal.active .modal-content {
             transform: translateY(0);
         }
 
-        /* Стилизация полосы прокрутки для WebKit-браузеров (Chrome, Safari) */
         .modal-content::-webkit-scrollbar {
             width: 8px;
         }
@@ -1141,6 +1169,14 @@
             .memory-cards {
                 gap: 15px;
             }
+
+            .memory-card {
+                height: 400px; /* Уменьшаем высоту для мобильных устройств */
+            }
+
+            .memory-image {
+                height: 160px; /* Примерно 40% от 400px */
+            }
         }
     </style>
 </head>
@@ -1410,9 +1446,11 @@
             function renderEntry(entry) {
                 const div = document.createElement('div');
                 div.className = 'entry';
+                div.dataset.date = entry.date; // Добавляем атрибут для идентификации
                 div.innerHTML = `
                     <div class="entry-from">От ${entry.from}</div>
                     <div class="entry-header">
+                        <button class="delete-btn" title="Удалить запись"><i class="fas fa-trash"></i></button>
                         <div class="entry-date">
                             <i class="far fa-calendar"></i> ${new Date(entry.date).toLocaleDateString('ru-RU', {
                                 day: 'numeric',
@@ -1430,12 +1468,20 @@
                     </div>
                 `;
                 entriesList.insertBefore(div, entriesList.firstChild);
+
+                // Обработчик удаления записи
+                div.querySelector('.delete-btn').addEventListener('click', function() {
+                    if (confirm('Вы уверены, что хотите удалить эту запись?')) {
+                        deleteEntry(entry.date);
+                    }
+                });
             }
 
             // Отображение воспоминания
             function renderMemory(memory) {
                 const div = document.createElement('div');
                 div.className = 'memory-card';
+                div.dataset.date = memory.date; // Добавляем атрибут для идентификации
                 div.innerHTML = `
                     <img src="${memory.image || 'https://via.placeholder.com/280x180/ffe0e8/fff9fb?text=Момент'}" class="memory-image" alt="${memory.title}">
                     <div class="memory-content">
@@ -1446,9 +1492,35 @@
                         })}</span>
                         <h3 class="memory-title">${memory.title}</h3>
                         <p class="memory-description">${memory.description}</p>
+                        <div class="memory-footer">
+                            <button class="delete-btn" title="Удалить момент"><i class="fas fa-trash"></i></button>
+                        </div>
                     </div>
                 `;
                 memoryCards.insertBefore(div, memoryCards.firstChild);
+
+                // Обработчик удаления воспоминания
+                div.querySelector('.delete-btn').addEventListener('click', function() {
+                    if (confirm('Вы уверены, что хотите удалить этот момент?')) {
+                        deleteMemory(memory.date);
+                    }
+                });
+            }
+
+            // Удаление записи
+            function deleteEntry(date) {
+                let entries = JSON.parse(localStorage.getItem('diaryEntries') || '[]');
+                entries = entries.filter(entry => entry.date !== date);
+                localStorage.setItem('diaryEntries', JSON.stringify(entries));
+                loadEntries(document.querySelector('.filter-btn.active').getAttribute('data-filter'));
+            }
+
+            // Удаление воспоминания
+            function deleteMemory(date) {
+                let memories = JSON.parse(localStorage.getItem('diaryMemories') || '[]');
+                memories = memories.filter(memory => new Date(memory.date).getTime() !== new Date(date).getTime());
+                localStorage.setItem('diaryMemories', JSON.stringify(memories));
+                loadMemories();
             }
 
             // Открытие модального окна для записи
