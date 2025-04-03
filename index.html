@@ -303,6 +303,15 @@
                     }
                 });
             });
+
+            // Обработчик для бокового меню
+            const sidebarToggle = document.getElementById('siteFunctionsBtn');
+            const sidebarMenu = document.getElementById('functionsMenu');
+            if (sidebarToggle && sidebarMenu) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebarMenu.classList.toggle('active');
+                });
+            }
         });
 
         displaySavedWishes();
@@ -413,6 +422,7 @@
             display: none;
             opacity: 1;
             transition: opacity 0.7s ease;
+            position: relative;
         }
 
         body.dark-mode #content-section {
@@ -784,6 +794,71 @@
             transform: scale(1.08);
             box-shadow: 0 4px 6px var(--shadow-color);
         }
+
+        /* Стили для бокового меню */
+        #sidebar {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            z-index: 100;
+        }
+
+        .sidebar-toggle {
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color var(--transition-duration) ease, transform 0.2s ease;
+        }
+
+        .sidebar-toggle:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.08);
+            box-shadow: 0 4px 6px var(--shadow-color);
+        }
+
+        .sidebar-menu {
+            display: none;
+            position: absolute;
+            top: 60px;
+            left: 0;
+            background-color: var(--bg-light);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            min-width: 200px;
+        }
+
+        .sidebar-menu.active {
+            display: block;
+        }
+
+        body.dark-mode .sidebar-menu {
+            background-color: var(--bg-dark);
+        }
+
+        .menu-btn {
+            display: block;
+            width: 100%;
+            padding: 10px 15px;
+            margin: 5px 0;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
+            transition: background-color var(--transition-duration) ease, transform 0.2s ease;
+        }
+
+        .menu-btn:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -803,6 +878,16 @@
     </div>
 
     <div id="content-section">
+        <div id="sidebar">
+            <button id="siteFunctionsBtn" class="sidebar-toggle">Функции сайта</button>
+            <div id="functionsMenu" class="sidebar-menu">
+                <button onclick="window.location.href='https://mishaandanna.github.io/MishaAndAnna/ForAnnaandMisha.html'" class="menu-btn">Признание</button>
+                <button onclick="window.location.href='movie.html'" class="menu-btn">Перейти на сайт с фильмами</button>
+                <button onclick="window.location.href='diary.html'" class="menu-btn">Открыть Дневник Любви</button>
+                <button onclick="window.location.href='universe.html'" class="menu-btn">Наша вселенная любви</button>
+            </div>
+        </div>
+
         <h1>Наш Личный Сайт</h1>
 
         <section id="love-quotes">
@@ -944,17 +1029,6 @@
             </form>
             <div id="saved-wishes-list"></div>
         </div>
-
-        <button onclick="window.location.href='movie.html';">Перейти на сайт с фильмами</button>
-        
-        <a href="diary.html" class="diary-btn">
-            <i class="fas fa-book-open"></i> Открыть Дневник Любви
-        </a>
-
-        <button onclick="window.location.href='universe.html';" class="return-button">Наша вселенная любви</button>
-        <a href="https://mishaandanna.github.io/MishaAndAnna/ForAnnaandMisha.html" target="_blank">
-            <button style="position: absolute; bottom: 20px; left: 20px; padding: 10px 20px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(218, 165, 32, 0.5); color: #fff; font-family: 'Cormorant Garamond', serif; border-radius: 20px; cursor: pointer; transition: all 0.3s ease;">Признание</button>
-        </a>
     </div>
 </body>
 </html>
