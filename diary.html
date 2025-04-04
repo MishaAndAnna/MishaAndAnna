@@ -1498,6 +1498,9 @@
                     console.log('Авторизация успешна');
                 }).catch(error => {
                     console.error('Ошибка при входе:', error);
+                    if (error.error === 'popup_closed_by_user') {
+                        alert('Пожалуйста, завершите авторизацию в окне Google, чтобы загрузить файлы.');
+                    }
                 });
             }
         }
@@ -1771,20 +1774,37 @@
             const file = fileInput.files[0];
 
             if (file) {
-                if (!gapi.auth2.getAuthInstance().isSignedIn.get()) {
-                    console.error('Пользователь не авторизован перед загрузкой файла');
-                    gapi.auth2.getAuthInstance().signIn().then(() => {
+                const authInstance = gapi.auth2.getAuthInstance();
+                if (!authInstance.isSignedIn.get()) {
+                    console.log('Пользователь не авторизован, запрашиваем вход');
+                    authInstance.signIn().then(() => {
+                        console.log('Авторизация успешна, загружаем файл');
                         uploadFileToDrive(file).then(imageUrl => {
                             const memory = { title, date, description, image: imageUrl };
                             saveMemory(memory);
+                        }).catch(error => {
+                            console.error('Ошибка при загрузке файла:', error);
+                            const memory = { 
+                                title, 
+                                date, 
+                                description, 
+                                image: 'https://via.placeholder.com/280x240/ffe0e8/fff9fb?text=Ошибка' 
+                            };
+                            saveMemory(memory);
                         });
+                    }).catch(error => {
+                        console.error('Ошибка авторизации:', error);
+                        if (error.error === 'popup_closed_by_user') {
+                            alert('Пожалуйста, завершите авторизацию в окне Google.');
+                        }
                     });
                 } else {
+                    console.log('Пользователь уже авторизован, загружаем файл');
                     uploadFileToDrive(file).then(imageUrl => {
                         const memory = { title, date, description, image: imageUrl };
                         saveMemory(memory);
                     }).catch(error => {
-                        console.error('Ошибка при загрузке файла на Google Диск:', error);
+                        console.error('Ошибка при загрузке файла:', error);
                         const memory = { 
                             title, 
                             date, 
