@@ -1441,17 +1441,7 @@
         </div>
     </footer>
 
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
-    const CLIENT_ID = '822036073579-53mj21ufbgmvn4tnvfr3pulhvbrov480.apps.googleusercontent.com';
-    const API_KEY = 'AIzaSyDhkC4s_k16cgn4ffKZ6ezDu0i3yqH-uIo';
-    const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
-    const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-    let tokenClient;
-    let accessToken = null;
-    let isSignedIn = false;
-
     function updateRelationshipStats() {
         const startDate = new Date('2023-01-01');
         const today = new Date();
@@ -1459,82 +1449,20 @@
         document.querySelector('.stat:nth-child(1) .stat-value').textContent = daysTogether;
     }
 
-    function initGoogleApi() {
-        if (typeof gapi === 'undefined') {
-            console.error('gapi не загружен. Ожидаем загрузки...');
-            setTimeout(initGoogleApi, 100);
-            return;
-        }
-        gapi.load('client', () => {
-            gapi.client.init({
-                apiKey: API_KEY,
-                discoveryDocs: DISCOVERY_DOCS
-            }).then(() => {
-                console.log('Google Drive API инициализирован');
-                tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: CLIENT_ID,
-                    scope: SCOPES,
-                    callback: (response) => {
-                        if (response.error) {
-                            console.error('Ошибка авторизации:', response);
-                            alert('Ошибка авторизации: ' + response.error);
-                            return;
-                        }
-                        accessToken = response.access_token;
-                        isSignedIn = true;
-                        updateSignInStatus();
-                        console.log('Получен access_token:', accessToken);
-                    }
-                });
-            }).catch(error => {
-                console.error('Ошибка инициализации Google API:', error);
-                alert('Не удалось инициализировать Google API.');
-            });
-        });
-    }
-
-    function updateSignInStatus() {
-        const googleSignInButton = document.getElementById('googleSignInButton');
-        if (isSignedIn) {
-            googleSignInButton.style.display = 'none';
-        } else {
-            googleSignInButton.style.display = 'inline-block';
-        }
-    }
-
-    function handleGoogleSignIn() {
-        if (!tokenClient) {
-            console.error('TokenClient не инициализирован. Ожидаем...');
-            setTimeout(handleGoogleSignIn, 100);
-            return;
-        }
-        tokenClient.requestAccessToken();
-    }
-
-    function uploadFileToDrive(file) {
+    function uploadFileToImgur(file) {
         return new Promise((resolve, reject) => {
-            if (!isSignedIn || !accessToken) {
-                reject(new Error('Пользователь не авторизован или отсутствует access_token'));
-                return;
-            }
+            const clientId = 'de8bafa2479f22a'; // Ваш Client ID
+            const formData = new FormData();
+            formData.append('image', file);
 
-            const metadata = {
-                'name': file.name,
-                'mimeType': file.type
-            };
+            console.log('Начинается загрузка файла на Imgur:', file.name);
 
-            const form = new FormData();
-            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-            form.append('file', file);
-
-            console.log('Начинается загрузка файла на Google Drive:', file.name);
-
-            fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            fetch('https://api.imgur.com/3/image', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${accessToken}`
+                    'Authorization': `Client-ID ${clientId}`
                 },
-                body: form
+                body: formData
             })
             .then(response => {
                 if (!response.ok) {
@@ -1543,48 +1471,16 @@
                 return response.json();
             })
             .then(data => {
-                console.log('Файл загружен, получен fileId:', data.id);
-                const fileId = data.id;
-
-                return gapi.client.drive.permissions.create({
-                    'fileId': fileId,
-                    'resource': {
-                        'role': 'reader',
-                        'type': 'anyone'
-                    }
-                }).then(() => {
-                    const imageUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
-                    console.log('Сформирован URL изображения:', imageUrl);
-
-                    let attempts = 0;
-                    const maxAttempts = 3;
-                    const delay = 5000;
-
-                    function checkImageAvailability() {
-                        attempts++;
-                        console.log(`Попытка ${attempts} проверить доступность изображения...`);
-                        const img = new Image();
-                        img.onload = () => {
-                            console.log('Изображение доступно по URL:', imageUrl);
-                            resolve(imageUrl);
-                        };
-                        img.onerror = () => {
-                            if (attempts < maxAttempts) {
-                                console.log(`Изображение недоступно, повторная попытка через ${delay/1000} секунд...`);
-                                setTimeout(checkImageAvailability, delay);
-                            } else {
-                                console.error('Изображение недоступно после всех попыток:', imageUrl);
-                                reject(new Error('Изображение не отображается даже после нескольких попыток'));
-                            }
-                        };
-                        img.src = imageUrl + `&t=${Date.now()}`;
-                    }
-
-                    setTimeout(checkImageAvailability, delay);
-                });
+                if (data.success) {
+                    const imageUrl = data.data.link;
+                    console.log('Файл загружен в Imgur, URL:', imageUrl);
+                    resolve(imageUrl);
+                } else {
+                    throw new Error('Ошибка загрузки в Imgur: ' + data.data.error);
+                }
             })
             .catch(error => {
-                console.error('Ошибка загрузки файла:', error);
+                console.error('Ошибка загрузки в Imgur:', error);
                 reject(error);
             });
         });
@@ -1606,10 +1502,7 @@
         const filterButtons = document.querySelectorAll('.filter-btn');
         const showEntryFormBtn = document.getElementById('showEntryForm');
         const showMemoryFormBtn = document.getElementById('showMemoryForm');
-        const googleSignInButton = document.getElementById('googleSignInButton');
         let isSelecting = false;
-
-        googleSignInButton.addEventListener('click', handleGoogleSignIn);
 
         showEntryFormBtn.addEventListener('click', function() {
             entryForm.style.display = 'block';
@@ -1872,13 +1765,8 @@
             const file = fileInput.files[0];
 
             if (file) {
-                if (!isSignedIn) {
-                    alert('Пожалуйста, войдите в аккаунт Google для загрузки изображений.');
-                    return;
-                }
-
                 console.log('Начало загрузки файла:', file.name);
-                uploadFileToDrive(file).then(imageUrl => {
+                uploadFileToImgur(file).then(imageUrl => {
                     console.log('Изображение успешно загружено, URL:', imageUrl);
                     const memory = { title, date, description, image: imageUrl };
                     saveMemory(memory);
@@ -1922,7 +1810,6 @@
 
         loadEntries();
         loadMemories();
-        initGoogleApi();
     });
 </script>
 </body>
