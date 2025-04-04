@@ -1441,9 +1441,7 @@
         </div>
     </footer>
 
-    <script src="https://apis.google.com/js/api.js"></script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script>
+    <script>
     const CLIENT_ID = '822036073579-53mj21ufbgmvn4tnvfr3pulhvbrov480.apps.googleusercontent.com';
     const API_KEY = 'AIzaSyDhkC4s_k16cgn4ffKZ6ezDu0i3yqH-uIo';
     const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
@@ -1462,7 +1460,7 @@
     function initGoogleApi() {
         if (typeof gapi === 'undefined') {
             console.error('gapi не загружен. Ожидаем загрузки...');
-            setTimeout(initGoogleApi, 100); // Повторная попытка через 100 мс
+            setTimeout(initGoogleApi, 100);
             return;
         }
         gapi.load('client', () => {
@@ -1505,7 +1503,7 @@
     function handleGoogleSignIn() {
         if (!tokenClient) {
             console.error('TokenClient не инициализирован. Ожидаем...');
-            setTimeout(handleGoogleSignIn, 100); // Повторная попытка через 100 мс
+            setTimeout(handleGoogleSignIn, 100);
             return;
         }
         tokenClient.requestAccessToken();
@@ -1550,9 +1548,19 @@
                         'type': 'anyone'
                     }
                 }).then(() => {
-                    const imageUrl = `https://drive.google.com/uc?id=${fileId}`;
+                    const imageUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
                     console.log('Сформирован URL изображения:', imageUrl);
-                    resolve(imageUrl);
+                    // Проверка доступности изображения
+                    const img = new Image();
+                    img.onload = () => {
+                        console.log('Изображение доступно по URL:', imageUrl);
+                        resolve(imageUrl);
+                    };
+                    img.onerror = () => {
+                        console.error('Изображение недоступно по URL:', imageUrl);
+                        reject(new Error('Изображение не отображается'));
+                    };
+                    img.src = imageUrl;
                 });
             }).catch(error => {
                 console.error('Ошибка загрузки файла:', error);
@@ -1668,7 +1676,7 @@
             div.className = 'memory-card';
             div.dataset.date = memory.date;
             div.innerHTML = `
-                <img src="${memory.image || 'https://placehold.co/280x240/ffe0e8/fff9fb?text=Moment'}" class="memory-image" alt="${memory.title}" onerror="this.src='https://placehold.co/280x240/ffe0e8/fff9fb?text=Error'; console.error('Ошибка загрузки изображения:', this.src)">
+                <img src="${memory.image || 'https://placehold.co/280x240/ffe0e8/fff9fb?text=Moment'}" class="memory-image" alt="${memory.title}" onerror="this.src='https://placehold.co/280x240/ffe0e8/fff9fb?text=Error'; console.error('Ошибка загрузки изображения:', '${memory.image}')">
                 <div class="memory-content">
                     <span class="memory-date">${new Date(memory.date).toLocaleDateString('ru-RU', {
                         day: 'numeric',
@@ -1893,7 +1901,7 @@
 
         loadEntries();
         loadMemories();
-        initGoogleApi(); // Вызываем после определения всех функций
+        initGoogleApi();
     });
 </script>
 </body>
