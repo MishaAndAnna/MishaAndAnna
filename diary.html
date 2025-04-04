@@ -1441,7 +1441,9 @@
         </div>
     </footer>
 
-    <script>
+    <script src="https://apis.google.com/js/api.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
     const CLIENT_ID = '822036073579-53mj21ufbgmvn4tnvfr3pulhvbrov480.apps.googleusercontent.com';
     const API_KEY = 'AIzaSyDhkC4s_k16cgn4ffKZ6ezDu0i3yqH-uIo';
     const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
@@ -1458,6 +1460,11 @@
     }
 
     function initGoogleApi() {
+        if (typeof gapi === 'undefined') {
+            console.error('gapi не загружен. Ожидаем загрузки...');
+            setTimeout(initGoogleApi, 100); // Повторная попытка через 100 мс
+            return;
+        }
         gapi.load('client', () => {
             gapi.client.init({
                 apiKey: API_KEY,
@@ -1497,7 +1504,8 @@
 
     function handleGoogleSignIn() {
         if (!tokenClient) {
-            console.error('TokenClient не инициализирован');
+            console.error('TokenClient не инициализирован. Ожидаем...');
+            setTimeout(handleGoogleSignIn, 100); // Повторная попытка через 100 мс
             return;
         }
         tokenClient.requestAccessToken();
@@ -1807,7 +1815,7 @@
             const title = document.getElementById('entry-title').value;
             const content = document.getElementById('entry-content').value;
             const from = document.querySelector('#entryFromSelection .mood-option.active').getAttribute('data-from');
-            const mood = document.querySelector('#entryMood.Selection .mood-option.active').textContent.trim();
+            const mood = document.querySelector('#entryMoodSelection .mood-option.active').textContent.trim();
             const date = new Date().getTime();
 
             const entry = { title, content, from, mood, date };
@@ -1885,7 +1893,7 @@
 
         loadEntries();
         loadMemories();
-        initGoogleApi();
+        initGoogleApi(); // Вызываем после определения всех функций
     });
 </script>
 </body>
