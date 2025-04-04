@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app; object-src 'none';">
     <title>Наш Дневник Любви</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -33,7 +32,7 @@
             color: var(--dark-text);
             line-height: 1.6;
             min-height: 100vh;
-            background-image: url('https://placehold.co/200x200/ffe0e8/fff9fb?text=♥');
+            background-image: url('https://via.placeholder.com/200/ffe0e8/fff9fb?text=♥');
             background-size: 200px;
             background-attachment: fixed;
             background-repeat: repeat;
@@ -57,7 +56,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('https://placehold.co/800x400/fff9fb/ffe0e8?text=Love') center/cover;
+            background: url('https://via.placeholder.com/800/400/fff9fb/ffe0e8?text=Love') center/cover;
             opacity: 0.1;
             z-index: 0;
         }
@@ -1260,7 +1259,7 @@
 
             <div class="couple-info">
                 <div class="partner-profile">
-                    <img src="https://placehold.co/120x120/ffe0e8/fff9fb?text=Анна" alt="Анна" class="profile-img">
+                    <img src="https://via.placeholder.com/120/ffe0e8/fff9fb?text=Анна" alt="Анна" class="profile-img">
                     <h2 class="profile-name">Анна</h2>
                 </div>
 
@@ -1269,7 +1268,7 @@
                 </div>
 
                 <div class="partner-profile">
-                    <img src="https://placehold.co/120x120/ffe0e8/fff9fb?text=Михаил" alt="Михаил" class="profile-img">
+                    <img src="https://via.placeholder.com/120/ffe0e8/fff9fb?text=Михаил" alt="Михаил" class="profile-img">
                     <h2 class="profile-name">Михаил</h2>
                 </div>
             </div>
@@ -1324,9 +1323,6 @@
                 </button>
                 <button class="confirm-delete-btn">
                     <i class="fas fa-check"></i> Удалить выбранное
-                </button>
-                <button id="googleSignInButton" class="add-entry-btn">
-                    <i class="fab fa-google"></i> Войти через Google
                 </button>
                 <div class="memory-cards" id="memoryCards">
                     <div class="no-entries">
@@ -1441,80 +1437,8 @@
         </div>
     </footer>
 
-    <!-- Firebase Browser Bundle (совместим с обычными скриптами) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            if (typeof firebase === 'undefined') {
-                console.error('Firebase SDK не загрузился. Проверьте подключение к интернету или URL скриптов.');
-                document.body.innerHTML += '<p style="color: red; text-align: center;">Ошибка загрузки Firebase. Проверьте консоль для деталей.</p>';
-                return;
-            }
-
-            const firebaseConfig = {
-                apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
-                authDomain: "misha-and-anna-48e4c.firebaseapp.com",
-                databaseURL: "https://misha-and-anna-48e4c-default-rtdb.europe-west1.firebasedatabase.app",
-                projectId: "misha-and-anna-48e4c",
-                storageBucket: "misha-and-anna-48e4c.firebasestorage.app",
-                messagingSenderId: "822036073579",
-                appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
-                measurementId: "G-XR86X6PXMX"
-            };
-
-            firebase.initializeApp(firebaseConfig);
-            const database = firebase.database();
-            const auth = firebase.auth();
-
-            function updateRelationshipStats() {
-                const startDate = new Date('2023-01-01');
-                const today = new Date();
-                const daysTogether = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
-                document.querySelector('.stat:nth-child(1) .stat-value').textContent = daysTogether;
-            }
-
-            function uploadFileToImgur(file) {
-                return new Promise((resolve, reject) => {
-                    const clientId = 'de8bafa2479f22a';
-                    const formData = new FormData();
-                    formData.append('image', file);
-
-                    console.log('Начинается загрузка файла на Imgur:', file.name);
-
-                    fetch('https://api.imgur.com/3/image', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Client-ID ${clientId}`
-                        },
-                        body: formData
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`Ошибка загрузки файла: ${response.status} - ${response.statusText}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            const imageUrl = data.data.link;
-                            console.log('Файл загружен в Imgur, URL:', imageUrl);
-                            resolve(imageUrl);
-                        } else {
-                            throw new Error('Ошибка загрузки в Imgur: ' + data.data.error);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Ошибка загрузки в Imgur:', error);
-                        reject(error);
-                    });
-                });
-            }
-
-            updateRelationshipStats();
-
             const modal = document.getElementById('entryModal');
             const addEntryBtn = document.querySelector('.add-entry-btn');
             const addMemoryBtn = document.querySelector('.add-memory-btn');
@@ -1530,32 +1454,7 @@
             const showMemoryFormBtn = document.getElementById('showMemoryForm');
             let isSelecting = false;
 
-            document.getElementById('googleSignInButton').addEventListener('click', function() {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                auth.signInWithPopup(provider)
-                    .then((result) => {
-                        const user = result.user;
-                        console.log('Вход выполнен:', user.displayName);
-                        loadEntries();
-                        loadMemories();
-                    })
-                    .catch((error) => {
-                        console.error('Ошибка входа:', error);
-                    });
-            });
-
-            auth.onAuthStateChanged((user) => {
-                if (user) {
-                    console.log('Пользователь вошел:', user.displayName);
-                    loadEntries();
-                    loadMemories();
-                } else {
-                    console.log('Пользователь не вошел');
-                    entriesList.innerHTML = '<p>Пожалуйста, войдите через Google, чтобы увидеть записи.</p>';
-                    memoryCards.innerHTML = '<p>Пожалуйста, войдите через Google, чтобы увидеть моменты.</p>';
-                }
-            });
-
+            // Переключение между формами
             showEntryFormBtn.addEventListener('click', function() {
                 entryForm.style.display = 'block';
                 memoryForm.style.display = 'none';
@@ -1570,48 +1469,43 @@
                 showMemoryFormBtn.classList.add('active');
             });
 
+            // Загрузка записей из localStorage
             function loadEntries(filter = 'all') {
-                if (!auth.currentUser) return;
-                database.ref('entries').once('value', (snapshot) => {
-                    entriesList.innerHTML = '';
-                    const entries = snapshot.val() || {};
-                    const filteredEntries = filter === 'all' 
-                        ? Object.values(entries) 
-                        : Object.values(entries).filter(entry => entry.from === filter);
+                const entries = JSON.parse(localStorage.getItem('diaryEntries') || '[]');
+                entriesList.innerHTML = '';
+                const filteredEntries = filter === 'all' ? entries : entries.filter(entry => entry.from === filter);
 
-                    if (filteredEntries.length === 0) {
-                        entriesList.innerHTML = `
-                            <div class="no-entries">
-                                <i class="fas fa-heart"></i>
-                                <h3>Пока нет записей</h3>
-                                <p>Начните вашу историю любви, добавив первую запись с помощью кнопки выше!</p>
-                            </div>
-                        `;
-                    } else {
-                        filteredEntries.sort((a, b) => b.date - a.date).forEach(entry => renderEntry(entry));
-                    }
-                });
+                if (filteredEntries.length === 0) {
+                    entriesList.innerHTML = `
+                        <div class="no-entries">
+                            <i class="fas fa-heart"></i>
+                            <h3>Пока нет записей</h3>
+                            <p>Начните вашу историю любви, добавив первую запись с помощью кнопки выше!</p>
+                        </div>
+                    `;
+                } else {
+                    filteredEntries.sort((a, b) => b.date - a.date).forEach(entry => renderEntry(entry));
+                }
             }
 
+            // Загрузка воспоминаний из localStorage
             function loadMemories() {
-                if (!auth.currentUser) return;
-                database.ref('memories').once('value', (snapshot) => {
-                    memoryCards.innerHTML = '';
-                    const memories = snapshot.val() || {};
-                    if (Object.keys(memories).length === 0) {
-                        memoryCards.innerHTML = `
-                            <div class="no-entries">
-                                <i class="fas fa-heart"></i>
-                                <h3>Пока нет воспоминаний</h3>
-                                <p>Добавьте свои особенные моменты с помощью кнопки выше!</p>
-                            </div>
-                        `;
-                    } else {
-                        Object.values(memories).sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(memory => renderMemory(memory));
-                    }
-                });
+                const memories = JSON.parse(localStorage.getItem('diaryMemories') || '[]');
+                memoryCards.innerHTML = '';
+                if (memories.length === 0) {
+                    memoryCards.innerHTML = `
+                        <div class="no-entries">
+                            <i class="fas fa-heart"></i>
+                            <h3>Пока нет воспоминаний</h3>
+                            <p>Добавьте свои особенные моменты с помощью кнопки выше!</p>
+                        </div>
+                    `;
+                } else {
+                    memories.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(memory => renderMemory(memory));
+                }
             }
 
+            // Отображение записи
             function renderEntry(entry) {
                 const div = document.createElement('div');
                 div.className = 'entry';
@@ -1645,12 +1539,13 @@
                 });
             }
 
+            // Отображение воспоминания
             function renderMemory(memory) {
                 const div = document.createElement('div');
                 div.className = 'memory-card';
                 div.dataset.date = memory.date;
                 div.innerHTML = `
-                    <img src="${memory.image || 'https://placehold.co/280x240/ffe0e8/fff9fb?text=Moment'}" class="memory-image" alt="${memory.title}" onerror="this.src='https://placehold.co/280x240/ffe0e8/fff9fb?text=Error'; console.error('Ошибка загрузки изображения:', '${memory.image}')">
+                    <img src="${memory.image || 'https://via.placeholder.com/280x240/ffe0e8/fff9fb?text=Момент'}" class="memory-image" alt="${memory.title}">
                     <div class="memory-content">
                         <span class="memory-date">${new Date(memory.date).toLocaleDateString('ru-RU', {
                             day: 'numeric',
@@ -1668,6 +1563,7 @@
                 `;
                 memoryCards.insertBefore(div, memoryCards.firstChild);
 
+                // Обработчик индивидуального удаления
                 div.querySelector('.delete-btn').addEventListener('click', function() {
                     if (!isSelecting) {
                         if (confirm('Вы уверены, что хотите удалить этот момент?')) {
@@ -1676,6 +1572,7 @@
                     }
                 });
 
+                // Обработчик выбора для массового удаления
                 div.addEventListener('click', function(e) {
                     if (isSelecting && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'I') {
                         div.classList.toggle('selected');
@@ -1684,50 +1581,46 @@
                 });
             }
 
+            // Удаление записи
             function deleteEntry(date) {
-                if (!auth.currentUser) return;
-                if (confirm('Вы уверены, что хотите удалить эту запись?')) {
-                    database.ref('entries/' + date).remove()
-                        .then(() => loadEntries(document.querySelector('.filter-btn.active').getAttribute('data-filter')))
-                        .catch((error) => console.error('Ошибка удаления записи:', error));
-                }
+                let entries = JSON.parse(localStorage.getItem('diaryEntries') || '[]');
+                entries = entries.filter(entry => entry.date !== date);
+                localStorage.setItem('diaryEntries', JSON.stringify(entries));
+                loadEntries(document.querySelector('.filter-btn.active').getAttribute('data-filter'));
             }
 
+            // Удаление воспоминания
             function deleteMemory(date) {
-                if (!auth.currentUser) return;
-                if (confirm('Вы уверены, что хотите удалить этот момент?')) {
-                    database.ref('memories/' + date).remove()
-                        .then(() => loadMemories())
-                        .catch((error) => console.error('Ошибка удаления момента:', error));
-                }
+                let memories = JSON.parse(localStorage.getItem('diaryMemories') || '[]');
+                memories = memories.filter(memory => new Date(memory.date).getTime() !== new Date(date).getTime());
+                localStorage.setItem('diaryMemories', JSON.stringify(memories));
+                loadMemories();
             }
 
+            // Удаление выбранных воспоминаний
             function deleteSelectedMemories() {
-                if (!auth.currentUser) return;
                 const selectedCards = document.querySelectorAll('.memory-card.selected');
                 if (selectedCards.length === 0) return;
 
                 if (confirm(`Вы уверены, что хотите удалить ${selectedCards.length} момент(ов)?`)) {
-                    const updates = {};
-                    selectedCards.forEach(card => {
-                        updates['memories/' + card.dataset.date] = null;
-                    });
-                    database.ref().update(updates)
-                        .then(() => {
-                            loadMemories();
-                            isSelecting = false;
-                            selectDeleteBtn.textContent = 'Выбрать для удаления';
-                            confirmDeleteBtn.style.display = 'none';
-                        })
-                        .catch((error) => console.error('Ошибка удаления моментов:', error));
+                    let memories = JSON.parse(localStorage.getItem('diaryMemories') || '[]');
+                    const datesToDelete = Array.from(selectedCards).map(card => card.dataset.date);
+                    memories = memories.filter(memory => !datesToDelete.includes(memory.date));
+                    localStorage.setItem('diaryMemories', JSON.stringify(memories));
+                    loadMemories();
+                    isSelecting = false;
+                    selectDeleteBtn.textContent = 'Выбрать для удаления';
+                    confirmDeleteBtn.style.display = 'none';
                 }
             }
 
+            // Обновление видимости кнопки подтверждения
             function updateConfirmButtonVisibility() {
                 const selectedCards = document.querySelectorAll('.memory-card.selected');
                 confirmDeleteBtn.style.display = selectedCards.length > 0 ? 'inline-block' : 'none';
             }
 
+            // Переключение режима выбора
             selectDeleteBtn.addEventListener('click', function() {
                 isSelecting = !isSelecting;
                 this.textContent = isSelecting ? 'Отменить выбор' : 'Выбрать для удаления';
@@ -1736,13 +1629,11 @@
                 confirmDeleteBtn.style.display = 'none';
             });
 
+            // Подтверждение удаления выбранных
             confirmDeleteBtn.addEventListener('click', deleteSelectedMemories);
 
+            // Открытие модального окна для записи
             addEntryBtn.addEventListener('click', function() {
-                if (!auth.currentUser) {
-                    alert('Пожалуйста, войдите через Google, чтобы добавить запись.');
-                    return;
-                }
                 modal.classList.add('active');
                 entryForm.style.display = 'block';
                 memoryForm.style.display = 'none';
@@ -1750,11 +1641,8 @@
                 showMemoryFormBtn.classList.remove('active');
             });
 
+            // Открытие модального окна для воспоминания
             addMemoryBtn.addEventListener('click', function() {
-                if (!auth.currentUser) {
-                    alert('Пожалуйста, войдите через Google, чтобы добавить момент.');
-                    return;
-                }
                 modal.classList.add('active');
                 entryForm.style.display = 'none';
                 memoryForm.style.display = 'block';
@@ -1762,6 +1650,7 @@
                 showMemoryFormBtn.classList.add('active');
             });
 
+            // Закрытие модального окна
             closeModalBtn.addEventListener('click', function() {
                 modal.classList.remove('active');
                 entryForm.reset();
@@ -1770,6 +1659,7 @@
                 resetSelections('entryMoodSelection');
             });
 
+            // Закрытие при клике вне окна
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
                     modal.classList.remove('active');
@@ -1780,6 +1670,7 @@
                 }
             });
 
+            // Настройка выбора "От кого" и "Настроение"
             function setupSelection(containerId) {
                 const options = document.querySelectorAll(`#${containerId} .mood-option`);
                 options.forEach(option => {
@@ -1794,12 +1685,14 @@
             setupSelection('entryFromSelection');
             setupSelection('entryMoodSelection');
 
+            // Сброс выбора до начального состояния
             function resetSelections(containerId) {
                 const options = document.querySelectorAll(`#${containerId} .mood-option`);
                 options.forEach(opt => opt.classList.remove('active'));
                 options[0].classList.add('active');
             }
 
+            // Фильтрация записей
             filterButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     filterButtons.forEach(btn => btn.classList.remove('active'));
@@ -1809,12 +1702,9 @@
                 });
             });
 
+            // Сохранение записи
             entryForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                if (!auth.currentUser) {
-                    alert('Пожалуйста, войдите через Google, чтобы сохранить запись.');
-                    return;
-                }
                 const title = document.getElementById('entry-title').value;
                 const content = document.getElementById('entry-content').value;
                 const from = document.querySelector('#entryFromSelection .mood-option.active').getAttribute('data-from');
@@ -1822,74 +1712,60 @@
                 const date = new Date().getTime();
 
                 const entry = { title, content, from, mood, date };
-                database.ref('entries/' + date).set(entry)
-                    .then(() => {
-                        renderEntry(entry);
-                        if (entriesList.querySelector('.no-entries')) {
-                            entriesList.querySelector('.no-entries').remove();
-                        }
-                        modal.classList.remove('active');
-                        this.reset();
-                        resetSelections('entryFromSelection');
-                        resetSelections('entryMoodSelection');
-                    })
-                    .catch((error) => console.error('Ошибка сохранения записи:', error));
+                const entries = JSON.parse(localStorage.getItem('diaryEntries') || '[]');
+                entries.push(entry);
+                localStorage.setItem('diaryEntries', JSON.stringify(entries));
+
+                renderEntry(entry);
+                if (entriesList.querySelector('.no-entries')) {
+                    entriesList.querySelector('.no-entries').remove();
+                }
+
+                modal.classList.remove('active');
+                this.reset();
+                resetSelections('entryFromSelection');
+                resetSelections('entryMoodSelection');
             });
 
+            // Сохранение воспоминания
             memoryForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                if (!auth.currentUser) {
-                    alert('Пожалуйста, войдите через Google, чтобы сохранить момент.');
-                    return;
-                }
                 const title = document.getElementById('memory-title').value;
                 const date = document.getElementById('memory-date').value;
                 const description = document.getElementById('memory-description').value;
-                const fileInput = document.getElementById('memory-image');
-                const file = fileInput.files[0];
+                const imageInput = document.getElementById('memory-image');
+                const reader = new FileReader();
 
-                if (file) {
-                    console.log('Начало загрузки файла:', file.name);
-                    uploadFileToImgur(file).then(imageUrl => {
-                        console.log('Изображение успешно загружено, URL:', imageUrl);
-                        const memory = { title, date, description, image: imageUrl };
+                const memory = { title, date, description };
+
+                if (imageInput.files && imageInput.files[0]) {
+                    reader.onload = function(e) {
+                        memory.image = e.target.result;
                         saveMemory(memory);
-                    }).catch(error => {
-                        console.error('Ошибка при загрузке изображения:', error);
-                        alert('Не удалось загрузить изображение. Оно будет сохранено без изображения.');
-                        const memory = { 
-                            title, 
-                            date, 
-                            description, 
-                            image: 'https://placehold.co/280x240/ffe0e8/fff9fb?text=Error'
-                        };
-                        saveMemory(memory);
-                    });
-                } else {
-                    console.log('Сохранение момента без изображения');
-                    const memory = { 
-                        title, 
-                        date, 
-                        description, 
-                        image: 'https://placehold.co/280x240/ffe0e8/fff9fb?text=Moment' 
                     };
+                    reader.readAsDataURL(imageInput.files[0]);
+                } else {
                     saveMemory(memory);
                 }
             });
 
             function saveMemory(memory) {
-                console.log('Сохранение момента в Firebase:', memory);
-                database.ref('memories/' + memory.date).set(memory)
-                    .then(() => {
-                        renderMemory(memory);
-                        if (memoryCards.querySelector('.no-entries')) {
-                            memoryCards.querySelector('.no-entries').remove();
-                        }
-                        modal.classList.remove('active');
-                        memoryForm.reset();
-                    })
-                    .catch((error) => console.error('Ошибка сохранения момента:', error));
+                const memories = JSON.parse(localStorage.getItem('diaryMemories') || '[]');
+                memories.push(memory);
+                localStorage.setItem('diaryMemories', JSON.stringify(memories));
+
+                renderMemory(memory);
+                if (memoryCards.querySelector('.no-entries')) {
+                    memoryCards.querySelector('.no-entries').remove();
+                }
+
+                modal.classList.remove('active');
+                memoryForm.reset();
             }
+
+            // Начальная загрузка
+            loadEntries();
+            loadMemories();
         });
     </script>
 </body>
