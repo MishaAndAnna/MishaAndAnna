@@ -23,6 +23,7 @@
         }
         
         @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Cinzel:wght@400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
         
         #container {
             position: relative;
@@ -938,42 +939,28 @@
             animation-delay: 9s;
         }
         
-        .light-particle {
-            position: absolute;
-            border-radius: 50%;
-            pointer-events: none;
-        }
+        /* Стили для сцены Анюты из первого кода */
+        #annyuta-scene {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #000;
+}
         
-        @keyframes sparkRise {
-            0% { opacity: 0; transform: translate(0, 0) scale(0.3); }
-            30% { opacity: 1; transform: translate(var(--x), var(--y)) scale(1); }
-            80% { opacity: 0.7; transform: translate(calc(var(--x) * 2), calc(var(--y) * 2)) scale(0.7); }
-            100% { opacity: 0; transform: translate(calc(var(--x) * 3), calc(var(--y) * 3)) scale(0.1); }
-        }
-        
-       #annyuta-scene {
-            background: linear-gradient(to bottom, #0a1a10 0%, #050b08 100%);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .night-bg {
+        .night-sky {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(ellipse at center, rgba(30, 60, 40, 0.2) 0%, rgba(10, 20, 15, 0.1) 100%);
-            animation: nightPulse 8s ease infinite;
+            background: linear-gradient(to bottom, #000000, #05021a, #0a0339, #0c054f);
+            z-index: 0;
         }
         
-        @keyframes nightPulse {
-            0% { opacity: 0.3; }
-            50% { opacity: 0.8; }
-            100% { opacity: 0.3; }
-        }
-        
-        .stars {
+        .stars-scene {
             position: absolute;
             top: 0;
             left: 0;
@@ -982,159 +969,289 @@
             z-index: 1;
         }
         
-        .star {
+        .star-scene {
             position: absolute;
-            width: 2px;
-            height: 2px;
-            background: #fff;
+            background-color: #fff;
             border-radius: 50%;
-            animation: twinkle var(--duration) ease-in-out infinite;
-            animation-delay: var(--delay);
+            animation: twinkle-scene 3s infinite ease-in-out;
         }
         
-        .moon-crescent {
+        @keyframes twinkle-scene {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        .moon-container {
+            position: absolute;
+            top: 10%;
+            right: 10%;
+            width: 200px;
+            height: 200px;
+            z-index: 2;
+            animation: floatMoon 12s ease-in-out infinite;
+            cursor: pointer;
+        }
+        
+        .moon {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #d8d8d8, #a8a8a8);
+            box-shadow: 0 0 80px 20px rgba(255, 255, 255, 0.6);
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+        
+        .moon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 100px 30px rgba(255, 255, 255, 0.8);
+        }
+        
+        .crater {
+            position: absolute;
+            background-color: rgba(170, 170, 170, 0.8);
+            border-radius: 50%;
+        }
+        
+        .name {
+            font-family: 'Dancing Script', cursive;
+            font-size: 4rem;
+            background: linear-gradient(to right, #ffffff, #c7d3f3, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s infinite;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 120px;
-            height: 120px;
-            transform: translate(-50%, -50%) scale(0) rotate(0deg);
+            transform: translate(-50%, -50%);
+            opacity: 0.9;
+            z-index: 3;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -100% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        @keyframes floatMoon {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-30px, 20px); }
+            50% { transform: translate(0, 40px); }
+            75% { transform: translate(30px, 20px); }
+        }
+        
+        .constellation-line {
+            position: absolute;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+            height: 1px;
+            transform-origin: left center;
             opacity: 0;
-            transition: opacity 0.5s ease, transform 0.5s ease; /* Добавлен плавный переход для JS-анимации */
-            z-index: 2;
-        }
-        
-        @keyframes crescentAppear {
-            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
-            15% { transform: translate(-50%, -50%) scale(1) rotate(20deg); opacity: 1; }
-            40% { transform: translate(-50%, -50%) scale(1.1) rotate(30deg); opacity: 1; }
-            70% { transform: translate(-50%, -50%) scale(1) rotate(40deg); opacity: 0.8; }
-            90% { transform: translate(-50%, -50%) scale(0.9) rotate(45deg); opacity: 0.4; }
-            100% { transform: translate(-50%, -50%) scale(0) rotate(60deg); opacity: 0; }
-        }
-        
-        .crescent-outer {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: #d0e0ff; /* Фон теперь полностью виден */
-            box-shadow: 0 0 20px rgba(200, 220, 255, 0.5), 0 0 40px rgba(180, 210, 250, 0.3);
-        }
-        
-        .crescent-inner {
-            position: absolute;
-            width: 80%; /* Уменьшен размер для создания формы полумесяца */
-            height: 80%;
-            border-radius: 50%;
-            background: #050b08; /* Цвет фона сцены для выреза */
-            top: -10%; /* Смещение вверх для формирования полумесяца */
-            left: 40%; /* Смещение вправо */
+            animation: drawLine 4s forwards;
             z-index: 1;
         }
         
-        .crescent-glow {
-            position: absolute;
-            width: 140%;
-            height: 140%;
-            top: -20%;
-            left: -20%;
-            border-radius: 50%;
-            background: radial-gradient(ellipse at center, rgba(200, 220, 255, 0.3) 0%, transparent 70%);
-            filter: blur(5px);
-            animation: crescentGlowPulse 4s ease infinite;
+        @keyframes drawLine {
+            0% { width: 0; opacity: 0; }
+            50% { opacity: 1; }
+            100% { width: 100%; opacity: 0.5; }
         }
         
-        @keyframes crescentGlowPulse {
-            0% { opacity: 0.3; transform: scale(0.9); }
-            50% { opacity: 0.6; transform: scale(1.1); }
-            100% { opacity: 0.3; transform: scale(0.9); }
-        }
-        
-        .crescent-crystal {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            top: 0;
-            left: 0;
-            overflow: hidden;
-            z-index: 2; /* Помещаем поверх inner для видимости граней */
-        }
-        
-        .crystal-facet {
-            position: absolute;
-            background: linear-gradient(135deg, rgba(210, 230, 255, 0.5), rgba(180, 210, 255, 0.2));
-            border-radius: 30%;
-        }
-        
-        .facet1 {
-            width: 60%;
-            height: 35%;
-            top: 15%;
-            left: 5%;
-            transform: rotate(30deg);
-        }
-        
-        .facet2 {
-            width: 40%;
-            height: 25%;
-            top: 55%;
-            left: 10%;
-            transform: rotate(-15deg);
-        }
-        
-        .facet3 {
-            width: 30%;
-            height: 40%;
-            top: 30%;
-            left: 60%;
-            transform: rotate(-45deg);
-        }
-        
-        .moon-particle {
+        .shooting-star {
             position: absolute;
             width: 4px;
             height: 4px;
-            background: radial-gradient(circle, rgba(210, 230, 255, 0.9) 20%, transparent 70%);
+            background: linear-gradient(to right, transparent, #fff 50%, transparent);
+            box-shadow: 0 0 20px 5px #fff;
             border-radius: 50%;
-            filter: blur(1px);
             opacity: 0;
-            z-index: 3;
+            transform: rotate(45deg);
+            z-index: 1;
+        }
+        
+        @keyframes shootingStar {
+            0% { transform: translate(0, 0) rotate(45deg) scale(1); opacity: 1; }
+            70% { opacity: 1; }
+            100% { transform: translate(var(--travel-x), var(--travel-y)) rotate(45deg) scale(0.2); opacity: 0; }
+        }
+        
+        .moon-glow {
+            position: absolute;
+            width: 300%;
+            height: 300%;
+            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 70%);
+            top: -100%;
+            left: -100%;
+            z-index: -1;
+            animation: pulse 5s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.1; }
+            100% { opacity: 0.4; }
+        }
+        
+        .mysterious-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 2;
             pointer-events: none;
         }
         
-        @keyframes particleDrift {
-            0% { opacity: 0; transform: translate(0, 0) scale(0.3); }
-            30% { opacity: 0.8; transform: translate(var(--x), var(--y)) scale(1); }
-            100% { opacity: 0; transform: translate(calc(var(--x) * 2), calc(var(--y) * 2)) scale(0.1); }
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            opacity: 0;
+            animation: float 20s linear infinite;
         }
         
-        #annyuta-scene .text-fragment:nth-child(5) {
-            top: 30%;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(210, 230, 255, 0.9);
-            animation: fadeText 3s ease forwards;
-            animation-delay: 3s;
+        @keyframes float {
+            0% {
+                transform: translate(var(--start-x), var(--start-y)) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: var(--opacity);
+                transform: translate(var(--start-x), var(--start-y)) scale(var(--size));
+            }
+            90% {
+                opacity: var(--opacity);
+                transform: translate(var(--end-x), var(--end-y)) scale(var(--size));
+            }
+            100% {
+                transform: translate(var(--end-x), var(--end-y)) scale(0);
+                opacity: 0;
+            }
         }
         
-        #annyuta-scene .text-fragment:nth-child(6) {
-            top: 65%;
-            left: 60%;
-            transform: translateX(-50%);
-            color: rgba(200, 220, 255, 0.9);
-            animation: fadeText 3s ease forwards;
-            animation-delay: 6s;
+        .cloud {
+            position: absolute;
+            opacity: 0.2;
+            filter: blur(20px);
+            border-radius: 100px;
+            background: rgba(100, 100, 150, 0.2);
+            animation: float-cloud 30s linear infinite;
         }
         
-        #annyuta-scene .text-fragment:nth-child(7) {
-            top: 35%;
-            left: 30%;
-            transform: translateX(-50%);
-            color: rgba(220, 240, 255, 0.9);
-            animation: fadeText 3s ease forwards;
-            animation-delay: 9s;
+        @keyframes float-cloud {
+            0% { transform: translateX(-120%); }
+            100% { transform: translateX(120vw); }
+        }
+        
+        .comet {
+            position: absolute;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.8));
+            height: 2px;
+            transform-origin: left center;
+            animation: cometMove 8s linear forwards;
+            z-index: 1;
+        }
+        
+        .comet:before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 20px 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        @keyframes cometMove {
+            0% { 
+                transform: translate(0, 0) rotate(var(--angle)); 
+                opacity: 0;
+                width: 0;
+            }
+            5% {
+                opacity: 1;
+                width: var(--length);
+            }
+            90% { 
+                opacity: 1;
+                width: var(--length);
+            }
+            100% { 
+                transform: translate(var(--travel-x), var(--travel-y)) rotate(var(--angle)); 
+                opacity: 0;
+                width: 0;
+            }
+        }
+        
+        .eclipse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 0%, transparent 30%, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 0.8) 100%);
+            opacity: 0;
+            transition: opacity 3s ease;
+            z-index: 0;
+        }
+        
+        .lunar-rays {
+            position: absolute;
+            width: 400%;
+            height: 400%;
+            top: -150%;
+            left: -150%;
+            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 30%, transparent 70%);
+            opacity: 0;
+            transform: scale(0);
+            transition: all 3s ease;
+            z-index: 0;
+        }
+        
+        .nebula {
+            position: absolute;
+            filter: blur(30px);
+            opacity: 0.3;
+            background: radial-gradient(ellipse at center, rgba(100, 100, 255, 0.3) 0%, rgba(50, 50, 100, 0.1) 70%, transparent 100%);
+            animation: nebulaMove 60s linear infinite alternate;
+            z-index: 0;
+        }
+        
+        @keyframes nebulaMove {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(20px, 20px) scale(1.1); }
+            100% { transform: translate(-20px, -20px) scale(0.9); }
+        }
+        
+        .praise-text {
+            position: absolute;
+            font-family: 'Dancing Script', cursive;
+            font-size: 2rem;
+            color: rgba(255, 255, 255, 0);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            pointer-events: none;
+            z-index: 3;
+        }
+        
+        .star-burst {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            transform: scale(0);
+            box-shadow: 0 0 20px 10px rgba(255, 255, 255, 0);
+            animation: starBurst 2s ease-out forwards;
+            z-index: 1;
+        }
+        
+        @keyframes starBurst {
+            0% { transform: scale(0); box-shadow: 0 0 20px 10px rgba(255, 255, 255, 0); }
+            20% { transform: scale(1); box-shadow: 0 0 20px 10px rgba(255, 255, 255, 0.8); }
+            100% { transform: scale(0); box-shadow: 0 0 50px 30px rgba(255, 255, 255, 0); }
         }
         
         @media (max-width: 768px) {
@@ -1251,7 +1368,7 @@
         
         <div class="fog"></div>
         
-        <div class="final-message">My dear beloved, shall we begin anew?</div>
+        <div class="final-message">My dear beloved, shall we begin anew, if I can be dare to ask for chance?</div>
         
         <div class="romantic-endnote">
             <span>O</span><span>u</span><span>r</span><span> </span>
@@ -1294,28 +1411,30 @@
                 </div>
                 <div class="lantern-ambient"></div>
             </div>
-            <div class="text-fragment">Забота</div>
-            <div class="text-fragment">Тепло</div>
-            <div class="text-fragment">Всегда</div>
+            <div class="text-fragment">I want to try to take care</div>
+            <div class="text-fragment">I want to love and either to be loved</div>
+            <div class="text-fragment">I want to be with Annyuta for now and for the rest of our life</div>
             <button class="return-button" onclick="endScene('mikhail-scene')">Вернуться</button>
         </div>
         
         <div id="annyuta-scene" class="scene">
-            <div class="night-bg"></div>
-            <div class="stars"></div>
-            <div class="moon-crescent">
-                <div class="crescent-glow"></div>
-                <div class="crescent-crystal">
-                    <div class="crescent-outer"></div>
-                    <div class="crescent-inner"></div>
-                    <div class="crystal-facet facet1"></div>
-                    <div class="crystal-facet facet2"></div>
-                    <div class="crystal-facet facet3"></div>
+            <div class="night-sky"></div>
+            <div class="stars-scene" id="stars-scene"></div>
+            <div class="name">Annyuta</div>
+            <div class="moon-container" id="moonContainer">
+                <div class="moon-glow"></div>
+                <div class="moon" id="moon">
+                    <!-- Craters will be added via JavaScript -->
                 </div>
             </div>
-            <div class="text-fragment">Уединение</div>
-            <div class="text-fragment">Контрасты</div>
-            <div class="text-fragment">Искренность</div>
+            <div class="mysterious-particles" id="particles-scene"></div>
+            <div class="text-fragment">Annyuta is the most wonderful person I’ve ever met</div>
+            <div class="text-fragment">With Annyuta, the world shines brighter</div>
+            <div class="text-fragment">Annyuta is the embodiment of kindness and light</div>
+            <div class="text-fragment">There’s no one better than Annyuta</div>
+            <div class="text-fragment">Annyuta is the dearest soul in my life</div>
+            <div class="text-fragment">Annyuta makes every day extraordinary</div>
+            <div class="text-fragment">Annyuta is pure happiness</div>
             <button class="return-button" onclick="endScene('annyuta-scene')">Вернуться</button>
         </div>
     </div>
@@ -1366,7 +1485,6 @@
                     document.querySelector('.connecting-line').classList.add('visible');
                     setTimeout(function() {
                         document.querySelector('.heart-center').classList.add('visible');
-                        document.querySelector('.royal-crest').classList.add('visible');
                     }, 1000);
                 }, 2000);
             }, 20000);
@@ -1399,408 +1517,6 @@
             setTimeout(createLightParticles, 19000);
         }
         
-        function resetAnimation() {
-            document.body.className = 'phase-initial';
-            document.querySelectorAll('.decorative-corner, .golden-frame, .medallion, .royal-crest').forEach(el => el.classList.remove('visible'));
-            document.getElementById('heraldic').classList.remove('visible');
-            document.getElementById('romantic-text').classList.remove('visible');
-            document.querySelector('.connecting-line').classList.remove('visible');
-            document.querySelector('.heart-center').classList.remove('visible');
-            document.querySelector('.eternal-flame').classList.remove('visible');
-            document.querySelector('.final-message').classList.remove('visible');
-            document.querySelector('.love-aura').classList.remove('active');
-            document.getElementById('replay-button').classList.remove('visible');
-            const clockContainer = document.getElementById('clock-container');
-            clockContainer.style.opacity = '1';
-            clockContainer.style.transform = 'scale(1)';
-            document.querySelectorAll('.star, .tea-leaf, .light-particle, .fog').forEach(el => el.remove());
-            document.querySelector('.fog').style.opacity = '0';
-            document.querySelectorAll('.popup').forEach(popup => popup.remove());
-            document.querySelector('.romantic-endnote').classList.remove('visible');
-            document.querySelector('.endnote-ornament.left').classList.remove('visible');
-            document.querySelector('.endnote-ornament.right').classList.remove('visible');
-            document.querySelector('.endnote-line').classList.remove('visible');
-            document.querySelectorAll('.scene').forEach(scene => scene.style.display = 'none');
-        }
-        
-        function setupClock() {
-            const hourHand = document.querySelector('.hour-hand');
-            const minuteHand = document.querySelector('.minute-hand');
-            const secondHand = document.querySelector('.second-hand');
-
-            function updateClock() {
-                const now = new Date();
-                const hours = now.getHours() % 12;
-                const minutes = now.getMinutes();
-                const seconds = now.getSeconds();
-
-                const hourDeg = (hours * 30) + (minutes / 2);
-                const minuteDeg = minutes * 6;
-                const secondDeg = seconds * 6;
-
-                hourHand.style.transform = `rotate(${hourDeg}deg)`;
-                minuteHand.style.transform = `rotate(${minuteDeg}deg)`;
-                secondHand.style.transform = `rotate(${secondDeg}deg)`;
-
-                requestAnimationFrame(updateClock);
-            }
-
-            updateClock();
-        }
-        
-        function createStars() {
-            const container = document.getElementById('container');
-            const starCount = Math.min(window.innerWidth / 10, 100);
-            for (let i = 0; i < starCount; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.left = `${Math.random() * 100}%`;
-                star.style.top = `${Math.random() * 100}%`;
-                star.style.setProperty('--twinkle-duration', `${Math.random() * 4 + 2}s`);
-                star.style.setProperty('--twinkle-delay', `${Math.random() * 2}s`);
-                container.appendChild(star);
-            }
-            createAnimationStars();
-        }
-        
-        function createTeaLeaves() {
-            const container = document.getElementById('container');
-            const leafCount = Math.min(window.innerWidth / 20, 30);
-            for (let i = 0; i < leafCount; i++) {
-                setTimeout(() => {
-                    const leaf = document.createElement('div');
-                    leaf.className = 'tea-leaf';
-                    leaf.style.left = `${Math.random() * 100}%`;
-                    leaf.style.setProperty('--petal-sway', `${Math.random() * 200 - 100}px`);
-                    leaf.style.animation = `floatPetal ${Math.random() * 8 + 7}s ease-in-out`;
-                    container.appendChild(leaf);
-                    setTimeout(() => {
-                        if (leaf.parentNode) leaf.parentNode.removeChild(leaf);
-                    }, 15000);
-                }, i * 300);
-            }
-        }
-        
-        function createLightParticles() {
-            const container = document.getElementById('container');
-            const particleCount = 20;
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'light-particle';
-                particle.style.width = `${Math.random() * 10 + 5}px`;
-                particle.style.height = particle.style.width;
-                particle.style.left = `${Math.random() * 100}%`;
-                particle.style.top = `${Math.random() * 100}%`;
-                particle.style.setProperty('--glow-min', '0.2');
-                particle.style.setProperty('--glow-max', '0.6');
-                particle.style.setProperty('--glow-scale-min', '0.5');
-                particle.style.setProperty('--glow-scale-max', '1');
-                particle.style.animation = `glow ${Math.random() * 3 + 2}s ease-in-out infinite`;
-                container.appendChild(particle);
-                setTimeout(() => particle.style.opacity = 1, i * 200);
-            }
-        }
-        
-        function createEndnoteParticles() {
-            const container = document.getElementById('container');
-            const particleCount = 10;
-            const endnote = document.querySelector('.romantic-endnote');
-            const rect = endnote.getBoundingClientRect();
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'light-particle endnote-particle';
-                particle.style.left = `${rect.left + Math.random() * rect.width}px`;
-                particle.style.top = `${rect.top - 10 + Math.random() * (rect.height + 20)}px`;
-                particle.style.setProperty('--glow-min', '0.2');
-                particle.style.setProperty('--glow-max', '0.5');
-                particle.style.setProperty('--glow-scale-min', '0.4');
-                particle.style.setProperty('--glow-scale-max', '0.8');
-                container.appendChild(particle);
-                setTimeout(() => particle.style.opacity = 1, i * 100);
-            }
-        }
-        
-        function setupMedallionPopups() {
-            const mikhailMedallion = document.querySelector('.medallion.left');
-            const annyutaMedallion = document.querySelector('.medallion.right');
-            
-            const mikhailDescription = "You pay for both of us, caring, attentive to small details, you listen, take interest in my hobbies and me in general, willing to compromise, ready to drag medicine across half of Seoul at night because I have a headache, you don’t dismiss my 'almost-rape' experience, and so much more.";
-            const annyutaDescription = "Annyuta is a person of contrasts, blending independence with deep emotions. She values freedom and personal space, often hiding her feelings behind an outward reserve. Her thoughts can remain a mystery, but beneath this enigma lies a storm of emotions she rarely lets others see. She knows how to be sincere, but expresses it in her own way—through brief words, glances, and actions. It’s important to her that those around her don’t restrict her, but understand her need for silence and solitude. At times she may seem cold, but it’s just a protective shell. Deep down, she remembers those who stood by her, who understood and accepted her as she is.";
-            
-            mikhailMedallion.addEventListener('click', () => showPopup(mikhailDescription, 'mikhail-scene'));
-            annyutaMedallion.addEventListener('click', () => showPopup(annyutaDescription, 'annyuta-scene'));
-        }
-        
-        function showPopup(description, sceneId) {
-            const existingPopup = document.querySelector('.popup');
-            if (existingPopup) existingPopup.remove();
-            
-            const popup = document.createElement('div');
-            popup.className = 'popup';
-            popup.innerHTML = `
-                <p>${description}</p>
-                <button>Close</button>
-            `;
-            document.getElementById('container').appendChild(popup);
-            
-            setTimeout(() => popup.classList.add('visible'), 10);
-            
-            const closeButton = popup.querySelector('button');
-            closeButton.addEventListener('click', () => {
-                popup.classList.remove('visible');
-                setTimeout(() => {
-                    popup.remove();
-                    document.addEventListener('click', startAnimationOnClick, { once: true });
-                }, 500);
-            });
-            
-            function startAnimationOnClick() {
-                startAnimation(sceneId);
-            }
-        }
-        
-        function createClockNumbers() {
-            const numbers = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
-            const clockNumbers = document.querySelector('.clock-numbers');
-            numbers.forEach((num, index) => {
-                const angle = (index * 30) * (Math.PI / 180);
-                const radius = 90;
-                const numberElement = document.createElement('div');
-                numberElement.className = 'clock-number';
-                numberElement.textContent = num;
-                numberElement.style.left = `${50 + Math.cos(angle) * radius}%`;
-                numberElement.style.top = `${50 + Math.sin(angle) * radius}%`;
-                numberElement.style.transform = 'translate(-50%, -50%)';
-                clockNumbers.appendChild(numberElement);
-            });
-        }
-        
-        const overlay = document.querySelector('.fade-overlay');
-        
-        function createAnimationStars() {
-            const starsContainer = document.querySelector('.stars');
-            const starsCount = 100;
-            for (let i = 0; i < starsCount; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.left = `${Math.random() * 100}%`;
-                star.style.top = `${Math.random() * 100}%`;
-                star.style.width = `${Math.random() * 2 + 1}px`;
-                star.style.height = star.style.width;
-                star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
-                star.style.setProperty('--delay', `${Math.random() * 2}s`);
-                starsContainer.appendChild(star);
-            }
-        }
-        
-        function startAnimation(sceneId) {
-            overlay.classList.add('active');
-            setTimeout(() => {
-                const scene = document.getElementById(sceneId);
-                scene.style.display = 'block';
-                overlay.classList.remove('active');
-                
-                if (sceneId === 'mikhail-scene') {
-                    startMikhailAnimation();
-                } else if (sceneId === 'annyuta-scene') {
-                    startAnnyutaAnimation();
-                }
-            }, 1500);
-        }
-        
-        function startMikhailAnimation() {
-            const scene = document.getElementById('mikhail-scene');
-            createSparks(scene);
-        }
-        
-        function startAnnyutaAnimation() {
-            const scene = document.getElementById('annyuta-scene');
-            createMoonParticles(scene);
-        }
-        
-        function endScene(sceneId) {
-            overlay.classList.add('active');
-            setTimeout(() => {
-                const scene = document.getElementById(sceneId);
-                scene.style.display = 'none';
-                overlay.classList.remove('active');
-                
-                if (sceneId === 'mikhail-scene') {
-                    clearParticles(scene, '.light-particle');
-                } else if (sceneId === 'annyuta-scene') {
-                    clearParticles(scene, '.moon-particle');
-                }
-            }, 1500);
-        }
-        
-        function clearParticles(scene, selector) {
-            const particles = scene.querySelectorAll(selector);
-            particles.forEach(particle => particle.remove());
-        }
-        
-        function createSparks(container) {
-            const sparkInterval = setInterval(() => {
-                const spark = document.createElement('div');
-                spark.className = 'light-particle';
-                const size = Math.random() * 5 + 3;
-                spark.style.width = `${size}px`;
-                spark.style.height = `${size}px`;
-                spark.style.left = '50%';
-                spark.style.top = '50%';
-                const angle = Math.random() * Math.PI * 2;
-                const distance = Math.random() * 150 + 50;
-                const xMove = Math.cos(angle) * distance;
-                const yMove = Math.sin(angle) * distance;
-                spark.style.setProperty('--x', `${xMove}px`);
-                spark.style.setProperty('--y', `${yMove}px`);
-                const hue = Math.random() * 30 + 40;
-                spark.style.background = `radial-gradient(circle, rgba(255, 255, ${Math.random() * 100 + 100}, 0.9) 20%, transparent 70%)`;
-                const duration = Math.random() * 3 + 2;
-                spark.style.animation = `sparkRise ${duration}s ease-out forwards`;
-                container.appendChild(spark);
-                setTimeout(() => spark.remove(), duration * 1000);
-            }, 300);
-            setTimeout(() => clearInterval(sparkInterval), 8000);
-        }
-        
-        function createMoonParticles(container) {
-            const particleInterval = setInterval(() => {
-                const particle = document.createElement('div');
-                particle.className = 'moon-particle';
-                const size = Math.random() * 4 + 2;
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                particle.style.left = '50%';
-                particle.style.top = '50%';
-                const angle = Math.random() * Math.PI * 2;
-                const distance = Math.random() * 100 + 50;
-                const xMove = Math.cos(angle) * distance;
-                const yMove = Math.sin(angle) * distance;
-                particle.style.setProperty('--x', `${xMove}px`);
-                particle.style.setProperty('--y', `${yMove}px`);
-                particle.style.animation = `particleDrift ${Math.random() * 2 + 2}s ease-out forwards`;
-                container.appendChild(particle);
-                setTimeout(() => particle.remove(), 4000);
-            }, 200);
-            setTimeout(() => clearInterval(particleInterval), 8000);
-        }
-
-        function startAnnyutaAnimation() {
-            const scene = document.getElementById('annyuta-scene');
-            createMoonParticles(scene);
-            const crescent = scene.querySelector('.moon-crescent');
-            setTimeout(() => {
-                crescent.style.opacity = '1';
-                crescent.style.transform = 'translate(-50%, -50%) scale(1) rotate(20deg)';
-            }, 1000);
-            createAnimationStars();
-        }
-
-        function endScene(sceneId) {
-            const overlay = document.querySelector('.fade-overlay');
-            overlay.classList.add('active');
-            setTimeout(() => {
-                const scene = document.getElementById(sceneId);
-                scene.style.display = 'none';
-                overlay.classList.remove('active');
-                
-                if (sceneId === 'mikhail-scene') {
-                    clearParticles(scene, '.light-particle');
-                } else if (sceneId === 'annyuta-scene') {
-                    clearParticles(scene, '.moon-particle');
-                    const crescent = scene.querySelector('.moon-crescent');
-                    crescent.style.opacity = '0';
-                    crescent.style.transform = 'translate(-50%, -50%) scale(0) rotate(0deg)';
-                }
-            }, 1500);
-        }
-
-        function clearParticles(scene, selector) {
-            const particles = scene.querySelectorAll(selector);
-            particles.forEach(particle => particle.remove());
-        }
-
-        function createAnimationStars() {
-            const starsContainer = document.querySelector('.stars');
-            if (!starsContainer) return;
-            const starsCount = 100;
-            for (let i = 0; i < starsCount; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.left = `${Math.random() * 100}%`;
-                star.style.top = `${Math.random() * 100}%`;
-                star.style.width = `${Math.random() * 2 + 1}px`;
-                star.style.height = star.style.width;
-                star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
-                star.style.setProperty('--delay', `${Math.random() * 2}s`);
-                starsContainer.appendChild(star);
-            }
-        }
-
-        function startAnimation() {
-            setTimeout(function() {
-                document.body.classList.remove('phase-initial');
-                document.body.classList.add('phase-middle');
-                document.querySelectorAll('.decorative-corner').forEach(corner => corner.classList.add('visible'));
-                document.querySelector('.golden-frame').classList.add('visible');
-                document.querySelectorAll('.star').forEach(star => star.style.opacity = 1);
-            }, 1000);
-            
-            setTimeout(function() {
-                document.getElementById('clock-container').style.opacity = 0;
-                document.getElementById('clock-container').style.transform = 'scale(0)';
-                setTimeout(function() {
-                    document.getElementById('heraldic').classList.add('visible');
-                }, 500);
-            }, 14000);
-            
-            setTimeout(function() {
-                document.body.classList.remove('phase-middle');
-                document.body.classList.add('phase-romantic');
-                document.getElementById('romantic-text').classList.add('visible');
-                document.querySelector('.fog').style.opacity = 0.3;
-                createTeaLeaves();
-            }, 17000);
-            
-            setTimeout(function() {
-                document.querySelector('.medallion.left').classList.add('visible');
-                document.querySelector('.medallion.right').classList.add('visible');
-                setTimeout(function() {
-                    document.querySelector('.connecting-line').classList.add('visible');
-                    setTimeout(function() {
-                        document.querySelector('.heart-center').classList.add('visible');
-                    }, 1000);
-                }, 2000);
-            }, 20000);
-            
-            setTimeout(function() {
-                document.body.classList.remove('phase-romantic');
-                document.body.classList.add('phase-final');
-                document.querySelector('.eternal-flame').classList.add('visible');
-                document.querySelector('.love-aura').classList.add('active');
-            }, 24000);
-            
-            setTimeout(function() {
-                document.querySelector('.final-message').classList.add('visible');
-                setTimeout(function() {
-                    document.getElementById('replay-button').classList.add('visible');
-                    const endnote = document.querySelector('.romantic-endnote');
-                    endnote.classList.add('visible');
-                    endnote.querySelectorAll('span').forEach((span, index) => {
-                        span.style.animationDelay = `${index * 0.05}s`;
-                    });
-                    setTimeout(() => {
-                        document.querySelector('.endnote-ornament.left').classList.add('visible');
-                        document.querySelector('.endnote-ornament.right').classList.add('visible');
-                        document.querySelector('.endnote-line').classList.add('visible');
-                        createEndnoteParticles();
-                    }, 1000);
-                }, 2000);
-            }, 29000);
-            
-            setTimeout(createLightParticles, 19000);
-        }
-
         function resetAnimation() {
             document.body.className = 'phase-initial';
             document.querySelectorAll('.decorative-corner, .golden-frame, .medallion').forEach(el => el.classList.remove('visible'));
@@ -1824,7 +1540,7 @@
             document.querySelector('.endnote-line').classList.remove('visible');
             document.querySelectorAll('.scene').forEach(scene => scene.style.display = 'none');
         }
-
+        
         function setupClock() {
             const hourHand = document.querySelector('.hour-hand');
             const minuteHand = document.querySelector('.minute-hand');
@@ -1849,7 +1565,7 @@
 
             updateClock();
         }
-
+        
         function createStars() {
             const container = document.getElementById('container');
             const starCount = Math.min(window.innerWidth / 10, 100);
@@ -1862,9 +1578,8 @@
                 star.style.setProperty('--twinkle-delay', `${Math.random() * 2}s`);
                 container.appendChild(star);
             }
-            createAnimationStars();
         }
-
+        
         function createTeaLeaves() {
             const container = document.getElementById('container');
             const leafCount = Math.min(window.innerWidth / 20, 30);
@@ -1882,7 +1597,7 @@
                 }, i * 300);
             }
         }
-
+        
         function createLightParticles() {
             const container = document.getElementById('container');
             const particleCount = 20;
@@ -1902,7 +1617,7 @@
                 setTimeout(() => particle.style.opacity = 1, i * 200);
             }
         }
-
+        
         function createEndnoteParticles() {
             const container = document.getElementById('container');
             const particleCount = 10;
@@ -1921,7 +1636,7 @@
                 setTimeout(() => particle.style.opacity = 1, i * 100);
             }
         }
-
+        
         function setupMedallionPopups() {
             const mikhailMedallion = document.querySelector('.medallion.left');
             const annyutaMedallion = document.querySelector('.medallion.right');
@@ -1932,7 +1647,7 @@
             mikhailMedallion.addEventListener('click', () => showPopup(mikhailDescription, 'mikhail-scene'));
             annyutaMedallion.addEventListener('click', () => showPopup(annyutaDescription, 'annyuta-scene'));
         }
-
+        
         function showPopup(description, sceneId) {
             const existingPopup = document.querySelector('.popup');
             if (existingPopup) existingPopup.remove();
@@ -1956,7 +1671,7 @@
                 }, 500);
             });
         }
-
+        
         function startScene(sceneId) {
             const overlay = document.querySelector('.fade-overlay');
             overlay.classList.add('active');
@@ -1972,65 +1687,312 @@
                 }
             }, 1500);
         }
-
+        
         function startMikhailAnimation() {
             const scene = document.getElementById('mikhail-scene');
             createSparks(scene);
         }
+        
+       function startAnnyutaAnimation() {
+    const scene = document.getElementById('annyuta-scene');
+    createSceneStars();
+    createCraters();
+    createConstellation();
+    createShootingStars();
+    createParticles();
+    createComets();
+    createNebulae();
+    createStarBursts();
+    setupMoonInteraction();
+    createPraiseTexts();
 
-        function createSparks(container) {
-            const sparkInterval = setInterval(() => {
-                const spark = document.createElement('div');
-                spark.className = 'light-particle';
-                const size = Math.random() * 5 + 3;
-                spark.style.width = `${size}px`;
-                spark.style.height = `${size}px`;
-                spark.style.left = '50%';
-                spark.style.top = '50%';
-                const angle = Math.random() * Math.PI * 2;
-                const distance = Math.random() * 150 + 50;
-                const xMove = Math.cos(angle) * distance;
-                const yMove = Math.sin(angle) * distance;
-                spark.style.setProperty('--x', `${xMove}px`);
-                spark.style.setProperty('--y', `${yMove}px`);
-                const hue = Math.random() * 30 + 40;
-                spark.style.background = `radial-gradient(circle, rgba(255, 255, ${Math.random() * 100 + 100}, 0.9) 20%, transparent 70%)`;
-                const duration = Math.random() * 3 + 2;
-                spark.style.animation = `sparkRise ${duration}s ease-out forwards`;
-                container.appendChild(spark);
-                setTimeout(() => spark.remove(), duration * 1000);
-            }, 300);
-            setTimeout(() => clearInterval(sparkInterval), 8000);
+    setInterval(() => {
+        createSingleConstellation();
+    }, 8000); // Создаем новую линию созвездия каждые 8 секунд
+
+    const textFragments = scene.querySelectorAll('.text-fragment');
+    textFragments.forEach((fragment, index) => {
+        fragment.style.top = `${30 + index * 10}%`;
+        fragment.style.left = '50%';
+        fragment.style.transform = 'translateX(-50%)';
+        fragment.style.animation = `fadeText 3s ease forwards ${index * 3 + 3}s`;
+    });
+}
+
+function createSceneStars() {
+    const starsContainer = document.getElementById('stars-scene');
+    const starCount = Math.min(window.innerWidth / 5, 200);
+    for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star-scene';
+        star.style.width = `${Math.random() * 3 + 1}px`;
+        star.style.height = star.style.width;
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.animationDelay = `${Math.random() * 3}s`;
+        starsContainer.appendChild(star);
+    }
+}
+
+function createCraters() {
+    const moon = document.getElementById('moon');
+    const craterCount = 8;
+    for (let i = 0; i < craterCount; i++) {
+        const crater = document.createElement('div');
+        crater.className = 'crater';
+        const size = Math.random() * 30 + 10;
+        crater.style.width = `${size}px`;
+        crater.style.height = `${size}px`;
+        crater.style.left = `${Math.random() * 80 + 10}%`;
+        crater.style.top = `${Math.random() * 80 + 10}%`;
+        moon.appendChild(crater);
+    }
+}
+
+function createConstellation() {
+    const starsContainer = document.getElementById('stars-scene');
+    const constellationStars = [];
+    for (let i = 0; i < 5; i++) {
+        const star = document.createElement('div');
+        star.className = 'star-scene';
+        star.style.width = '4px';
+        star.style.height = '4px';
+        star.style.left = `${Math.random() * 60 + 20}%`;
+        star.style.top = `${Math.random() * 60 + 20}%`;
+        starsContainer.appendChild(star);
+        constellationStars.push(star);
+    }
+
+    for (let i = 0; i < constellationStars.length - 1; i++) {
+        const line = document.createElement('div');
+        line.className = 'constellation-line';
+        const start = constellationStars[i].getBoundingClientRect();
+        const end = constellationStars[i + 1].getBoundingClientRect();
+        const angle = Math.atan2(end.top - start.top, end.left - start.left) * 180 / Math.PI;
+        const length = Math.sqrt(Math.pow(end.left - start.left, 2) + Math.pow(end.top - start.top, 2));
+        line.style.width = `${length}px`;
+        line.style.left = `${start.left + window.scrollX}px`;
+        line.style.top = `${start.top + window.scrollY}px`;
+        line.style.transform = `rotate(${angle}deg)`;
+        line.style.animationDelay = `${i * 0.5}s`;
+        starsContainer.appendChild(line);
+    }
+}
+
+function createSingleConstellation() {
+    const starsContainer = document.getElementById('stars-scene');
+    const constellationStars = [];
+    const starCount = Math.floor(Math.random() * 4 + 3);
+    for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star-scene';
+        star.style.width = '3px';
+        star.style.height = '3px';
+        star.style.left = `${Math.random() * 50 + 25}%`;
+        star.style.top = `${Math.random() * 50 + 25}%`;
+        starsContainer.appendChild(star);
+        constellationStars.push(star);
+    }
+
+    for (let i = 0; i < constellationStars.length - 1; i++) {
+        const line = document.createElement('div');
+        line.className = 'constellation-line';
+        const start = constellationStars[i].getBoundingClientRect();
+        const end = constellationStars[i + 1].getBoundingClientRect();
+        const angle = Math.atan2(end.top - start.top, end.left - start.left) * 180 / Math.PI;
+        const length = Math.sqrt(Math.pow(end.left - start.left, 2) + Math.pow(end.top - start.top, 2));
+        line.style.width = `${length}px`;
+        line.style.left = `${start.left + window.scrollX}px`;
+        line.style.top = `${start.top + window.scrollY}px`;
+        line.style.transform = `rotate(${angle}deg)`;
+        line.style.animationDelay = `${i * 0.5}s`;
+        starsContainer.appendChild(line);
+        setTimeout(() => line.remove(), 6000);
+    }
+
+    setTimeout(() => constellationStars.forEach(star => star.remove()), 6000);
+}
+
+function createShootingStars() {
+    const starsContainer = document.getElementById('stars-scene');
+    setInterval(() => {
+        const shootingStar = document.createElement('div');
+        shootingStar.className = 'shooting-star';
+        const startX = Math.random() * 80 + 10;
+        const startY = Math.random() * 20;
+        const travelX = (Math.random() * 200 - 100) + 'px';
+        const travelY = (Math.random() * 200 + 100) + 'px';
+        shootingStar.style.left = `${startX}%`;
+        shootingStar.style.top = `${startY}%`;
+        shootingStar.style.setProperty('--travel-x', travelX);
+        shootingStar.style.setProperty('--travel-y', travelY);
+        shootingStar.style.animation = `shootingStar ${Math.random() * 2 + 1}s ease-out forwards`;
+        starsContainer.appendChild(shootingStar);
+        setTimeout(() => shootingStar.remove(), 3000);
+    }, 5000);
+}
+
+function createParticles() {
+    const particlesContainer = document.getElementById('particles-scene');
+    const particleCount = 20;
+    for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        const size = Math.random() * 4 + 1;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.setProperty('--start-x', `${Math.random() * 100 - 50}px`);
+        particle.style.setProperty('--start-y', `${Math.random() * 100 - 50}px`);
+        particle.style.setProperty('--end-x', `${Math.random() * 200 - 100}px`);
+        particle.style.setProperty('--end-y', `${Math.random() * 200 - 100}px`);
+        particle.style.setProperty('--size', Math.random() * 0.5 + 0.5);
+        particle.style.setProperty('--opacity', Math.random() * 0.5 + 0.2);
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.top = `${Math.random() * 100}%`;
+        particle.style.animationDelay = `${Math.random() * 10}s`;
+        particlesContainer.appendChild(particle);
+    }
+}
+
+function createComets() {
+    const starsContainer = document.getElementById('stars-scene');
+    setInterval(() => {
+        const comet = document.createElement('div');
+        comet.className = 'comet';
+        const startX = Math.random() * 80 + 10;
+        const startY = Math.random() * 20;
+        const angle = Math.random() * 60 - 30;
+        const length = Math.random() * 100 + 50;
+        const travelX = Math.cos(angle * Math.PI / 180) * 300 + 'px';
+        const travelY = Math.sin(angle * Math.PI / 180) * 300 + 'px';
+        comet.style.left = `${startX}%`;
+        comet.style.top = `${startY}%`;
+        comet.style.setProperty('--angle', `${angle}deg`);
+        comet.style.setProperty('--length', `${length}px`);
+        comet.style.setProperty('--travel-x', travelX);
+        comet.style.setProperty('--travel-y', travelY);
+        starsContainer.appendChild(comet);
+        setTimeout(() => comet.remove(), 8000);
+    }, 10000);
+}
+
+function createNebulae() {
+    const scene = document.getElementById('annyuta-scene');
+    const nebulaCount = 3;
+    for (let i = 0; i < nebulaCount; i++) {
+        const nebula = document.createElement('div');
+        nebula.className = 'nebula';
+        const size = Math.random() * 200 + 100;
+        nebula.style.width = `${size}px`;
+        nebula.style.height = `${size}px`;
+        nebula.style.left = `${Math.random() * 80}%`;
+        nebula.style.top = `${Math.random() * 80}%`;
+        nebula.style.animationDelay = `${Math.random() * 20}s`;
+        scene.appendChild(nebula);
+    }
+}
+
+function createStarBursts() {
+    const starsContainer = document.getElementById('stars-scene');
+    setInterval(() => {
+        const burst = document.createElement('div');
+        burst.className = 'star-burst';
+        burst.style.left = `${Math.random() * 80 + 10}%`;
+        burst.style.top = `${Math.random() * 80 + 10}%`;
+        starsContainer.appendChild(burst);
+        setTimeout(() => burst.remove(), 2000);
+    }, 6000);
+}
+
+function setupMoonInteraction() {
+    const moonContainer = document.getElementById('moonContainer');
+    const moonGlow = moonContainer.querySelector('.moon-glow');
+    const eclipse = document.createElement('div');
+    eclipse.className = 'eclipse';
+    const lunarRays = document.createElement('div');
+    lunarRays.className = 'lunar-rays';
+    moonContainer.appendChild(eclipse);
+    moonContainer.appendChild(lunarRays);
+
+    moonContainer.addEventListener('mouseenter', () => {
+        eclipse.style.opacity = '1';
+        lunarRays.style.opacity = '0.5';
+        lunarRays.style.transform = 'scale(1)';
+    });
+
+    moonContainer.addEventListener('mouseleave', () => {
+        eclipse.style.opacity = '0';
+        lunarRays.style.opacity = '0';
+        lunarRays.style.transform = 'scale(0)';
+    });
+}
+
+function createPraiseTexts() {
+    const scene = document.getElementById('annyuta-scene');
+    const praises = ['Beautiful', 'Mysterious', 'Unique', 'Graceful'];
+    praises.forEach((text, index) => {
+        const praise = document.createElement('div');
+        praise.className = 'praise-text';
+        praise.textContent = text;
+        praise.style.left = `${Math.random() * 60 + 20}%`;
+        praise.style.top = `${Math.random() * 60 + 20}%`;
+        praise.style.animation = `fadeText 4s ease-in-out ${index * 2}s infinite`;
+        scene.appendChild(praise);
+    });
+}
+
+function endScene(sceneId) {
+    const overlay = document.querySelector('.fade-overlay');
+    overlay.classList.add('active');
+    setTimeout(() => {
+        const scene = document.getElementById(sceneId);
+        scene.style.display = 'none';
+        overlay.classList.remove('active');
+        if (sceneId === 'annyuta-scene') {
+            cleanupAnnyutaScene();
         }
+    }, 1500);
+}
 
-        function createClockNumbers() {
-            const numbers = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
-            const clockNumbers = document.querySelector('.clock-numbers');
-            numbers.forEach((num, index) => {
-                const angle = (index * 30) * (Math.PI / 180);
-                const radius = 90;
-                const numberElement = document.createElement('div');
-                numberElement.className = 'clock-number';
-                numberElement.textContent = num;
-                numberElement.style.left = `${50 + Math.cos(angle) * radius}%`;
-                numberElement.style.top = `${50 + Math.sin(angle) * radius}%`;
-                numberElement.style.transform = 'translate(-50%, -50%)';
-                clockNumbers.appendChild(numberElement);
-            });
-        }
+function cleanupAnnyutaScene() {
+    const starsContainer = document.getElementById('stars-scene');
+    const particlesContainer = document.getElementById('particles-scene');
+    const moon = document.getElementById('moon');
+    starsContainer.innerHTML = '';
+    particlesContainer.innerHTML = '';
+    moon.innerHTML = '';
+    const scene = document.getElementById('annyuta-scene');
+    scene.querySelectorAll('.nebula, .praise-text, .eclipse, .lunar-rays').forEach(el => el.remove());
+}
 
-        document.addEventListener('DOMContentLoaded', function() {
-            startAnimation();
-            document.getElementById('replay-button').addEventListener('click', function() {
-                resetAnimation();
-                setTimeout(startAnimation, 500);
-            });
-            createStars();
-            createTeaLeaves();
-            setupClock();
-            setupMedallionPopups();
-            createClockNumbers();
-        });
-    </script>
+function createClockNumbers() {
+    const clockNumbers = document.querySelector('.clock-numbers');
+    for (let i = 1; i <= 12; i++) {
+        const number = document.createElement('div');
+        number.className = 'clock-number';
+        number.textContent = i.toString().padStart(2, '0');
+        const angle = (i - 3) * 30 * Math.PI / 180;
+        const radius = 90;
+        number.style.left = `calc(50% + ${radius * Math.cos(angle)}px - 10px)`;
+        number.style.top = `calc(50% + ${radius * Math.sin(angle)}px - 10px)`;
+        clockNumbers.appendChild(number);
+    }
+}
+
+function createSparks(container) {
+    const sparkCount = 20;
+    for (let i = 0; i < sparkCount; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'light-particle';
+        spark.style.width = `${Math.random() * 5 + 2}px`;
+        spark.style.height = spark.style.width;
+        spark.style.left = `${Math.random() * 100}%`;
+        spark.style.top = `${Math.random() * 100}%`;
+        spark.style.animation = `glow ${Math.random() * 2 + 1}s ease-in-out infinite`;
+        container.appendChild(spark);
+        setTimeout(() => spark.style.opacity = 1, i * 100);
+    }
+}
+</script>
 </body>
 </html>
