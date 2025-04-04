@@ -1601,7 +1601,7 @@
                 div.className = 'memory-card';
                 div.dataset.date = memory.date;
                 div.innerHTML = `
-                    <img src="${memory.image || 'https://via.placeholder.com/280x240/ffe0e8/fff9fb?text=Момент'}" class="memory-image" alt="${memory.title}">
+                    <img src="${memory.image || 'https://via.placeholder.com/280x240/ffe0e8/fff9fb?text=Moment'}" class="memory-image" alt="${memory.title}">
                     <div class="memory-content">
                         <span class="memory-date">${new Date(memory.date).toLocaleDateString('ru-RU', {
                             day: 'numeric',
@@ -1789,11 +1789,12 @@
                         saveMemory(memory);
                     }).catch(error => {
                         console.error('Ошибка загрузки файла:', error);
+                        alert('Не удалось загрузить изображение на Google Drive. Оно будет сохранено без изображения.');
                         const memory = { 
                             title, 
                             date, 
                             description, 
-                            image: 'https://via.placeholder.com/280x240/ffe0e8/fff9fb?text=Ошибка' 
+                            image: 'https://via.placeholder.com/280x240/ffe0e8/fff9fb?text=Error'
                         };
                         saveMemory(memory);
                     });
@@ -1802,7 +1803,7 @@
                         title, 
                         date, 
                         description, 
-                        image: 'https://via.placeholder.com/280x240/ffe0e8/fff9fb?text=Момент' 
+                        image: 'https://via.placeholder.com/280x240/ffe0e8/fff9fb?text=Moment' 
                     };
                     saveMemory(memory);
                 }
@@ -1832,7 +1833,8 @@
                 form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
                 form.append('file', file);
 
-                console.log('Отправляем файл на Google Диск, размер:', file.size);
+                console.log('Отправляем файл на Google Диск, размер:', file.size, 'токен:', accessToken);
+
                 return fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                     method: 'POST',
                     headers: {
@@ -1840,8 +1842,11 @@
                     },
                     body: form
                 }).then(response => {
+                    console.log('Статус ответа от Google Drive:', response.status, response.statusText);
                     if (!response.ok) {
-                        throw new Error('Ошибка загрузки файла на Google Drive: ' + response.statusText);
+                        return response.text().then(text => {
+                            throw new Error(`Ошибка загрузки файла на Google Drive: ${response.status} - ${text}`);
+                        });
                     }
                     return response.json();
                 }).then(data => {
@@ -1856,6 +1861,9 @@
                     }).then(() => {
                         console.log('Права доступа установлены');
                         return `https://drive.google.com/uc?export=view&id=${fileId}`;
+                    }).catch(error => {
+                        console.error('Ошибка установки прав доступа:', error);
+                        throw error;
                     });
                 }).catch(error => {
                     console.error('Ошибка в uploadFileToDrive:', error);
