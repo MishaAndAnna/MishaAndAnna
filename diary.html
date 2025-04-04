@@ -1324,7 +1324,9 @@
                 <button class="confirm-delete-btn">
                     <i class="fas fa-check"></i> Удалить выбранное
                 </button>
-                <div id="googleSignInContainer" style="display: inline-block; margin-left: 10px;"></div>
+                <button id="googleSignInButton" class="add-entry-btn">
+                    <i class="fab fa-google"></i> Войти через Google
+                </button>
                 <div class="memory-cards" id="memoryCards">
                     <div class="no-entries">
                         <i class="fas fa-heart"></i>
@@ -1438,12 +1440,13 @@
         </div>
     </footer>
 
-    <!-- Подключение Google Identity Services -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <!-- Подключение Google Drive API для управления правами доступа -->
+    <!-- Подключение Google API Client Library -->
     <script src="https://apis.google.com/js/api.js"></script>
     <script>
-        let googleUserAccessToken;
+        const CLIENT_ID = '822036073579-53mj21ufbgmvn4tnvfr3pulhvbrov480.apps.googleusercontent.com';
+        const API_KEY = 'AIzaSyDhkC4s_k16cgn4ffKZ6ezDu0i3yqH-uIo'; // Ваш API ключ
+        const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
         let isSignedIn = false;
 
         // Обновление статистики отношений
@@ -1472,67 +1475,53 @@
             const filterButtons = document.querySelectorAll('.filter-btn');
             const showEntryFormBtn = document.getElementById('showEntryForm');
             const showMemoryFormBtn = document.getElementById('showMemoryForm');
+            const googleSignInButton = document.getElementById('googleSignInButton');
             let isSelecting = false;
 
-            // Проверка состояния входа
-            isSignedIn = localStorage.getItem('isSignedIn') === 'true';
-            if (isSignedIn && localStorage.getItem('googleUserAccessToken')) {
-                googleUserAccessToken = localStorage.getItem('googleUserAccessToken');
+            // Инициализация Google API
+            function initGoogleApi() {
+                gapi.load('client:auth2', () => {
+                    gapi.client.init({
+                        apiKey: API_KEY,
+                        clientId: CLIENT_ID,
+                        discoveryDocs: DISCOVERY_DOCS,
+                        scope: SCOPES
+                    }).then(() => {
+                        console.log('Google API инициализирован');
+                        const authInstance = gapi.auth2.getAuthInstance();
+                        isSignedIn = authInstance.isSignedIn.get();
+                        authInstance.isSignedIn.listen(updateSignInStatus);
+                        updateSignInStatus(isSignedIn);
+                    }).catch(error => {
+                        console.error('Ошибка инициализации Google API:', error);
+                        alert('Не удалось инициализировать Google API. Проверьте настройки API-ключа и Client ID.');
+                    });
+                });
             }
 
-            // Инициализация Google API для Drive
-            gapi.load('client', function() {
-                gapi.client.init({
-                    discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
-                }).then(() => {
-                    console.log('Google Drive API инициализирован');
+            // Обновление статуса авторизации
+            function updateSignInStatus(signedIn) {
+                isSignedIn = signedIn;
+                if (isSignedIn) {
+                    googleSignInButton.style.display = 'none';
+                    console.log('Пользователь авторизован');
+                } else {
+                    googleSignInButton.style.display = 'inline-block';
+                    console.log('Пользователь не авторизован');
+                }
+            }
+
+            // Авторизация через Google
+            googleSignInButton.addEventListener('click', function() {
+                const authInstance = gapi.auth2.getAuthInstance();
+                authInstance.signIn().then(() => {
+                    console.log('Успешная авторизация');
+                    updateSignInStatus(true);
                 }).catch(error => {
-                    console.error('Ошибка инициализации Google Drive API:', error);
+                    console.error('Ошибка авторизации:', error);
+                    alert('Ошибка авторизации. Проверьте подключение к интернету или настройки Google API.');
                 });
             });
-
-            // Инициализация кнопки Google Sign-In
-            function initializeGoogleSignIn() {
-                google.accounts.id.initialize({
-                    client_id: '822036073579-53mj21ufbgmvn4tnvfr3pulhvbrov480.apps.googleusercontent.com',
-                    callback: handleCredentialResponse
-                });
-
-                if (!isSignedIn) {
-                    google.accounts.id.renderButton(
-                        document.getElementById('googleSignInContainer'),
-                        {
-                            theme: 'outline',
-                            size: 'large',
-                            text: 'sign_in_with',
-                            shape: 'pill'
-                        }
-                    );
-                } else {
-                    document.getElementById('googleSignInContainer').style.display = 'none';
-                }
-            }
-
-            // Обработка ответа от Google Identity Services
-            function handleCredentialResponse(response) {
-                if (response.credential) {
-                    console.log('Авторизация успешна, токен:', response.credential);
-                    googleUserAccessToken = response.credential;
-                    isSignedIn = true;
-                    document.getElementById('googleSignInContainer').style.display = 'none';
-                    localStorage.setItem('isSignedIn', 'true');
-                    localStorage.setItem('googleUserAccessToken', googleUserAccessToken);
-                    alert('Вы успешно вошли в аккаунт Google!');
-                } else {
-                    console.error('Ошибка авторизации:', response);
-                    alert('Не удалось войти. Пожалуйста, попробуйте снова.');
-                }
-            }
-
-            // Вызов инициализации кнопки после загрузки GIS
-            window.onload = function() {
-                initializeGoogleSignIn();
-            };
 
             // Переключение между формами
             showEntryFormBtn.addEventListener('click', function() {
@@ -1803,12 +1792,12 @@
                 const file = fileInput.files[0];
 
                 if (file) {
-                    if (!isSignedIn || !googleUserAccessToken) {
+                    if (!isSignedIn) {
                         alert('Пожалуйста, войдите в аккаунт Google с помощью кнопки "Войти через Google" для загрузки изображений.');
                         return;
                     }
 
-                    uploadFileToDrive(file, googleUserAccessToken).then(imageUrl => {
+                    uploadFileToDrive(file).then(imageUrl => {
                         const memory = { title, date, description, image: imageUrl };
                         saveMemory(memory);
                     }).catch(error => {
@@ -1847,46 +1836,56 @@
                 memoryForm.reset();
             }
 
-            function uploadFileToDrive(file, accessToken) {
-                const metadata = {
-                    'name': file.name,
-                    'mimeType': file.type
-                };
-
-                const form = new FormData();
-                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-                form.append('file', file);
-
-                return fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    },
-                    body: form
-                }).then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Ошибка загрузки файла: ${response.status} - ${response.statusText}`);
+            function uploadFileToDrive(file) {
+                return new Promise((resolve, reject) => {
+                    const authInstance = gapi.auth2.getAuthInstance();
+                    if (!authInstance || !authInstance.isSignedIn.get()) {
+                        reject(new Error('Пользователь не авторизован'));
+                        return;
                     }
-                    return response.json();
-                }).then(data => {
-                    const fileId = data.id;
-                    return gapi.client.drive.permissions.create({
-                        'fileId': fileId,
-                        'resource': {
-                            'role': 'reader',
-                            'type': 'anyone'
+
+                    const accessToken = authInstance.currentUser.get().getAuthResponse().access_token;
+                    const metadata = {
+                        'name': file.name,
+                        'mimeType': file.type
+                    };
+
+                    const form = new FormData();
+                    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                    form.append('file', file);
+
+                    fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`
+                        },
+                        body: form
+                    }).then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Ошибка загрузки файла: ${response.status} - ${response.statusText}`);
                         }
-                    }).then(() => {
-                        return `https://drive.google.com/uc?export=view&id=${fileId}`;
+                        return response.json();
+                    }).then(data => {
+                        const fileId = data.id;
+                        return gapi.client.drive.permissions.create({
+                            'fileId': fileId,
+                            'resource': {
+                                'role': 'reader',
+                                'type': 'anyone'
+                            }
+                        }).then(() => {
+                            resolve(`https://drive.google.com/uc?export=view&id=${fileId}`);
+                        });
+                    }).catch(error => {
+                        console.error('Ошибка загрузки файла на Google Drive:', error);
+                        reject(error);
                     });
-                }).catch(error => {
-                    console.error('Ошибка загрузки файла на Google Drive:', error);
-                    throw error;
                 });
             }
 
             loadEntries();
             loadMemories();
+            initGoogleApi();
         });
     </script>
 </body>
