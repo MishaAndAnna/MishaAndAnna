@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Михаил & Аня: Timeless Love</title>
     <style>
-        /* Основные стили и сброс */
         *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
@@ -25,7 +24,6 @@
         
         @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Cinzel:wght@400;600&display=swap');
         
-        /* Основной контейнер */
         #container {
             position: relative;
             width: 100%;
@@ -39,13 +37,11 @@
             transition: all 3s cubic-bezier(0.42, 0, 0.58, 1);
         }
         
-        /* Фазы анимации */
         .phase-initial #container { background: radial-gradient(ellipse at center, #000000 0%, #080010 100%); }
         .phase-middle #container { background: radial-gradient(ellipse at center, #0a0a2c 0%, #05051a 100%); }
         .phase-romantic #container { background: radial-gradient(ellipse at center, #1a0a34 0%, #0a051a 100%); }
         .phase-final #container { background: radial-gradient(ellipse at center, #240a2b 0%, #0a051a 100%); }
         
-        /* Звезды на фоне */
         .star {
             position: absolute;
             width: 2px;
@@ -63,7 +59,6 @@
             50% { opacity: 0.8; transform: scale(1.2); }
         }
         
-        /* Антикварные часы */
         #clock-container {
             position: relative;
             width: 260px;
@@ -169,7 +164,6 @@
         .clock-ornament.bottom-left { bottom: 10px; left: 20px; }
         .clock-ornament.bottom-right { bottom: 10px; right: 20px; }
         
-        /* Геральдический щит */
         #heraldic {
             position: absolute;
             top: 50%;
@@ -190,7 +184,6 @@
             filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
         }
         
-        /* Романтический текст */
         #romantic-text {
             position: absolute;
             bottom: 50px;
@@ -237,7 +230,6 @@
         #romantic-text .quote::before { top: 0; left: 0; border-top: 2px solid #D4AF37; border-left: 2px solid #D4AF37; }
         #romantic-text .quote::after { bottom: 0; right: 0; border-bottom: 2px solid #D4AF37; border-right: 2px solid #D4AF37; }
         
-        /* Эффект лондонского тумана */
         .fog {
             position: absolute;
             width: 100%;
@@ -254,7 +246,6 @@
             100% { transform: translateX(-10%) translateY(-10%); }
         }
         
-        /* Листья чая */
         .tea-leaf {
             position: absolute;
             width: 15px;
@@ -267,7 +258,6 @@
             z-index: 5;
         }
         
-        /* Светящиеся частицы */
         .light-particle {
             position: absolute;
             border-radius: 50%;
@@ -277,7 +267,6 @@
             z-index: 6;
         }
         
-        /* Кнопка повторения анимации */
         #replay-button {
             position: absolute;
             bottom: 20px;
@@ -298,7 +287,6 @@
         #replay-button:hover { background: rgba(212, 175, 55, 0.2); transform: scale(1.05); }
         #replay-button.visible { opacity: 1; }
         
-        /* Декоративные углы */
         .decorative-corner {
             position: absolute;
             width: 100px;
@@ -327,7 +315,6 @@
         .decorative-corner.bottom-left.visible { transform: rotate(270deg) scale(1); }
         .decorative-corner.bottom-right.visible { transform: rotate(180deg) scale(1); }
         
-        /* Анимации */
         @keyframes floatOrnament {
             0% { transform: translateY(0); }
             50% { transform: translateY(-5px); }
@@ -344,7 +331,6 @@
             50% { transform: scale(1.1); opacity: 0.8; }
         }
         
-        /* Медальоны */
         .medallion {
             position: absolute;
             width: 150px;
@@ -406,7 +392,6 @@
             text-shadow: 0 0 10px rgba(192, 156, 77, 0.5);
         }
         
-        /* Стили для всплывающего окна */
         .popup {
             position: absolute;
             top: 50%;
@@ -450,7 +435,6 @@
         
         .popup button:hover { background: rgba(212, 175, 55, 0.2); transform: scale(1.05); }
         
-        /* Соединяющая линия */
         .connecting-line {
             position: absolute;
             top: 50%;
@@ -466,7 +450,6 @@
         
         .connecting-line.visible { width: 30%; opacity: 1; }
         
-        /* Сердце */
         .heart-center {
             position: absolute;
             top: 50%;
@@ -488,7 +471,6 @@
             filter: drop-shadow(0 0 5px rgba(192, 156, 77, 0.5));
         }
         
-        /* Вечное пламя */
         .eternal-flame {
             position: absolute;
             top: 20%;
@@ -552,7 +534,6 @@
             75% { transform: scaleY(1.05) scaleX(0.95); }
         }
         
-        /* Золотая рамка */
         .golden-frame {
             position: absolute;
             top: 10px;
@@ -568,7 +549,6 @@
         
         .golden-frame.visible { opacity: 1; }
         
-        /* Финальный текст */
         .final-message {
             position: absolute;
             top: 50%;
@@ -588,7 +568,6 @@
         
         .final-message.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         
-        /* Аура любви */
         .love-aura {
             position: absolute;
             top: 50%;
@@ -605,7 +584,6 @@
         
         .love-aura.active { width: 800px; height: 800px; opacity: 0.5; }
         
-        /* Королевский герб */
         .royal-crest {
             position: absolute;
             top: 20%;
@@ -620,7 +598,6 @@
         
         .royal-crest.visible { opacity: 1; transform: translateX(-50%) scale(1); }
         
-        /* Романтическая финальная фраза */
         .romantic-endnote {
             position: absolute;
             top: 50px;
@@ -650,7 +627,6 @@
             100% { opacity: 1; transform: translateY(0); }
         }
         
-        /* Декоративные завитки */
         .endnote-ornament {
             position: absolute;
             width: 60px;
@@ -672,7 +648,6 @@
             fill: none;
         }
         
-        /* Золотая линия */
         .endnote-line {
             position: absolute;
             bottom: -10px;
@@ -687,14 +662,481 @@
         
         .endnote-line.visible { width: 80%; opacity: 0.7; }
         
-        /* Обновляем стили для частиц */
         .light-particle.endnote-particle {
             width: 6px;
             height: 6px;
             animation: glow 2s ease-in-out infinite;
         }
         
-        /* Медиа-запросы */
+        /* Стили анимаций */
+        .fade-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            pointer-events: none;
+            z-index: 300;
+        }
+        .fade-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+            display: none;
+            z-index: 250;
+        }
+        
+        .text-fragment {
+            position: absolute;
+            font-family: 'EB Garamond', serif;
+            font-size: 28px;
+            color: #fafafa;
+            opacity: 0;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+            letter-spacing: 1.5px;
+        }
+        
+        @keyframes fadeText {
+            0% { opacity: 0; transform: translateY(20px); }
+            30% { opacity: 1; transform: translateY(0); }
+            70% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+        
+        .return-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            font-family: 'EB Garamond', serif;
+            font-size: 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s ease;
+            animation: showButton 1s ease forwards 10s;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+            backdrop-filter: blur(3px);
+        }
+        
+        .return-button:hover {
+            background: rgba(212, 175, 55, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
+        
+        @keyframes showButton {
+            to { opacity: 1; }
+        }
+        
+        #mikhail-scene {
+            background: linear-gradient(to bottom, #2b2b2b 0%, #1a1a1a 100%);
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background: linear-gradient(to bottom, #2b2b2b 0%, #1a1a1a 100%); }
+            50% { background: linear-gradient(to bottom, #302b20 0%, #1a1a10 100%); }
+            100% { background: linear-gradient(to bottom, #2b2b2b 0%, #1a1a1a 100%); }
+        }
+        
+        .lantern-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            animation: lanternAppear 12s ease forwards;
+            z-index: 5;
+        }
+        
+        @keyframes lanternAppear {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            15% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            85% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        }
+        
+        .lantern-body {
+            position: relative;
+            width: 100px;
+            height: 160px;
+            background: #603814;
+            border-radius: 8px 8px 20px 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        
+        .lantern-top {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 15px;
+            background: #4a2b10;
+            border-radius: 5px 5px 0 0;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .lantern-handle {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 30px;
+            border: 4px solid #4a2b10;
+            border-bottom: none;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .lantern-frame {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: calc(100% - 20px);
+            height: calc(100% - 20px);
+            background: rgba(255, 215, 150, 0.15);
+            border: 2px solid #8c5d3a;
+            border-radius: 6px 6px 15px 15px;
+            overflow: hidden;
+        }
+        
+        .lantern-glass {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 215, 150, 0.1);
+            backdrop-filter: blur(1px);
+        }
+        
+        .lantern-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+        }
+        
+        .lantern-grid::before, .lantern-grid::after {
+            content: '';
+            position: absolute;
+            background: #8c5d3a;
+        }
+        
+        .lantern-grid::before {
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            transform: translateY(-50%);
+        }
+        
+        .lantern-grid::after {
+            top: 0;
+            left: 50%;
+            height: 100%;
+            width: 2px;
+            transform: translateX(-50%);
+        }
+        
+        .lantern-flame {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 30px;
+            background: radial-gradient(ellipse at center, #ffee88 0%, #ff8800 70%, transparent 100%);
+            border-radius: 50% 50% 20% 20% / 60% 60% 40% 40%;
+            filter: blur(2px);
+            animation: flameFlicker 3s ease-in-out infinite;
+            box-shadow: 0 0 20px #ff8800, 0 0 40px #ffee88;
+            z-index: 2;
+        }
+        
+        @keyframes flameFlicker {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            25% { transform: translate(-50%, -50%) scale(1.1) skew(2deg, 0deg); }
+            50% { transform: translate(-50%, -50%) scale(0.9) skew(-1deg, 1deg); }
+            75% { transform: translate(-50%, -50%) scale(1.05) skew(-3deg, 0.5deg); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        .lantern-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 215, 150, 0.4) 0%, transparent 70%);
+            filter: blur(5px);
+            animation: glowPulse 4s ease-in-out infinite;
+            z-index: 1;
+        }
+        
+        .lantern-ambient {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 165, 70, 0.2) 0%, transparent 70%);
+            opacity: 0;
+            animation: ambientGlow 12s ease forwards;
+        }
+        
+        @keyframes ambientGlow {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            20% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+            80% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+        }
+        
+        #mikhail-scene .text-fragment:nth-child(2) {
+            top: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: fadeText 3s ease forwards;
+            animation-delay: 3s;
+        }
+        
+        #mikhail-scene .text-fragment:nth-child(3) {
+            top: 60%;
+            left: 65%;
+            transform: translateX(-50%);
+            animation: fadeText 3s ease forwards;
+            animation-delay: 6s;
+        }
+        
+        #mikhail-scene .text-fragment:nth-child(4) {
+            top: 40%;
+            left: 35%;
+            transform: translateX(-50%);
+            animation: fadeText 3s ease forwards;
+            animation-delay: 9s;
+        }
+        
+        .light-particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        @keyframes sparkRise {
+            0% { opacity: 0; transform: translate(0, 0) scale(0.3); }
+            30% { opacity: 1; transform: translate(var(--x), var(--y)) scale(1); }
+            80% { opacity: 0.7; transform: translate(calc(var(--x) * 2), calc(var(--y) * 2)) scale(0.7); }
+            100% { opacity: 0; transform: translate(calc(var(--x) * 3), calc(var(--y) * 3)) scale(0.1); }
+        }
+        
+       #annyuta-scene {
+            background: linear-gradient(to bottom, #0a1a10 0%, #050b08 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .night-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(30, 60, 40, 0.2) 0%, rgba(10, 20, 15, 0.1) 100%);
+            animation: nightPulse 8s ease infinite;
+        }
+        
+        @keyframes nightPulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.3; }
+        }
+        
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite;
+            animation-delay: var(--delay);
+        }
+        
+        .moon-crescent {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120px;
+            height: 120px;
+            transform: translate(-50%, -50%) scale(0) rotate(0deg);
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.5s ease; /* Добавлен плавный переход для JS-анимации */
+            z-index: 2;
+        }
+        
+        @keyframes crescentAppear {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+            15% { transform: translate(-50%, -50%) scale(1) rotate(20deg); opacity: 1; }
+            40% { transform: translate(-50%, -50%) scale(1.1) rotate(30deg); opacity: 1; }
+            70% { transform: translate(-50%, -50%) scale(1) rotate(40deg); opacity: 0.8; }
+            90% { transform: translate(-50%, -50%) scale(0.9) rotate(45deg); opacity: 0.4; }
+            100% { transform: translate(-50%, -50%) scale(0) rotate(60deg); opacity: 0; }
+        }
+        
+        .crescent-outer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #d0e0ff; /* Фон теперь полностью виден */
+            box-shadow: 0 0 20px rgba(200, 220, 255, 0.5), 0 0 40px rgba(180, 210, 250, 0.3);
+        }
+        
+        .crescent-inner {
+            position: absolute;
+            width: 80%; /* Уменьшен размер для создания формы полумесяца */
+            height: 80%;
+            border-radius: 50%;
+            background: #050b08; /* Цвет фона сцены для выреза */
+            top: -10%; /* Смещение вверх для формирования полумесяца */
+            left: 40%; /* Смещение вправо */
+            z-index: 1;
+        }
+        
+        .crescent-glow {
+            position: absolute;
+            width: 140%;
+            height: 140%;
+            top: -20%;
+            left: -20%;
+            border-radius: 50%;
+            background: radial-gradient(ellipse at center, rgba(200, 220, 255, 0.3) 0%, transparent 70%);
+            filter: blur(5px);
+            animation: crescentGlowPulse 4s ease infinite;
+        }
+        
+        @keyframes crescentGlowPulse {
+            0% { opacity: 0.3; transform: scale(0.9); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+            100% { opacity: 0.3; transform: scale(0.9); }
+        }
+        
+        .crescent-crystal {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            z-index: 2; /* Помещаем поверх inner для видимости граней */
+        }
+        
+        .crystal-facet {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(210, 230, 255, 0.5), rgba(180, 210, 255, 0.2));
+            border-radius: 30%;
+        }
+        
+        .facet1 {
+            width: 60%;
+            height: 35%;
+            top: 15%;
+            left: 5%;
+            transform: rotate(30deg);
+        }
+        
+        .facet2 {
+            width: 40%;
+            height: 25%;
+            top: 55%;
+            left: 10%;
+            transform: rotate(-15deg);
+        }
+        
+        .facet3 {
+            width: 30%;
+            height: 40%;
+            top: 30%;
+            left: 60%;
+            transform: rotate(-45deg);
+        }
+        
+        .moon-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, rgba(210, 230, 255, 0.9) 20%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(1px);
+            opacity: 0;
+            z-index: 3;
+            pointer-events: none;
+        }
+        
+        @keyframes particleDrift {
+            0% { opacity: 0; transform: translate(0, 0) scale(0.3); }
+            30% { opacity: 0.8; transform: translate(var(--x), var(--y)) scale(1); }
+            100% { opacity: 0; transform: translate(calc(var(--x) * 2), calc(var(--y) * 2)) scale(0.1); }
+        }
+        
+        #annyuta-scene .text-fragment:nth-child(5) {
+            top: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(210, 230, 255, 0.9);
+            animation: fadeText 3s ease forwards;
+            animation-delay: 3s;
+        }
+        
+        #annyuta-scene .text-fragment:nth-child(6) {
+            top: 65%;
+            left: 60%;
+            transform: translateX(-50%);
+            color: rgba(200, 220, 255, 0.9);
+            animation: fadeText 3s ease forwards;
+            animation-delay: 6s;
+        }
+        
+        #annyuta-scene .text-fragment:nth-child(7) {
+            top: 35%;
+            left: 30%;
+            transform: translateX(-50%);
+            color: rgba(220, 240, 255, 0.9);
+            animation: fadeText 3s ease forwards;
+            animation-delay: 9s;
+        }
+        
         @media (max-width: 768px) {
             #romantic-text p { font-size: 20px; }
             #romantic-text .quote { font-size: 16px; }
@@ -724,7 +1166,6 @@
 </head>
 <body class="phase-initial">
     <div id="container">
-        <!-- Декоративные углы -->
         <div class="decorative-corner top-left">
             <svg viewBox="0 0 100 100">
                 <path d="M 0 30 Q 0 0 30 0" />
@@ -750,10 +1191,8 @@
             </svg>
         </div>
         
-        <!-- Золотая рамка -->
         <div class="golden-frame"></div>
         
-        <!-- Антикварные часы -->
         <div id="clock-container">
             <div class="clock-face">
                 <div class="clock-numbers">
@@ -775,7 +1214,6 @@
             <div class="clock-ornament bottom-right"></div>
         </div>
         
-        <!-- Геральдический щит -->
         <div id="heraldic">
             <svg viewBox="0 0 100 120">
                 <path d="M 50 0 C 20 0 0 20 0 50 L 0 100 L 50 120 L 100 100 L 100 50 C 100 20 80 0 50 0 Z" fill="rgba(80, 0, 0, 0.2)" stroke="rgba(192, 156, 77, 0.5)" stroke-width="1" />
@@ -785,13 +1223,11 @@
             </svg>
         </div>
         
-        <!-- Романтический текст -->
         <div id="romantic-text">
             <p>My dearest Anna, thou wert mine own light, mine own joy. Though we art parted, my heart hath not let thee go.</p>
             <div class="quote">I do still love thee, and each day I dream of returning to what once was betwixt us.</div>
         </div>
         
-        <!-- Медальоны -->
         <div class="medallion left">
             <div class="medallion-content">Mikhail</div>
         </div>
@@ -799,31 +1235,24 @@
             <div class="medallion-content">Annyuta</div>
         </div>
         
-        <!-- Соединяющая линия -->
         <div class="connecting-line"></div>
         
-        <!-- Сердце -->
         <div class="heart-center">
             <svg viewBox="0 0 100 100">
                 <path d="M 50 30 L 65 15 A 17 17 0 1 1 95 40 L 50 85 L 5 40 A 17 17 0 1 1 35 15 L 50 30 Z" fill="rgba(180, 20, 40, 0.6)" stroke="rgba(255, 255, 255, 0.5)" stroke-width="1" />
             </svg>
         </div>
         
-        <!-- Вечное пламя -->
         <div class="eternal-flame">
             <div class="flame"></div>
         </div>
         
-        <!-- Аура любви -->
         <div class="love-aura"></div>
         
-        <!-- Лондонский туман -->
         <div class="fog"></div>
         
-        <!-- Финальное сообщение -->
         <div class="final-message">My dear beloved, shall we begin anew?</div>
         
-        <!-- Романтическая финальная фраза -->
         <div class="romantic-endnote">
             <span>O</span><span>u</span><span>r</span><span> </span>
             <span>l</span><span>o</span><span>v</span><span>e</span><span> </span>
@@ -847,8 +1276,48 @@
             <div class="endnote-line"></div>
         </div>
         
-        <!-- Кнопка повтора -->
         <button id="replay-button">Once More</button>
+        
+        <div class="fade-overlay"></div>
+        
+        <div id="mikhail-scene" class="scene">
+            <div class="lantern-container">
+                <div class="lantern-handle"></div>
+                <div class="lantern-top"></div>
+                <div class="lantern-body">
+                    <div class="lantern-frame">
+                        <div class="lantern-glass"></div>
+                        <div class="lantern-grid"></div>
+                        <div class="lantern-flame"></div>
+                        <div class="lantern-glow"></div>
+                    </div>
+                </div>
+                <div class="lantern-ambient"></div>
+            </div>
+            <div class="text-fragment">Забота</div>
+            <div class="text-fragment">Тепло</div>
+            <div class="text-fragment">Всегда</div>
+            <button class="return-button" onclick="endScene('mikhail-scene')">Вернуться</button>
+        </div>
+        
+        <div id="annyuta-scene" class="scene">
+            <div class="night-bg"></div>
+            <div class="stars"></div>
+            <div class="moon-crescent">
+                <div class="crescent-glow"></div>
+                <div class="crescent-crystal">
+                    <div class="crescent-outer"></div>
+                    <div class="crescent-inner"></div>
+                    <div class="crystal-facet facet1"></div>
+                    <div class="crystal-facet facet2"></div>
+                    <div class="crystal-facet facet3"></div>
+                </div>
+            </div>
+            <div class="text-fragment">Уединение</div>
+            <div class="text-fragment">Контрасты</div>
+            <div class="text-fragment">Искренность</div>
+            <button class="return-button" onclick="endScene('annyuta-scene')">Вернуться</button>
+        </div>
     </div>
     
     <script>
@@ -862,6 +1331,7 @@
             createTeaLeaves();
             setupClock();
             setupMedallionPopups();
+            createClockNumbers();
         });
         
         function startAnimation() {
@@ -950,6 +1420,7 @@
             document.querySelector('.endnote-ornament.left').classList.remove('visible');
             document.querySelector('.endnote-ornament.right').classList.remove('visible');
             document.querySelector('.endnote-line').classList.remove('visible');
+            document.querySelectorAll('.scene').forEach(scene => scene.style.display = 'none');
         }
         
         function setupClock() {
@@ -989,6 +1460,7 @@
                 star.style.setProperty('--twinkle-delay', `${Math.random() * 2}s`);
                 container.appendChild(star);
             }
+            createAnimationStars();
         }
         
         function createTeaLeaves() {
@@ -1055,11 +1527,11 @@
             const mikhailDescription = "You pay for both of us, caring, attentive to small details, you listen, take interest in my hobbies and me in general, willing to compromise, ready to drag medicine across half of Seoul at night because I have a headache, you don’t dismiss my 'almost-rape' experience, and so much more.";
             const annyutaDescription = "Annyuta is a person of contrasts, blending independence with deep emotions. She values freedom and personal space, often hiding her feelings behind an outward reserve. Her thoughts can remain a mystery, but beneath this enigma lies a storm of emotions she rarely lets others see. She knows how to be sincere, but expresses it in her own way—through brief words, glances, and actions. It’s important to her that those around her don’t restrict her, but understand her need for silence and solitude. At times she may seem cold, but it’s just a protective shell. Deep down, she remembers those who stood by her, who understood and accepted her as she is.";
             
-            mikhailMedallion.addEventListener('click', () => showPopup(mikhailDescription));
-            annyutaMedallion.addEventListener('click', () => showPopup(annyutaDescription));
+            mikhailMedallion.addEventListener('click', () => showPopup(mikhailDescription, 'mikhail-scene'));
+            annyutaMedallion.addEventListener('click', () => showPopup(annyutaDescription, 'annyuta-scene'));
         }
         
-        function showPopup(description) {
+        function showPopup(description, sceneId) {
             const existingPopup = document.querySelector('.popup');
             if (existingPopup) existingPopup.remove();
             
@@ -1073,10 +1545,18 @@
             
             setTimeout(() => popup.classList.add('visible'), 10);
             
-            popup.querySelector('button').addEventListener('click', () => {
+            const closeButton = popup.querySelector('button');
+            closeButton.addEventListener('click', () => {
                 popup.classList.remove('visible');
-                setTimeout(() => popup.remove(), 500);
+                setTimeout(() => {
+                    popup.remove();
+                    document.addEventListener('click', startAnimationOnClick, { once: true });
+                }, 500);
             });
+            
+            function startAnimationOnClick() {
+                startAnimation(sceneId);
+            }
         }
         
         function createClockNumbers() {
@@ -1095,18 +1575,462 @@
             });
         }
         
+        const overlay = document.querySelector('.fade-overlay');
+        
+        function createAnimationStars() {
+            const starsContainer = document.querySelector('.stars');
+            const starsCount = 100;
+            for (let i = 0; i < starsCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.width = `${Math.random() * 2 + 1}px`;
+                star.style.height = star.style.width;
+                star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+                star.style.setProperty('--delay', `${Math.random() * 2}s`);
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        function startAnimation(sceneId) {
+            overlay.classList.add('active');
+            setTimeout(() => {
+                const scene = document.getElementById(sceneId);
+                scene.style.display = 'block';
+                overlay.classList.remove('active');
+                
+                if (sceneId === 'mikhail-scene') {
+                    startMikhailAnimation();
+                } else if (sceneId === 'annyuta-scene') {
+                    startAnnyutaAnimation();
+                }
+            }, 1500);
+        }
+        
+        function startMikhailAnimation() {
+            const scene = document.getElementById('mikhail-scene');
+            createSparks(scene);
+        }
+        
+        function startAnnyutaAnimation() {
+            const scene = document.getElementById('annyuta-scene');
+            createMoonParticles(scene);
+        }
+        
+        function endScene(sceneId) {
+            overlay.classList.add('active');
+            setTimeout(() => {
+                const scene = document.getElementById(sceneId);
+                scene.style.display = 'none';
+                overlay.classList.remove('active');
+                
+                if (sceneId === 'mikhail-scene') {
+                    clearParticles(scene, '.light-particle');
+                } else if (sceneId === 'annyuta-scene') {
+                    clearParticles(scene, '.moon-particle');
+                }
+            }, 1500);
+        }
+        
+        function clearParticles(scene, selector) {
+            const particles = scene.querySelectorAll(selector);
+            particles.forEach(particle => particle.remove());
+        }
+        
+        function createSparks(container) {
+            const sparkInterval = setInterval(() => {
+                const spark = document.createElement('div');
+                spark.className = 'light-particle';
+                const size = Math.random() * 5 + 3;
+                spark.style.width = `${size}px`;
+                spark.style.height = `${size}px`;
+                spark.style.left = '50%';
+                spark.style.top = '50%';
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 150 + 50;
+                const xMove = Math.cos(angle) * distance;
+                const yMove = Math.sin(angle) * distance;
+                spark.style.setProperty('--x', `${xMove}px`);
+                spark.style.setProperty('--y', `${yMove}px`);
+                const hue = Math.random() * 30 + 40;
+                spark.style.background = `radial-gradient(circle, rgba(255, 255, ${Math.random() * 100 + 100}, 0.9) 20%, transparent 70%)`;
+                const duration = Math.random() * 3 + 2;
+                spark.style.animation = `sparkRise ${duration}s ease-out forwards`;
+                container.appendChild(spark);
+                setTimeout(() => spark.remove(), duration * 1000);
+            }, 300);
+            setTimeout(() => clearInterval(sparkInterval), 8000);
+        }
+        
+        function createMoonParticles(container) {
+            const particleInterval = setInterval(() => {
+                const particle = document.createElement('div');
+                particle.className = 'moon-particle';
+                const size = Math.random() * 4 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = '50%';
+                particle.style.top = '50%';
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 100 + 50;
+                const xMove = Math.cos(angle) * distance;
+                const yMove = Math.sin(angle) * distance;
+                particle.style.setProperty('--x', `${xMove}px`);
+                particle.style.setProperty('--y', `${yMove}px`);
+                particle.style.animation = `particleDrift ${Math.random() * 2 + 2}s ease-out forwards`;
+                container.appendChild(particle);
+                setTimeout(() => particle.remove(), 4000);
+            }, 200);
+            setTimeout(() => clearInterval(particleInterval), 8000);
+        }
+
+        function startAnnyutaAnimation() {
+            const scene = document.getElementById('annyuta-scene');
+            createMoonParticles(scene);
+            const crescent = scene.querySelector('.moon-crescent');
+            setTimeout(() => {
+                crescent.style.opacity = '1';
+                crescent.style.transform = 'translate(-50%, -50%) scale(1) rotate(20deg)';
+            }, 1000);
+            createAnimationStars();
+        }
+
+        function endScene(sceneId) {
+            const overlay = document.querySelector('.fade-overlay');
+            overlay.classList.add('active');
+            setTimeout(() => {
+                const scene = document.getElementById(sceneId);
+                scene.style.display = 'none';
+                overlay.classList.remove('active');
+                
+                if (sceneId === 'mikhail-scene') {
+                    clearParticles(scene, '.light-particle');
+                } else if (sceneId === 'annyuta-scene') {
+                    clearParticles(scene, '.moon-particle');
+                    const crescent = scene.querySelector('.moon-crescent');
+                    crescent.style.opacity = '0';
+                    crescent.style.transform = 'translate(-50%, -50%) scale(0) rotate(0deg)';
+                }
+            }, 1500);
+        }
+
+        function clearParticles(scene, selector) {
+            const particles = scene.querySelectorAll(selector);
+            particles.forEach(particle => particle.remove());
+        }
+
+        function createAnimationStars() {
+            const starsContainer = document.querySelector('.stars');
+            if (!starsContainer) return;
+            const starsCount = 100;
+            for (let i = 0; i < starsCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.width = `${Math.random() * 2 + 1}px`;
+                star.style.height = star.style.width;
+                star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+                star.style.setProperty('--delay', `${Math.random() * 2}s`);
+                starsContainer.appendChild(star);
+            }
+        }
+
+        function startAnimation() {
+            setTimeout(function() {
+                document.body.classList.remove('phase-initial');
+                document.body.classList.add('phase-middle');
+                document.querySelectorAll('.decorative-corner').forEach(corner => corner.classList.add('visible'));
+                document.querySelector('.golden-frame').classList.add('visible');
+                document.querySelectorAll('.star').forEach(star => star.style.opacity = 1);
+            }, 1000);
+            
+            setTimeout(function() {
+                document.getElementById('clock-container').style.opacity = 0;
+                document.getElementById('clock-container').style.transform = 'scale(0)';
+                setTimeout(function() {
+                    document.getElementById('heraldic').classList.add('visible');
+                }, 500);
+            }, 14000);
+            
+            setTimeout(function() {
+                document.body.classList.remove('phase-middle');
+                document.body.classList.add('phase-romantic');
+                document.getElementById('romantic-text').classList.add('visible');
+                document.querySelector('.fog').style.opacity = 0.3;
+                createTeaLeaves();
+            }, 17000);
+            
+            setTimeout(function() {
+                document.querySelector('.medallion.left').classList.add('visible');
+                document.querySelector('.medallion.right').classList.add('visible');
+                setTimeout(function() {
+                    document.querySelector('.connecting-line').classList.add('visible');
+                    setTimeout(function() {
+                        document.querySelector('.heart-center').classList.add('visible');
+                    }, 1000);
+                }, 2000);
+            }, 20000);
+            
+            setTimeout(function() {
+                document.body.classList.remove('phase-romantic');
+                document.body.classList.add('phase-final');
+                document.querySelector('.eternal-flame').classList.add('visible');
+                document.querySelector('.love-aura').classList.add('active');
+            }, 24000);
+            
+            setTimeout(function() {
+                document.querySelector('.final-message').classList.add('visible');
+                setTimeout(function() {
+                    document.getElementById('replay-button').classList.add('visible');
+                    const endnote = document.querySelector('.romantic-endnote');
+                    endnote.classList.add('visible');
+                    endnote.querySelectorAll('span').forEach((span, index) => {
+                        span.style.animationDelay = `${index * 0.05}s`;
+                    });
+                    setTimeout(() => {
+                        document.querySelector('.endnote-ornament.left').classList.add('visible');
+                        document.querySelector('.endnote-ornament.right').classList.add('visible');
+                        document.querySelector('.endnote-line').classList.add('visible');
+                        createEndnoteParticles();
+                    }, 1000);
+                }, 2000);
+            }, 29000);
+            
+            setTimeout(createLightParticles, 19000);
+        }
+
+        function resetAnimation() {
+            document.body.className = 'phase-initial';
+            document.querySelectorAll('.decorative-corner, .golden-frame, .medallion').forEach(el => el.classList.remove('visible'));
+            document.getElementById('heraldic').classList.remove('visible');
+            document.getElementById('romantic-text').classList.remove('visible');
+            document.querySelector('.connecting-line').classList.remove('visible');
+            document.querySelector('.heart-center').classList.remove('visible');
+            document.querySelector('.eternal-flame').classList.remove('visible');
+            document.querySelector('.final-message').classList.remove('visible');
+            document.querySelector('.love-aura').classList.remove('active');
+            document.getElementById('replay-button').classList.remove('visible');
+            const clockContainer = document.getElementById('clock-container');
+            clockContainer.style.opacity = '1';
+            clockContainer.style.transform = 'scale(1)';
+            document.querySelectorAll('.star, .tea-leaf, .light-particle, .fog').forEach(el => el.remove());
+            document.querySelector('.fog').style.opacity = '0';
+            document.querySelectorAll('.popup').forEach(popup => popup.remove());
+            document.querySelector('.romantic-endnote').classList.remove('visible');
+            document.querySelector('.endnote-ornament.left').classList.remove('visible');
+            document.querySelector('.endnote-ornament.right').classList.remove('visible');
+            document.querySelector('.endnote-line').classList.remove('visible');
+            document.querySelectorAll('.scene').forEach(scene => scene.style.display = 'none');
+        }
+
+        function setupClock() {
+            const hourHand = document.querySelector('.hour-hand');
+            const minuteHand = document.querySelector('.minute-hand');
+            const secondHand = document.querySelector('.second-hand');
+
+            function updateClock() {
+                const now = new Date();
+                const hours = now.getHours() % 12;
+                const minutes = now.getMinutes();
+                const seconds = now.getSeconds();
+
+                const hourDeg = (hours * 30) + (minutes / 2);
+                const minuteDeg = minutes * 6;
+                const secondDeg = seconds * 6;
+
+                hourHand.style.transform = `rotate(${hourDeg}deg)`;
+                minuteHand.style.transform = `rotate(${minuteDeg}deg)`;
+                secondHand.style.transform = `rotate(${secondDeg}deg)`;
+
+                requestAnimationFrame(updateClock);
+            }
+
+            updateClock();
+        }
+
+        function createStars() {
+            const container = document.getElementById('container');
+            const starCount = Math.min(window.innerWidth / 10, 100);
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.setProperty('--twinkle-duration', `${Math.random() * 4 + 2}s`);
+                star.style.setProperty('--twinkle-delay', `${Math.random() * 2}s`);
+                container.appendChild(star);
+            }
+            createAnimationStars();
+        }
+
+        function createTeaLeaves() {
+            const container = document.getElementById('container');
+            const leafCount = Math.min(window.innerWidth / 20, 30);
+            for (let i = 0; i < leafCount; i++) {
+                setTimeout(() => {
+                    const leaf = document.createElement('div');
+                    leaf.className = 'tea-leaf';
+                    leaf.style.left = `${Math.random() * 100}%`;
+                    leaf.style.setProperty('--petal-sway', `${Math.random() * 200 - 100}px`);
+                    leaf.style.animation = `floatPetal ${Math.random() * 8 + 7}s ease-in-out`;
+                    container.appendChild(leaf);
+                    setTimeout(() => {
+                        if (leaf.parentNode) leaf.parentNode.removeChild(leaf);
+                    }, 15000);
+                }, i * 300);
+            }
+        }
+
+        function createLightParticles() {
+            const container = document.getElementById('container');
+            const particleCount = 20;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'light-particle';
+                particle.style.width = `${Math.random() * 10 + 5}px`;
+                particle.style.height = particle.style.width;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.setProperty('--glow-min', '0.2');
+                particle.style.setProperty('--glow-max', '0.6');
+                particle.style.setProperty('--glow-scale-min', '0.5');
+                particle.style.setProperty('--glow-scale-max', '1');
+                particle.style.animation = `glow ${Math.random() * 3 + 2}s ease-in-out infinite`;
+                container.appendChild(particle);
+                setTimeout(() => particle.style.opacity = 1, i * 200);
+            }
+        }
+
+        function createEndnoteParticles() {
+            const container = document.getElementById('container');
+            const particleCount = 10;
+            const endnote = document.querySelector('.romantic-endnote');
+            const rect = endnote.getBoundingClientRect();
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'light-particle endnote-particle';
+                particle.style.left = `${rect.left + Math.random() * rect.width}px`;
+                particle.style.top = `${rect.top - 10 + Math.random() * (rect.height + 20)}px`;
+                particle.style.setProperty('--glow-min', '0.2');
+                particle.style.setProperty('--glow-max', '0.5');
+                particle.style.setProperty('--glow-scale-min', '0.4');
+                particle.style.setProperty('--glow-scale-max', '0.8');
+                container.appendChild(particle);
+                setTimeout(() => particle.style.opacity = 1, i * 100);
+            }
+        }
+
+        function setupMedallionPopups() {
+            const mikhailMedallion = document.querySelector('.medallion.left');
+            const annyutaMedallion = document.querySelector('.medallion.right');
+            
+            const mikhailDescription = "You pay for both of us, caring, attentive to small details, you listen, take interest in my hobbies and me in general, willing to compromise, ready to drag medicine across half of Seoul at night because I have a headache, you don’t dismiss my 'almost-rape' experience, and so much more.";
+            const annyutaDescription = "Annyuta is a person of contrasts, blending independence with deep emotions. She values freedom and personal space, often hiding her feelings behind an outward reserve. Her thoughts can remain a mystery, but beneath this enigma lies a storm of emotions she rarely lets others see. She knows how to be sincere, but expresses it in her own way—through brief words, glances, and actions. It’s important to her that those around her don’t restrict her, but understand her need for silence and solitude. At times she may seem cold, but it’s just a protective shell. Deep down, she remembers those who stood by her, who understood and accepted her as she is.";
+            
+            mikhailMedallion.addEventListener('click', () => showPopup(mikhailDescription, 'mikhail-scene'));
+            annyutaMedallion.addEventListener('click', () => showPopup(annyutaDescription, 'annyuta-scene'));
+        }
+
+        function showPopup(description, sceneId) {
+            const existingPopup = document.querySelector('.popup');
+            if (existingPopup) existingPopup.remove();
+            
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.innerHTML = `
+                <p>${description}</p>
+                <button>Close</button>
+            `;
+            document.getElementById('container').appendChild(popup);
+            
+            setTimeout(() => popup.classList.add('visible'), 10);
+            
+            const closeButton = popup.querySelector('button');
+            closeButton.addEventListener('click', () => {
+                popup.classList.remove('visible');
+                setTimeout(() => {
+                    popup.remove();
+                    startScene(sceneId);
+                }, 500);
+            });
+        }
+
+        function startScene(sceneId) {
+            const overlay = document.querySelector('.fade-overlay');
+            overlay.classList.add('active');
+            setTimeout(() => {
+                const scene = document.getElementById(sceneId);
+                scene.style.display = 'block';
+                overlay.classList.remove('active');
+                
+                if (sceneId === 'mikhail-scene') {
+                    startMikhailAnimation();
+                } else if (sceneId === 'annyuta-scene') {
+                    startAnnyutaAnimation();
+                }
+            }, 1500);
+        }
+
+        function startMikhailAnimation() {
+            const scene = document.getElementById('mikhail-scene');
+            createSparks(scene);
+        }
+
+        function createSparks(container) {
+            const sparkInterval = setInterval(() => {
+                const spark = document.createElement('div');
+                spark.className = 'light-particle';
+                const size = Math.random() * 5 + 3;
+                spark.style.width = `${size}px`;
+                spark.style.height = `${size}px`;
+                spark.style.left = '50%';
+                spark.style.top = '50%';
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 150 + 50;
+                const xMove = Math.cos(angle) * distance;
+                const yMove = Math.sin(angle) * distance;
+                spark.style.setProperty('--x', `${xMove}px`);
+                spark.style.setProperty('--y', `${yMove}px`);
+                const hue = Math.random() * 30 + 40;
+                spark.style.background = `radial-gradient(circle, rgba(255, 255, ${Math.random() * 100 + 100}, 0.9) 20%, transparent 70%)`;
+                const duration = Math.random() * 3 + 2;
+                spark.style.animation = `sparkRise ${duration}s ease-out forwards`;
+                container.appendChild(spark);
+                setTimeout(() => spark.remove(), duration * 1000);
+            }, 300);
+            setTimeout(() => clearInterval(sparkInterval), 8000);
+        }
+
+        function createClockNumbers() {
+            const numbers = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+            const clockNumbers = document.querySelector('.clock-numbers');
+            numbers.forEach((num, index) => {
+                const angle = (index * 30) * (Math.PI / 180);
+                const radius = 90;
+                const numberElement = document.createElement('div');
+                numberElement.className = 'clock-number';
+                numberElement.textContent = num;
+                numberElement.style.left = `${50 + Math.cos(angle) * radius}%`;
+                numberElement.style.top = `${50 + Math.sin(angle) * radius}%`;
+                numberElement.style.transform = 'translate(-50%, -50%)';
+                clockNumbers.appendChild(numberElement);
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            const fog = document.createElement('div');
-            fog.className = 'fog';
-            document.getElementById('container').appendChild(fog);
-            createClockNumbers();
             startAnimation();
-            document.getElementById('replay-button').addEventListener('click', () => {
+            document.getElementById('replay-button').addEventListener('click', function() {
                 resetAnimation();
                 setTimeout(startAnimation, 500);
             });
+            createStars();
+            createTeaLeaves();
+            setupClock();
+            setupMedallionPopups();
+            createClockNumbers();
         });
     </script>
 </body>
 </html>
-
