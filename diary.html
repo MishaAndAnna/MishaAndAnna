@@ -1324,6 +1324,7 @@
                 <button class="confirm-delete-btn">
                     <i class="fas fa-check"></i> Удалить выбранное
                 </button>
+                <div id="googleSignInContainer" style="display: inline-block; margin-left: 10px;"></div>
                 <div class="memory-cards" id="memoryCards">
                     <div class="no-entries">
                         <i class="fas fa-heart"></i>
@@ -1403,7 +1404,7 @@
                         <label for="memory-description" class="form-label">Описание</label>
                         <textarea id="memory-description" class="form-textarea" placeholder="Опиши этот особенный момент..." required></textarea>
                     </div>
-                                        <div class="form-group">
+                    <div class="form-group">
                         <label for="memory-image" class="form-label">Изображение (опционально)</label>
                         <input type="file" id="memory-image" class="form-input" accept="image/*">
                     </div>
@@ -1443,6 +1444,7 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script>
         let googleUserAccessToken;
+        let isSignedIn = false;
 
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('entryModal');
@@ -1460,7 +1462,7 @@
             const showMemoryFormBtn = document.getElementById('showMemoryForm');
             let isSelecting = false;
 
-            // Инициализация Google API для Drive (требуется для управления правами доступа)
+            // Инициализация Google API для Drive
             gapi.load('client', function() {
                 gapi.client.init({
                     discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
@@ -1471,15 +1473,41 @@
                 });
             });
 
+            // Инициализация кнопки Google Sign-In
+            function initializeGoogleSignIn() {
+                google.accounts.id.initialize({
+                    client_id: '822036073579-53mj21ufbgmvn4tnvfr3pulhvbrov480.apps.googleusercontent.com',
+                    callback: handleCredentialResponse
+                });
+
+                google.accounts.id.renderButton(
+                    document.getElementById('googleSignInContainer'),
+                    {
+                        theme: 'outline',
+                        size: 'large',
+                        text: 'sign_in_with',
+                        shape: 'pill'
+                    }
+                );
+            }
+
             // Обработка ответа от Google Identity Services
-            window.handleCredentialResponse = function(response) {
+            function handleCredentialResponse(response) {
                 if (response.credential) {
                     console.log('Авторизация успешна, токен:', response.credential);
                     googleUserAccessToken = response.credential;
+                    isSignedIn = true;
+                    document.getElementById('googleSignInContainer').style.display = 'none'; // Скрываем кнопку после входа
+                    alert('Вы успешно вошли в аккаунт Google!');
                 } else {
                     console.error('Ошибка авторизации:', response);
                     alert('Не удалось войти. Пожалуйста, попробуйте снова.');
                 }
+            }
+
+            // Вызов инициализации кнопки после загрузки GIS
+            window.onload = function() {
+                initializeGoogleSignIn();
             };
 
             // Переключение между формами
@@ -1751,17 +1779,8 @@
                 const file = fileInput.files[0];
 
                 if (file) {
-                    if (!googleUserAccessToken) {
-                        alert('Пожалуйста, войдите в аккаунт Google для загрузки изображений.');
-                        // Добавляем кнопку входа, если пользователь не авторизован
-                        if (!document.getElementById('g_id_onload')) {
-                            const signInDiv = document.createElement('div');
-                            signInDiv.id = 'g_id_onload';
-                            signInDiv.setAttribute('data-client_id', '822036073579-53mj21ufbgmvn4tnvfr3pulhvbrov480.apps.googleusercontent.com');
-                            signInDiv.setAttribute('data-callback', 'handleCredentialResponse');
-                            signInDiv.setAttribute('data-auto_prompt', 'true');
-                            document.body.appendChild(signInDiv);
-                        }
+                    if (!isSignedIn || !googleUserAccessToken) {
+                        alert('Пожалуйста, войдите в аккаунт Google с помощью кнопки "Войти через Google" для загрузки изображений.');
                         return;
                     }
 
