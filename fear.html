@@ -917,106 +917,163 @@
             100% { transform: translateY(0) translateX(0); opacity: 0.2; }
         }
         
-       @keyframes flicker {
-    0% { transform: translateX(-50%) scale(1); opacity: 0.8; }
-    25% { transform: translateX(-50%) scale(0.95); opacity: 0.7; }
-    50% { transform: translateX(-50%) scale(1.1); opacity: 0.9; }
-    75% { transform: translateX(-50%) scale(0.85); opacity: 0.6; }
-    100% { transform: translateX(-50%) scale(1); opacity: 0.8; }
-}
+        @keyframes flicker {
+            0% { transform: translateX(-50%) scale(1); opacity: 0.8; }
+            25% { transform: translateX(-50%) scale(0.95); opacity: 0.7; }
+            50% { transform: translateX(-50%) scale(1.1); opacity: 0.9; }
+            75% { transform: translateX(-50%) scale(0.85); opacity: 0.6; }
+            100% { transform: translateX(-50%) scale(1); opacity: 0.8; }
+        }
+        
+        @keyframes dripping {
+            0% { height: 0; opacity: 0; }
+            5% { opacity: 0.8; }
+            50% { height: 20px; opacity: 1; }
+            90% { opacity: 0.3; }
+            100% { height: 40px; opacity: 0; }
+        }
+        
+        @keyframes smokeRise {
+            0% { height: 10px; transform: translateX(-50%) translateY(0); opacity: 0.8; }
+            100% { height: 60px; transform: translateX(-50%) translateY(-100px); opacity: 0; }
+        }
+        
+        @keyframes flyingBat {
+            0% { transform: translateX(-100px) translateY(0) scale(0.7) rotate(0deg); }
+            20% { transform: translateX(20vw) translateY(-50px) scale(1) rotate(10deg); }
+            40% { transform: translateX(40vw) translateY(-20px) scale(0.8) rotate(-5deg); }
+            60% { transform: translateX(60vw) translateY(-70px) scale(1.1) rotate(15deg); }
+            80% { transform: translateX(80vw) translateY(-30px) scale(0.9) rotate(-10deg); }
+            100% { transform: translateX(110vw) translateY(0) scale(0.7) rotate(0deg); }
+        }
+        
+        @keyframes spiderMove {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(100px); }
+            100% { transform: translateY(0); }
+        }
+        
+        @keyframes floatUpDown {
+            0% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-10px); }
+            100% { transform: translateX(-50%) translateY(0); }
+        }
+        
+        @keyframes ravenFly {
+            0% { transform: translateX(0) translateY(0); }
+            20% { transform: translateX(-200px) translateY(50px); }
+            40% { transform: translateX(-400px) translateY(20px); }
+            60% { transform: translateX(-600px) translateY(80px); }
+            80% { transform: translateX(-800px) translateY(40px); }
+            100% { transform: translateX(-1000px) translateY(0); }
+        }
+        
+        @keyframes wingFlap {
+            0% { transform: rotate(0); }
+            100% { transform: rotate(30deg); }
+        }
+        
+        /* Медиа-запросы для адаптивности */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .content {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            
+            .gallery-item {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .candle-container {
+                flex-wrap: wrap;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            p {
+                font-size: 1rem;
+            }
+            
+            .content {
+                padding: 1rem;
+            }
+            
+            .gallery-item {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .music-player {
+                flex-direction: column;
+                align-items: flex-end;
+            }
+        }
 
-@keyframes dripping {
-    0% { height: 0; opacity: 0; }
-    5% { opacity: 0.8; }
-    50% { height: 20px; opacity: 1; }
-    90% { opacity: 0.3; }
-    100% { height: 40px; opacity: 0; }
-}
+        /* Кнопка возвращения на главную */
+        .home-button {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(100, 100, 100, 0.2);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--primary-text);
+            font-family: 'Georgia', serif;
+            font-size: 1rem;
+            z-index: 10;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--shadow-color);
+            backdrop-filter: blur(5px);
+        }
 
-@keyframes smokeRise {
-    0% { height: 10px; transform: translateX(-50%) translateY(0); opacity: 0.8; }
-    100% { height: 60px; transform: translateX(-50%) translateY(-100px); opacity: 0; }
-}
+        .home-button:hover {
+            opacity: 1;
+            background: rgba(138, 3, 3, 0.2);
+            box-shadow: 0 0 20px rgba(138, 3, 3, 0.5);
+            transform: translateY(-2px);
+        }
 
-@keyframes flyingBat {
-    0% { transform: translateX(-100px) translateY(0) scale(0.7) rotate(0deg); }
-    20% { transform: translateX(20vw) translateY(-50px) scale(1) rotate(10deg); }
-    40% { transform: translateX(40vw) translateY(-20px) scale(0.8) rotate(-5deg); }
-    60% { transform: translateX(60vw) translateY(-70px) scale(1.1) rotate(15deg); }
-    80% { transform: translateX(80vw) translateY(-30px) scale(0.9) rotate(-10deg); }
-    100% { transform: translateX(110vw) translateY(0) scale(0.7) rotate(0deg); }
-}
+        .home-icon {
+            font-size: 1.2rem;
+            color: var(--blood-red);
+            text-shadow: 0 0 5px var(--shadow-color);
+        }
 
-@keyframes spiderMove {
-    0% { transform: translateY(0); }
-    50% { transform: translateY(100px); }
-    100% { transform: translateY(0); }
-}
+        .home-text {
+            position: relative;
+        }
 
-@keyframes floatUpDown {
-    0% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(-10px); }
-    100% { transform: translateX(-50%) translateY(0); }
-}
+        .blood-drip-home {
+            position: absolute;
+            width: 3px;
+            height: 0;
+            background: var(--blood-red);
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 0 0 2px 2px;
+            animation: dripping 4s infinite;
+            opacity: 0;
+        }
 
-@keyframes ravenFly {
-    0% { transform: translateX(0) translateY(0); }
-    20% { transform: translateX(-200px) translateY(50px); }
-    40% { transform: translateX(-400px) translateY(20px); }
-    60% { transform: translateX(-600px) translateY(80px); }
-    80% { transform: translateX(-800px) translateY(40px); }
-    100% { transform: translateX(-1000px) translateY(0); }
-}
-
-@keyframes wingFlap {
-    0% { transform: rotate(0); }
-    100% { transform: rotate(30deg); }
-}
-
-/* Медиа-запросы для адаптивности */
-@media (max-width: 768px) {
-    h1 {
-        font-size: 2.5rem;
-    }
-    
-    .content {
-        padding: 1.5rem;
-        margin: 1rem;
-    }
-    
-    .gallery-item {
-        width: 120px;
-        height: 120px;
-    }
-    
-    .candle-container {
-        flex-wrap: wrap;
-    }
-}
-
-@media (max-width: 480px) {
-    h1 {
-        font-size: 2rem;
-    }
-    
-    p {
-        font-size: 1rem;
-    }
-    
-    .content {
-        padding: 1rem;
-    }
-    
-    .gallery-item {
-        width: 100px;
-        height: 100px;
-    }
-    
-    .music-player {
-        flex-direction: column;
-        align-items: flex-end;
-    }
-}
+        .home-button:hover .blood-drip-home {
+            animation-play-state: running;
+        }
     </style>
 </head>
 <body>
@@ -1165,6 +1222,13 @@
     
     <!-- Секретная кнопка -->
     <button class="secret-button" id="secretButton">⦿</button>
+    
+    <!-- Кнопка возвращения на главную -->
+    <a href="poetry_for_Anna.html" class="home-button" id="homeButton" title="Вернуться на главную">
+        <span class="home-icon">↫</span>
+        <span class="home-text">Поэма судьбы</span>
+        <div class="blood-drip-home"></div>
+    </a>
     
     <!-- Контроль настроения -->
     <div class="mood-controls" id="moodControls">
@@ -1400,7 +1464,31 @@
             checkScroll(); // Проверим при загрузке
         }
         
-        // Иницализация при загрузке страницы
+        // Настройка кнопки "На главную"
+        function setupHomeButton() {
+            const homeButton = document.getElementById('homeButton');
+            
+            // Плавное появление кнопки
+            homeButton.style.opacity = '0';
+            setTimeout(() => {
+                homeButton.style.transition = 'opacity 2s ease';
+                homeButton.style.opacity = '0.7';
+            }, 1000);
+            
+            // Эффект капающей крови
+            const drip = homeButton.querySelector('.blood-drip-home');
+            if (drip) {
+                drip.style.animationPlayState = 'paused';
+                homeButton.addEventListener('mouseenter', () => {
+                    drip.style.animationPlayState = 'running';
+                });
+                homeButton.addEventListener('mouseleave', () => {
+                    drip.style.animationPlayState = 'paused';
+                });
+            }
+        }
+        
+        // Инициализация при загрузке страницы
         window.addEventListener('DOMContentLoaded', function() {
             createRaindrops();
             createCemetery();
@@ -1409,6 +1497,7 @@
             setupBloodDrops();
             setupSecretButton();
             setupScrollAnimation();
+            setupHomeButton();
             
             // Обработчики для контроля настроения
             const moodControls = document.querySelectorAll('.mood-controls input');
@@ -1416,7 +1505,7 @@
                 control.addEventListener('input', updateMood);
             });
             
-            // Иницализация настроения
+            // Инициализация настроения
             updateMood();
         });
         
