@@ -1,11 +1,15 @@
-​<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Книга нашей любви</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+    <!-- Firebase App (основная библиотека Firebase) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.14.0/firebase-app-compat.min.js"></script>
+    <!-- Firebase Database (для работы с базой данных) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.14.0/firebase-database-compat.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
@@ -21,7 +25,6 @@
             height: 100vh;
             font-family: 'Cormorant Garamond', serif;
             overflow: hidden;
-            Ascent;
             position: relative;
         }
 
@@ -141,27 +144,25 @@
             text-align: justify;
         }
 
-        .notes-area {
-            min-height: 120px;
-            border-top: 1px dashed #a48549;
-            padding-top: 15px;
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.2rem;
-            color: #4b3a6e;
+        .comments-btn-container {
+            margin-top: 10px;
+            text-align: center;
         }
 
-        .note-input {
-            width: 100%;
-            background: transparent;
+        button.view-notes {
+            background: linear-gradient(to bottom, #4b3a6e, #2e1a47);
             border: none;
-            border-bottom: 1px solid #a48549;
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.2rem;
-            color: #4b3a6e;
-            outline: none;
-            resize: none;
-            padding: 8px;
-            height: 90px;
+            padding: 8px 20px;
+            border-radius: 5px;
+            color: #f4ead1;
+            cursor: pointer;
+            font-family: 'Cormorant Garamond', serif;
+            transition: all 0.3s;
+        }
+
+        button.view-notes:hover {
+            background: linear-gradient(to bottom, #5c4b7f, #4b3a6e);
+            transform: translateY(-2px);
         }
 
         button.save-note {
@@ -172,8 +173,8 @@
             color: #f4ead1;
             cursor: pointer;
             font-family: 'Cormorant Garamond', serif;
-            margin-top: 10px;
             transition: all 0.3s;
+            margin-bottom: 15px;
         }
 
         button.save-note:hover {
@@ -217,21 +218,27 @@
         }
 
         .cover-3d, .back-cover {
-            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNzAwIj48ZGVmcz48cGF0dGVybiBpZD0ibGVhdGhlciIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiPjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjMmQxYzQ3Ii8+PGNpcmNsZSBjeD0iMCIgY3k9IjAiIHI9IjgiIGZpbGw9IiM0YjNhNmUiIG9wYWNpdHk9IjAuMyIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjgiIGZpbGw9IiM0YjNhNmUiIG9wYWNpdHk9IjAuMyIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iOCIgZmlsbD0iIzRiM2E2ZSIgb3BhY2l0eT0iMC4zIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iNTAwIiBoZWlnaHQ9IjcwMCIgZmlsbD0idXJsKCNsZWF0aGVyKSIvPjxyZWN0IHg9IjMwIiB5PSIzMCIgd2lkdGg9IjQ0MCIgaGVpZ2h0PSI2NDAiIHN0cm9rZT0iI2E0ODU0OSIgc3Ryb2tlLXdpZHRoPSI1IiBmaWxsPSJub25lIi8+PHRleHQgeD0iMjUwIiB5PSIzNTAiIGZvbnQtZmFtaWx5PSJVbmNpYWwgQW50aXF1YSIgbWFyZ2luPSIwIGF1dG8iIGZvbnQtc2l6ZT0iNTAiIGZpbGw9IiNmNGVhZDEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPtCR0L3QuNCz0LDQsCDQvdCw0YjQtdC5PC90ZXh0Pjx0ZXh0IHg9IjI1MCIgeT0iNDAwIiBmb250LWZhbWlseT0iVW5jaWFsIEFudGlxdWEiIGZvbnQtc2l6ZT0iNTAiIGZpbGw9IiNmNGVhZDEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPtC70Y7QsdCy0Lg8L3RleHQ+PC9zdmc+');
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNzAwIj48ZGVmcz48cGF0dGVybiBpZD0ibGVhdGhlciIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiPjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjMmQxYzQ3Ii8+PGNpcmNsZSBjeD0iMCIgY3k9IjAiIHI9IjgiIGZpbGw9IiM0YjNhNmUiIG9wYWNpdHk9IjAuMyIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjgiIGZpbGw9IiM0YjNhNmUiIG9wYWNpdHk9IjAuMyIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iOCIgZmlsbD0iIzRiM2E2ZSIgb3BhY2l0eT0iMC4zIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iNTAwIiBoZWlnaHQ9IjcwMCIgZmlsbD0idXJsKCNsZWF0aGVyKSIvPjxyZWN0IHg9IjMwIiB5PSIzMCIgd2lkdGg9IjQ0MCIgaGVpZ2h0PSI2NDAiIHN0cm9rZT0iI2E0ODU0OSIgc3Ryb2tlLXdpZHRoPSI1IiBmaWxsPSJub25lIi8+PGNpcmNsZSBjeD0iMjUwIiBjeT0iMzUwIiByPSI1MCIgZmlsbD0iI2Y0ZWFkMSIgb3BhY2l0eT0iMC4yIi8+PGVsbGlwc2UgY3g9IjI1MCIgY3k9IjM1MCIgcng9IjQwIiByeT0iNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2E0ODU0OSIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtZGFzaGFycmF5PSI1LDUiLz48cGF0aCBkPSJNMjUwIDM1MGw1MCA1MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYTQ4NTQ5IiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNMjUwIDM1MGwtNTAgNTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2E0ODU0OSIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+');
             background-size: cover;
             z-index: 10;
-            border-radius: 8px 0 0 8px;
-            transform: translateZ(20px);
+            transform-origin: 0 50%;
             box-shadow: 
                 inset 0 0 50px rgba(0,0,0,0.6),
                 -10px 0 60px rgba(0,0,0,0.4);
-            position: relative;
+        }
+
+        .cover-3d {
+            transform: translateZ(20px);
+            border-radius: 8px 0 0 8px;
         }
 
         .back-cover {
-            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWghtD0iNzAwIj48ZGVmcz48cGF0dGVybiBpZD0ibGVhdGhlciIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiPjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjMmQxYzQ3Ii8+PGNpcmNsZSBjeD0iMCIgY3k9IjAiIHI9IjgiIGZpbGw9IiM0YjNhNmUiIG9wYWNpdHk9IjAuMyIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjgiIGZpbGw9IiM0YjNhNmUiIG9wYWNpdHk9IjAuMyIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iOCIgZmlsbD0iIzRiM2E2ZSIgb3BhY2l0eT0iMC4zIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iNTAwIiBoZWlnaHQ9IjcwMCIgZmlsbD0idXJsKCNsZWF0aGVyKSIvPjxyZWN0IHg9IjMwIiB5PSIzMCIgd2lkdGg9IjQ0MCIgaGVpZ2h0PSI2NDAiIHN0cm9rZT0iI2E0ODU0OSIgc3Ryb2tlLXdpZHRoPSI1IiBmaWxsPSJub25lIi8+PHRleHQgeD0iMjUwIiB5PSIzNTAiIGZvbnQtZmFtaWx5PSJVbmNpYWwg-QW50aXF1YSIgZm9udC1zaXplPSIyNSIgZmlsbD0iI2Y0ZWFkMSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+0J3QsNGI0Lgg0YHQsNC80YvQtSDQutGA0LDRgdC40LLRi9C1INC80L7QvNC10L3RgtGLPC90ZXh0Pjx0ZXh0IHg9IjI1MCIgeT0iMzgwIiBmb250LWZhbWlseT0iVW5jaWFsIEFudGlxdWEiIGZvbnQtc2l6ZT0iMjUiIGZpbGw9IiNmNGVhZDEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPtC4INC70YPRh9GI0LjQtSDQstC+0YHQv9C+0LzQuNC90LDQvdC40Y88L3RleHQ+PC9zdmc+');
-            border-radius: 0 8px 8px 0;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNzAwIj48ZGVmcz48cGF0dGVybiBpZD0ibGVhdGhlciIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiPjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjMmQxYzQ3Ii8+PGNpcmNsZSBjeD0iMCIgY3k9IjAiIHI9IjgiIGZpbGw9IiM0YjNhNmUiIG9wYWNpdHk9IjAuMyIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjgiIGZpbGw9IiM0YjNhNmUiIG9wYWNpdHk9IjAuMyIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iOCIgZmlsbD0iIzRiM2E2ZSIgb3BhY2l0eT0iMC4zIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iNTAwIiBoZWlnaHQ9IjcwMCIgZmlsbD0idXJsKCNsZWF0aGVyKSIvPjxyZWN0IHg9IjMwIiB5PSIzMCIgd2lkdGg9IjQ0MCIgaGVpZ2h0PSI2NDAiIHN0cm9rZT0iI2E0ODU0OSIgc3Ryb2tlLXdpZHRoPSI1IiBmaWxsPSJub25lIi8+PGNpcmNsZSBjeD0iMjUwIiBjeT0iMzUwIiByPSI1MCIgZmlsbD0iI2Y0ZWFkMSIgb3BhY2l0eT0iMC4yIi8+PGVsbGlwc2UgY3g9IjI1MCIgY3k9IjM1MCIgcng9IjQwIiByeT0iNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2E0ODU0OSIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtZGFzaGFycmF5PSI1LDUiLz48cGF0aCBkPSJNMjUwIDM1MGw1MCA1MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYTQ4NTQ5IiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNMjUwIDM1MGwtNTAgNTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2E0ODU0OSIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+');
             transform: translateZ(20px);
+            border-radius: 0 8px 8px 0;
             box-shadow: 
                 inset 0 0 50px rgba(0,0,0,0.6),
                 10px 0 60px rgba(0,0,0,0.4);
@@ -272,31 +279,6 @@
             pointer-events: none;
             z-index: 999;
             mix-blend-mode: overlay;
-        }
-
-        .intro-page {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            text-align: center;
-        }
-
-        .intro-title {
-            font-family: 'Uncial Antiqua', cursive;
-            font-size: 3rem;
-            color: #a48549;
-            margin-bottom: 35px;
-            text-shadow: 0 0 10px rgba(164, 133, 73, 0.7);
-        }
-
-        .intro-text {
-            font-size: 1.3rem;
-            line-height: 1.7;
-            margin-bottom: 25px;
-            padding: 0 25px;
-            color: #f4ead1;
         }
 
         .first-page {
@@ -355,6 +337,144 @@
             animation: pageFlipShadow 1.4s linear;
         }
 
+        /* Стили для модального окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            position: relative;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y0ZWFkMSIvPjxwYXRoIGQ9Ik0wIDUwQzEwIDQ1IDIwIDU1IDMwIDUwQzQwIDQ1IDUwIDU1IDYwIDUwQzcwIDQ1IDgwIDU1IDkwIDUwQzEwMCA0NSAxMDAgNTUgMTAwIDUwIiBzdHJva2U9IiNlZWUyYzAiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==');
+            margin: 15% auto;
+            padding: 40px;
+            width: 70%;
+            max-width: 700px;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(164, 133, 73, 0.8);
+            animation: modalEnter 0.5s;
+        }
+
+        @keyframes modalEnter {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px dashed #a48549;
+            padding-bottom: 15px;
+        }
+
+        .modal-title {
+            font-family: 'Uncial Antiqua', cursive;
+            color: #4b3a6e;
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        .close-modal {
+            font-size: 28px;
+            color: #4b3a6e;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: #a48549;
+        }
+
+        .modal-body {
+            max-height: 60vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .note-entry {
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: rgba(75, 58, 110, 0.1);
+            border-left: 4px solid #a48549;
+            border-radius: 5px;
+            transition: transform 0.3s;
+        }
+
+        .note-entry:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .note-text {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.3rem;
+            color: #2e1a47;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .note-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #a48549;
+        }
+
+        .note-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #a48549;
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.2rem;
+            color: #4b3a6e;
+            outline: none;
+            resize: none;
+            padding: 8px;
+            height: 90px;
+            margin-bottom: 15px;
+        }
+
+        .notes-list {
+            margin-top: 15px;
+        }
+
+        .page-indicator {
+            display: inline-block;
+            padding: 3px 8px;
+            background-color: rgba(164, 133, 73, 0.2);
+            border-radius: 4px;
+        }
+
+        /* Scrollbar styling */
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: rgba(164, 133, 73, 0.1);
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(75, 58, 110, 0.5);
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(75, 58, 110, 0.7);
+        }
+
+        /* Медиа-запросы для адаптивности */
         @media (max-width: 768px) {
             .book-container {
                 width: 95%;
@@ -367,10 +487,12 @@
 
             .page-text {
                 font-size: 1rem;
+                line-height: 1.5;
             }
 
             .arrow-nav {
                 padding: 0 30px;
+                bottom: 15px;
             }
 
             .arrow {
@@ -379,387 +501,420 @@
             }
 
             .arrow svg {
+                width: 30px;
+                height: 30px;
+            }
+
+            .first-page-title {
+                font-size: 2.2rem;
+            }
+
+            .first-page-text {
+                font-size: 1.15rem;
+            }
+
+            .modal-content {
+                width: 90%;
+                padding: 20px;
+            }
+
+            .modal-title {
+                font-size: 1.5rem;
+            }
+
+            .note-input {
+                font-size: 1rem;
+                height: 70px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 1.5rem;
+                margin-bottom: 15px;
+            }
+
+            .page {
+                padding: 20px;
+            }
+
+            .page-text {
+                font-size: 0.95rem;
+                line-height: 1.4;
+            }
+
+            .arrow {
+                width: 40px;
+                height: 40px;
+            }
+
+            .arrow svg {
                 width: 25px;
                 height: 25px;
             }
 
-            .intro-title {
-                font-size: 2.2rem;
+            .first-page-title {
+                font-size: 1.8rem;
             }
 
-            .first-page-title {
-                font-size: 2rem;
+            .modal-content {
+                margin: 30% auto;
+                padding: 15px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="book-container">
-        <canvas id="particle-canvas" class="particle-canvas"></canvas>
-        <div id="book">
-            <!-- Обложка -->
-            <div class="page cover cover-3d">
-                <div class="page-content intro-page">
-                    <h1 class="intro-title magical-text">Книга нашей любви</h1>
-                    <p class="intro-text">Нажмите, чтобы открыть...</p>
-                    <div class="cover-gem"></div>
-                </div>
-            </div>
-            
-            <!-- Первая страница -->
-            <div class="page first-page">
-                <div class="page-content">
-                    <h1 class="first-page-title">Наша история любви</h1>
-                    <p class="first-page-text">В этой книге собраны самые прекрасные моменты нашей с тобой истории. Каждая страница — это воспоминание, которое мы создали вместе. Ты можешь оставлять свои заметки на полях, добавляя новые детали к нашей общей истории.</p>
-                    <p class="first-page-text magical-text">Пусть магия наших воспоминаний никогда не иссякнет...</p>
-                </div>
-            </div>
-            
-            <!-- Страница "Первая встреча" -->
-            <div class="page">
-                <div class="page-content">
-                    <h2 class="page-title">Первая встреча</h2>
-                    <div class="page-text">
-                        <p>Я помню тот день, словно это было вчера, мы много играли в Геншине, а потом выяснили, что оба в Сеуле. </p>
-                        <p>Мы встретились с тобой и гуляли до самого вечера, и тогда я впервые почувствовал что-то в сердце: любовь к тебе</p>
-                    </div>
-                    <div class="notes-area">
-                        <p>Твои мысли:</p>
-                        <textarea class="note-input" data-page="2" placeholder="Напиши здесь свои воспоминания..."></textarea>
-                        <button class="save-note" data-page="2">Сохранить</button>
-                        <div class="saved-notes" id="notes-2"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Страница "Первая прогулка" -->
-            <div class="page">
-                <div class="page-content">
-                    <h2 class="page-title">Первая прогулка</h2>
-                    <div class="page-text">
-                        <p>Наша первая прогулка была похожа на сказку. Мы бродили по улицам города, разговаривая обо всём на свете, будто знали друг друга уже тысячу лет.</p>
-                        <p>Время остановилось, и существовали только мы вдвоём. Я запомнил(а) каждую деталь: как ветер играл с твоими волосами, как солнце отражалось в твоих глазах, и как наши руки случайно соприкоснулись.</p>
-                    </div>
-                    <div class="notes-area">
-                        <p>Твои мысли:</p>
-                        <textarea class="note-input" data-page="3" placeholder="Напиши здесь свои воспоминания..."></textarea>
-                        <button class="save-note" data-page="3">Сохранить</button>
-                        <div class="saved-notes" id="notes-3"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Страница "Первый поцелуй" -->
-            <div class="page">
-                <div class="page-content">
-                    <h2 class="page-title">Первый поцелуй</h2>
-                    <div class="page-text">
-                        <p>Этот момент был наполнен трепетом и волнением. Звёзды, казалось, сияли ярче в тот вечер, а воздух был наполнен ароматом цветов.</p>
-                        <p>Когда наши губы соприкоснулись, я понял(а), что никогда не испытывал(а) ничего подобного. Это было прикосновение к чему-то высшему, чистому и настоящему. В тот момент я осознал(а), что ты — тот человек, с которым я хочу разделить свою жизнь.</p>
-                    </div>
-                    <div class="notes-area">
-                        <p>Твои мысли:</p>
-                        <textarea class="note-input" data-page="4" placeholder="Напиши здесь свои воспоминания..."></textarea>
-                        <button class="save-note" data-page="4">Сохранить</button>
-                        <div class="saved-notes" id="notes-4"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Страница "Когда ты улыбнулась" -->
-            <div class="page">
-                <div class="page-content">
-                    <h2 class="page-title">Когда ты улыбнулась</h2>
-                    <div class="page-text">
-                        <p>Существуют улыбки, которые меняют всё. Твоя улыбка — одна из них. Когда ты улыбаешься, мир вокруг становится ярче, и все проблемы отступают.</p>
-                        <p>Я могу бесконечно смотреть на твою улыбку, и каждый раз она кажется мне новой, неповторимой. В ней отражается твоя душа — чистая и светлая. Я благодарен(на) каждому дню, когда могу видеть твою улыбку и быть причиной твоей радости.</p>
-                    </div>
-                    <div class="notes-area">
-                        <p>Твои мысли:</p>
-                        <textarea class="note-input" data-page="5" placeholder="Напиши здесь свои воспоминания..."></textarea>
-                        <button class="save-note" data-page="5">Сохранить</button>
-                        <div class="saved-notes" id="notes-5"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Страница "Особенные моменты" -->
-            <div class="page">
-                <div class="page-content">
-                    <h2 class="page-title">Особенные моменты</h2>
-                    <div class="page-text">
-                        <p>Жизнь соткана из моментов. Некоторые из них проходят незаметно, другие остаются в памяти навсегда. С тобой каждый момент становится особенным.</p>
-                        <p>Утренний кофе вместе, прогулки под дождем, объятия после долгого дня — все эти маленькие радости я храню в своем сердце. Они наполняют жизнь смыслом и делают каждый день неповторимым.</p>
-                    </div>
-                    <div class="notes-area">
-                        <p>Твои мысли:</p>
-                        <textarea class="note-input" data-page="6" placeholder="Напиши здесь свои воспоминания..."></textarea>
-                        <button class="save-note" data-page="6">Сохранить</button>
-                        <div class="saved-notes" id="notes-6"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Страница "Наши мечты" -->
-            <div class="page">
-                <div class="page-content">
-                    <h2 class="page-title">Наши мечты</h2>
-                    <div class="page-text">
-                        <p>Мечты становятся сильнее, когда ими делишься с любимым человеком. Наши мечты переплетаются и создают общее будущее, полное надежды и любви.</p>
-                        <p>Путешествовать по миру, создать уютный дом, просыпаться каждое утро рядом друг с другом — это лишь малая часть того, о чем мы мечтаем вместе. И я знаю, что вместе мы способны воплотить все наши мечты в реальность.</p>
-                    </div>
-                    <div class="notes-area">
-                        <p>Твои мысли:</p>
-                        <textarea class="note-input" data-page="7" placeholder="Напиши здесь свои мечты и желания..."></textarea>
-                        <button class="save-note" data-page="7">Сохранить</button>
-                        <div class="saved-notes" id="notes-7"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Страница "Письмо любви" -->
-            <div class="page">
-                <div class="page-content">
-                    <h2 class="page-title">Письмо любви</h2>
-                    <div class="page-text">
-                        <p>Мой самый дорогой человек,</p>
-                        <p>Слова не могут в полной мере выразить всю глубину моих чувств к тебе. Ты — мое вдохновение, моя опора, мой лучший друг и самая большая любовь.</p>
-                        <p>С каждым днем я люблю тебя все сильнее и открываю в тебе что-то новое. Твоя доброта, твой смех, твоя забота — все это делает меня счастливее, чем я когда-либо мог(ла) мечтать.</p>
-                        <p>Я обещаю любить тебя каждый день, в радости и в печали, и делать все возможное, чтобы наполнить нашу жизнь счастьем.</p>
-                    </div>
-                    <div class="notes-area">
-                        <p>Твой ответ:</p>
-                        <textarea class="note-input" data-page="8" placeholder="Напиши здесь свое письмо..."></textarea>
-                        <button class="save-note" data-page="8">Сохранить</button>
-                        <div class="saved-notes" id="notes-8"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Страница "Наше будущее" -->
-            <div class="page">
-                <div class="page-content">
-                    <h2 class="page-title">Наше будущее</h2>
-                    <div class="page-text">
-                        <p>Когда я думаю о будущем, я вижу нас вместе. Идущих рука об руку по дороге жизни, встречающих рассветы и закаты, преодолевающих трудности и празднующих победы.</p>
-                        <p>Наше будущее — это история, которую мы пишем вместе, день за днем, страница за страницей. И я не могу дождаться, чтобы увидеть, какой прекрасной она будет.</p>
-                        <p>Спасибо, что ты рядом. Спасибо за любовь, которая делает меня лучше. Я люблю тебя сегодня, завтра и всегда.</p>
-                    </div>
-                    <div class="notes-area">
-                        <p>Твои мысли о нашем будущем:</p>
-                        <textarea class="note-input" data-page="9" placeholder="Напиши здесь свои мысли..."></textarea>
-                        <button class="save-note" data-page="9">Сохранить</button>
-                        <div class="saved-notes" id="notes-9"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Пустая страница для записей -->
-            <div class="page">
-                <div class="page-content">
-                    <h2 class="page-title">Твоя страница</h2>
-                    <div class="page-text">
-                        <p>Эта страница полностью твоя. Здесь ты можешь написать все, что хочешь: свои мысли, чувства, воспоминания или планы на будущее.</p>
-                        <p>Иногда слова, написанные от сердца, становятся самым ценным подарком.</p>
-                    </div>
-                    <div class="notes-area">
-                        <p>Твои слова:</p>
-                        <textarea class="note-input" data-page="10" placeholder="Напиши здесь все, что пожелаешь..."></textarea>
-                        <button class="save-note" data-page="10">Сохранить</button>
-                        <div class="saved-notes" id="notes-10"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Последняя страница -->
-            <div class="page">
-                <div class="page-content">
-                    <h2 class="page-title">Бесконечная любовь</h2>
-                    <div class="page-text">
-                        <p>Наша история не заканчивается на последней странице этой книги. Она продолжается каждый день, с каждым взглядом, с каждым прикосновением, с каждым словом любви.</p>
-                        <p>Как и эта книга, наша любовь будет расти и развиваться, наполняясь новыми историями и воспоминаниями.</p>
-                        <p>Я благодарен(на) судьбе за то, что она подарила мне тебя, и обещаю хранить нашу любовь, как самое ценное сокровище.</p>
-                        <p class="magical-text">Это только начало нашей вечной истории...</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Задняя обложка -->
-            <div class="page back-cover">
-                <div class="page-content intro-page">
-                    <h1 class="intro-title">Конец и новое начало</h1>
-                    <p class="intro-text">Каждый день — это новая страница нашей любви</p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Книжная подставка -->
-        <div class="book-stand"></div>
-        
-        <!-- Эффект освещения -->
-        <div class="lighting"></div>
-        
-        <!-- Стрелки навигации -->
-        <div class="arrow-nav">
-            <div class="arrow prev">
-                <svg viewBox="0 0 24 24">
-                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-                </svg>
-            </div>
-            <div class="arrow next">
-                <svg viewBox="0 0 24 24">
-                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-                </svg>
-            </div>
-        </div>
-    </div>
-    
+    <div class="book-container"></div>
+    <div class="arrow-nav"></div>
+    <div class="lighting"></div>
     <script>
+        // Конфигурация Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
+            authDomain: "misha-and-anna-48e4c.firebaseapp.com",
+            databaseURL: "https://misha-and-anna-48e4c-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "misha-and-anna-48e4c",
+            storageBucket: "misha-and-anna-48e4c.firebasestorage.app",
+            messagingSenderId: "822036073579",
+            appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
+            measurementId: "G-XR86X6PXMX"
+        };
+
+        // Инициализация Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const notesRef = database.ref('notes');
+
+        // Содержимое страниц книги
+        const bookContent = [
+            {
+                title: "Наша первая встреча",
+                text: "Когда мы впервые встретились, я никогда не думал, что эта случайная встреча изменит всю мою жизнь. Твоя улыбка, твой смех, твой взгляд — всё это осталось в моей памяти как самое яркое воспоминание. Помнишь, как мы разговаривали часами, забыв о времени? Наше первое свидание было волшебным: тёплый летний вечер, прогулка по набережной, звёзды над головой и наши переплетённые пальцы. Тогда я уже знал, что ты — особенная.",
+                pageId: "first-meeting"
+            },
+            {
+                title: "Наши приключения",
+                text: "Мы всегда были немного авантюристами, не так ли? Спонтанные поездки, неожиданные решения, новые места. Помнишь нашу первую совместную поездку? Как мы заблудились, но нашли такие удивительные места, которые не были отмечены ни на одной карте. Или как мы танцевали под дождём, промокшие до нитки, но такие счастливые. Каждое наше приключение — это маленькая история любви, которую мы пишем вместе.",
+                pageId: "adventures"
+            },
+            {
+                title: "Наши мечты",
+                text: "С тобой я научился мечтать снова. Мы часто говорим о будущем, строим планы, представляем, как будем состариться вместе. Наш домик у моря, утренний кофе на террасе, закаты, которые мы будем встречать вместе долгие годы. Я верю, что все наши мечты осуществятся, потому что вместе мы можем всё. Твоя поддержка и вера в меня делают невозможное возможным.",
+                pageId: "dreams"
+            },
+            {
+                title: "Наши трудности",
+                text: "Не всё всегда было идеально, были и сложные периоды, испытания, через которые нам пришлось пройти. Но именно эти моменты сделали нас сильнее, научили ценить друг друга ещё больше. Мы преодолели расстояние, недопонимание, сомнения. Мы научились слушать и слышать, уступать и принимать. Каждая преодолённая трудность — это ещё один кирпичик в фундаменте нашей любви.",
+                pageId: "challenges"
+            },
+            {
+                title: "Наши маленькие радости",
+                text: "В нашей истории любви есть не только грандиозные события, но и маленькие ежедневные радости: твоя утренняя улыбка, наши совместные завтраки, тихие вечера с фильмами, случайные объятия. Я люблю, как ты морщишь нос, когда смеёшься, как задумчиво смотришь в окно, когда идёт дождь, как сосредоточенно читаешь интересную книгу. Эти моменты делают нашу жизнь особенной.",
+                pageId: "small-joys"
+            },
+            {
+                title: "Наше будущее",
+                text: "Когда я думаю о будущем, я всегда представляю тебя рядом. Мы будем вместе встречать рассветы и провожать закаты, вместе праздновать победы и преодолевать трудности. Наша история только начинается, и впереди ещё много непрочитанных страниц, которые мы заполним вместе. Я благодарен судьбе за каждый день с тобой и с нетерпением жду всех тех дней, которые нам ещё предстоит прожить вместе.",
+                pageId: "future"
+            }
+        ];
+
         $(document).ready(function() {
-            // Инициализация книги
+            // Создаем структуру книги
+            const bookHtml = `
+                <div id="book">
+                    <div class="cover-3d">
+                        <div class="cover-gem"></div>
+                    </div>
+                    <div class="first-page">
+                        <h1 class="first-page-title">Книга нашей <span class="magical-text">любви</span></h1>
+                        <p class="first-page-text">Эта книга — хранилище наших самых дорогих воспоминаний, наших чувств и мыслей. Здесь собраны истории нашей любви, которые мы будем писать вместе. Каждая страница — это часть нашего общего пути. Листай страницы, оставляй свои заметки и воспоминания, и пусть эта книга станет таким же особенным сокровищем, как наша любовь.</p>
+                    </div>
+                    ${bookContent.map((page, index) => `
+                        <div class="page">
+                            <div class="page-content">
+                                <h2 class="page-title">${page.title}</h2>
+                                <div class="page-text">${page.text}</div>
+                                <div class="comments-btn-container">
+                                    <button class="view-notes" data-page-id="${page.pageId}">Комментарии</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                    <div class="back-cover"></div>
+                </div>
+                <div class="book-stand"></div>
+            `;
+
+            $('.book-container').html(bookHtml);
+
+            // Инициализация turn.js
             $("#book").turn({
                 width: $('.book-container').width(),
                 height: $('.book-container').height(),
-                elevation: 100,
+                elevation: 50,
                 gradients: true,
                 autoCenter: true,
-                duration: 1400,
-                acceleration: false
-            });
-            
-            // Обработка клика по стрелкам
-            $('.prev').click(function() {
-                $('#book').turn('previous');
-                $('.page:visible').addClass('flipping');
-                setTimeout(() => $('.page').removeClass('flipping'), 1400);
-            });
-            
-            $('.next').click(function() {
-                $('#book').turn('next');
-                $('.page:visible').addClass('flipping');
-                setTimeout(() => $('.page').removeClass('flipping'), 1400);
-            });
-            
-            // Адаптивность
-            $(window).resize(function() {
-                $('#book').turn('size', 
-                    $('.book-container').width(), 
-                    $('.book-container').height());
-            });
-            
-            // Сохранение заметок
-            $('.save-note').click(function() {
-                const pageId = $(this).data('page');
-                const noteText = $(`.note-input[data-page="${pageId}"]`).val();
-                
-                if (noteText.trim() !== '') {
-                    let savedNotes = JSON.parse(localStorage.getItem('loveBookNotes') || '{}');
-                    savedNotes[pageId] = savedNotes[pageId] || [];
-                    savedNotes[pageId].push({
-                        text: noteText,
-                        date: new Date().toLocaleDateString()
-                    });
-                    localStorage.setItem('loveBookNotes', JSON.stringify(savedNotes));
-                    
-                    $(`.note-input[data-page="${pageId}"]`).val('');
-                    displayNotes(pageId);
-                }
-            });
-            
-            // Отображение заметок
-            function displayNotes(pageId) {
-                const savedNotes = JSON.parse(localStorage.getItem('loveBookNotes') || '{}');
-                const pageNotes = savedNotes[pageId] || [];
-                
-                let notesHtml = '';
-                pageNotes.forEach((note, index) => {
-                    notesHtml += `
-                        <div class="saved-note" style="margin-top: 15px; padding: 8px; border-left: 3px solid #a48549;">
-                            <p style="margin: 0; font-style: italic;">${note.text}</p>
-                            <small style="color: #4b3a6e;">${note.date}</small>
-                        </div>
-                    `;
-                });
-                
-                $(`#notes-${pageId}`).html(notesHtml);
-            }
-            
-            for (let i = 1; i <= 10; i++) {
-                displayNotes(i);
-            }
-            
-            // Динамическое освещение
-            $('.book-container').on('mousemove', function(e) {
-                const x = e.pageX - $(this).offset().left;
-                const y = e.pageY - $(this).offset().top;
-                
-                $('.lighting').css({
-                    'background': `radial-gradient(ellipse at ${x}px ${y}px, rgba(255,255,255,0.25) 0%, rgba(0,0,0,0.4) 80%)`
-                });
-            });
-            
-            // 3D-эффект обложки
-            $('.cover-3d').on('mouseenter', function() {
-                $(this).css({
-                    transform: 'translateZ(30px) rotateY(-5deg)',
-                    transition: 'transform 0.5s'
-                });
-            }).on('mouseleave', function() {
-                $(this).css({
-                    transform: 'translateZ(20px) rotateY(0deg)',
-                    transition: 'transform 0.5s'
-                });
-            });
-            
-            // Частицы
-            const canvas = document.getElementById('particle-canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            
-            const particles = [];
-            class Particle {
-                constructor() {
-                    this.x = Math.random() * canvas.width;
-                    this.y = Math.random() * canvas.height;
-                    this.size = Math.random() * 2 + 1;
-                    this.speedX = Math.random() * 0.5 - 0.25;
-                    this.speedY = Math.random() * 0.5 - 0.25;
-                }
-                update() {
-                    this.x += this.speedX;
-                    this.y += this.speedY;
-                    if (this.size > 0.2) this.size -= 0.05;
-                }
-                draw() {
-                    ctx.fillStyle = 'rgba(164, 133, 73, 0.6)';
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-            
-            function handleParticles() {
-                for (let i = 0; i < particles.length; i++) {
-                    particles[i].update();
-                    particles[i].draw();
-                    if (particles[i].size <= 0.2) {
-                        particles.splice(i, 1);
-                        i--;
+                display: 'double',
+                when: {
+                    start: function(event, pageObject, corner) {
+                        if (pageObject.page === 1) {
+                            $('.prev-page').hide();
+                        } else {
+                            $('.prev-page').show();
+                        }
+                        if (pageObject.page >= $(this).turn('pages')) {
+                            $('.next-page').hide();
+                        } else {
+                            $('.next-page').show();
+                        }
                     }
                 }
-            }
-            
-            function animateParticles() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                if (Math.random() < 0.1) {
-                    particles.push(new Particle());
+            });
+
+            // Создаем парящие частицы
+            createParticles();
+
+            // Настройка навигации по книге
+            $('.arrow-nav').html(`
+                <div class="arrow prev-page" style="display: none;">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="arrow next-page">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            `);
+
+            $('.prev-page').on('click', function() {
+                $("#book").turn("previous");
+            });
+
+            $('.next-page').on('click', function() {
+                $("#book").turn("next");
+            });
+
+            // Обработка переворачивания страниц
+            $("#book").on("turning", function(event, page, view) {
+                const currentPage = $(this).turn("page");
+                if (Math.abs(page - currentPage) === 1 || Math.abs(page - currentPage) === 2) {
+                    $(this).find('.page').eq(currentPage - 1).addClass('flipping');
+                    setTimeout(() => {
+                        $(this).find('.page').eq(currentPage - 1).removeClass('flipping');
+                    }, 1000);
                 }
-                handleParticles();
-                requestAnimationFrame(animateParticles);
+            });
+
+            // Создаем модальное окно для заметок
+            $('body').append(`
+                <div class="modal" id="notesModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Комментарии</h3>
+                            <span class="close-modal">×</span>
+                        </div>
+                        <div class="modal-body">
+                            <textarea class="note-input" placeholder="Оставь свой комментарий..."></textarea>
+                            <button class="save-note">Сохранить заметку</button>
+                            <div class="notes-list">
+                                <!-- Сюда будут добавляться заметки -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            // Обработчик для открытия модального окна заметок
+            $(document).on('click', '.view-notes', function() {
+                const pageId = $(this).data('page-id');
+                const pageTitle = $(this).closest('.page-content').find('.page-title').text();
+                
+                $('#notesModal .modal-title').text(`Комментарии: ${pageTitle}`);
+                $('#notesModal .notes-list').empty();
+                $('#notesModal .note-input').val('');
+                $('#notesModal').data('page-id', pageId);
+                
+                notesRef.orderByChild('pageId').equalTo(pageId).once('value')
+                    .then(snapshot => {
+                        if (snapshot.exists()) {
+                            snapshot.forEach(childSnapshot => {
+                                const noteData = childSnapshot.val();
+                                $('#notesModal .notes-list').append(`
+                                    <div class="note-entry">
+                                        <div class="note-text">${noteData.text}</div>
+                                        <div class="note-meta">
+                                            <span class="note-date">${noteData.date}</span>
+                                            <span class="page-indicator">${pageTitle}</span>
+                                        </div>
+                                    </div>
+                                `);
+                            });
+                        } else {
+                            $('#notesModal .notes-list').append(`
+                                <p>Пока нет комментариев для этой страницы. Оставьте первый!</p>
+                            `);
+                        }
+                        
+                        $('#notesModal').fadeIn();
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при загрузке заметок:', error);
+                        alert('Не удалось загрузить комментарии. Пожалуйста, попробуйте снова.');
+                    });
+            });
+
+            // Обработчик для сохранения заметок
+            $(document).on('click', '.save-note', function() {
+                const noteInput = $('#notesModal .note-input');
+                const noteText = noteInput.val().trim();
+                const pageId = $('#notesModal').data('page-id');
+                
+                if (noteText) {
+                    const newNote = {
+                        text: noteText,
+                        pageId: pageId,
+                        date: new Date().toLocaleString('ru-RU')
+                    };
+                    
+                    notesRef.push(newNote)
+                        .then(() => {
+                            noteInput.val('');
+                            // Обновляем список заметок
+                            const pageTitle = $('#notesModal .modal-title').text().replace('Комментарии: ', '');
+                            notesRef.orderByChild('pageId').equalTo(pageId).once('value')
+                                .then(snapshot => {
+                                    $('#notesModal .notes-list').empty();
+                                    if (snapshot.exists()) {
+                                        snapshot.forEach(childSnapshot => {
+                                            const noteData = childSnapshot.val();
+                                            $('#notesModal .notes-list').append(`
+                                                <div class="note-entry">
+                                                    <div class="note-text">${noteData.text}</div>
+                                                    <div class="note-meta">
+                                                        <span class="note-date">${noteData.date}</span>
+                                                        <span class="page-indicator">${pageTitle}</span>
+                                                    </div>
+                                                </div>
+                                            `);
+                                        });
+                                    } else {
+                                        $('#notesModal .notes-list').append(`
+                                            <p>Пока нет комментариев для этой страницы. Оставьте первый!</p>
+                                        `);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Ошибка при обновлении заметок:', error);
+                                    alert('Не удалось обновить комментарии. Пожалуйста, попробуйте снова.');
+                                });
+                            alert('Комментарий успешно сохранен!');
+                        })
+                        .catch(error => {
+                            console.error('Ошибка при сохранении заметки:', error);
+                            alert('Не удалось сохранить комментарий. Пожалуйста, попробуйте снова.');
+                        });
+                } else {
+                    alert('Пожалуйста, введите текст комментария.');
+                }
+            });
+
+            // Закрытие модального окна
+            $('.close-modal').on('click', function() {
+                $('#notesModal').fadeOut();
+            });
+
+            $(window).on('click', function(event) {
+                if ($(event.target).is('#notesModal')) {
+                    $('#notesModal').fadeOut();
+                }
+            });
+
+            // Закрытие модального окна по клавише Escape
+            $(document).on('keydown', function(event) {
+                if (event.key === 'Escape' && $('#notesModal').is(':visible')) {
+                    $('#notesModal').fadeOut();
+                }
+            });
+
+            // Создание эффекта парящих частиц
+            function createParticles() {
+                const canvas = document.createElement('canvas');
+                canvas.className = 'particle-canvas';
+                document.body.appendChild(canvas);
+                
+                const ctx = canvas.getContext('2d');
+                
+                function resizeCanvas() {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                }
+                
+                resizeCanvas();
+                
+                const particles = [];
+                const particleCount = 50;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    particles.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        radius: Math.random() * 3 + 1,
+                        color: '#a48549',
+                        speed: Math.random() * 0.5 + 0.1,
+                        direction: Math.random() * 360
+                    });
+                }
+                
+                let lastTime = 0;
+                const fps = 30;
+                const interval = 1000 / fps;
+                
+                function drawParticles(timestamp) {
+                    if (timestamp - lastTime < interval) {
+                        requestAnimationFrame(drawParticles);
+                        return;
+                    }
+                    lastTime = timestamp;
+                    
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    particles.forEach(particle => {
+                        const radians = particle.direction * Math.PI / 180;
+                        particle.x += Math.cos(radians) * particle.speed;
+                        particle.y += Math.sin(radians) * particle.speed;
+                        
+                        if (particle.x < 0 || particle.x > canvas.width) {
+                            particle.direction = 180 - particle.direction;
+                        }
+                        if (particle.y < 0 || particle.y > canvas.height) {
+                            particle.direction = 360 - particle.direction;
+                        }
+                        
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2, false);
+                        ctx.fillStyle = particle.color;
+                        ctx.globalAlpha = 0.4;
+                        ctx.fill();
+                    });
+                    
+                    requestAnimationFrame(drawParticles);
+                }
+                
+                drawParticles(performance.now());
+                
+                $(window).resize(resizeCanvas);
             }
-            
-            animateParticles();
+
+            // Адаптивность при изменении размера окна
+            $(window).resize(function() {
+                const width = $('.book-container').width();
+                const height = $('.book-container').height();
+                $("#book").turn("size", width, height);
+            });
         });
     </script>
 </body>
