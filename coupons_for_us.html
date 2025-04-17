@@ -91,7 +91,13 @@
             color: var(--primary);
         }
 
-        .theme-toggle {
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .theme-toggle, .reset-coupons {
             background: var(--light);
             border: 2px solid var(--primary-light);
             border-radius: 20px;
@@ -106,7 +112,7 @@
             gap: 6px;
         }
 
-        .theme-toggle:hover {
+        .theme-toggle:hover, .reset-coupons:hover {
             background: var(--primary-light);
             color: white;
         }
@@ -540,6 +546,11 @@
             .modal-content {
                 padding: 20px;
             }
+
+            .header-actions {
+                flex-direction: column;
+                gap: 5px;
+            }
         }
 
         /* Dark Theme */
@@ -559,7 +570,7 @@
             color: var(--primary-light);
         }
 
-        body.dark-theme .theme-toggle {
+        body.dark-theme .theme-toggle, body.dark-theme .reset-coupons {
             background: #3d3d55;
             border-color: var(--primary-light);
             color: var(--primary-light);
@@ -657,9 +668,14 @@
             <i class="fas fa-heart"></i>
             <h1>Купоны для нас</h1>
         </div>
-        <button class="theme-toggle" id="themeToggle">
-            <i class="fas fa-moon"></i> Тема
-        </button>
+        <div class="header-actions">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i> Тема
+            </button>
+            <button class="reset-coupons" id="resetCoupons">
+                <i class="fas fa-redo"></i> Сбросить купоны
+            </button>
+        </div>
     </header>
 
     <main>
@@ -752,6 +768,20 @@
         </div>
     </div>
 
+    <!-- Модальное окно для подтверждения сброса купонов -->
+    <div class="modal" id="resetCouponModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeResetModal">×</button>
+            <h2>Сбросить все купоны?</h2>
+            <p>Вы уверены, что хотите сбросить все использованные купоны? Это позволит использовать их снова.</p>
+            
+            <div class="modal-actions">
+                <button class="btn-secondary" id="cancelResetCoupon">Отмена</button>
+                <button class="btn-primary" id="confirmResetCoupon">Да, сбросить</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Определение переменных
@@ -770,6 +800,11 @@
             const closeUseModal = document.getElementById('closeUseModal');
             const cancelUseCoupon = document.getElementById('cancelUseCoupon');
             const confirmUseCoupon = document.getElementById('confirmUseCoupon');
+            const resetCouponsBtn = document.getElementById('resetCoupons');
+            const resetCouponModal = document.getElementById('resetCouponModal');
+            const closeResetModal = document.getElementById('closeResetModal');
+            const cancelResetCoupon = document.getElementById('cancelResetCoupon');
+            const confirmResetCoupon = document.getElementById('confirmResetCoupon');
             const themeToggle = document.getElementById('themeToggle');
             const heartBackground = document.getElementById('heartBackground');
             
@@ -880,8 +915,10 @@
             }
             
             // Функция для отправки сообщения в Telegram
-            async function sendTelegramNotification(couponTitle) {
-                const message = `Твоя любимая выбрала купон: "${couponTitle}"! 🎉`;
+            async function sendTelegramNotification(couponTitle, isReset = false) {
+                const message = isReset 
+                    ? `Твоя любимая сбросила все использованные купоны! 🎉 Теперь их можно использовать снова.` 
+                    : `Твоя любимая выбрала купон: "${couponTitle}"! 🎉`;
                 const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(message)}`;
                 
                 try {
@@ -898,6 +935,7 @@
             submitPassword.addEventListener('click', function() {
                 if (passwordInput.value === PASSWORD) {
                     passwordOverlay.style.display = 'none';
+                    localStorage.setItem('lovePassword', passwordInput.value);
                     createFloatingHearts();
                     renderCoupons();
                 } else {
@@ -1074,6 +1112,37 @@
                         currentCoupon = null;
                     }
                 }
+            });
+
+            // Обработчики модального окна сброса купонов
+            resetCouponsBtn.addEventListener('click', () => {
+                resetCouponModal.style.display = 'flex';
+            });
+            
+            closeResetModal.addEventListener('click', () => {
+                resetCouponModal.style.display = 'none';
+            });
+            
+            cancelResetCoupon.addEventListener('click', () => {
+                resetCouponModal.style.display = 'none';
+            });
+            
+            confirmResetCoupon.addEventListener('click', () => {
+                coupons = coupons.map(coupon => ({
+                    ...coupon,
+                    used: false
+                }));
+                localStorage.setItem('loveCoupons', JSON.stringify(coupons));
+                
+                // Отправка уведомления о сбросе в Telegram
+                sendTelegramNotification(null, true);
+                
+                resetCouponModal.style.display = 'none';
+                currentFilter = 'all';
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                document.querySelector('[data-filter="all"]').classList.add('active');
+                renderCoupons();
+                showConfetti();
             });
             
             // Переключение темы
