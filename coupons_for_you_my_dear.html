@@ -453,7 +453,7 @@
             z-index: 300;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+ a           justify-content: center;
             align-items: center;
             padding: 20px;
         }
@@ -804,7 +804,7 @@
             const MAX_RETRIES = 3; // Максимальное количество попыток отправки уведомления
             const RETRY_DELAY = 2000; // Задержка между попытками в миллисекундах
             let currentFilter = 'all';
-            let currentCoupon = null;
+            let currentCouponId = null;
             
             // Проверка темной темы в localStorage
             if (localStorage.getItem('darkTheme') === 'true') {
@@ -814,7 +814,7 @@
             
             // Создание плавающих сердечек
             function createFloatingHearts() {
-                const heartSymbols = ['❤️', '�15', '💖', '�18', '💗'];
+                const heartSymbols = ['❤️', '💕', '💖', '💘', '💗'];
                 for (let i = 0; i < 20; i++) {
                     const heart = document.createElement('div');
                     heart.className = 'heart';
@@ -987,7 +987,7 @@
                 }
             }
             
-            // Функция для проверки пароля
+            // Функция проверки пароля
             submitPassword.addEventListener('click', function() {
                 if (passwordInput.value === PASSWORD) {
                     localStorage.setItem('lovePassword', passwordInput.value);
@@ -1064,24 +1064,28 @@
                     }
                 });
                 
-                // Обработчики событий для кнопок купонов
-                document.querySelectorAll('.flip-coupon, .flip-back').forEach(button => {
-                    button.addEventListener('click', function(e) {
+                // Используем делегирование событий для обработки кликов по динамически созданным элементам
+                couponContainer.addEventListener('click', function(e) {
+                    const target = e.target;
+                    
+                    // Обработка клика по кнопке "Перевернуть купон" или "Вернуться"
+                    if (target.closest('.flip-coupon') || target.closest('.flip-back')) {
                         e.stopPropagation();
-                        const coupon = this.closest('.coupon');
-                        coupon.classList.toggle('flipped');
-                    });
-                });
-                
-                document.querySelectorAll('.use-coupon').forEach(button => {
-                    button.addEventListener('click', function(e) {
+                        const coupon = target.closest('.coupon');
+                        if (coupon) {
+                            coupon.classList.toggle('flipped');
+                        }
+                    }
+                    
+                    // Обработка клика по кнопке "Использовать"
+                    if (target.closest('.use-coupon')) {
                         e.stopPropagation();
-                        const couponDiv = this.closest('.coupon');
-                        if (!couponDiv.classList.contains('used')) {
-                            currentCoupon = couponDiv.dataset.id;
+                        const couponDiv = target.closest('.coupon');
+                        if (couponDiv && !couponDiv.classList.contains('used')) {
+                            currentCouponId = couponDiv.dataset.id;
                             useCouponModal.style.display = 'flex';
                         }
-                    });
+                    }
                 });
             }
             
@@ -1143,17 +1147,17 @@
             // Обработчики модального окна использования купона
             closeUseModal.addEventListener('click', () => {
                 useCouponModal.style.display = 'none';
-                currentCoupon = null;
+                currentCouponId = null;
             });
             
             cancelUseCoupon.addEventListener('click', () => {
                 useCouponModal.style.display = 'none';
-                currentCoupon = null;
+                currentCouponId = null;
             });
             
             confirmUseCoupon.addEventListener('click', async () => {
-                if (currentCoupon) {
-                    const index = coupons.findIndex(coupon => coupon.id === currentCoupon);
+                if (currentCouponId) {
+                    const index = coupons.findIndex(coupon => coupon.id === currentCouponId);
                     if (index !== -1) {
                         coupons[index].used = true;
                         coupons[index].usedTimestamp = Date.now();
@@ -1165,7 +1169,7 @@
                         useCouponModal.style.display = 'none';
                         renderCoupons();
                         showConfetti();
-                        currentCoupon = null;
+                        currentCouponId = null;
                     }
                 }
             });
