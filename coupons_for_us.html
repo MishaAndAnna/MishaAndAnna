@@ -754,12 +754,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Проверка локального окружения
-            if (window.location.protocol === 'file:') {
-                console.warn('Страница загружена через file://. Сетевые запросы (например, Telegram API) могут быть заблокированы. Используйте локальный сервер (например, Live Server или python -m http.server).');
-                alert('Пожалуйста, запустите страницу через локальный сервер (например, Live Server или python -m http.server), чтобы отправка уведомлений работала корректно.');
-            }
-
             // Определение переменных
             const passwordOverlay = document.getElementById('passwordOverlay');
             const passwordInput = document.getElementById('password');
@@ -783,7 +777,6 @@
             const PASSWORD = "любимая"; // Пароль для доступа
             const TELEGRAM_BOT_TOKEN = '8055216192:AAGYBAVgLaVUinW-YqnB7QTSLWljuT9s3Pg'; // Токен вашего бота
             const TELEGRAM_CHAT_ID = '1042168412'; // Ваш chat_id
-            const MAX_RETRIES = 2; // Максимальное количество попыток отправки
             let currentFilter = 'all';
             let currentCoupon = null;
             
@@ -886,37 +879,18 @@
                 coupons = initialCoupons;
             }
             
-            // Функция для отправки сообщения в Telegram с повторными попытками
-            async function sendTelegramNotification(couponTitle, retryCount = 0) {
+            // Функция для отправки сообщения в Telegram
+            async function sendTelegramNotification(couponTitle) {
                 const message = `Твоя любимая выбрала купон: "${couponTitle}"! 🎉`;
                 const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(message)}`;
                 
                 try {
-                    const response = await fetch(url, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        signal: AbortSignal.timeout(5000) // Таймаут 5 секунд
-                    });
-                    const data = await response.json();
-                    if (!response.ok || !data.ok) {
-                        throw new Error(`Telegram API error: ${data.description || response.statusText}`);
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        console.error('Ошибка отправки сообщения в Telegram:', response.statusText);
                     }
-                    console.log('Уведомление успешно отправлено в Telegram:', data);
                 } catch (error) {
-                    console.error(`Попытка ${retryCount + 1}: Ошибка при отправке уведомления в Telegram:`, {
-                        message: error.message,
-                        name: error.name,
-                        stack: error.stack
-                    });
-                    if (retryCount < MAX_RETRIES) {
-                        console.log(`Повторная попытка ${retryCount + 2} через 2 секунды...`);
-                        await new Promise(resolve => setTimeout(resolve, 2000));
-                        return sendTelegramNotification(couponTitle, retryCount + 1);
-                    }
-                    console.error('Все попытки отправки уведомления исчерпаны.');
-                    alert('Не удалось отправить уведомление в Telegram. Проверьте подключение к интернету или настройки бота. Купон всё равно отмечен как использованный.');
+                    console.error('Ошибка при отправке уведомления в Telegram:', error);
                 }
             }
             
@@ -924,7 +898,6 @@
             submitPassword.addEventListener('click', function() {
                 if (passwordInput.value === PASSWORD) {
                     passwordOverlay.style.display = 'none';
-                    localStorage.setItem('lovePassword', passwordInput.value); // Сохраняем пароль для авто-входа
                     createFloatingHearts();
                     renderCoupons();
                 } else {
@@ -1085,7 +1058,6 @@
                 currentCoupon = null;
             });
             
-            // Обработчик подтверждения использования купона
             confirmUseCoupon.addEventListener('click', () => {
                 if (currentCoupon) {
                     const index = coupons.findIndex(coupon => coupon.id === currentCoupon);
