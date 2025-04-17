@@ -91,13 +91,7 @@
             color: var(--primary);
         }
 
-        .header-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .theme-toggle, .reset-coupons {
+        .theme-toggle {
             background: var(--light);
             border: 2px solid var(--primary-light);
             border-radius: 20px;
@@ -112,7 +106,7 @@
             gap: 6px;
         }
 
-        .theme-toggle:hover, .reset-coupons:hover {
+        .theme-toggle:hover {
             background: var(--primary-light);
             color: white;
         }
@@ -453,7 +447,7 @@
             z-index: 300;
             display: flex;
             flex-direction: column;
- a           justify-content: center;
+            justify-content: center;
             align-items: center;
             padding: 20px;
         }
@@ -527,11 +521,6 @@
                 height: 50px;
                 font-size: 20px;
             }
-
-            .header-actions {
-                flex-direction: column;
-                gap: 5px;
-            }
         }
 
         @media (max-width: 480px) {
@@ -550,11 +539,6 @@
 
             .modal-content {
                 padding: 20px;
-            }
-
-            .header-actions {
-                flex-direction: column;
-                gap: 5px;
             }
         }
 
@@ -575,8 +559,7 @@
             color: var(--primary-light);
         }
 
-        body.dark-theme .theme-toggle,
-        body.dark-theme .reset-coupons {
+        body.dark-theme .theme-toggle {
             background: #3d3d55;
             border-color: var(--primary-light);
             color: var(--primary-light);
@@ -674,14 +657,9 @@
             <i class="fas fa-heart"></i>
             <h1>Купоны для нас</h1>
         </div>
-        <div class="header-actions">
-            <button class="theme-toggle" id="themeToggle">
-                <i class="fas fa-moon"></i> Тема
-            </button>
-            <button class="reset-coupons" id="resetCoupons">
-                <i class="fas fa-redo"></i> Сбросить купоны
-            </button>
-        </div>
+        <button class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon"></i> Тема
+        </button>
     </header>
 
     <main>
@@ -793,7 +771,6 @@
             const cancelUseCoupon = document.getElementById('cancelUseCoupon');
             const confirmUseCoupon = document.getElementById('confirmUseCoupon');
             const themeToggle = document.getElementById('themeToggle');
-            const resetCouponsBtn = document.getElementById('resetCoupons');
             const heartBackground = document.getElementById('heartBackground');
             
             // Настроечные параметры
@@ -801,10 +778,8 @@
             const TELEGRAM_BOT_TOKEN = '8055216192:AAGYBAVgLaVUinW-YqnB7QTSLWljuT9s3Pg'; // Токен вашего бота
             const TELEGRAM_CHAT_ID = '1042168412'; // Ваш chat_id
             const RESET_TIMEOUT = 12 * 60 * 60 * 1000; // 12 часов в миллисекундах
-            const MAX_RETRIES = 3; // Максимальное количество попыток отправки уведомления
-            const RETRY_DELAY = 2000; // Задержка между попытками в миллисекундах
             let currentFilter = 'all';
-            let currentCouponId = null;
+            let currentCoupon = null;
             
             // Проверка темной темы в localStorage
             if (localStorage.getItem('darkTheme') === 'true') {
@@ -913,84 +888,37 @@
                 coupons = initialCoupons;
             }
             
-            // Функция для отправки сообщения в Telegram с полным описанием и повторными попытками
-            async function sendTelegramNotification(coupon, isReset = false, retryCount = 0) {
-                let message;
-                if (isReset) {
-                    message = `Все купоны были сброшены и снова доступны для использования!`;
-                } else {
-                    message = `Твоя любимая выбрала купон:\n\n🎫 *${coupon.title}*\n📝 *Описание:* ${coupon.description}\n📌 *Категория:* ${coupon.category.charAt(0).toUpperCase() + coupon.category.slice(1)}`;
-                }
+            // Функция для отправки сообщения в Telegram с полным описанием
+            async function sendTelegramNotification(coupon) {
+                const message = `Твоя любимая выбрала купон:\n\n🎫 *${coupon.title}*\n📝 *Описание:* ${coupon.description}\n📌 *Категория:* ${coupon.category.charAt(0).toUpperCase() + coupon.category.slice(1)}`;
                 const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(message)}&parse_mode=Markdown`;
-                
-                console.log(`Попытка отправки уведомления в Telegram (попытка ${retryCount + 1}):`, message);
                 
                 try {
                     const response = await fetch(url);
-                    if (response.ok) {
-                        console.log('Уведомление успешно отправлено в Telegram:', message);
-                        return true;
-                    } else {
-                        const errorText = await response.text();
-                        console.error(`Ошибка отправки в Telegram (статус ${response.status}):`, errorText);
-                        if (retryCount < MAX_RETRIES - 1) {
-                            console.log(`Повторная попытка через ${RETRY_DELAY} мс...`);
-                            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-                            return sendTelegramNotification(coupon, isReset, retryCount + 1);
-                        } else {
-                            console.error('Достигнуто максимальное количество попыток отправки.');
-                            return false;
-                        }
+                    if (!response.ok) {
+                        console.error('Ошибка отправки сообщения в Telegram:', response.statusText);
                     }
                 } catch (error) {
                     console.error('Ошибка при отправке уведомления в Telegram:', error);
-                    if (retryCount < MAX_RETRIES - 1) {
-                        console.log(`Повторная попытка через ${RETRY_DELAY} мс...`);
-                        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-                        return sendTelegramNotification(coupon, isReset, retryCount + 1);
-                    } else {
-                        console.error('Достигнуто максимальное количество попыток отправки.');
-                        return false;
-                    }
                 }
             }
             
-            // Функция для немедленного сброса всех купонов
-            async function resetAllCoupons() {
-                coupons.forEach(coupon => {
-                    coupon.used = false;
-                    coupon.usedTimestamp = null;
-                });
-                localStorage.setItem('loveCoupons', JSON.stringify(coupons));
-                renderCoupons();
-                showConfetti();
-                // Отправляем уведомление о сбросе
-                await sendTelegramNotification(null, true);
-            }
-            
-            // Функция для проверки и сброса использованных купонов по таймеру
-            async function checkAndResetCoupons() {
+            // Функция для проверки и сброса использованных купонов
+            function checkAndResetCoupons() {
                 const now = Date.now();
-                let updated = false;
                 coupons.forEach(coupon => {
                     if (coupon.used && coupon.usedTimestamp && (now - coupon.usedTimestamp >= RESET_TIMEOUT)) {
                         coupon.used = false;
                         coupon.usedTimestamp = null;
-                        updated = true;
                     }
                 });
-                if (updated) {
-                    localStorage.setItem('loveCoupons', JSON.stringify(coupons));
-                    renderCoupons();
-                    // Отправляем уведомление о сбросе
-                    await sendTelegramNotification(null, true);
-                }
+                localStorage.setItem('loveCoupons', JSON.stringify(coupons));
+                renderCoupons();
             }
             
-            // Функция проверки пароля
+            // Функция для проверки пароля
             submitPassword.addEventListener('click', function() {
                 if (passwordInput.value === PASSWORD) {
-                    localStorage.setItem('lovePassword', passwordInput.value);
                     passwordOverlay.style.display = 'none';
                     createFloatingHearts();
                     renderCoupons();
@@ -1064,28 +992,23 @@
                     }
                 });
                 
-                // Используем делегирование событий для обработки кликов по динамически созданным элементам
-                couponContainer.addEventListener('click', function(e) {
-                    const target = e.target;
-                    
-                    // Обработка клика по кнопке "Перевернуть купон" или "Вернуться"
-                    if (target.closest('.flip-coupon') || target.closest('.flip-back')) {
+                // Обработчики событий для кнопок купонов
+                document.querySelectorAll('.flip-coupon, .flip-back').forEach(button => {
+                    button.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        const coupon = target.closest('.coupon');
-                        if (coupon) {
-                            coupon.classList.toggle('flipped');
-                        }
-                    }
-                    
-                    // Обработка клика по кнопке "Использовать"
-                    if (target.closest('.use-coupon')) {
+                        const coupon = this.closest('.coupon');
+                        coupon.classList.toggle('flipped');
+                    });
+                });
+                
+                document.querySelectorAll('.use-coupon').forEach(button => {
+                    button.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        const couponDiv = target.closest('.coupon');
-                        if (couponDiv && !couponDiv.classList.contains('used')) {
-                            currentCouponId = couponDiv.dataset.id;
+                        if (!this.closest('.coupon').classList.contains('used')) {
+                            currentCoupon = this.closest('.coupon').dataset.id;
                             useCouponModal.style.display = 'flex';
                         }
-                    }
+                    });
                 });
             }
             
@@ -1120,7 +1043,7 @@
                 e.preventDefault();
                 
                 const newCoupon = {
-                    id: 'coupon-' + Date.now(),
+                    id: 'coupon-' + (Date.now()),
                     title: document.getElementById('couponTitle').value,
                     description: document.getElementById('couponDescription').value,
                     category: document.getElementById('couponCategory').value,
@@ -1147,29 +1070,29 @@
             // Обработчики модального окна использования купона
             closeUseModal.addEventListener('click', () => {
                 useCouponModal.style.display = 'none';
-                currentCouponId = null;
+                currentCoupon = null;
             });
             
             cancelUseCoupon.addEventListener('click', () => {
                 useCouponModal.style.display = 'none';
-                currentCouponId = null;
+                currentCoupon = null;
             });
             
-            confirmUseCoupon.addEventListener('click', async () => {
-                if (currentCouponId) {
-                    const index = coupons.findIndex(coupon => coupon.id === currentCouponId);
+            confirmUseCoupon.addEventListener('click', () => {
+                if (currentCoupon) {
+                    const index = coupons.findIndex(coupon => coupon.id === currentCoupon);
                     if (index !== -1) {
                         coupons[index].used = true;
                         coupons[index].usedTimestamp = Date.now();
                         localStorage.setItem('loveCoupons', JSON.stringify(coupons));
                         
                         // Отправка уведомления в Telegram
-                        await sendTelegramNotification(coupons[index]);
+                        sendTelegramNotification(coupons[index]);
                         
                         useCouponModal.style.display = 'none';
                         renderCoupons();
                         showConfetti();
-                        currentCouponId = null;
+                        currentCoupon = null;
                     }
                 }
             });
@@ -1185,11 +1108,6 @@
                 } else {
                     themeToggle.innerHTML = '<i class="fas fa-moon"></i> Тема';
                 }
-            });
-            
-            // Обработчик сброса купонов
-            resetCouponsBtn.addEventListener('click', function() {
-                resetAllCoupons();
             });
             
             // Анимация конфетти при успешном действии
