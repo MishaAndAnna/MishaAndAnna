@@ -774,7 +774,9 @@
             const heartBackground = document.getElementById('heartBackground');
             
             // Настроечные параметры
-            const PASSWORD = "любимая"; // Измените на свой пароль
+            const PASSWORD = "любимая"; // Пароль для доступа
+            const TELEGRAM_BOT_TOKEN = '8055216192:AAGYBAVgLaVUinW-YqnB7QTSLWljuT9s3Pg'; // Токен вашего бота
+            const TELEGRAM_CHAT_ID = '1042168412'; // Ваш chat_id
             let currentFilter = 'all';
             let currentCoupon = null;
             
@@ -875,6 +877,21 @@
             if (!coupons || coupons.length === 0) {
                 localStorage.setItem('loveCoupons', JSON.stringify(initialCoupons));
                 coupons = initialCoupons;
+            }
+            
+            // Функция для отправки сообщения в Telegram
+            async function sendTelegramNotification(couponTitle) {
+                const message = `Твоя любимая выбрала купон: "${couponTitle}"! 🎉`;
+                const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(message)}`;
+                
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        console.error('Ошибка отправки сообщения в Telegram:', response.statusText);
+                    }
+                } catch (error) {
+                    console.error('Ошибка при отправке уведомления в Telegram:', error);
+                }
             }
             
             // Функция для проверки пароля
@@ -1048,6 +1065,9 @@
                         coupons[index].used = true;
                         localStorage.setItem('loveCoupons', JSON.stringify(coupons));
                         
+                        // Отправка уведомления в Telegram
+                        sendTelegramNotification(coupons[index].title);
+                        
                         useCouponModal.style.display = 'none';
                         renderCoupons();
                         showConfetti();
@@ -1119,7 +1139,6 @@
             `);
             
             // Проверим, есть ли сохраненный пароль в localStorage для авто-входа
-            // Это может быть небезопасно на реальном сайте, но удобно для личного использования
             const savedPassword = localStorage.getItem('lovePassword');
             if (savedPassword === PASSWORD) {
                 passwordOverlay.style.display = 'none';
