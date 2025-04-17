@@ -302,6 +302,19 @@
             color: white;
         }
 
+        .btn-delete {
+            background: transparent;
+            color: #ff4444;
+            border: 1px solid #ff4444;
+            padding: 8px;
+            flex-grow: 0;
+        }
+
+        .btn-delete:hover {
+            background: #ff4444;
+            color: white;
+        }
+
         .coupon.used .coupon-front::after {
             content: 'ИСПОЛЬЗОВАН';
             position: absolute;
@@ -441,7 +454,6 @@
             z-index: 150;
         }
 
-        /* Password protection overlay */
         .password-overlay {
             position: fixed;
             top: 0;
@@ -509,7 +521,6 @@
             display: none;
         }
 
-        /* Responsive styles */
         @media (max-width: 768px) {
             header h1 {
                 font-size: 1.3rem;
@@ -553,7 +564,6 @@
             }
         }
 
-        /* Dark Theme */
         body.dark-theme {
             background-color: #1e1e2e;
             background-image: 
@@ -639,12 +649,21 @@
         body.dark-theme .password-container p {
             color: #e0e0e0;
         }
+
+        body.dark-theme .btn-delete {
+            color: #ff6666;
+            border-color: #ff6666;
+        }
+
+        body.dark-theme .btn-delete:hover {
+            background: #ff6666;
+            color: white;
+        }
     </style>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Password protection -->
     <div class="password-overlay" id="passwordOverlay">
         <div class="password-container">
             <h2>Добро пожаловать</h2>
@@ -660,7 +679,6 @@
         </div>
     </div>
 
-    <!-- Плавающие сердечки фон -->
     <div class="heart-bg" id="heartBackground"></div>
 
     <header>
@@ -680,7 +698,7 @@
 
     <main>
         <section class="intro">
-            <h2>Наши особенные купоны</h2>
+            <h2>Наренные купоны</h2>
             <p>Эти купоны созданы специально для тебя, моя любимая. Каждый из них можно использовать в любой момент, когда захочешь. Просто выбери понравившийся купон, нажми "Использовать", и я исполню написанное в нём обещание.</p>
             <p>Нажми на купон, чтобы увидеть подробности!</p>
         </section>
@@ -695,7 +713,6 @@
         </section>
 
         <section class="coupon-container" id="couponContainer">
-            <!-- Купоны будут добавлены с помощью JavaScript -->
         </section>
     </main>
 
@@ -703,7 +720,6 @@
         <i class="fas fa-plus"></i>
     </button>
 
-    <!-- Модальное окно для добавления нового купона -->
     <div class="modal" id="addCouponModal">
         <div class="modal-content">
             <button class="close-modal" id="closeModal">×</button>
@@ -754,7 +770,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно для подтверждения использования купона -->
     <div class="modal" id="useCouponModal">
         <div class="modal-content">
             <button class="close-modal" id="closeUseModal">×</button>
@@ -768,7 +783,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно для подтверждения сброса купонов -->
     <div class="modal" id="resetCouponModal">
         <div class="modal-content">
             <button class="close-modal" id="closeResetModal">×</button>
@@ -782,9 +796,21 @@
         </div>
     </div>
 
+    <div class="modal" id="deleteCouponModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeDeleteModal">×</button>
+            <h2>Удалить купон?</h2>
+            <p>Вы уверены, что хотите удалить этот купон? Это действие нельзя отменить.</p>
+            
+            <div class="modal-actions">
+                <button class="btn-secondary" id="cancelDeleteCoupon">Отмена</button>
+                <button class="btn-primary" id="confirmDeleteCoupon">Да, удалить</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Определение переменных
             const passwordOverlay = document.getElementById('passwordOverlay');
             const passwordInput = document.getElementById('password');
             const submitPassword = document.getElementById('submitPassword');
@@ -805,23 +831,24 @@
             const closeResetModal = document.getElementById('closeResetModal');
             const cancelResetCoupon = document.getElementById('cancelResetCoupon');
             const confirmResetCoupon = document.getElementById('confirmResetCoupon');
+            const deleteCouponModal = document.getElementById('deleteCouponModal');
+            const closeDeleteModal = document.getElementById('closeDeleteModal');
+            const cancelDeleteCoupon = document.getElementById('cancelDeleteCoupon');
+            const confirmDeleteCoupon = document.getElementById('confirmDeleteCoupon');
             const themeToggle = document.getElementById('themeToggle');
             const heartBackground = document.getElementById('heartBackground');
             
-            // Настроечные параметры
-            const PASSWORD = "любимая"; // Пароль для доступа
-            const TELEGRAM_BOT_TOKEN = '8055216192:AAGYBAVgLaVUinW-YqnB7QTSLWljuT9s3Pg'; // Токен вашего бота
-            const TELEGRAM_CHAT_ID = '1042168412'; // Ваш chat_id
+            const PASSWORD = "любимая";
+            const TELEGRAM_BOT_TOKEN = '8055216192:AAGYBAVgLaVUinW-YqnB7QTSLWljuT9s3Pg';
+            const TELEGRAM_CHAT_ID = '1042168412';
             let currentFilter = 'all';
             let currentCoupon = null;
             
-            // Проверка темной темы в localStorage
             if (localStorage.getItem('darkTheme') === 'true') {
                 document.body.classList.add('dark-theme');
                 themeToggle.innerHTML = '<i class="fas fa-sun"></i> Тема';
             }
             
-            // Создание плавающих сердечек
             function createFloatingHearts() {
                 const heartSymbols = ['❤️', '💕', '💖', '💘', '💗'];
                 for (let i = 0; i < 20; i++) {
@@ -837,7 +864,6 @@
                 }
             }
             
-            // Предзагруженные купоны
             const initialCoupons = [
                 {
                     id: 'coupon-1',
@@ -905,20 +931,22 @@
                 }
             ];
 
-            // Проверка и загрузка купонов из localStorage
             let coupons = JSON.parse(localStorage.getItem('loveCoupons')) || initialCoupons;
             
-            // Если купонов в localStorage нет, инициализируем предзагруженными
             if (!coupons || coupons.length === 0) {
                 localStorage.setItem('loveCoupons', JSON.stringify(initialCoupons));
                 coupons = initialCoupons;
             }
             
-            // Функция для отправки сообщения в Telegram
-            async function sendTelegramNotification(couponTitle, isReset = false) {
-                const message = isReset 
-                    ? `Твоя любимая сбросила все использованные купоны! 🎉 Теперь их можно использовать снова.` 
-                    : `Твоя любимая выбрала купон: "${couponTitle}"! 🎉`;
+            async function sendTelegramNotification(couponTitle, isReset = false, isDeleted = false) {
+                let message;
+                if (isReset) {
+                    message = `Твоя любимая сбросила все использованные купоны! 🎉 Теперь их можно использовать снова.`;
+                } else if (isDeleted) {
+                    message = `Твоя любимая удалила купон: "${couponTitle}"! 🗑️`;
+                } else {
+                    message = `Твоя любимая выбрала купон: "${couponTitle}"! 🎉`;
+                }
                 const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(message)}`;
                 
                 try {
@@ -931,7 +959,6 @@
                 }
             }
             
-            // Функция для проверки пароля
             submitPassword.addEventListener('click', function() {
                 if (passwordInput.value === PASSWORD) {
                     passwordOverlay.style.display = 'none';
@@ -942,7 +969,6 @@
                     passwordError.style.display = 'block';
                     passwordInput.value = '';
                     passwordInput.focus();
-                    // Встряхнуть поле с паролем для эффекта ошибки
                     passwordInput.classList.add('shake');
                     setTimeout(() => {
                         passwordInput.classList.remove('shake');
@@ -950,14 +976,12 @@
                 }
             });
 
-            // Позволить отправить пароль нажатием Enter
             passwordInput.addEventListener('keyup', function(event) {
                 if (event.key === 'Enter') {
                     submitPassword.click();
                 }
             });
             
-            // Функция отрисовки купонов
             function renderCoupons() {
                 couponContainer.innerHTML = '';
                 
@@ -986,6 +1010,9 @@
                                             <button class="btn-secondary flip-coupon">
                                                 <i class="fas fa-sync-alt"></i>
                                             </button>
+                                            <button class="btn-delete delete-coupon">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -1002,7 +1029,6 @@
                     }
                 });
                 
-                // Обработчики событий для кнопок купонов
                 document.querySelectorAll('.flip-coupon, .flip-back').forEach(button => {
                     button.addEventListener('click', function(e) {
                         e.stopPropagation();
@@ -1021,7 +1047,14 @@
                     });
                 });
                 
-                // Обработчик клика по купону для переворачивания
+                document.querySelectorAll('.delete-coupon').forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        currentCoupon = this.closest('.coupon').dataset.id;
+                        deleteCouponModal.style.display = 'flex';
+                    });
+                });
+                
                 document.querySelectorAll('.coupon').forEach(coupon => {
                     coupon.addEventListener('click', function() {
                         if(!this.classList.contains('flipped')) {
@@ -1031,7 +1064,6 @@
                 });
             }
             
-            // Обработчики фильтров
             filterButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     filterButtons.forEach(btn => btn.classList.remove('active'));
@@ -1041,7 +1073,6 @@
                 });
             });
             
-            // Обработчики модального окна добавления купона
             addCouponBtn.addEventListener('click', () => {
                 addCouponModal.style.display = 'flex';
                 document.getElementById('couponTitle').focus();
@@ -1057,7 +1088,6 @@
                 newCouponForm.reset();
             });
             
-            // Обработчик отправки формы нового купона
             newCouponForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
@@ -1076,7 +1106,6 @@
                 addCouponModal.style.display = 'none';
                 newCouponForm.reset();
                 
-                // Показать все купоны после добавления нового
                 currentFilter = 'all';
                 filterButtons.forEach(btn => btn.classList.remove('active'));
                 document.querySelector('[data-filter="all"]').classList.add('active');
@@ -1085,7 +1114,6 @@
                 showConfetti();
             });
             
-            // Обработчики модального окна использования купона
             closeUseModal.addEventListener('click', () => {
                 useCouponModal.style.display = 'none';
                 currentCoupon = null;
@@ -1103,7 +1131,6 @@
                         coupons[index].used = true;
                         localStorage.setItem('loveCoupons', JSON.stringify(coupons));
                         
-                        // Отправка уведомления в Telegram
                         sendTelegramNotification(coupons[index].title);
                         
                         useCouponModal.style.display = 'none';
@@ -1114,7 +1141,34 @@
                 }
             });
 
-            // Обработчики модального окна сброса купонов
+            closeDeleteModal.addEventListener('click', () => {
+                deleteCouponModal.style.display = 'none';
+                currentCoupon = null;
+            });
+            
+            cancelDeleteCoupon.addEventListener('click', () => {
+                deleteCouponModal.style.display = 'none';
+                currentCoupon = null;
+            });
+            
+            confirmDeleteCoupon.addEventListener('click', () => {
+                if (currentCoupon) {
+                    const index = coupons.findIndex(coupon => coupon.id === currentCoupon);
+                    if (index !== -1) {
+                        const deletedCouponTitle = coupons[index].title;
+                        coupons.splice(index, 1);
+                        localStorage.setItem('loveCoupons', JSON.stringify(coupons));
+                        
+                        sendTelegramNotification(deletedCouponTitle, false, true);
+                        
+                        deleteCouponModal.style.display = 'none';
+                        renderCoupons();
+                        showConfetti();
+                        currentCoupon = null;
+                    }
+                }
+            });
+            
             resetCouponsBtn.addEventListener('click', () => {
                 resetCouponModal.style.display = 'flex';
             });
@@ -1134,7 +1188,6 @@
                 }));
                 localStorage.setItem('loveCoupons', JSON.stringify(coupons));
                 
-                // Отправка уведомления о сбросе в Telegram
                 sendTelegramNotification(null, true);
                 
                 resetCouponModal.style.display = 'none';
@@ -1145,7 +1198,6 @@
                 showConfetti();
             });
             
-            // Переключение темы
             themeToggle.addEventListener('click', function() {
                 document.body.classList.toggle('dark-theme');
                 const isDark = document.body.classList.contains('dark-theme');
@@ -1158,7 +1210,6 @@
                 }
             });
             
-            // Анимация конфетти при успешном действии
             function showConfetti() {
                 const colors = ['#ff5e94', '#ff9db9', '#8064a2', '#ffd700', '#7fffd4'];
                 
@@ -1192,7 +1243,6 @@
                 }
             }
             
-            // Добавляем анимацию встряхивания для поля пароля
             document.head.insertAdjacentHTML('beforeend', `
                 <style>
                     @keyframes shake {
@@ -1207,7 +1257,6 @@
                 </style>
             `);
             
-            // Проверим, есть ли сохраненный пароль в localStorage для авто-входа
             const savedPassword = localStorage.getItem('lovePassword');
             if (savedPassword === PASSWORD) {
                 passwordOverlay.style.display = 'none';
