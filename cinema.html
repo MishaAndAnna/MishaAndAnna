@@ -700,6 +700,59 @@
             }
         }
 
+        /* Модальное окно для трансляции */
+        .stream-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .stream-modal-content {
+            background-color: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            width: 90%;
+            max-width: 1200px;
+            aspect-ratio: 16 / 9;
+            position: relative;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .stream-zone {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .stream-video-hidden {
+            display: none;
+        }
+
+        .stream-close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: var(--light-text);
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .stream-close:hover {
+            color: var(--accent-color);
+        }
+
         @media (max-width: 768px) {
             .connection-panel {
                 grid-template-columns: 1fr;
@@ -715,6 +768,10 @@
 
             .modal-content {
                 max-width: 90%;
+            }
+
+            .stream-modal-content {
+                width: 95%;
             }
         }
     </style>
@@ -852,7 +909,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">Выберите, что хотите транслировать</h3>
-                <span class="close">&times;</span>
+                <span class="close">×</span>
             </div>
             <div class="screen-options">
                 <div class="screen-option" id="share-entire-screen">
@@ -886,12 +943,21 @@
         </div>
     </div>
 
+    <!-- Модальное окно для трансляции -->
+    <div id="streamModal" class="stream-modal">
+        <div class="stream-modal-content">
+            <span class="stream-close" id="stream-close">×</span>
+            <div id="stream-zone" class="stream-zone"></div>
+            <video id="stream-video-hidden" class="stream-video-hidden"></video>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-      // Конфигурация Firebase
+        // Конфигурация Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
             authDomain: "misha-and-anna-48e4c.firebaseapp.com",
@@ -909,6 +975,8 @@
         
         // Элементы DOM
         const videoPlayer = document.getElementById('video-player');
+        const streamZone = document.getElementById('stream-zone');
+        const streamVideoHidden = document.getElementById('stream-video-hidden');
         const shareScreenBtn = document.getElementById('share-screen-btn');
         const stopSharingBtn = document.getElementById('stop-sharing-btn');
         const roomIdInput = document.getElementById('room-id');
@@ -923,7 +991,9 @@
         const sendBtn = document.getElementById('send-btn');
         const inVideoSendBtn = document.getElementById('in-video-send-btn');
         const screenSelectionModal = document.getElementById('screenSelectionModal');
-        const closeModalBtn = document.querySelector('.close');
+        const streamModal = document.getElementById('streamModal');
+        const closeModalBtn = document.querySelector('.modal .close');
+        const streamCloseBtn = document.getElementById('stream-close');
         const shareEntireScreenBtn = document.getElementById('share-entire-screen');
         const shareApplicationWindowBtn = document.getElementById('share-application-window');
         const shareBrowserTabBtn = document.getElementById('share-browser-tab');
@@ -1015,11 +1085,23 @@
         // Обработчик входящего потока
         function handleTrack(event) {
             if (event.streams && event.streams[0]) {
+                streamVideoHidden.srcObject = event.streams[0];
+                streamVideoHidden.play().catch(e => console.error('Ошибка воспроизведения:', e));
+                
+                // Привязываем поток к stream-zone через CSS
+                streamZone.style.backgroundImage = `url(${URL.createObjectURL(new Blob([], { type: 'video/mp4' }))})`;
+                streamZone.innerHTML = '';
+                streamZone.appendChild(streamVideoHidden);
+                streamVideoHidden.style.width = '100%';
+                streamVideoHidden.style.height = '100%';
+                streamVideoHidden.style.objectFit = 'contain';
+                
                 videoPlayer.srcObject = event.streams[0];
                 addMessageToChat('Трансляция началась', false);
                 updateStreamingStatus('watching');
                 connectionStatus.textContent = 'Подключено!';
                 connectionStatusDot.classList.add('connected');
+                streamModal.style.display = 'flex';
             }
         }
         
@@ -1028,12 +1110,17 @@
             if (status === 'streaming') {
                 statusDot.className = 'dot streaming';
                 streamingStatus.textContent = 'Трансляция';
+                streamModal.style.display = 'flex';
             } else if (status === 'watching') {
                 statusDot.className = 'dot watching';
                 streamingStatus.textContent = 'Просмотр';
+                streamModal.style.display = 'flex';
             } else {
                 statusDot.className = 'dot';
                 streamingStatus.textContent = 'Не подключено';
+                streamModal.style.display = 'none';
+                streamZone.style.backgroundImage = '';
+                streamZone.innerHTML = '';
             }
         }
         
@@ -1217,15 +1304,27 @@
             screenSelectionModal.style.display = 'flex';
         });
         
-        // Закрытие модального окна
+        // Закрытие модального окна выбора экрана
         closeModalBtn.addEventListener('click', function() {
             screenSelectionModal.style.display = 'none';
+        });
+        
+        // Закрытие модального окна трансляции
+        streamCloseBtn.addEventListener('click', function() {
+            if (isHost) {
+                stopScreenSharing();
+            } else {
+                streamModal.style.display = 'none';
+            }
         });
         
         // Закрытие модального окна при клике вне его содержимого
         window.addEventListener('click', function(event) {
             if (event.target === screenSelectionModal) {
                 screenSelectionModal.style.display = 'none';
+            }
+            if (event.target === streamModal && isHost) {
+                stopScreenSharing();
             }
         });
         
@@ -1250,7 +1349,17 @@
                 // Запрашиваем доступ к экрану
                 localStream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
                 
-                // Показываем локальное видео
+                // Настройка потока для stream-zone
+                streamVideoHidden.srcObject = localStream;
+                streamVideoHidden.play().catch(e => console.error('Ошибка воспроизведения:', e));
+                
+                streamZone.innerHTML = '';
+                streamZone.appendChild(streamVideoHidden);
+                streamVideoHidden.style.width = '100%';
+                streamVideoHidden.style.height = '100%';
+                streamVideoHidden.style.objectFit = 'contain';
+                
+                // Показываем локальное видео в videoPlayer
                 videoPlayer.srcObject = localStream;
                 
                 // Добавляем треки в peer connection
@@ -1299,7 +1408,10 @@
                 // Отправляем сообщение в чат
                 sendChatMessage('Я остановил трансляцию экрана');
                 
-                // Сбрасываем видео
+                // Сбрасываем stream-zone и видео
+                streamZone.innerHTML = '';
+                streamZone.style.backgroundImage = '';
+                streamVideoHidden.srcObject = null;
                 videoPlayer.srcObject = null;
                 localStream = null;
                 isStreaming = false;
