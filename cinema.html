@@ -1144,9 +1144,6 @@
                 streamModal.style.display = 'flex';
                 connectionStatus.textContent = 'Подключено!';
                 connectionStatusDot.classList.add('connected');
-                if (!streamVideoHidden.paused) {
-                    streamVideoHidden.pause();
-                }
                 streamVideoHidden.play().catch(e => console.error('Ошибка воспроизведения:', e));
             }
         }
@@ -1314,9 +1311,6 @@
                 document.getElementById('stop-sharing-btn').style.display = 'block';
                 streamModal.style.display = 'flex';
                 isStreaming = true;
-                if (!streamVideoHidden.paused) {
-                    streamVideoHidden.pause();
-                }
                 streamVideoHidden.play().catch(e => console.error('Ошибка воспроизведения:', e));
                 if (isHost) {
                     await createOffer();
