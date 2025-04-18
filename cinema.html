@@ -972,7 +972,7 @@
                 username = promptResult.trim();
             }
         }
-        const isHost = username.toLowerCase() === "михаил";
+        let isHost = username.toLowerCase() === "михаил";
 
         let currentRoomId = null;
         let roomRef = null;
@@ -980,6 +980,7 @@
         let dataChannel = null;
         let localStream = null;
         let isStreaming = false;
+        let isWebRTCInitialized = false;
 
         const iceServers = {
             iceServers: [
@@ -1082,6 +1083,7 @@
         }
 
         function initWebRTC() {
+            isWebRTCInitialized = false;
             peerConnection = new RTCPeerConnection(iceServers);
             peerConnection.onicecandidate = handleICECandidate;
             peerConnection.ontrack = handleTrack;
@@ -1094,6 +1096,7 @@
                     setupDataChannel();
                 };
             }
+            isWebRTCInitialized = true;
         }
 
         function setupDataChannel() {
@@ -1190,6 +1193,10 @@
 
         async function createOffer() {
             try {
+                if (!peerConnection) {
+                    console.error('peerConnection не инициализирован');
+                    return;
+                }
                 const offer = await peerConnection.createOffer();
                 await peerConnection.setLocalDescription(offer);
                 set(ref(db, `rooms/${currentRoomId}/offer`), {
@@ -1203,6 +1210,10 @@
 
         async function createAnswer(offerSdp) {
             try {
+                if (!peerConnection) {
+                    console.error('peerConnection не инициализирован');
+                    return;
+                }
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(offerSdp));
                 const answer = await peerConnection.createAnswer();
                 await peerConnection.setLocalDescription(answer);
@@ -1235,7 +1246,9 @@
                 if (data) {
                     Object.values(data).forEach(async candidate => {
                         try {
-                            await peerConnection.addIceCandidate(new RTCIceCandidate(candidate.candidate));
+                            if (peerConnection) {
+                                await peerConnection.addIceCandidate(new RTCIceCandidate(candidate.candidate));
+                            }
                         } catch (error) {
                             console.error('Ошибка при добавлении ICE кандидата:', error);
                         }
@@ -1265,6 +1278,10 @@
                 alert('Только создатель комнаты может транслировать экран');
                 return;
             }
+            if (!isWebRTCInitialized || !peerConnection) {
+                alert('WebRTC соединение не готово. Пожалуйста, попробуйте снова.');
+                return;
+            }
             try {
                 localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
                 streamVideoHidden.srcObject = localStream;
@@ -1276,7 +1293,9 @@
                 streamVideoHidden.style.objectFit = 'contain';
                 screenShareVideo.srcObject = localStream;
                 localStream.getTracks().forEach(track => {
-                    peerConnection.addTrack(track, localStream);
+                    if (peerConnection) {
+                        peerConnection.addTrack(track, localStream);
+                    }
                 });
                 localStream.getVideoTracks()[0].onended = stopScreenSharing;
                 sendMessageToFirebase('Я начал трансляцию экрана');
@@ -1285,7 +1304,7 @@
                 streamModal.style.display = 'flex';
                 isStreaming = true;
                 if (isHost) {
-                    createOffer();
+                    await createOffer();
                 }
             } catch (error) {
                 console.error('Ошибка при запуске трансляции экрана:', error);
@@ -1318,6 +1337,7 @@
                 if (isHost && currentRoomId) {
                     if (peerConnection) {
                         peerConnection.close();
+                        peerConnection = null;
                     }
                     initWebRTC();
                 }
