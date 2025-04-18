@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Планировщик свиданий</title>
+    <title>Планировщик прогулок</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap');
 
@@ -326,11 +326,7 @@
             margin-bottom: 40px;
         }
 
-        .telegram-settings {
-            margin-top: 40px;
-        }
-
-        textarea, input[type="text"] {
+        textarea {
             width: 100%;
             padding: 15px;
             border: 2px solid var(--secondary-color);
@@ -339,7 +335,7 @@
             transition: border-color 0.3s ease;
         }
 
-        textarea:focus, input[type="text"]:focus {
+        textarea:focus {
             outline: none;
             border-color: var(--primary-color);
         }
@@ -486,26 +482,20 @@
 
                 <div class="notes-section">
                     <h2 class="section-title">Заметки (опционально)</h2>
-                    <textarea id="dateNotes" placeholder="Добавьте заметки к свиданию (например, название ресторана, пожелания)..."></textarea>
+                    <textarea id="dateNotes" placeholder="Добавьте заметки к прогулке (например, название ресторана, пожелания)..."></textarea>
                 </div>
                 
-                <button id="addDateBtn" class="btn">Добавить свидание</button>
+                <button id="addDateBtn" class="btn">Добавить прогулку</button>
             </div>
             
             <div class="right-panel">
-                <h2 class="section-title">Запланированные свидания</h2>
+                <h2 class="section-title">Запланированные прогулки</h2>
                 
                 <div id="selectedDates" class="selected-dates">
                     <div class="empty-state">
                         <div class="activity-icon">💌</div>
-                        <p>Здесь будут отображаться запланированные свидания</p>
+                        <p>Здесь будут отображаться запланированные прогулки</p>
                     </div>
-                </div>
-                
-                <div class="telegram-settings">
-                    <h2 class="section-title">Настройки Telegram</h2>
-                    <input type="text" id="telegramChatId" placeholder="Введите Telegram Chat ID" value="1042168412">
-                    <button id="saveTelegramSettings" class="btn">Сохранить настройки</button>
                 </div>
             </div>
         </div>
@@ -519,7 +509,7 @@
             let plannedDates = JSON.parse(localStorage.getItem('plannedDates')) || [];
             let telegramSettings = {
                 botToken: '7236920382:AAFoDyrXdr-p3ZCCqKIqWfb2OvRT9oB91R4',
-                chatId: localStorage.getItem('telegramChatId') || '1042168412'
+                chatId: '1042168412'
             };
             
             // Calendar functionality
@@ -529,8 +519,6 @@
             const nextMonthBtn = document.getElementById('nextMonth');
             const addDateBtn = document.getElementById('addDateBtn');
             const selectedDatesContainer = document.getElementById('selectedDates');
-            const saveTelegramSettingsBtn = document.getElementById('saveTelegramSettings');
-            const telegramChatIdInput = document.getElementById('telegramChatId');
             const themeToggle = document.getElementById('themeToggle');
             const dateNotesTextarea = document.getElementById('dateNotes');
             
@@ -555,14 +543,6 @@
                 document.documentElement.setAttribute('data-theme', newTheme);
                 themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
                 localStorage.setItem('theme', newTheme);
-            });
-            
-            // Save Telegram settings
-            saveTelegramSettingsBtn.addEventListener('click', function() {
-                telegramSettings.chatId = telegramChatIdInput.value.trim();
-                localStorage.setItem('telegramChatId', telegramSettings.chatId);
-                alert('Настройки Telegram сохранены');
-                scheduleNotifications();
             });
             
             // Previous month button
@@ -744,7 +724,7 @@
                     if (timeToDayBefore > 0) {
                         setTimeout(() => {
                             const notesText = dateObj.notes ? `\nЗаметки: ${dateObj.notes}` : '';
-                            const message = `Напоминание: Завтра в ${dateObj.time} у вас запланировано свидание (${getActivityName(dateObj.activity)})${notesText}`;
+                            const message = `Напоминание: Завтра в ${dateObj.time} у вас запланирована прогулка (${getActivityName(dateObj.activity)})${notesText}`;
                             sendTelegramNotification(message);
                         }, timeToDayBefore);
                     }
@@ -756,7 +736,7 @@
                     if (timeToTwoHours > 0) {
                         setTimeout(() => {
                             const notesText = dateObj.notes ? `\nЗаметки: ${dateObj.notes}` : '';
-                            const message = `Скоро свидание! Через 2 часа в ${dateObj.time} (${getActivityName(dateObj.activity)})${notesText}`;
+                            const message = `Скоро прогулка! Через 2 часа в ${dateObj.time} (${getActivityName(dateObj.activity)})${notesText}`;
                             sendTelegramNotification(message);
                         }, timeToTwoHours);
                     }
@@ -766,7 +746,7 @@
             // Add date to planned dates
             addDateBtn.addEventListener('click', async function() {
                 if (!selectedDate || !selectedTime || !selectedActivity) {
-                    alert('Пожалуйста, выберите дату, время и тип свидания');
+                    alert('Пожалуйста, выберите дату, время и тип прогулки');
                     return;
                 }
                 
@@ -785,7 +765,7 @@
                 
                 // Send immediate Telegram notification
                 const notesText = dateNotes ? `\nЗаметки: ${dateNotes}` : '';
-                const message = `Новое свидание запланировано!\n${formatDate(new Date(selectedDate))} в ${selectedTime}\nАктивность: ${getActivityName(selectedActivity)}${notesText}`;
+                const message = `Новая прогулка запланирована!\n${formatDate(new Date(selectedDate))} в ${selectedTime}\nАктивность: ${getActivityName(selectedActivity)}${notesText}`;
                 await sendTelegramNotification(message);
                 
                 renderPlannedDates();
@@ -814,7 +794,7 @@
                     selectedDatesContainer.innerHTML = `
                         <div class="empty-state">
                             <div class="activity-icon">💌</div>
-                            <p>Здесь будут отображаться запланированные свидания</p>
+                            <p>Здесь будут отображаться запланированные прогулки</p>
                         </div>
                     `;
                     return;
