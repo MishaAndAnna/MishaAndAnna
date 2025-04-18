@@ -1129,22 +1129,31 @@
             }
         }
 
-        function handleTrack(event) {
+        function wait(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function handleTrack(event) {
             if (event.streams && event.streams[0]) {
-                streamVideoHidden.pause();
-                streamVideoHidden.srcObject = null;
-                streamVideoHidden.srcObject = event.streams[0];
-                streamZone.innerHTML = '';
-                streamZone.appendChild(streamVideoHidden);
-                streamVideoHidden.style.width = '100%';
-                streamVideoHidden.style.height = '100%';
-                streamVideoHidden.style.objectFit = 'contain';
-                screenShareVideo.srcObject = event.streams[0];
-                sendMessageToFirebase('Трансляция началась');
-                streamModal.style.display = 'flex';
-                connectionStatus.textContent = 'Подключено!';
-                connectionStatusDot.classList.add('connected');
-                streamVideoHidden.play().catch(e => console.error('Ошибка воспроизведения:', e));
+                try {
+                    streamVideoHidden.pause();
+                    await wait(50); // Ждем завершения паузы
+                    streamVideoHidden.srcObject = null;
+                    streamVideoHidden.srcObject = event.streams[0];
+                    streamZone.innerHTML = '';
+                    streamZone.appendChild(streamVideoHidden);
+                    streamVideoHidden.style.width = '100%';
+                    streamVideoHidden.style.height = '100%';
+                    streamVideoHidden.style.objectFit = 'contain';
+                    screenShareVideo.srcObject = event.streams[0];
+                    sendMessageToFirebase('Трансляция началась');
+                    streamModal.style.display = 'flex';
+                    connectionStatus.textContent = 'Подключено!';
+                    connectionStatusDot.classList.add('connected');
+                    await streamVideoHidden.play().catch(e => console.error('Ошибка воспроизведения:', e));
+                } catch (error) {
+                    console.error('Ошибка в handleTrack:', error);
+                }
             }
         }
 
@@ -1292,6 +1301,7 @@
             try {
                 localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
                 streamVideoHidden.pause();
+                await wait(50); // Ждем завершения паузы
                 streamVideoHidden.srcObject = null;
                 streamVideoHidden.srcObject = localStream;
                 streamZone.innerHTML = '';
@@ -1311,7 +1321,7 @@
                 document.getElementById('stop-sharing-btn').style.display = 'block';
                 streamModal.style.display = 'flex';
                 isStreaming = true;
-                streamVideoHidden.play().catch(e => console.error('Ошибка воспроизведения:', e));
+                await streamVideoHidden.play().catch(e => console.error('Ошибка воспроизведения:', e));
                 if (isHost) {
                     await createOffer();
                 }
