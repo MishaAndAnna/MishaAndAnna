@@ -981,6 +981,7 @@
         let localStream = null;
         let isStreaming = false;
         let isWebRTCInitialized = false;
+        let isStreamStopping = false;
 
         const iceServers = {
             iceServers: [
@@ -1130,8 +1131,9 @@
 
         function handleTrack(event) {
             if (event.streams && event.streams[0]) {
+                streamVideoHidden.pause();
+                streamVideoHidden.srcObject = null;
                 streamVideoHidden.srcObject = event.streams[0];
-                streamVideoHidden.play().catch(e => console.error('Ошибка воспроизведения:', e));
                 streamZone.innerHTML = '';
                 streamZone.appendChild(streamVideoHidden);
                 streamVideoHidden.style.width = '100%';
@@ -1142,6 +1144,10 @@
                 streamModal.style.display = 'flex';
                 connectionStatus.textContent = 'Подключено!';
                 connectionStatusDot.classList.add('connected');
+                if (!streamVideoHidden.paused) {
+                    streamVideoHidden.pause();
+                }
+                streamVideoHidden.play().catch(e => console.error('Ошибка воспроизведения:', e));
             }
         }
 
@@ -1282,10 +1288,15 @@
                 alert('WebRTC соединение не готово. Пожалуйста, попробуйте снова.');
                 return;
             }
+            if (isStreamStopping) {
+                alert('Остановка трансляции в процессе. Пожалуйста, подождите.');
+                return;
+            }
             try {
                 localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                streamVideoHidden.pause();
+                streamVideoHidden.srcObject = null;
                 streamVideoHidden.srcObject = localStream;
-                streamVideoHidden.play().catch(e => console.error('Ошибка воспроизведения:', e));
                 streamZone.innerHTML = '';
                 streamZone.appendChild(streamVideoHidden);
                 streamVideoHidden.style.width = '100%';
@@ -1303,6 +1314,10 @@
                 document.getElementById('stop-sharing-btn').style.display = 'block';
                 streamModal.style.display = 'flex';
                 isStreaming = true;
+                if (!streamVideoHidden.paused) {
+                    streamVideoHidden.pause();
+                }
+                streamVideoHidden.play().catch(e => console.error('Ошибка воспроизведения:', e));
                 if (isHost) {
                     await createOffer();
                 }
@@ -1323,10 +1338,12 @@
         }
 
         function stopScreenSharing() {
-            if (localStream) {
+            if (localStream && !isStreamStopping) {
+                isStreamStopping = true;
                 localStream.getTracks().forEach(track => track.stop());
-                streamZone.innerHTML = '';
+                streamVideoHidden.pause();
                 streamVideoHidden.srcObject = null;
+                streamZone.innerHTML = '';
                 screenShareVideo.srcObject = null;
                 localStream = null;
                 sendMessageToFirebase('Я остановил трансляцию экрана');
@@ -1341,6 +1358,9 @@
                     }
                     initWebRTC();
                 }
+                setTimeout(() => {
+                    isStreamStopping = false;
+                }, 500);
             }
         }
 
