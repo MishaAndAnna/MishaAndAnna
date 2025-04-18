@@ -302,6 +302,12 @@
             color: var(--accent-color);
         }
 
+        .date-info p.notes {
+            font-style: italic;
+            opacity: 0.8;
+            margin-top: 8px;
+        }
+
         .date-actions button {
             background: none;
             border: none;
@@ -315,7 +321,12 @@
             color: var(--accent-color);
         }
 
-        .notes-section, .telegram-settings {
+        .notes-section {
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+
+        .telegram-settings {
             margin-top: 40px;
         }
 
@@ -397,7 +408,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>Планировщик свиданий</h1>
+            <h1>Планировщик прогулок</h1>
             <p class="tagline">Создавайте незабываемые моменты вместе</p>
             <button class="theme-toggle" id="themeToggle">🌙</button>
         </header>
@@ -432,11 +443,14 @@
                 <div class="time-selector">
                     <h2 class="section-title">Выберите время</h2>
                     <div class="time-slots" id="timeSlots">
+                        <div class="time-slot" data-time="10:00">10:00</div>
+                        <div class="time-slot" data-time="11:00">11:00</div>
                         <div class="time-slot" data-time="12:00">12:00</div>
+                        <div class="time-slot" data-time="13:00">13:00</div>
                         <div class="time-slot" data-time="14:00">14:00</div>
+                        <div class="time-slot" data-time="15:00">15:00</div>
                         <div class="time-slot" data-time="16:00">16:00</div>
-                        <div class="time-slot" data-time="18:00">18:00</div>
-                        <div class="time-slot" data-time="20:00">20:00</div>
+                        <div class="time-slot" data-time="17:00">17:00</div>
                     </div>
                 </div>
                 
@@ -469,6 +483,11 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="notes-section">
+                    <h2 class="section-title">Заметки (опционально)</h2>
+                    <textarea id="dateNotes" placeholder="Добавьте заметки к свиданию (например, название ресторана, пожелания)..."></textarea>
+                </div>
                 
                 <button id="addDateBtn" class="btn">Добавить свидание</button>
             </div>
@@ -487,12 +506,6 @@
                     <h2 class="section-title">Настройки Telegram</h2>
                     <input type="text" id="telegramChatId" placeholder="Введите Telegram Chat ID" value="1042168412">
                     <button id="saveTelegramSettings" class="btn">Сохранить настройки</button>
-                </div>
-                
-                <div class="notes-section">
-                    <h2 class="section-title">Заметки</h2>
-                    <textarea id="notes" placeholder="Идеи для свиданий, особые пожелания или что-то, что важно не забыть..."></textarea>
-                    <button id="saveNotes" class="btn">Сохранить заметки</button>
                 </div>
             </div>
         </div>
@@ -519,8 +532,7 @@
             const saveTelegramSettingsBtn = document.getElementById('saveTelegramSettings');
             const telegramChatIdInput = document.getElementById('telegramChatId');
             const themeToggle = document.getElementById('themeToggle');
-            const saveNotesBtn = document.getElementById('saveNotes');
-            const notesTextarea = document.getElementById('notes');
+            const dateNotesTextarea = document.getElementById('dateNotes');
             
             let currentDate = new Date();
             let displayMonth = currentDate.getMonth();
@@ -530,9 +542,6 @@
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
             themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-            
-            // Load saved notes
-            notesTextarea.value = localStorage.getItem('notes') || '';
             
             // Initialize calendar and notifications
             generateCalendar(displayMonth, displayYear);
@@ -554,12 +563,6 @@
                 localStorage.setItem('telegramChatId', telegramSettings.chatId);
                 alert('Настройки Telegram сохранены');
                 scheduleNotifications();
-            });
-            
-            // Save notes
-            saveNotesBtn.addEventListener('click', function() {
-                localStorage.setItem('notes', notesTextarea.value);
-                alert('Заметки сохранены');
             });
             
             // Previous month button
@@ -717,7 +720,11 @@
                             text: message
                         })
                     });
-                    return await response.json();
+                    const result = await response.json();
+                    if (!result.ok) {
+                        console.error('Ошибка отправки уведомления:', result);
+                    }
+                    return result;
                 } catch (error) {
                     console.error('Ошибка отправки уведомления:', error);
                 }
@@ -736,7 +743,8 @@
                     
                     if (timeToDayBefore > 0) {
                         setTimeout(() => {
-                            const message = `Напоминание: Завтра в ${dateObj.time} у вас запланировано свидание (${getActivityName(dateObj.activity)})`;
+                            const notesText = dateObj.notes ? `\nЗаметки: ${dateObj.notes}` : '';
+                            const message = `Напоминание: Завтра в ${dateObj.time} у вас запланировано свидание (${getActivityName(dateObj.activity)})${notesText}`;
                             sendTelegramNotification(message);
                         }, timeToDayBefore);
                     }
@@ -747,7 +755,8 @@
                     
                     if (timeToTwoHours > 0) {
                         setTimeout(() => {
-                            const message = `Скоро свидание! Через 2 часа в ${dateObj.time} (${getActivityName(dateObj.activity)})`;
+                            const notesText = dateObj.notes ? `\nЗаметки: ${dateObj.notes}` : '';
+                            const message = `Скоро свидание! Через 2 часа в ${dateObj.time} (${getActivityName(dateObj.activity)})${notesText}`;
                             sendTelegramNotification(message);
                         }, timeToTwoHours);
                     }
@@ -755,22 +764,30 @@
             }
             
             // Add date to planned dates
-            addDateBtn.addEventListener('click', function() {
+            addDateBtn.addEventListener('click', async function() {
                 if (!selectedDate || !selectedTime || !selectedActivity) {
                     alert('Пожалуйста, выберите дату, время и тип свидания');
                     return;
                 }
                 
+                const dateNotes = dateNotesTextarea.value.trim();
                 const dateId = Date.now();
                 const newDate = {
                     id: dateId,
                     date: selectedDate,
                     time: selectedTime,
-                    activity: selectedActivity
+                    activity: selectedActivity,
+                    notes: dateNotes
                 };
                 
                 plannedDates.push(newDate);
                 localStorage.setItem('plannedDates', JSON.stringify(plannedDates));
+                
+                // Send immediate Telegram notification
+                const notesText = dateNotes ? `\nЗаметки: ${dateNotes}` : '';
+                const message = `Новое свидание запланировано!\n${formatDate(new Date(selectedDate))} в ${selectedTime}\nАктивность: ${getActivityName(selectedActivity)}${notesText}`;
+                await sendTelegramNotification(message);
+                
                 renderPlannedDates();
                 scheduleNotifications();
                 
@@ -784,6 +801,7 @@
                 document.querySelectorAll('.activity-card.selected').forEach(c => {
                     c.classList.remove('selected');
                 });
+                dateNotesTextarea.value = '';
                 
                 selectedDate = null;
                 selectedTime = null;
@@ -812,10 +830,13 @@
                     dateCard.className = 'date-card';
                     dateCard.id = `date-${dateObj.id}`;
                     
+                    const notesHtml = dateObj.notes ? `<p class="notes">${dateObj.notes}</p>` : '';
+                    
                     dateCard.innerHTML = `
                         <div class="date-info">
                             <h3>${getActivityIcon(dateObj.activity)} ${getActivityName(dateObj.activity)}</h3>
                             <p>${formatDate(new Date(dateObj.date))} в ${dateObj.time}</p>
+                            ${notesHtml}
                         </div>
                         <div class="date-actions">
                             <button class="delete-btn" data-id="${dateObj.id}">✕</button>
