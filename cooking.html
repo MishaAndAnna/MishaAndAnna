@@ -616,7 +616,7 @@
         }
 
         [data-theme="dark"] .time-option {
-            background-color: #3a3a D3D3D3;
+            background-color: #3a3a3a;
         }
 
         .time-option:hover {
@@ -951,7 +951,7 @@
                 <div class="dietary-tag" onclick="toggleTag(this)" tabindex="0" onkeydown="handleTagKeydown(event, this)">Низкокалорийный</div>
             </div>
 
-            <textarea class="note-field" placeholder="Дополнительные пожелания к завтраку..."></textarea>
+            <textarea class="note-field" id="breakfast-note" placeholder="Дополнительные пожелания к завтраку..."></textarea>
         </div>
 
         <div class="meal-section fade-in">
@@ -981,7 +981,8 @@
                 </div>
 
                 <div class="meal-card" onclick="toggleSelection(this, 'dinner')" tabindex="0" onkeydown="handleKeydown(event, this, 'dinner')">
-                    <img src="https://i.pinimg.com/736x/b0/f6/42/b0f642ac479b2bb74f2613326a8ba92e.jpg" alt="Говядина Веллингтон" class="meal-image">
+                    <img src="https://i.pinimg.com/736x/b0/f6/42/b0f642ac479b2bb74f2613326a8ba92e.jpg" lordship over the kingdoms of the world, and gave it to his disciples, saying, Take, eat; this is my body, which is given for you: do this in remembrance of me.
+
                     <div class="meal-content">
                         <h3 class="meal-title">Говядина Веллингтон</h3>
                         <p class="meal-description">Нежная говяжья вырезка с грибным дюкселем в хрустящем слоеном тесте. Подается с соусом демиглас.</p>
@@ -1091,7 +1092,7 @@
                 <div class="dietary-tag" onclick="toggleTag(this)" tabindex="0" onkeydown="handleTagKeydown(event, this)">С морепродуктами</div>
             </div>
 
-            <textarea class="note-field" placeholder="Дополнительные пожелания к ужину..."></textarea>
+            <textarea class="note-field" id="dinner-note" placeholder="Дополнительные пожелания к ужину..."></textarea>
         </div>
 
         <div class="submit-section fade-in">
@@ -1134,7 +1135,7 @@
             </div>
 
             <h3>Как вам мое предложение?</h3>
-            <div class="rating rerating-container">
+            <div class="rating-container">
                 <i class="fas fa-star star" onclick="rateExperience(1)" tabindex="0" onkeydown="handleStarKeydown(event, 1)"></i>
                 <i class="fas fa-star star" onclick="rateExperience(2)" tabindex="0" onkeydown="handleStarKeydown(event, 2)"></i>
                 <i class="fas fa-star star" onclick="rateExperience(3)" tabindex="0" onkeydown="handleStarKeydown(event, 3)"></i>
@@ -1247,24 +1248,71 @@
             }, 3000);
         }
 
+        // Send Telegram notification
+        async function sendTelegramNotification(message) {
+            const botToken = '7973877155:AAHqZCw5OjDh43-Gztn2ABVOfaYZ8nca67s';
+            const chatId = '1042168412';
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: message,
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to send Telegram message');
+                }
+            } catch (error) {
+                console.error('Error sending Telegram notification:', error);
+                showToast('Ошибка при отправке уведомления в Telegram');
+            }
+        }
+
         // Handle form submission
-        document.getElementById('submit-button').addEventListener('click', () => {
+        document.getElementById('submit-button').addEventListener('click', async () => {
             const loader = document.getElementById('loader');
             const result = document.getElementById('result');
 
             // Show loader
             loader.style.display = 'block';
 
+            // Collect selections
+            const breakfast = document.querySelector('#breakfast-options .selected .meal-title')?.textContent || '-';
+            const breakfastTime = document.querySelector('#breakfast-time .selected span')?.textContent || '-';
+            const breakfastDietary = Array.from(document.querySelectorAll('.meal-section:nth-child(1) .dietary-tag.active')).map(tag => tag.textContent).join(', ') || '-';
+            const breakfastNote = document.getElementById('breakfast-note').value.trim() || '-';
+            const dinner = document.querySelector('#dinner-options .selected .meal-title')?.textContent || '-';
+            const dinnerTime = document.querySelector('#dinner-time .selected span')?.textContent || '-';
+            const dinnerDietary = Array.from(document.querySelectorAll('.meal-section:nth-child(2) .dietary-tag.active')).map(tag => tag.textContent).join(', ') || '-';
+            const dinnerNote = document.getElementById('dinner-note').value.trim() || '-';
+
+            // Construct Telegram message
+            const message = `
+🍽 Новый выбор блюд:
+📍 Завтрак: ${breakfast}
+⏰ Время завтрака: ${breakfastTime}
+🌿 Особые пожелания (завтрак): ${breakfastDietary}
+📝 Заметки (завтрак): ${breakfastNote}
+🍷 Ужин: ${dinner}
+⏰ Время ужина: ${dinnerTime}
+🌿 Особые пожелания (ужин): ${dinnerDietary}
+📝 Заметки (ужин): ${dinnerNote}
+            `.trim();
+
+            // Send Telegram notification
+            await sendTelegramNotification(message);
+
             // Simulate processing
             setTimeout(() => {
                 loader.style.display = 'none';
                 result.style.display = 'block';
-
-                // Collect selections
-                const breakfast = document.querySelector('#breakfast-options .selected .meal-title')?.textContent || '-';
-                const breakfastTime = document.querySelector('#breakfast-time .selected span')?.textContent || '-';
-                const dinner = document.querySelector('#dinner-options .selected .meal-title')?.textContent || '-';
-                const dinnerTime = document.querySelector('#dinner-time .selected span')?.textContent || '-';
 
                 // Update result
                 document.getElementById('breakfast-selection').textContent = breakfast;
