@@ -313,6 +313,24 @@
                     sidebarMenu.classList.toggle('active');
                 });
             }
+
+            // Обработчик для сворачиваемых категорий
+            const categoryToggles = document.querySelectorAll('.category-toggle');
+            categoryToggles.forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    const content = this.nextElementSibling;
+                    const icon = this.querySelector('.toggle-icon');
+                    content.classList.toggle('active');
+                    icon.classList.toggle('active');
+                });
+            });
+
+            // Закрытие меню при клике вне его
+            document.addEventListener('click', function(event) {
+                if (!sidebarMenu.contains(event.target) && !sidebarToggle.contains(event.target)) {
+                    sidebarMenu.classList.remove('active');
+                }
+            });
         });
 
         displaySavedWishes();
@@ -461,7 +479,7 @@
             margin: 30px auto;
             max-width: 700px;
             text-align: center;
-            transition: background var(--transition_duration) ease;
+            transition: background var(--transition-duration) ease;
             animation: breathe 5s infinite alternate;
         }
 
@@ -798,7 +816,7 @@
 
         /* Стили для бокового меню */
         #sidebar {
-            position: absolute;
+            position: fixed;
             left: 20px;
             top: 20px;
             z-index: 100;
@@ -830,7 +848,9 @@
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 4px 15px var(--shadow-color);
-            min-width: 200px;
+            min-width: 250px;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .sidebar-menu.active {
@@ -839,6 +859,54 @@
 
         body.dark-mode .sidebar-menu {
             background-color: var(--bg-dark);
+        }
+
+        /* Стили для категорий */
+        .menu-category {
+            margin-bottom: 10px;
+        }
+
+        .category-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            text-align: left;
+            transition: background-color var(--transition-duration) ease;
+        }
+
+        .category-toggle:hover {
+            background-color: var(--accent-color);
+        }
+
+        .toggle-icon {
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-icon.active {
+            transform: rotate(180deg);
+        }
+
+        .category-content {
+            display: none;
+            padding: 10px 0;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .category-content.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .menu-btn {
@@ -859,6 +927,19 @@
         .menu-btn:hover {
             background-color: var(--accent-color);
             transform: scale(1.05);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 600px) {
+            #sidebar {
+                left: 10px;
+                top: 10px;
+            }
+
+            .sidebar-menu {
+                min-width: 200px;
+                max-width: 90vw;
+            }
         }
     </style>
 </head>
@@ -882,15 +963,39 @@
         <div id="sidebar">
             <button id="siteFunctionsBtn" class="sidebar-toggle">Функции сайта</button>
             <div id="functionsMenu" class="sidebar-menu">
-                <button onclick="window.location.href='walking.html'" class="menu-btn">Спланируем прогулку?</button>
-                <button onclick="window.location.href='poetry.html'" class="menu-btn">Прощение пред тобою</button>
-                <button onclick="window.location.href='movie.html'" class="menu-btn">Перейти на сайт с фильмами</button>
-                <button onclick="window.location.href='diary.html'" class="menu-btn">Открыть Дневник</button>
-                <button onclick="window.location.href='universe.html'" class="menu-btn">Вселенная</button>
-                <button onclick="window.location.href='fear.html'" class="menu-btn">Мысли об апреле</button>
-                <button onclick="window.location.href='mydearlady.html'" class="menu-btn">Что я думаю о Аннюте</button>
-                <button onclick="window.location.href='book_of_us.html'" class="menu-btn">Краткая история о нас</button>
-                <button onclick="window.location.href='coupons_for_us.html'" class="menu-btn">Кое-что интересное, хех!</button>
+                <!-- Категория: Планирование -->
+                <div class="menu-category">
+                    <button class="category-toggle">Планирование <span class="toggle-icon">▼</span></button>
+                    <div class="category-content">
+                        <button onclick="window.location.href='walking.html'" class="menu-btn">Спланируем прогулку?</button>
+                        <button onclick="window.location.href='coupons_for_us.html'" class="menu-btn">Кое-что интересное, хех!</button>
+                    </div>
+                </div>
+                <!-- Категория: Личные моменты -->
+                <div class="menu-category">
+                    <button class="category-toggle">Личные моменты <span class="toggle-icon">▼</span></button>
+                    <div class="category-content">
+                        <button onclick="window.location.href='diary.html'" class="menu-btn">Открыть Дневник</button>
+                        <button onclick="window.location.href='mydearlady.html'" class="menu-btn">Что я думаю о Аннюте</button>
+                        <button onclick="window.location.href='book_of_us.html'" class="menu-btn">Краткая история о нас</button>
+                    </div>
+                </div>
+                <!-- Категория: Развлечения -->
+                <div class="menu-category">
+                    <button class="category-toggle">Развлечения <span class="toggle-icon">▼</span></button>
+                    <div class="category-content">
+                        <button onclick="window.location.href='movie.html'" class="menu-btn">Перейти на сайт с фильмами</button>
+                        <button onclick="window.location.href='universe.html'" class="menu-btn">Вселенная</button>
+                    </div>
+                </div>
+                <!-- Категория: История и мысли -->
+                <div class="menu-category">
+                    <button class="category-toggle">История и мысли <span class="toggle-icon">▼</span></button>
+                    <div class="category-content">
+                        <button onclick="window.location.href='poetry.html'" class="menu-btn">Прощение пред тобою</button>
+                        <button onclick="window.location.href='fear.html'" class="menu-btn">Мысли об апреле</button>
+                    </div>
+                </div>
             </div>
         </div>
 
