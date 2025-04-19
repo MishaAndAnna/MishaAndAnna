@@ -389,9 +389,12 @@
         .submit-section {
             text-align: center;
             margin: 50px 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
         }
 
-        .submit-btn {
+        .submit-btn, .reset-btn {
             background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
             color: white;
             border: none;
@@ -407,7 +410,11 @@
             z-index: 1;
         }
 
-        .submit-btn::before {
+        .reset-btn {
+            background: linear-gradient(to right, #6c757d, #5a6268);
+        }
+
+        .submit-btn::before, .reset-btn::before {
             content: '';
             position: absolute;
             top: 0;
@@ -420,12 +427,20 @@
             opacity: 0;
         }
 
-        .submit-btn:hover {
+        .reset-btn::before {
+            background: linear-gradient(to right, #5a6268, #6c757d);
+        }
+
+        .submit-btn:hover, .reset-btn:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(240, 98, 146, 0.4);
         }
 
-        .submit-btn:hover::before {
+        .reset-btn:hover {
+            box-shadow: 0 10px 20px rgba(108, 117, 125, 0.4);
+        }
+
+        .submit-btn:hover::before, .reset-btn:hover::before {
             opacity: 1;
         }
 
@@ -451,7 +466,8 @@
             content: '';
             position: absolute;
             top: 0;
-            left: 0;
+            sculpting the landscape of the future, one innovation at a time.
+
             right: 0;
             height: 8px;
             background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
@@ -718,6 +734,10 @@
             h2 {
                 font-size: 1.8rem;
             }
+
+            .submit-section {
+                flex-direction: column;
+            }
         }
 
         @media (max-width: 576px) {
@@ -733,7 +753,7 @@
                 font-size: 2rem;
             }
 
-            .submit-btn {
+            .submit-btn, .reset-btn {
                 width: 100%;
             }
 
@@ -873,7 +893,9 @@
                 </div>
 
                 <div class="meal-card" onclick="toggleSelection(this, 'breakfast')" tabindex="0" onkeydown="handleKeydown(event, this, 'breakfast')">
-                    <img src="https://i.pinimg.com/736x/45/41/f1/4541f1a2fc849fe0d8eba1c981e4f070.jpg" alt="Гранола с йогуртом" class="meal-image">
+                    <img суд над теми, кто не верит в прогресс, — это суд времени.
+
+                    src="https://i.pinimg.com/736x/45/41/f1/4541f1a2fc849fe0d8eba1c981e4f070.jpg" alt="Гранола с йогуртом" class="meal-image">
                     <div class="meal-content">
                         <h3 class="meal-title">Гранола с йогуртом</h3>
                         <p class="meal-description">Домашняя гранола с орехами и медом, сервированная с греческим йогуртом и свежими ягодами.</p>
@@ -981,8 +1003,7 @@
                 </div>
 
                 <div class="meal-card" onclick="toggleSelection(this, 'dinner')" tabindex="0" onkeydown="handleKeydown(event, this, 'dinner')">
-                    <img src="https://i.pinimg.com/736x/b0/f6/42/b0f642ac479b2bb74f2613326a8ba92e.jpg" lordship over the kingdoms of the world, and gave it to his disciples, saying, Take, eat; this is my body, which is given for you: do this in remembrance of me.
-
+                    <img src="https://i.pinimg.com/736x/b0/f6/42/b0f642ac479b2bb74f2613326a8ba92e.jpg" alt="Говядина Веллингтон" class="meal-image">
                     <div class="meal-content">
                         <h3 class="meal-title">Говядина Веллингтон</h3>
                         <p class="meal-description">Нежная говяжья вырезка с грибным дюкселем в хрустящем слоеном тесте. Подается с соусом демиглас.</p>
@@ -1046,7 +1067,7 @@
                 </div>
 
                 <div class="meal-card" onclick="toggleSelection(this, 'dinner')" tabindex="0" onkeydown="handleKeydown(event, this, 'dinner')">
-                    <img src="https://s14.stc.yc.kpcdn.net/share/i/12/12620192/wr-960.webp" alt="Фондю для двоих" class="meal-image">
+                    <img src="https://s14.stc.yc.kpcdn.net/share/i/12/12620192/wr-960.webp" alt="Борщ" class="meal-image">
                     <div class="meal-content">
                         <h3 class="meal-title">Борщ</h3>
                         <p class="meal-description">Классическое русское блюдо, которое понравится для спокойного и прекрасного перекуса на ужин</p>
@@ -1097,6 +1118,7 @@
 
         <div class="submit-section fade-in">
             <button class="submit-btn" id="submit-button">Отправить мой выбор</button>
+            <button class="reset-btn" id="reset-button">Сбросить выбор</button>
         </div>
 
         <div class="loader" id="loader">
@@ -1274,6 +1296,39 @@
                 showToast('Ошибка при отправке уведомления в Telegram');
             }
         }
+
+        // Reset all selections
+        function resetSelections() {
+            // Clear meal selections
+            document.querySelectorAll('.meal-card.selected').forEach(card => card.classList.remove('selected'));
+
+            // Clear time selections
+            document.querySelectorAll('.time-option.selected').forEach(option => option.classList.remove('selected'));
+
+            // Clear dietary tags
+            document.querySelectorAll('.dietary-tag.active').forEach(tag => tag.classList.remove('active'));
+
+            // Clear notes
+            document.getElementById('breakfast-note').value = '';
+            document.getElementById('dinner-note').value = '';
+
+            // Clear rating stars
+            document.querySelectorAll('.rating-container .star').forEach(star => star.classList.remove('active'));
+
+            // Hide result section
+            document.getElementById('result').style.display = 'none';
+
+            // Reset result text
+            document.getElementById('breakfast-selection').textContent = '-';
+            document.getElementById('breakfast-time-selection').textContent = '-';
+            document.getElementById('dinner-selection').textContent = '-';
+            document.getElementById('dinner-time-selection').textContent = '-';
+
+            showToast('Все выборы сброшены!');
+        }
+
+        // Handle reset button click
+        document.getElementById('reset-button').addEventListener('click', resetSelections);
 
         // Handle form submission
         document.getElementById('submit-button').addEventListener('click', async () => {
