@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ретро Аркадные Гонки</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle at center, #2a004d, #0f0f0f);
+            font-family: 'Press Start 2P', cursive;
+            color: #fff;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .arcade-cabinet {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1500px;
+        }
+
+        .cabinet-body {
+            width: 98%;
+            max-width: 1400px;
+            height: 99vh;
+            background: linear-gradient(135deg, #7b00cc, #cc66ff);
+            border-radius: 40px 40px 80px 80px;
+            border: 20px solid #3c0066;
+            border-bottom-width: 60px;
+            box-shadow: 0 0 120px rgba(255, 51, 255, 0.8), 
+                        inset 0 0 50px rgba(255, 255, 255, 0.5);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transform: rotateX(8deg);
+        }
+
+        .cabinet-header {
+            text-align: center;
+            background: linear-gradient(45deg, #3c0066, #9933cc);
+            padding: 15px;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+            margin-bottom: 5px;
+            animation: neonPulse 1.2s infinite alternate;
+        }
+
+        .cabinet-header h1 {
+            margin: 0;
+            font-size: 28px;
+            color: #ffeb3b;
+            text-shadow: 0 0 20px #ff00cc, 0 0 30px #ff00cc, 0 0 40px #ff00cc;
+        }
+
+        .screen-container {
+            flex: 1.5;
+            margin: 0 10px 10px;
+            background-color: #000;
+            border-radius: 20px;
+            border: 8px solid #1a1a1a;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9);
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 20px 20px;
+            background: linear-gradient(#1a1a1a, #0d0d0d);
+        }
+
+        .button {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #ff4da6, #cc0066);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 8px 0 #660033, 0 12px 15px rgba(0, 0, 0, 0.7);
+            transition: all 0.2s;
+        }
+
+        .button:active {
+            transform: translateY(8px);
+            box-shadow: 0 0 0 #660033, 0 6px 6px rgba(0, 0, 0, 0.7);
+        }
+
+        .start-button {
+            width: 140px;
+            height: 60px;
+            border-radius: 30px;
+            background: linear-gradient(145deg, #00ffaa, #00cc88);
+            color: black;
+            box-shadow: 0 8px 0 #006644, 0 12px 15px rgba(0, 0, 0, 0.7);
+        }
+
+        .joystick {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            background: radial-gradient(#555, #333);
+            border-radius: 50%;
+            border: 6px solid #222;
+            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.7);
+        }
+
+        .stick {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(145deg, #ff6666, #cc0000);
+            border-radius: 50%;
+            border: 3px solid #660000;
+            box-shadow: 0 6px 0 #660000;
+            cursor: grab;
+        }
+
+        .coin-slot {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            width: 60px;
+            height: 12px;
+            background: linear-gradient(#666, #444);
+            border-radius: 4px;
+            border: 3px solid #333;
+            animation: coinGlow 1.8s infinite alternate;
+        }
+
+        .game-area {
+            width: 100%;
+            height: 100%;
+            background-color: #0d0d0d;
+            position: relative;
+            overflow: hidden;
+            transition: background-color 1s ease;
+        }
+
+        .game-area.day {
+            background-color: #0d0d0d;
+        }
+
+        .game-area.night {
+            background-color: #000022;
+        }
+
+        .background-trees {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent 0%,
+                transparent 80%,
+                #228B22 80%,
+                #228B22 100%
+            );
+            background-size: 100% 120px;
+            animation: treeScroll 0.5s linear infinite;
+            z-index: 2;
+            opacity: 0.6;
+        }
+
+        .road {
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(90deg, #333 0%, #333 10%, 
+                                #777 10%, #777 90%, 
+                                #333 90%, #333 100%),
+                repeating-linear-gradient(0deg, transparent 0%, transparent 85%, 
+                                          #ffeb3b 85%, #ffeb3b 100%);
+            background-size: 100% 100%, 100% 60px;
+            animation: roadScroll 0.3s linear infinite;
+            position: absolute;
+            transition: transform 0.5s ease;
+            z-index: 3;
+        }
+
+        .road.curve-left {
+            transform: translateX(-50px);
+            background-image: 
+                linear-gradient(90deg, #333 0%, #333 15%, 
+                                #777 15%, #777 85%, 
+                                #333 85%, #333 100%),
+                repeating-linear-gradient(0deg, transparent 0%, transparent 85%, 
+                                          #ff6666 85%, #ff6666 100%);
+        }
+
+        .road.curve-right {
+            transform: translateX(50px);
+            background-image: 
+                linear-gradient(90deg, #333 0%, #333 5%, 
+                                #777 5%, #777 95%, 
+                                #333 95%, #333 100%),
+                repeating-linear-gradient(0deg, transparent 0%, transparent 85%, 
+                                          #66ff66 85%, #66ff66 100%);
+        }
+
+        .road.narrow {
+            background-image: 
+                linear-gradient(90deg, #333 0%, #333 20%, 
+                                #777 20%, #777 80%, 
+                                #333 80%, #333 100%),
+                repeating-linear-gradient(0deg, transparent 0%, transparent 85%, 
+                                          #33ccff 85%, #33ccff 100%);
+        }
+
+        .car {
+            width: 80px;
+            height: 120px;
+            position: absolute;
+            bottom: 50px;
+            border-radius: 15px;
+            z-index: 10;
+            box-shadow: 0 0 25px rgba(255, 51, 51, 0.7);
+            animation: carVibrate 0.04s infinite;
+        }
+
+        .car.player1 {
+            background: linear-gradient(180deg, #ff4d4d, #b30000);
+            left: 35%;
+            transform: translateX(-50%);
+        }
+
+        .car.player2 {
+            background: linear-gradient(180deg, #4da8ff, #004d99);
+            left: 65%;
+            transform: translateX(-50%);
+        }
+
+        .car:after {
+            content: '';
+            position: absolute;
+            width: 72px;
+            height: 30px;
+            background: linear-gradient(#330000, #1a0000);
+            bottom: -8px;
+            left: 4px;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .car.player2:after {
+            background: linear-gradient(#002266, #001133);
+        }
+
+        .car:before {
+            content: '';
+            position: absolute;
+            width: 72px;
+            height: 25px;
+            background: linear-gradient(#ffffb3, #ffeb3b);
+            top: 8px;
+            left: 4px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .car.player2:before {
+            background: linear-gradient(#b3d9ff, #80bfff);
+        }
+
+        .car .spoiler {
+            position: absolute;
+            width: 60px;
+            height: 10px;
+            background: #333;
+            top: -10px;
+            left: 10px;
+            border-radius: 5px;
+        }
+
+        .car .headlights {
+            position: absolute;
+            width: 20px;
+            height: 10px;
+            background: radial-gradient(#ffffff, #ffff99);
+            top: 10px;
+            border-radius: 5px;
+            opacity: 0;
+            animation: headlightPulse 1.5s infinite alternate;
+        }
+
+        .car.player1 .headlights.left {
+            left: 5px;
+        }
+
+        .car.player1 .headlights.right {
+            right: 5px;
+        }
+
+        .car.player2 .headlights.left {
+            left: 5px;
+        }
+
+        .car.player2 .headlights.right {
+            right: 5px;
+        }
+
+        .car .exhaust {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: radial-gradient(#ff5555, transparent);
+            bottom: -10px;
+            left: 30px;
+            border-radius: 50%;
+            opacity: 0;
+            animation: exhaustPulse 0.3s infinite;
+        }
+
+        .car .shadow {
+            position: absolute;
+            width: 90px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            opacity: 0.6;
+            transition: opacity 1s ease;
+        }
+
+        .car.night .shadow {
+            opacity: 0.2;
+        }
+
+        .puddle {
+            width: 60px;
+            height: 30px;
+            background: radial-gradient(#87CEEB, #4682B4);
+            position: absolute;
+            top: -40px;
+            border-radius: 50%;
+            z-index: 8;
+            opacity: 0.7;
+            box-shadow: 0 0 10px rgba(70, 130, 180, 0.5);
+        }
+
+        .power-up {
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(#00ffcc, #009999);
+            position: absolute;
+            top: -60px;
+            border-radius: 50%;
+            z-index: 8;
+            animation: spin 0.8s linear infinite;
+            box-shadow: 0 0 20px #00ffcc;
+        }
+
+        .neon-trim {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 5px solid transparent;
+            border-image: linear-gradient(45deg, #ff33cc, #33ccff, #ff33cc) 1;
+            pointer-events: none;
+            animation: borderColor 1.8s infinite linear;
+        }
+
+        .logo {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 36px;
+            color: #ffeb3b;
+            text-shadow: 0 0 20px #ff33cc, 0 0 30px #ff33cc, 0 0 40px #ff33cc;
+            z-index: 100;
+            pointer-events: none;
+            animation: logoPulse 1.8s infinite alternate;
+        }
+
+        .countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            font-size: 120px;
+            color: #ffeb3b;
+            z-index: 200;
+            opacity: 0;
+            text-shadow: 0 0 30px #ff33cc, 0 0 60px #ff33cc;
+            animation: countdownPop 0.8s ease-out;
+        }
+
+        .menu {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 1));
+            z-index: 300;
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        .menu-title {
+            font-size: 50px;
+            margin-bottom: 60px;
+            text-shadow: 0 0 20px #ff33cc, 0 0 30px #ff33cc, 0 0 40px #ff33cc;
+            color: #ffeb3b;
+            animation: neonPulse 1.2s infinite alternate;
+        }
+
+        .menu-button {
+            padding: 20px 40px;
+            margin: 15px 0;
+            background: linear-gradient(145deg, #ff4da6, #cc0066);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #660033, 0 12px 15px rgba(0, 0, 0, 0.7);
+            transition: all 0.2s;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .menu-button:hover {
+            background: linear-gradient(145deg, #ff80bf, #ff4da6);
+            transform: scale(1.1);
+        }
+
+        .menu-button:active {
+            transform: translateY(8px);
+            box-shadow: 0 0 0 #660033, 0 6px 6px rgba(0, 0, 0, 0.7);
+        }
+
+        .game-over {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            font-size: 60px;
+            color: #ff3333;
+            text-shadow: 5px 5px 0 #ffeb3b, 10px 10px 0 #ff33cc, 15px 15px 0 #33ccff;
+            z-index: 150;
+            display: none;
+            animation: gameOverShake 0.4s infinite;
+        }
+
+        .connection-status {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            color: #00ffaa;
+            z-index: 100;
+            text-shadow: 0 0 12px #00ffaa;
+        }
+
+        .chat {
+            position: absolute;
+            bottom: 60px;
+            right: 20px;
+            width: 280px;
+            height: 130px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 3px solid #33ccff;
+            border-radius: 15px;
+            color: #33ccff;
+            font-size: 14px;
+            padding: 15px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 0 20px rgba(51, 204, 255, 0.6);
+        }
+
+        .chat-input {
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            width: 280px;
+            height: 45px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 3px solid #33ccff;
+            border-radius: 12px;
+            color: #33ccff;
+            font-size: 14px;
+            padding: 12px;
+            z-index: 100;
+            display: none;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            box-shadow: 0  pleadings: 0 0 15px #33ccff;
+        }
+
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0,0,0,0.2),
+                rgba(0,0,0,0.2) 1px,
+                transparent 1px,
+                transparent 4px
+            );
+            pointer-events: none;
+            z-index: 150;
+        }
+
+        .crt-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                ellipse at center,
+                rgba(0,0,0,0) 0%,
+                rgba(0,0,0,0.5) 80%,
+                rgba(0,0,0,0.9) 100%
+            );
+            pointer-events: none;
+            z-index: 151;
+        }
+
+        .room-code {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: #ffeb3b;
+            font-size: 18px;
+            z-index: 100;
+            text-shadow: 0 0 10px #ff33cc;
+        }
+
+        .players {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            font-size: 16px;
+            color: #00ffaa;
+            z-index: 100;
+            text-shadow: 0 0 10px #00ffaa;
+        }
+
+        .finish-line {
+            position: absolute;
+            width: 100%;
+            height: 40px;
+            background: repeating-linear-gradient(
+                45deg,
+                #ffeb3b,
+                #ffeb3b 20px,
+                #333 20px,
+                #333 40px
+            );
+            top: 0;
+            z-index: 5;
+            box-shadow: 0 0 20px #ffeb3b;
+        }
+
+        @keyframes roadScroll {
+            0% { background-position: 0 0, 0 0; }
+            100% { background-position: 0 0, 0 60px; }
+        }
+
+        @keyframes treeScroll {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 120px; }
+        }
+
+        @keyframes neonPulse {
+            0% { text-shadow: 0 0 20px #ff33cc, 0 0 30px #ff33cc, 0 0 40px #ff33cc; }
+            100% { text-shadow: 0 0 30px #ff33cc, 0 0 40px #ff33cc, 0 0 50px #ff33cc; }
+        }
+
+        @keyframes borderColor {
+            0% { border-image: linear-gradient(45deg, #ff33cc, #33ccff, #ff33cc) 1; }
+            50% { border-image: linear-gradient(45deg, #33ccff, #ff33cc, #33ccff) 1; }
+            100% { border-image: linear-gradient(45deg, #ff33cc, #33ccff, #ff33cc) 1; }
+        }
+
+        @keyframes coinGlow {
+            0% { box-shadow: 0 0 15px #ffeb3b; }
+            100% { box-shadow: 0 0 25px #ffeb3b; }
+        }
+
+        @keyframes logoPulse {
+            0% { transform: translateX(-50%) scale(1); }
+            100% { transform: translateX(-50%) scale(1.08); }
+        }
+
+        @keyframes countdownPop {
+            0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        @keyframes gameOverShake {
+            0% { transform: translate(-50%, -50%) rotate(-15deg) translateX(0); }
+            25% { transform: translate(-50%, -50%) rotate(-15deg) translateX(8px); }
+            50% { transform: translate(-50%, -50%) rotate(-15deg) translateX(0); }
+            75% { transform: translate(-50%, -50%) rotate(-15deg) translateX(-8px); }
+            100% { transform: translate(-50%, -50%) rotate(-15deg) translateX(0); }
+        }
+
+        @keyframes carVibrate {
+            0% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(2px); }
+            100% { transform: translateX(-50%) translateY(0); }
+        }
+
+        @keyframes headlightPulse {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes exhaustPulse {
+            0% { opacity: 0.5; transform: scale(1); }
+            100% { opacity: 0.8; transform: scale(1.2); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .cabinet-body {
+                width: 98%;
+                height: 95vh;
+                border-width: 15px;
+                border-bottom-width: 40px;
+            }
+            
+            .cabinet-header h1 {
+                font-size: 24px;
+            }
+            
+            .button {
+                width: 70px;
+                height: 70px;
+                font-size: 16px;
+            }
+            
+            .start-button {
+                width: 120px;
+                height: 50px;
+            }
+            
+            .joystick {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .stick {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .menu-title {
+                font-size: 40px;
+            }
+            
+            .menu-button {
+                padding: 15px 30px;
+                font-size: 16px;
+            }
+            
+            .countdown {
+                font-size: 80px;
+            }
+            
+            .game-over {
+                font-size: 40px;
+            }
+            
+            .chat {
+                width: 220px;
+                height: 100px;
+            }
+            
+            .chat-input {
+                width: 220px;
+                height: 40px;
+            }
+            
+            .car {
+                width: 60px;
+                height: 90px;
+            }
+            
+            .car:after, .car:before {
+                width: 54px;
+            }
+            
+            .car .spoiler {
+                width: 45px;
+            }
+            
+            .car .headlights {
+                width: 15px;
+                height: 8px;
+            }
+            
+            .car .exhaust {
+                width: 12px;
+                height: 12px;
+            }
+            
+            .car .shadow {
+                width: 70px;
+                height: 15px;
+            }
+            
+            .puddle {
+                width: 50px;
+                height: 25px;
+            }
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="arcade-cabinet">
+        <div class="cabinet-body">
+            <div class="cabinet-header">
+                <h1>РЕТРО ГОНКИ</h1>
+            </div>
+            <div class="coin-slot"></div>
+            <div class="screen-container">
+                <div class="screen">
+                    <div class="game-area">
+                        <div class="background-trees"></div>
+                        <div class="road"></div>
+                        <div class="car player1">
+                            <div class="spoiler"></div>
+                            <div class="headlights left"></div>
+                            <div class="headlights right"></div>
+                            <div class="exhaust"></div>
+                            <div class="shadow"></div>
+                        </div>
+                        <div class="car player2">
+                            <div class="spoiler"></div>
+                            <div class="headlights left"></div>
+                            <div class="headlights right"></div>
+                            <div class="exhaust"></div>
+                            <div class="shadow"></div>
+                        </div>
+                        <div class="finish-line"></div>
+                        <div class="neon-trim"></div>
+                        <div class="logo">РЕТРО ГОНКИ</div>
+                        <div class="countdown">3</div>
+                        <div class="game-over">ФИНИШ!</div>
+                        <div class="connection-status">СТАТУС: ОФФЛАЙН</div>
+                        <div class="room-code"></div>
+                        <div class="players"></div>
+                        <div class="chat"></div>
+                        <input type="text" class="chat-input" placeholder="Сообщение...">
+                        <div class="scanlines"></div>
+                        <div class="crt-effect"></div>
+                    </div>
+                    <div class="menu">
+                        <h2 class="menu-title">РЕТРО ГОНКИ</h2>
+                        <button class="menu-button create-room">СОЗДАТЬ ИГРУ</button>
+                        <button class="menu-button join-room">ПРИСОЕДИНИТЬСЯ</button>
+                        <button class="menu-button tutorial">КАК ИГРАТЬ</button>
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <div class="joystick">
+                    <div class="stick"></div>
+                </div>
+                <button class="button start-button">СТАРТ</button>
+                <button class="button action-button">УСКОРЕНИЕ</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Элементы игры
+            const gameArea = document.querySelector('.game-area');
+            const car1 = document.querySelector('.car.player1');
+            const car2 = document.querySelector('.car.player2');
+            const road = document.querySelector('.road');
+            const finishLine = document.querySelector('.finish-line');
+            const countdown = document.querySelector('.countdown');
+            const menu = document.querySelector('.menu');
+            const createRoomButton = document.querySelector('.create-room');
+            const joinRoomButton = document.querySelector('.join-room');
+            const tutorialButton = document.querySelector('.tutorial');
+            const gameOverDisplay = document.querySelector('.game-over');
+            const connectionStatus = document.querySelector('.connection-status');
+            const roomCodeDisplay = document.querySelector('.room-code');
+            const playersDisplay = document.querySelector('.players');
+            const startButton = document.querySelector('.start-button');
+            const accelerationButton = document.querySelector('.action-button');
+            const stick = document.querySelector('.stick');
+            const joystick = document.querySelector('.joystick');
+            const chat = document.querySelector('.chat');
+            const chatInput = document.querySelector('.chat-input');
+
+            // Настройки игры
+            const gameSettings = {
+                baseSpeed: 8,
+                maxSpeed: 12,
+                carSpeed: 10,
+                finishLinePosition: 5000,
+                player1: {
+                    x: gameArea.offsetWidth * 0.35 - 40,
+                    y: 50,
+                    speed: 0,
+                    boost: 1,
+                    boostEndTime: 0,
+                    slowEndTime: 0
+                },
+                player2: {
+                    x: gameArea.offsetWidth * 0.65 - 40,
+                    y: 50,
+                    speed: 0,
+                    boost: 1,
+                    boostEndTime: 0,
+                    slowEndTime: 0
+                },
+                powerUps: [],
+                puddles: [],
+                maxPowerUps: 3,
+                maxPuddles: 2,
+                powerUpFrequency: 4000,
+                puddleFrequency: 6000,
+                lastPowerUpTime: 0,
+                lastPuddleTime: 0,
+                currentTime: 0,
+                gameStarted: false,
+                gameOver: false,
+                timeOfDay: 'day',
+                dayNightCycle: 30000,
+                lastDayNightChange: 0,
+                keys: {
+                    player1: {
+                        ArrowLeft: false,
+                        ArrowRight: false,
+                        ArrowUp: false
+                    },
+                    player2: {
+                        KeyA: false,
+                        KeyD: false,
+                        KeyW: false,
+                        KeyS: false
+                    }
+                },
+                isPeer1: false,
+                isPeer2: false,
+                connectionEstablished: false,
+                roomCode: '',
+                peer: null,
+                conn: null,
+                username: 'Игрок ' + Math.floor(Math.random() * 1000),
+                opponentUsername: '',
+                lastSentPosition: Date.now(),
+                roadPattern: 'normal',
+                lastRoadChange: 0,
+                roadChangeInterval: 5000,
+                progress: 0
+            };
+
+            // Начальные позиции машин
+            car1.style.left = gameSettings.player1.x + 'px';
+            car1.style.bottom = gameSettings.player1.y + 'px';
+            car2.style.left = gameSettings.player2.x + 'px';
+            car2.style.bottom = gameSettings.player2.y + 'px';
+
+            // Управление через клавиатуру
+            window.addEventListener('keydown', function(e) {
+                if (gameSettings.keys.player1.hasOwnProperty(e.code)) {
+                    gameSettings.keys.player1[e.code] = true;
+                }
+                if (gameSettings.keys.player2.hasOwnProperty(e.code)) {
+                    gameSettings.keys.player2[e.code] = true;
+                }
+                
+                if (e.key === 't' && gameSettings.connectionEstablished) {
+                    toggleChat();
+                }
+                
+                if (e.key === 'Enter' && document.activeElement === chatInput) {
+                    sendChatMessage();
+                }
+            });
+
+            window.addEventListener('keyup', function(e) {
+                if (gameSettings.keys.player1.hasOwnProperty(e.code)) {
+                    gameSettings.keys.player1[e.code] = false;
+                }
+                if (gameSettings.keys.player2.hasOwnProperty(e.code)) {
+                    gameSettings.keys.player2[e.code] = false;
+                }
+            });
+
+            // Управление через джойстик
+            let isDragging = false;
+            let joystickRect = joystick.getBoundingClientRect();
+            let joystickCenterX = joystickRect.width / 2;
+            let joystickCenterY = joystickRect.height / 2;
+            let joystickRadius = joystickRect.width / 2 - 25;
+
+            window.addEventListener('resize', function() {
+                joystickRect = joystick.getBoundingClientRect();
+                joystickCenterX = joystickRect.width / 2;
+                joystickCenterY = joystickRect.height / 2;
+                joystickRadius = joystickRect.width / 2 - 25;
+            });
+
+            stick.addEventListener('mousedown', startDrag);
+            stick.addEventListener('touchstart', handleTouch);
+            window.addEventListener('mousemove', drag);
+            window.addEventListener('touchmove', handleTouch);
+            window.addEventListener('mouseup', endDrag);
+            window.addEventListener('touchend', endDrag);
+
+            function startDrag(e) {
+                e.preventDefault();
+                isDragging = true;
+            }
+
+            function handleTouch(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                if (e.type === 'touchstart') {
+                    isDragging = true;
+                }
+                if (isDragging && e.type === 'touchmove') {
+                    const touchX = touch.clientX - joystickRect.left;
+                    const touchY = touch.clientY - joystickRect.top;
+                    moveStick(touchX, touchY);
+                }
+            }
+
+            function drag(e) {
+                if (isDragging) {
+                    const mouseX = e.clientX - joystickRect.left;
+                    const mouseY = e.clientY - joystickRect.top;
+                    moveStick(mouseX, mouseY);
+                }
+            }
+
+            function moveStick(x, y) {
+                const deltaX = x - joystickCenterX;
+                const deltaY = y - joystickCenterY;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                
+                let newX, newY;
+                if (distance > joystickRadius) {
+                    const ratio = joystickRadius / distance;
+                    newX = joystickCenterX + deltaX * ratio;
+                    newY = joystickCenterY + deltaY * ratio;
+                } else {
+                    newX = x;
+                    newY = y;
+                }
+                
+                stick.style.left = newX + 'px';
+                stick.style.top = newY + 'px';
+                stick.style.transform = 'translate(-50%, -50%)';
+                
+                if (gameSettings.isPeer1) {
+                    gameSettings.keys.player1.ArrowLeft = deltaX < -20;
+                    gameSettings.keys.player1.ArrowRight = deltaX > 20;
+                    gameSettings.keys.player1.ArrowUp = deltaY < -20;
+                } else if (gameSettings.isPeer2) {
+                    gameSettings.keys.player2.KeyA = deltaX < -20;
+                    gameSettings.keys.player2.KeyD = deltaX > 20;
+                    gameSettings.keys.player2.KeyW = deltaY < -20;
+                }
+            }
+
+            function endDrag() {
+                isDragging = false;
+                stick.style.left = '50%';
+                stick.style.top = '50%';
+                if (gameSettings.isPeer1) {
+                    gameSettings.keys.player1.ArrowLeft = false;
+                    gameSettings.keys.player1.ArrowRight = false;
+                    gameSettings.keys.player1.ArrowUp = false;
+                } else if (gameSettings.isPeer2) {
+                    gameSettings.keys.player2.KeyA = false;
+                    gameSettings.keys.player2.KeyD = false;
+                    gameSettings.keys.player2.KeyW = false;
+                    gameSettings.keys.player2.KeyS = false;
+                }
+            }
+
+            accelerationButton.addEventListener('mousedown', function() {
+                if (gameSettings.isPeer1) {
+                    gameSettings.keys.player1.ArrowUp = true;
+                } else if (gameSettings.isPeer2) {
+                    gameSettings.keys.player2.KeyW = true;
+                }
+            });
+            
+            accelerationButton.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                if (gameSettings.isPeer1) {
+                    gameSettings.keys.player1.ArrowUp = true;
+                } else if (gameSettings.isPeer2) {
+                    gameSettings.keys.player2.KeyW = true;
+                }
+            });
+            
+            accelerationButton.addEventListener('mouseup', function() {
+                if (gameSettings.isPeer1) {
+                    gameSettings.keys.player1.ArrowUp = false;
+                } else if (gameSettings.isPeer2) {
+                    gameSettings.keys.player2.KeyW = false;
+                }
+            });
+            
+            accelerationButton.addEventListener('touchend', function() {
+                if (gameSettings.isPeer1) {
+                    gameSettings.keys.player1.ArrowUp = false;
+                } else if (gameSettings.isPeer2) {
+                    gameSettings.keys.player2.KeyW = false;
+                }
+            });
+
+            function createPowerUp() {
+                if (gameSettings.powerUps.length < gameSettings.maxPowerUps && gameSettings.gameStarted && !gameSettings.gameOver) {
+                    const powerUp = document.createElement('div');
+                    powerUp.classList.add('power-up');
+                    const laneWidth = gameArea.offsetWidth * 0.8;
+                    const roadStartX = gameArea.offsetWidth * 0.1;
+                    const randomX = Math.floor(Math.random() * laneWidth) + roadStartX;
+                    
+                    powerUp.style.left = randomX + 'px';
+                    powerUp.style.top = '-60px';
+                    gameArea.appendChild(powerUp);
+                    
+                    gameSettings.powerUps.push({
+                        element: powerUp,
+                        x: randomX,
+                        y: -60,
+                        speed: gameSettings.baseSpeed
+                    });
+                }
+            }
+
+            function createPuddle() {
+                if (gameSettings.puddles.length < gameSettings.maxPuddles && gameSettings.gameStarted && !gameSettings.gameOver) {
+                    const puddle = document.createElement('div');
+                    puddle.classList.add('puddle');
+                    const laneWidth = gameArea.offsetWidth * 0.8;
+                    const roadStartX = gameArea.offsetWidth * 0.1;
+                    const randomX = Math.floor(Math.random() * laneWidth) + roadStartX;
+                    
+                    puddle.style.left = randomX + 'px';
+                    puddle.style.top = '-40px';
+                    gameArea.appendChild(puddle);
+                    
+                    gameSettings.puddles.push({
+                        element: puddle,
+                        x: randomX,
+                        y: -40,
+                        speed: gameSettings.baseSpeed
+                    });
+                }
+            }
+
+            function startCountdown() {
+                return new Promise((resolve) => {
+                    let count = 3;
+                    countdown.textContent = count;
+                    countdown.style.opacity = 1;
+                    
+                    const interval = setInterval(() => {
+                        count--;
+                        if (count > 0) {
+                            countdown.textContent = count;
+                            countdown.style.animation = 'countdownPop 0.8s ease-out';
+                        } else if (count === 0) {
+                            countdown.textContent = 'СТАРТ!';
+                            countdown.style.animation = 'countdownPop 0.8s ease-out';
+                        } else {
+                            clearInterval(interval);
+                            countdown.style.opacity = 0;
+                            countdown.style.animation = 'none';
+                            resolve();
+                        }
+                    }, 1000);
+                });
+            }
+
+            function updateDayNightCycle() {
+                if (gameSettings.currentTime - gameSettings.lastDayNightChange > gameSettings.dayNightCycle) {
+                    gameSettings.timeOfDay = gameSettings.timeOfDay === 'day' ? 'night' : 'day';
+                    gameSettings.lastDayNightChange = gameSettings.currentTime;
+                    gameArea.className = `game-area ${gameSettings.timeOfDay}`;
+                    car1.className = `car player1 ${gameSettings.timeOfDay}`;
+                    car2.className = `car player2 ${gameSettings.timeOfDay}`;
+                    if (gameSettings.timeOfDay === 'night') {
+                        car1.querySelectorAll('.headlights').forEach(h => h.style.opacity = 1);
+                        car2.querySelectorAll('.headlights').forEach(h => h.style.opacity = 1);
+                    } else {
+                        car1.querySelectorAll('.headlights').forEach(h => h.style.opacity = 0);
+                        car2.querySelectorAll('.headlights').forEach(h => h.style.opacity = 0);
+                    }
+                }
+            }
+
+            function updateRoadPattern() {
+                if (gameSettings.currentTime - gameSettings.lastRoadChange > gameSettings.roadChangeInterval) {
+                    const patterns = ['normal', 'curve-left', 'curve-right', 'narrow'];
+                    const newPattern = patterns[Math.floor(Math.random() * patterns.length)];
+                    road.className = 'road ' + newPattern;
+                    gameSettings.roadPattern = newPattern;
+                    gameSettings.lastRoadChange = gameSettings.currentTime;
+                }
+            }
+
+            function updateGame() {
+                if (!gameSettings.gameStarted || gameSettings.gameOver) return;
+
+                if (gameSettings.player1.boost > 1 && Date.now() > gameSettings.player1.boostEndTime) {
+                    gameSettings.player1.boost = 1;
+                    car1.style.animation = 'carVibrate 0.04s infinite';
+                }
+                if (gameSettings.player2.boost > 1 && Date.now() > gameSettings.player2.boostEndTime) {
+                    gameSettings.player2.boost = 1;
+                    car2.style.animation = 'carVibrate 0.04s infinite';
+                }
+
+                const player1Slowed = Date.now() < gameSettings.player1.slowEndTime;
+                const player2Slowed = Date.now() < gameSettings.player2.slowEndTime;
+
+                if (gameSettings.isPeer1) {
+                    const currentCarSpeed = gameSettings.carSpeed * (player1Slowed ? 0.5 : gameSettings.player1.boost);
+                    let minX = gameArea.offsetWidth * (gameSettings.roadPattern === 'narrow' ? 0.2 : 0.1);
+                    let maxX = gameArea.offsetWidth * (gameSettings.roadPattern === 'narrow' ? 0.8 : 0.9) - 80;
+                    if (gameSettings.roadPattern === 'curve-left') {
+                        minX += 50;
+                        maxX += 50;
+                    } else if (gameSettings.roadPattern === 'curve-right') {
+                        minX -= 50;
+                        maxX -= 50;
+                    }
+                    if (gameSettings.keys.player1.ArrowLeft && gameSettings.player1.x > minX) {
+                        gameSettings.player1.x -= currentCarSpeed;
+                    }
+                    if (gameSettings.keys.player1.ArrowRight && gameSettings.player1.x < maxX) {
+                        gameSettings.player1.x += currentCarSpeed;
+                    }
+                    if (gameSettings.keys.player1.ArrowUp) {
+                        gameSettings.player1.speed = Math.min(gameSettings.player1.speed + 0.1, gameSettings.maxSpeed * (player1Slowed ? 0.5 : gameSettings.player1.boost));
+                        car1.querySelector('.exhaust').style.opacity = 1;
+                    } else {
+                        gameSettings.player1.speed = Math.max(gameSettings.player1.speed - 0.05, gameSettings.baseSpeed * (player1Slowed ? 0.5 : gameSettings.player1.boost));
+                        car1.querySelector('.exhaust').style.opacity = 0;
+                    }
+                    gameSettings.progress = Math.max(gameSettings.progress, gameSettings.player1.speed / 60);
+                    car1.style.left = gameSettings.player1.x + 'px';
+                }
+
+                if (gameSettings.isPeer2) {
+                    const currentCarSpeed = gameSettings.carSpeed * (player2Slowed ? 0.5 : gameSettings.player2.boost);
+                    let minX = gameArea.offsetWidth * (gameSettings.roadPattern === 'narrow' ? 0.2 : 0.1);
+                    let maxX = gameArea.offsetWidth * (gameSettings.roadPattern === 'narrow' ? 0.8 : 0.9) - 80;
+                    if (gameSettings.roadPattern === 'curve-left') {
+                        minX += 50;
+                        maxX += 50;
+                    } else if (gameSettings.roadPattern === 'curve-right') {
+                        minX -= 50;
+                        maxX -= 50;
+                    }
+                    if (gameSettings.keys.player2.KeyA && gameSettings.player2.x > minX) {
+                        gameSettings.player2.x -= currentCarSpeed;
+                    }
+                    if (gameSettings.keys.player2.KeyD && gameSettings.player2.x < maxX) {
+                        gameSettings.player2.x += currentCarSpeed;
+                    }
+                    if (gameSettings.keys.player2.KeyW) {
+                        gameSettings.player2.speed = Math.min(gameSettings.player2.speed + 0.1, gameSettings.maxSpeed * (player2Slowed ? 0.5 : gameSettings.player2.boost));
+                        car2.querySelector('.exhaust').style.opacity = 1;
+                    } else {
+                        gameSettings.player2.speed = Math.max(gameSettings.player2.speed - 0.05, gameSettings.baseSpeed * (player2Slowed ? 0.5 : gameSettings.player2.boost));
+                        car2.querySelector('.exhaust').style.opacity = 0;
+                    }
+                    gameSettings.progress = Math.max(gameSettings.progress, gameSettings.player2.speed / 60);
+                    car2.style.left = gameSettings.player2.x + 'px';
+                }
+
+                if (gameSettings.connectionEstablished && Date.now() - gameSettings.lastSentPosition > 50) {
+                    sendGameData();
+                    gameSettings.lastSentPosition = Date.now();
+                }
+
+                gameSettings.currentTime = Date.now();
+                if (gameSettings.currentTime - gameSettings.lastPowerUpTime > gameSettings.powerUpFrequency) {
+                    createPowerUp();
+                    gameSettings.lastPowerUpTime = gameSettings.currentTime;
+                }
+                if (gameSettings.currentTime - gameSettings.lastPuddleTime > gameSettings.puddleFrequency) {
+                    createPuddle();
+                    gameSettings.lastPuddleTime = gameSettings.currentTime;
+                }
+
+                updateDayNightCycle();
+                updateRoadPattern();
+
+                for (let i = 0; i < gameSettings.powerUps.length; i++) {
+                    const powerUp = gameSettings.powerUps[i];
+                    powerUp.y += powerUp.speed;
+                    powerUp.element.style.top = powerUp.y + 'px';
+
+                    if (gameSettings.isPeer1 && checkPowerUpCollision(gameSettings.player1.x, gameSettings.player1.y, powerUp.x, powerUp.y)) {
+                        gameArea.removeChild(powerUp.element);
+                        gameSettings.powerUps.splice(i, 1);
+                        i--;
+                        applyPowerUp(1);
+                    } else if (gameSettings.isPeer2 && checkPowerUpCollision(gameSettings.player2.x, gameSettings.player2.y, powerUp.x, powerUp.y)) {
+                        gameArea.removeChild(powerUp.element);
+                        gameSettings.powerUps.splice(i, 1);
+                        i--;
+                        applyPowerUp(2);
+                    }
+
+                    if (powerUp.y > gameArea.offsetHeight) {
+                        gameArea.removeChild(powerUp.element);
+                        gameSettings.powerUps.splice(i, 1);
+                        i--;
+                    }
+                }
+
+                for (let i = 0; i < gameSettings.puddles.length; i++) {
+                    const puddle = gameSettings.puddles[i];
+                    puddle.y += puddle.speed;
+                    puddle.element.style.top = puddle.y + 'px';
+
+                    if (gameSettings.isPeer1 && checkPuddleCollision(gameSettings.player1.x, gameSettings.player1.y, puddle.x, puddle.y)) {
+                        gameArea.removeChild(puddle.element);
+                        gameSettings.puddles.splice(i, 1);
+                        i--;
+                        applyPuddleEffect(1);
+                    } else if (gameSettings.isPeer2 && checkPuddleCollision(gameSettings.player2.x, gameSettings.player2.y, puddle.x, puddle.y)) {
+                        gameArea.removeChild(puddle.element);
+                        gameSettings.puddles.splice(i, 1);
+                        i--;
+                        applyPuddleEffect(2);
+                    }
+
+                    if (puddle.y > gameArea.offsetHeight) {
+                        gameArea.removeChild(puddle.element);
+                        gameSettings.puddles.splice(i, 1);
+                        i--;
+                    }
+                }
+
+                // Проверка столкновения с финишной линией
+                if (checkFinishLineCollision(gameSettings.player1.x, gameSettings.player1.y)) {
+                    endGame(1);
+                    return;
+                }
+                if (checkFinishLineCollision(gameSettings.player2.x, gameSettings.player2.y)) {
+                    endGame(2);
+                    return;
+                }
+
+                // Обновление позиции финишной линии
+                const totalProgress = gameSettings.progress / gameSettings.finishLinePosition;
+                finishLine.style.top = (gameArea.offsetHeight * (1 - totalProgress)) + 'px';
+
+                requestAnimationFrame(updateGame);
+            }
+
+            function checkPowerUpCollision(carX, carY, powerUpX, powerUpY) {
+                const carWidth = 80;
+                const carHeight = 120;
+                const powerUpWidth = 50;
+                const powerUpHeight = 50;
+                
+                return (
+                    carX < powerUpX + powerUpWidth &&
+                    carX + carWidth > powerUpX &&
+                    gameArea.offsetHeight - carY - carHeight < powerUpY + powerUpHeight &&
+                    gameArea.offsetHeight - carY > powerUpY
+                );
+            }
+
+            function checkPuddleCollision(carX, carY, puddleX, puddleY) {
+                const carWidth = 80;
+                const carHeight = 120;
+                const puddleWidth = 60;
+                const puddleHeight = 30;
+                
+                return (
+                    carX < puddleX + puddleWidth &&
+                    carX + carWidth > puddleX &&
+                    gameArea.offsetHeight - carY - carHeight < puddleY + puddleHeight &&
+                    gameArea.offsetHeight - carY > puddleY
+                );
+            }
+
+            function checkFinishLineCollision(carX, carY) {
+                const carWidth = 80;
+                const carHeight = 120;
+                const finishY = parseFloat(finishLine.style.top) || 0;
+                const finishHeight = 40;
+                
+                return (
+                    carX < gameArea.offsetWidth &&
+                    carX + carWidth > 0 &&
+                    gameArea.offsetHeight - carY - carHeight < finishY + finishHeight &&
+                    gameArea.offsetHeight - carY > finishY
+                );
+            }
+
+            function applyPowerUp(player) {
+                if (player === 1) {
+                    gameSettings.player1.boost = 1.5;
+                    gameSettings.player1.boostEndTime = Date.now() + 5000;
+                    car1.style.animation = 'carVibrate 0.02s infinite, neonPulse 0.4s infinite alternate';
+                    gameSettings.progress += 100 / gameSettings.finishLinePosition;
+                } else {
+                    gameSettings.player2.boost = 1.5;
+                    gameSettings.player2.boostEndTime = Date.now() + 5000;
+                    car2.style.animation = 'carVibrate 0.02s infinite, neonPulse 0.4s infinite alternate';
+                    gameSettings.progress += 100 / gameSettings.finishLinePosition;
+                }
+            }
+
+            function applyPuddleEffect(player) {
+                if (player === 1) {
+                    gameSettings.player1.slowEndTime = Date.now() + 2000;
+                    car1.style.animation = 'carVibrate 0.1s infinite';
+                } else {
+                    gameSettings.player2.slowEndTime = Date.now() + 2000;
+                    car2.style.animation = 'carVibrate 0.1s infinite';
+                }
+            }
+
+            function endGame(winner) {
+                gameSettings.gameOver = true;
+                gameSettings.gameStarted = false;
+                gameOverDisplay.textContent = `ИГРОК ${winner} ПОБЕДИЛ!`;
+                gameOverDisplay.style.display = 'block';
+                setTimeout(() => {
+                    gameOverDisplay.style.display = 'none';
+                    menu.style.display = 'flex';
+                    gameSettings.player1.speed = 0;
+                    gameSettings.player2.speed = 0;
+                    gameSettings.player1.boost = 1;
+                    gameSettings.player2.boost = 1;
+                    gameSettings.player1.slowEndTime = 0;
+                    gameSettings.player2.slowEndTime = 0;
+                    gameSettings.powerUps.forEach(powerUp => gameArea.removeChild(powerUp.element));
+                    gameSettings.puddles.forEach(puddle => gameArea.removeChild(puddle.element));
+                    gameSettings.powerUps = [];
+                    gameSettings.puddles = [];
+                    gameSettings.gameOver = false;
+                    gameSettings.progress = 0;
+                    car1.style.left = gameArea.offsetWidth * 0.35 - 40 + 'px';
+                    car1.style.bottom = '50px';
+                    car2.style.left = gameArea.offsetWidth * 0.65 - 40 + 'px';
+                    car2.style.bottom = '50px';
+                    gameSettings.player1.x = gameArea.offsetWidth * 0.35 - 40;
+                    gameSettings.player1.y = 50;
+                    gameSettings.player2.x = gameArea.offsetWidth * 0.65 - 40;
+                    gameSettings.player2.y = 50;
+                    finishLine.style.top = '0';
+                    road.className = 'road';
+                    gameSettings.roadPattern = 'normal';
+                    gameSettings.timeOfDay = 'day';
+                    gameSettings.lastDayNightChange = 0;
+                    gameArea.className = 'game-area day';
+                    car1.className = 'car player1 day';
+                    car2.className = 'car player2 day';
+                    car1.querySelectorAll('.headlights').forEach(h => h.style.opacity = 0);
+                    car2.querySelectorAll('.headlights').forEach(h => h.style.opacity = 0);
+                    car1.querySelector('.exhaust').style.opacity = 0;
+                    car2.querySelector('.exhaust').style.opacity = 0;
+                }, 4000);
+            }
+
+            function toggleChat() {
+                const isChatVisible = chat.style.display === 'block';
+                chat.style.display = isChatVisible ? 'none' : 'block';
+                chatInput.style.display = isChatVisible ? 'none' : 'block';
+                if (!isChatVisible) {
+                    chatInput.focus();
+                }
+            }
+
+            function sendChatMessage() {
+                const message = chatInput.value.trim();
+                if (message && gameSettings.connectionEstablished && gameSettings.conn) {
+                    gameSettings.conn.send({
+                        type: 'chat',
+                        username: gameSettings.username,
+                        message: message
+                    });
+                    appendChatMessage(gameSettings.username, message);
+                    chatInput.value = '';
+                }
+            }
+
+            function appendChatMessage(username, message) {
+                const messageElement = document.createElement('div');
+                messageElement.textContent = `${username}: ${message}`;
+                chat.appendChild(messageElement);
+                chat.scrollTop = chat.scrollHeight;
+            }
+
+            function initializePeer() {
+                try {
+                    gameSettings.peer = new Peer();
+                    gameSettings.peer.on('open', function(id) {
+                        console.log('Peer ID:', id);
+                    });
+                    gameSettings.peer.on('connection', function(conn) {
+                        gameSettings.conn = conn;
+                        handleConnection();
+                    });
+                    gameSettings.peer.on('error', function(err) {
+                        console.error('PeerJS Error:', err);
+                        connectionStatus.textContent = 'СТАТУС: ОШИБКА';
+                        alert('Ошибка подключения PeerJS. Попробуйте снова.');
+                    });
+                } catch (err) {
+                    console.error('PeerJS Initialization Error:', err);
+                    connectionStatus.textContent = 'СТАТУС: ОШИБКА';
+                    alert('Не удалось инициализировать PeerJS. Проверьте подключение к интернету.');
+                }
+            }
+
+            function createRoom() {
+                gameSettings.isPeer1 = true;
+                gameSettings.roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                roomCodeDisplay.textContent = 'КОД: ' + gameSettings.roomCode;
+                connectionStatus.textContent = 'СТАТУС: ОЖИДАНИЕ';
+                playersDisplay.textContent = 'ИГРОКИ: ' + gameSettings.username;
+                menu.style.display = 'none';
+            }
+
+            function joinRoom() {
+                const code = prompt('Введите код комнаты:');
+                if (code) {
+                    gameSettings.isPeer2 = true;
+                    gameSettings.roomCode = code.toUpperCase();
+                    try {
+                        gameSettings.conn = gameSettings.peer.connect(gameSettings.roomCode);
+                        handleConnection();
+                        roomCodeDisplay.textContent = 'КОД: ' + gameSettings.roomCode;
+                        connectionStatus.textContent = 'СТАТУС: ПОДКЛЮЧАЕТСЯ';
+                        menu.style.display = 'none';
+                    } catch (err) {
+                        console.error('Join Room Error:', err);
+                        alert('Ошибка при подключении к комнате. Проверьте код комнаты.');
+                    }
+                }
+            }
+
+            function handleConnection() {
+                if (!gameSettings.conn) return;
+                gameSettings.conn.on('open', function() {
+                    gameSettings.connectionEstablished = true;
+                    connectionStatus.textContent = 'СТАТУС: ОНЛАЙН';
+                    playersDisplay.textContent = 'ИГРОКИ: ' + gameSettings.username + ', ' + gameSettings.opponentUsername;
+                    gameSettings.conn.send({
+                        type: 'join',
+                        username: gameSettings.username
+                    });
+                });
+
+                gameSettings.conn.on('data', function(data) {
+                    if (data.type === 'join') {
+                        gameSettings.opponentUsername = data.username;
+                        playersDisplay.textContent = 'ИГРОКИ: ' + gameSettings.username + ', ' + data.username;
+                    } else if (data.type === 'game') {
+                        if (gameSettings.isPeer1) {
+                            gameSettings.player2.x = data.x;
+                            gameSettings.player2.speed = data.speed;
+                            gameSettings.player2.boost = data.boost;
+                            car2.style.left = data.x + 'px';
+                        } else if (gameSettings.isPeer2) {
+                            gameSettings.player1.x = data.x;
+                            gameSettings.player1.speed = data.speed;
+                            gameSettings.player1.boost = data.boost;
+                            car1.style.left = data.x + 'px';
+                        }
+                    } else if (data.type === 'chat') {
+                        appendChatMessage(data.username, data.message);
+                    }
+                });
+
+                gameSettings.conn.on('error', function(err) {
+                    console.error('Connection Error:', err);
+                    connectionStatus.textContent = 'СТАТУС: ОШИБКА';
+                });
+            }
+
+            function sendGameData() {
+                if (gameSettings.conn && gameSettings.connectionEstablished) {
+                    gameSettings.conn.send({
+                        type: 'game',
+                        x: gameSettings.isPeer1 ? gameSettings.player1.x : gameSettings.player2.x,
+                        speed: gameSettings.isPeer1 ? gameSettings.player1.speed : gameSettings.player2.speed,
+                        boost: gameSettings.isPeer1 ? gameSettings.player1.boost : gameSettings.player2.boost
+                    });
+                }
+            }
+
+            createRoomButton.addEventListener('click', function() {
+                initializePeer();
+                createRoom();
+            });
+
+            joinRoomButton.addEventListener('click', function() {
+                initializePeer();
+                joinRoom();
+            });
+
+            tutorialButton.addEventListener('click', function() {
+                alert('Управление:\nИгрок 1:\n- Стрелки влево/вправо: движение\n- Стрелка вверх: ускорение\nИгрок 2:\n- A/D: движение\n- W: ускорение\n\nЦель: первым пересечь финишную линию, собирайте бонусы для ускорения, избегайте луж!\n\nЧат: T для открытия/закрытия, Enter для отправки сообщения.');
+            });
+
+            startButton.addEventListener('click', async function() {
+                if (!gameSettings.gameStarted && gameSettings.connectionEstablished) {
+                    gameSettings.gameStarted = true;
+                    await startCountdown();
+                    gameSettings.lastPowerUpTime = Date.now();
+                    gameSettings.lastPuddleTime = Date.now();
+                    updateGame();
+                } else if (!gameSettings.connectionEstablished) {
+                    alert('Ожидайте подключения второго игрока!');
+                }
+            });
+
+            menu.style.display = 'flex';
+        });
+    </script>
+</body>
+</html>
