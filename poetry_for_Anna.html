@@ -449,7 +449,6 @@
             }
         }
 
-        /* Дополнительные декоративные элементы */
         .corner {
             position: absolute;
             width: 30px;
@@ -492,6 +491,8 @@
             width: 50px;
             height: 50px;
             background: var(--accent-color);
+
+
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -611,7 +612,6 @@
             z-index: -2;
         }
         
-        /* Дополнительные анимации */
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -647,7 +647,6 @@
             z-index: -1;
         }
         
-        /* Дополнительные эффекты */
         .texture-overlay {
             position: fixed;
             top: 0;
@@ -752,7 +751,6 @@
             opacity: 0.6;
         }
 
-        /* Hover effects */
         .poem-title:hover {
             color: var(--accent-color);
             transition: color 0.3s ease;
@@ -773,7 +771,46 @@
             transition: background-color 0.3s ease;
         }
 
-        /* Print styles */
+        .home-button {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            margin: 1rem 0;
+            background: var(--background-color);
+            color: var(--primary-color);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            font-style: italic;
+            text-decoration: none;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .home-button:hover {
+            background: var(--secondary-color);
+            color: #fff;
+            border-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .home-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .home-button:hover::before {
+            left: 100%;
+        }
+
         @media print {
             body {
                 background: none;
@@ -800,7 +837,6 @@
             }
         }
 
-        /* Dark mode */
         @media (prefers-color-scheme: dark) {
             :root {
                 --primary-color: #a3c6e9;
@@ -848,7 +884,6 @@
             }
         }
 
-        /* Font loading optimization */
         @font-face {
             font-family: 'Playfair Display';
             font-style: normal;
@@ -865,7 +900,6 @@
             src: url(https://fonts.gstatic.com/s/cormorantgaramond/v16/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYqXtMky2F7g.woff) format('woff');
         }
 
-        /* Accessibility improvements */
         @media (prefers-reduced-motion: reduce) {
             * {
                 animation: none !important;
@@ -877,13 +911,11 @@
             }
         }
 
-        /* Focus state for accessibility */
         :focus {
             outline: 2px solid var(--accent-color);
             outline-offset: 2px;
         }
 
-        /* Additional decorative elements */
         .quill-border {
             position: absolute;
             bottom: 10px;
@@ -965,7 +997,9 @@
                     Бежал от мыслей, ждал, писал…<br>
                     Но каждый раз в тебе срывался<br>
                     Надежды тонкий пьедестал.<br>
-                    Ты уставала — я не понял.<br>
+                    Ты устав
+
+ала — я не понял.<br>
                     Ты повторяла — я молчал.<br>
                     Ты отдалялась — я всё строил,<br>
                     Ты говорила — я мечтал.
@@ -1028,12 +1062,13 @@
             <div class="quote">
                 "И сердце вновь горит и любит — оттого, что не любить оно не может."
             </div>
+            <a href="index.html" class="home-button">Вернуться на главную</a>
+            </div>
         </footer>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Плавная прокрутка при нажатии на индикатор прокрутки
             const scrollIndicator = document.querySelector('.scroll-indicator');
             if (scrollIndicator) {
                 scrollIndicator.addEventListener('click', function() {
@@ -1044,7 +1079,6 @@
                 });
             }
             
-            // Анимация переворачивания страницы
             const page = document.querySelector('.page');
             if (page) {
                 page.addEventListener('click', function() {
@@ -1054,7 +1088,6 @@
                 });
             }
             
-            // Добавление анимации для элементов при скроллинге
             const animateOnScroll = function() {
                 const elements = document.querySelectorAll('.fadeIn, .stanza, .poem-title, .poem-subtitle, .signature, .quote');
                 
@@ -1069,11 +1102,9 @@
                 });
             };
             
-            // Запуск анимации при скролле
             window.addEventListener('scroll', animateOnScroll);
-            animateOnScroll(); // Запуск анимации при загрузке страницы
+            animateOnScroll();
             
-            // Эффект мерцания для водяных знаков
             const watermark = document.querySelector('.watermark');
             if (watermark) {
                 setInterval(function() {
@@ -1081,7 +1112,6 @@
                 }, 3000);
             }
             
-            // Анимация перьев
             const animateFeathers = function() {
                 const feathers = document.querySelectorAll('.feather');
                 feathers.forEach(function(feather, index) {
@@ -1094,7 +1124,6 @@
             
             animateFeathers();
             
-            // Эффект старой бумаги при наведении на стихи
             const poem = document.querySelector('.poem');
             if (poem) {
                 poem.addEventListener('mousemove', function(e) {
@@ -1109,28 +1138,23 @@
                 });
             }
             
-            // Добавить случайные чернильные пятна
             const addInkStains = function() {
                 const main = document.querySelector('main');
-                const stainCount = 3 + Math.floor(Math.random() * 4); // 3-6 пятен
+                const stainCount = 3 + Math.floor(Math.random() * 4);
                 
                 for (let i = 0; i < stainCount; i++) {
                     const stain = document.createElement('div');
                     stain.classList.add('ink-stain');
                     
-                    // Случайный размер
                     const size = 30 + Math.random() * 70;
                     stain.style.width = `${size}px`;
                     stain.style.height = `${size}px`;
                     
-                    // Случайная позиция
                     stain.style.top = `${Math.random() * 100}%`;
                     stain.style.left = `${Math.random() * 100}%`;
                     
-                    // Случайный поворот
                     stain.style.transform = `rotate(${Math.random() * 360}deg) scale(${0.5 + Math.random() * 0.5})`;
                     
-                    // Случайная прозрачность
                     stain.style.opacity = `${0.1 + Math.random() * 0.2}`;
                     
                     main.appendChild(stain);
@@ -1139,13 +1163,11 @@
             
             addInkStains();
             
-            // Эффект потертости для текста
             const addTextWear = function() {
                 const stanzas = document.querySelectorAll('.stanza');
                 stanzas.forEach(function(stanza) {
                     const words = stanza.innerHTML.split(' ');
                     const newWords = words.map(word => {
-                        // С вероятностью 10% делаем слово немного бледнее
                         if (Math.random() < 0.1) {
                             return `<span style="opacity: 0.7;">${word}</span>`;
                         }
@@ -1157,7 +1179,6 @@
             
             addTextWear();
             
-            // Подсветка первой буквы при наведении
             const firstLetters = document.querySelectorAll('.first-letter');
             firstLetters.forEach(function(letter) {
                 letter.addEventListener('mouseover', function() {
@@ -1169,7 +1190,6 @@
                 });
             });
             
-            // Переключение темной/светлой темы
             const addThemeToggle = function() {
                 const footer = document.querySelector('footer');
                 const toggle = document.createElement('div');
@@ -1181,7 +1201,6 @@
                 toggle.addEventListener('click', function() {
                     document.body.classList.toggle('dark-theme');
                     
-                    // Сохраняем предпочтение в localStorage
                     if (document.body.classList.contains('dark-theme')) {
                         localStorage.setItem('theme', 'dark');
                     } else {
@@ -1191,7 +1210,6 @@
                 
                 footer.appendChild(toggle);
                 
-                // Проверяем сохраненное предпочтение
                 if (localStorage.getItem('theme') === 'dark') {
                     document.body.classList.add('dark-theme');
                 }
@@ -1199,7 +1217,6 @@
             
             addThemeToggle();
             
-            // Анимированные уголки
             const animateCorners = function() {
                 const corners = document.querySelectorAll('.corner');
                 corners.forEach(function(corner) {
@@ -1219,7 +1236,6 @@
             
             animateCorners();
             
-            // Создаем эффект сгиба страницы
             const createPageBend = function() {
                 const main = document.querySelector('main');
                 main.addEventListener('mousemove', function(e) {
@@ -1227,13 +1243,11 @@
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
                     
-                    // Вычисляем расстояние от правого нижнего угла
                     const maxX = rect.width;
                     const maxY = rect.height;
                     const distanceX = maxX - x;
                     const distanceY = maxY - y;
                     
-                    // Обновляем эффект сгиба только если мышь близко к правому нижнему углу
                     if (distanceX < 150 && distanceY < 150) {
                         const curl = document.querySelector('.parchment-curl');
                         if (curl) {
