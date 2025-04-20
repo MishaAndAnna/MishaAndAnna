@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Скрабл для Миши и Анны</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@400;500;700&display=swap');
+
+        :root {
+            --primary-color: #6b4e31; /* Rich coffee brown */
+            --primary-light: #a68a64; /* Light tan */
+            --primary-dark: #4a3723; /* Dark walnut */
+            --secondary-color: #9b2d30; /* Deep burgundy */
+            --secondary-light: #c75b5e; /* Soft rose */
+            --secondary-dark: #7a2426; /* Darker burgundy */
+            --accent-color: #d4a017; /* Warm gold */
+            --accent-dark: #b38712; /* Darker gold */
+            --success-color: #2ea44f; /* Forest green */
+            --danger-color: #dc2626; /* Crimson */
+            --warning-color: #d97706; /* Amber */
+            --background-color: #fdf6e3; /* Cream parchment */
+            --board-bg: #8b5a2b; /* Polished wood */
+            --board-light: #f4e1c1; /* Light wood grain */
+            --board-dark: #3c2f2f; /* Dark wood */
+            --white: #ffffff;
+            --black: #1a1a1a;
+            --gray-100: #f8f1e9;
+            --gray-200: #e7ded2;
+            --gray-300: #d1c7b7;
+            --gray-400: #a89f8f;
+            --gray-500: #7f7666;
+            --gray-600: #5c5346;
+            --gray-700: #3d352a;
+            --border-radius: 16px;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--gray-700);
+            min-height: 100vh;
+            font-family: 'Roboto', sans-serif;
+            background-image: url('https://www.transparenttextures.com/patterns/old-wall.png');
+            background-attachment: fixed;
+            background-size: cover;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-dark) 100%);
+            color: var(--white);
+            padding: 30px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .app-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 40px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .player-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .player-input {
+            padding: 14px 20px;
+            border: 2px solid var(--gray-300);
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-family: 'Roboto', sans-serif;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 220px;
+            max-width: 450px;
+            background-color: var(--gray-100);
+        }
+
+        .player-input:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(155, 45, 48, 0.2);
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 500;
+            font-family: 'Roboto', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 180px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .button:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(155, 45, 48, 0.3);
+        }
+
+        .button:disabled {
+            background: var(--gray-400);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .button i {
+            margin-right: 10px;
+        }
+
+        .button-success {
+            background: linear-gradient(135deg, var(--success-color) 0%, #16a34a 100%);
+        }
+
+        .button-success:hover {
+            background: linear-gradient(135deg, #16a34a 0%, var(--success-color) 100%);
+        }
+
+        .button-danger {
+            background: linear-gradient(135deg, var(--danger-color) 0%, #b91c1c 100%);
+        }
+
+        .button-danger:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, var(--danger-color) 100%);
+        }
+
+        .message {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--white);
+            border-radius: var(--border-radius);
+            background-color: var(--gray-500);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+        }
+
+        .message.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .message.info {
+            background-color: var(--secondary-color);
+        }
+
+        .message.success {
+            background-color: var(--success-color);
+        }
+
+        .message.error {
+            background-color: var(--danger-color);
+        }
+
+        .game-info {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .game-info i {
+            margin-right: 12px;
+            font-size: 1.5rem;
+        }
+
+        .board-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 auto;
+            max-width: 720px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-dark) 100%);
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            transform: perspective(1000px) rotateX(5deg);
+            transition: transform 0.3s ease;
+        }
+
+        .board-container:hover {
+            transform: perspective(1000px) rotateX(0deg);
+        }
+
+        .board-title {
+            margin-bottom: 20px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--white);
+            font-family: 'Playfair Display', serif;
+            display: flex;
+            align-items: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .board-title i {
+            margin-right: 12px;
+            color: var(--accent-color);
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(15, 44px);
+            grid-template-rows: repeat(15, 44px);
+            gap: 3px;
+            background: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+            border: 5px solid var(--primary-dark);
+            border-radius: 12px;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.4);
+            padding: 5px;
+        }
+
+        .cell {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--white);
+            text-align: center;
+            background-color: var(--board-light);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .cell.double-letter {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        .cell.triple-letter {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            box-shadow: 0 0 12px rgba(37, 99, 235, 0.6);
+        }
+
+        .cell.double-word {
+            background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+            box-shadow: 0 0 10px rgba(251, 113, 133, 0.5);
+        }
+
+        .cell.triple-word {
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
+        }
+
+        .cell.center {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.7);
+        }
+
+        .cell.draggable-over {
+            background: rgba(46, 164, 79, 0.7);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--success-color);
+        }
+
+        .cell:hover {
+            transform: scale(1.03);
+        }
+
+        .letter {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #f4e1c1 0%, #e6d3a3 100%);
+            border: 2px solid var(--primary-dark);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--black);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), inset 0 0 8px rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+
+        .letter.draggable {
+            cursor: grab;
+        }
+
+        .letter.dragging {
+            opacity: 0.7;
+            transform: scale(1.2);
+        }
+
+        .letter.placed {
+            background: linear-gradient(135deg, #d4d4d4 0%, #b0b0b0 100%);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .letter:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .letter-value {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            font-size: 0.7rem;
+            color: var(--gray-700);
+            font-weight: 500;
+        }
+
+        @keyframes slideIn {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .rack {
+            display: flex;
+            gap: 12px;
+            margin: 25px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 2px solid var(--primary-dark);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .rules {
+            padding: 30px;
+            background: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+            background-color: var(--gray-100);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-top: 40px;
+            border: 2px solid var(--primary-dark);
+        }
+
+        .rules h2 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .rules h2 i {
+            margin-right: 12px;
+            color: var(--secondary-color);
+        }
+
+        .rules p {
+            margin-bottom: 20px;
+            line-height: 1.7;
+            font-size: 1.1rem;
+        }
+
+        .rules ul {
+            padding-left: 25px;
+            margin-bottom: 25px;
+        }
+
+        .rules li {
+            margin-bottom: 12px;
+            line-height: 1.7;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .app-header h1 {
+                font-size: 2.2rem;
+            }
+
+            .board-container {
+                max-width: 600px;
+            }
+
+            .board {
+                grid-template-columns: repeat(15, 36px);
+                grid-template-rows: repeat(15, 36px);
+            }
+
+            .cell {
+                width: 36px;
+                height: 36px;
+                font-size: 0.8rem;
+            }
+
+            .letter {
+                width: 32px;
+                height: 32px;
+                font-size: 1.2rem;
+            }
+
+            .letter-value {
+                font-size: 0.6rem;
+            }
+
+            .button {
+                padding: 12px 24px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .board-container {
+                max-width: 480px;
+            }
+
+            .board {
+                grid-template-columns: repeat(15, 28px);
+                grid-template-rows: repeat(15, 28px);
+            }
+
+            .cell {
+                width: 28px;
+                height: 28px;
+                font-size: 0.6rem;
+            }
+
+            .letter {
+                width: 24px;
+                height: 24px;
+                font-size: 1rem;
+            }
+
+            .letter-value {
+                font-size: 0.5rem;
+            }
+
+            .player-input {
+                padding: 12px;
+                font-size: 1rem;
+            }
+
+            .button {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+                min-width: 140px;
+            }
+
+            .rules {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1><i class="fas fa-book"></i> Скрабл для Миши и Анны</h1>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="player-info">
+                <input type="text" id="playerName" class="player-input" placeholder="Введите ваше имя">
+                <button id="joinGame" class="button"><i class="fas fa-play"></i> Присоединиться к игре</button>
+            </div>
+
+            <div class="message" id="message"></div>
+
+            <div class="game-info" id="gameInfo"><i class="fas fa-info-circle"></i> Подготовка к игре...</div>
+
+            <div class="board-container">
+                <div class="board-title"><i class="fas fa-book"></i> Игровая доска</div>
+                <div class="board" id="gameBoard"></div>
+            </div>
+
+            <div class="rack" id="playerRack"></div>
+
+            <div class="controls">
+                <div class="button-group">
+                    <button id="submitWord" class="button button-success" disabled>
+                        <i class="fas fa-check"></i> Подтвердить слово
+                    </button>
+                    <button id="passTurn" class="button button-danger" disabled>
+                        <i class="fas fa-forward"></i> Пропустить ход
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="rules">
+            <h2><i class="fas fa-book"></i> Правила игры</h2>
+            <p><strong>1. Цель игры:</strong> Составлять слова из букв на доске, получая очки за длину слов и редкие буквы.</p>
+            <p><strong>2. Игровая доска:</strong> Доска 15x15 клеток. Некоторые клетки дают бонусы: двойной/тройной счёт буквы или слова.</p>
+            <p><strong>3. Начало игры:</strong> Каждый игрок получает 7 случайных букв. Первый игрок должен составить слово, проходящее через центральную клетку (H8).</p>
+            <p><strong>4. Ходы:</strong></p>
+            <ul>
+                <li>Игроки по очереди составляют слова, размещая буквы горизонтально или вертикально.</li>
+                <li>Слова должны быть соединены с уже существующими словами на доске.</li>
+                <li>Все слова должны быть в словаре (русский язык).</li>
+                <li>После хода игрок берёт новые буквы из мешка, чтобы снова иметь 7 букв.</li>
+                <li>Специальные клетки: двойной/тройной счёт буквы или слова применяется только при первом размещении.</li>
+            </ul>
+            <p><strong>5. Победа:</strong> Игрок с наибольшим количеством очков после того, как закончатся буквы в мешке, и один из игроков использует все свои буквы.</p>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
+            authDomain: "misha-and-anna-48e4c.firebaseapp.com",
+            databaseURL: "https://misha-and-anna-48e4c-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "misha-and-anna-48e4c",
+            storageBucket: "misha-and-anna-48e4c.firebasestorage.app",
+            messagingSenderId: "822036073579",
+            appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
+            measurementId: "G-XR86X6PXMX"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Global Variables
+        let playerName = '';
+        let playerId = '';
+        let gameId = '';
+        let playerNumber = null;
+        let myTurn = false;
+        let gameStarted = false;
+        let board = [];
+        let playerRack = [];
+        let placedLetters = [];
+        let scores = {};
+
+        // DOM Elements
+        const playerNameInput = document.getElementById('playerName');
+        const joinGameButton = document.getElementById('joinGame');
+        const messageElement = document.getElementById('message');
+        const gameInfoElement = document.getElementById('gameInfo');
+        const gameBoardElement = document.getElementById('gameBoard');
+        const playerRackElement = document.getElementById('playerRack');
+        const submitWordButton = document.getElementById('submitWord');
+        const passTurnButton = document.getElementById('passTurn');
+
+        // Letter Values (Russian Scrabble)
+        const letterValues = {
+            'А': 1, 'Б': 3, 'В': 2, 'Г': 3, 'Д': 2, 'Е': 1, 'Ё': 3, 'Ж': 5, 'З': 5, 'И': 1,
+            'Й': 4, 'К': 2, 'Л': 2, 'М': 2, 'Н': 1, 'О': 1, 'П': 2, 'Р': 2, 'С': 2, 'Т': 2,
+            'У': 3, 'Ф': 8, 'Х': 5, 'Ц': 5, 'Ч': 5, 'Ш': 8, 'Щ': 10, 'Ъ': 10, 'Ы': 4, 'Ь': 3,
+            'Э': 8, 'Ю': 8, 'Я': 3
+        };
+
+        // Letter Bag (simplified distribution)
+        const letterBagTemplate = [
+            ...Array(8).fill('А'), ...Array(4).fill('Б'), ...Array(5).fill('В'), ...Array(4).fill('Г'),
+            ...Array(5).fill('Д'), ...Array(8).fill('Е'), ...Array(1).fill('Ё'), ...Array(2).fill('Ж'),
+            ...Array(2).fill('З'), ...Array(8).fill('И'), ...Array(2).fill('Й'), ...Array(5).fill('К'),
+            ...Array(5).fill('Л'), ...Array(5).fill('М'), ...Array(8).fill('Н'), ...Array(10).fill('О'),
+            ...Array(5).fill('П'), ...Array(5).fill('Р'), ...Array(5).fill('С'), ...Array(5).fill('Т'),
+            ...Array(4).fill('У'), ...Array(1).fill('Ф'), ...Array(2).fill('Х'), ...Array(2).fill('Ц'),
+            ...Array(2).fill('Ч'), ...Array(1).fill('Ш'), ...Array(1).fill('Щ'), ...Array(1).fill('Ъ'),
+            ...Array(2).fill('Ы'), ...Array(2).fill('Ь'), ...Array(1).fill('Э'), ...Array(1).fill('Ю'),
+            ...Array(3).fill('Я')
+        ];
+
+        // Simple Russian Dictionary (extend with a full dictionary)
+        const dictionary = [
+            'ДОМ', 'КОТ', 'СОБАКА', 'СТОЛ', 'КНИГА', 'ДЕРЕВО', 'РЕКА', 'СОЛНЦЕ', 'ЛУНА', 'ЗВЕЗДА',
+            'ПОЛЕ', 'ГОРА', 'МОРЕ', 'НЕБО', 'ЦВЕТОК', 'ПТИЦА', 'РЫБА', 'МАШИНА', 'ДОРОГА', 'ГОРОД'
+        ];
+
+        // Initialize Board
+        function initializeBoard() {
+            board = Array(15).fill().map(() => Array(15).fill(null));
+            gameBoardElement.innerHTML = '';
+
+            const specialTiles = {
+                tripleWord: [[0,0], [0,7], [0,14], [7,0], [7,14], [14,0], [14,7], [14,14]],
+                doubleWord: [[1,1], [2,2], [3,3], [4,4], [1,13], [2,12], [3,11], [4,10], [10,4], [11,3], [12,2], [13,1], [10,10], [11,11], [12,12], [13,13]],
+                tripleLetter: [[1,5], [1,9], [5,1], [5,5], [5,9], [5,13], [9,1], [9,5], [9,9], [9,13], [13,5], [13,9]],
+                doubleLetter: [[0,3], [0,11], [2,6], [2,8], [3,0], [3,7], [3,14], [6,2], [6,6], [6,8], [6,12], [7,3], [7,11], [8,2], [8,6], [8,8], [8,12], [11,0], [11,7], [11,14], [12,6], [12,8], [14,3], [14,11]]
+            };
+
+            for (let row = 0; row < 15; row++) {
+                for (let col = 0; col < 15; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+
+                    if (specialTiles.tripleWord.some(([r, c]) => r === row && c === col)) {
+                        cell.classList.add('triple-word');
+                        cell.textContent = 'Тройной счёт слова';
+                    } else if (specialTiles.doubleWord.some(([r, c]) => r === row && c === col)) {
+                        cell.classList.add('double-word');
+                        cell.textContent = 'Двойной счёт слова';
+                    } else if (specialTiles.tripleLetter.some(([r, c]) => r === row && c === col)) {
+                        cell.classList.add('triple-letter');
+                        cell.textContent = 'Тройной счёт буквы';
+                    } else if (specialTiles.doubleLetter.some(([r, c]) => r === row && c === col)) {
+                        cell.classList.add('double-letter');
+                        cell.textContent = 'Двойной счёт буквы';
+                    } else if (row === 7 && col === 7) {
+                        cell.classList.add('center');
+                        cell.textContent = '★';
+                    }
+
+                    cell.addEventListener('dragover', (e) => e.preventDefault());
+                    cell.addEventListener('dragenter', () => cell.classList.add('draggable-over'));
+                    cell.addEventListener('dragleave', () => cell.classList.remove('draggable-over'));
+                    cell.addEventListener('drop', (e) => handleDrop(e, row, col));
+
+                    gameBoardElement.appendChild(cell);
+                }
+            }
+        }
+
+        // Initialize Player Rack
+        function initializeRack() {
+            playerRackElement.innerHTML = '';
+            playerRack.forEach(letter => {
+                const tile = document.createElement('div');
+                tile.className = 'letter draggable';
+                tile.draggable = true;
+                tile.textContent = letter;
+                tile.dataset.letter = letter;
+                tile.innerHTML += `<span class="letter-value">${letterValues[letter]}</span>`;
+                tile.addEventListener('dragstart', handleDragStart);
+                tile.addEventListener('dragend', handleDragEnd);
+                playerRackElement.appendChild(tile);
+            });
+        }
+
+        // Drag-and-Drop Handlers
+        function handleDragStart(e) {
+            if (!myTurn || !gameStarted) return;
+            e.target.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', e.target.dataset.letter);
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            document.querySelectorAll('.cell').forEach(cell => cell.classList.remove('draggable-over'));
+        }
+
+        function handleDrop(e, row, col) {
+            e.preventDefault();
+            if (!myTurn || !gameStarted) return;
+            const letter = e.dataTransfer.getData('text/plain');
+            if (!board[row][col] && playerRack.includes(letter)) {
+                placedLetters.push({ row, col, letter });
+                board[row][col] = { letter, temporary: true };
+                playerRack.splice(playerRack.indexOf(letter), 1);
+                updateBoardUI();
+                initializeRack();
+                submitWordButton.disabled = false;
+            }
+        }
+
+        // Update Board UI
+        function updateBoardUI() {
+            for (let row = 0; row < 15; row++) {
+                for (let col = 0; col < 15; col++) {
+                    const cell = gameBoardElement.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    cell.innerHTML = '';
+                    if (board[row][col]) {
+                        const letter = document.createElement('div');
+                        letter.className = `letter ${board[row][col].temporary ? '' : 'placed'}`;
+                        letter.textContent = board[row][col].letter;
+                        letter.innerHTML += `<span class="letter-value">${letterValues[board[row][col].letter]}</span>`;
+                        cell.appendChild(letter);
+                    }
+                }
+            }
+        }
+
+        // Validate and Score Word
+        function submitWord() {
+            if (placedLetters.length === 0) {
+                showMessage('Разместите хотя бы одну букву', 'error');
+                return;
+            }
+
+            const isFirstMove = !board.some(row => row.some(cell => cell && !cell.temporary));
+            const words = getWords();
+            if (!validateWords(words, isFirstMove)) return;
+
+            const score = calculateScore(words);
+            scores[playerId] = (scores[playerId] || 0) + score;
+
+            // Save move to Firebase
+            database.ref(`games/${gameId}/moves`).push({
+                playerId: playerId,
+                letters: placedLetters,
+                score: score,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            // Confirm letters and refill rack
+            placedLetters.forEach(({ row, col, letter }) => {
+                board[row][col] = { letter, temporary: false };
+            });
+            refillRack();
+            placedLetters = [];
+            myTurn = false;
+            submitWordButton.disabled = true;
+            passTurnButton.disabled = true;
+            updateBoardUI();
+            initializeRack();
+            updateGameInfo();
+            checkGameEnd();
+        }
+
+        // Get Words Formed
+        function getWords() {
+            const words = [];
+            let mainWord = '';
+            let mainPositions = [];
+
+            // Check if placed letters are in a line
+            if (placedLetters.length === 1) {
+                mainWord = placedLetters[0].letter;
+                mainPositions = [placedLetters[0]];
+            } else {
+                const rows = [...new Set(placedLetters.map(l => l.row))];
+                const cols = [...new Set(placedLetters.map(l => l.col))];
+                const isHorizontal = rows.length === 1;
+                const isVertical = cols.length === 1;
+
+                if (!isHorizontal && !isVertical) {
+                    showMessage('Буквы должны быть в одной строке или столбце', 'error');
+                    return [];
+                }
+
+                if (isHorizontal) {
+                    const row = rows[0];
+                    let startCol = Math.min(...placedLetters.map(l => l.col));
+                    let endCol = Math.max(...placedLetters.map(l => l.col));
+                    while (startCol > 0 && board[row][startCol - 1]) startCol--;
+                    while (endCol < 14 && board[row][endCol + 1]) endCol++;
+                    for (let col = startCol; col <= endCol; col++) {
+                        if (board[row][col]) {
+                            mainWord += board[row][col].letter;
+                            mainPositions.push({ row, col, letter: board[row][col].letter });
+                        } else {
+                            mainWord = '';
+                            mainPositions = [];
+                            break;
+                        }
+                    }
+                } else {
+                    const col = cols[0];
+                    let startRow = Math.min(...placedLetters.map(l => l.row));
+                    let endRow = Math.max(...placedLetters.map(l => l.row));
+                    while (startRow > 0 && board[startRow - 1][col]) startRow--;
+                    while (endRow < 14 && board[endRow + 1][col]) endRow++;
+                    for (let row = startRow; row <= endRow; row++) {
+                        if (board[row][col]) {
+                            mainWord += board[row][col].letter;
+                            mainPositions.push({ row, col, letter: board[row][col].letter });
+                        } else {
+                            mainWord = '';
+                            mainPositions = [];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (mainWord.length > 1) words.push({ word: mainWord, positions: mainPositions });
+
+            // Check for secondary words
+            placedLetters.forEach(({ row, col, letter }) => {
+                let word = '';
+                let positions = [];
+                if (row > 0 && board[row - 1][col] || row < 14 && board[row + 1][col]) {
+                    let r = row;
+                    while (r > 0 && board[r - 1][col]) r--;
+                    while (r <= 14 && board[r][col]) {
+                        word += board[r][col].letter;
+                        positions.push({ row: r, col, letter: board[r][col].letter });
+                        r++;
+                    }
+                    if (word.length > 1) words.push({ word, positions });
+                }
+            });
+
+            return words;
+        }
+
+        // Validate Words
+        function validateWords(words, isFirstMove) {
+            if (words.length === 0) {
+                showMessage('Некорректное слово', 'error');
+                return false;
+            }
+
+            if (isFirstMove && !placedLetters.some(l => l.row === 7 && l.col === 7)) {
+                showMessage('Первое слово должно проходить через центр (H8)', 'error');
+                return false;
+            }
+
+            if (!isFirstMove && !placedLetters.some(l => {
+                return (l.row > 0 && board[l.row - 1][l.col] && !board[l.row - 1][l.col].temporary) ||
+                       (l.row < 14 && board[l.row + 1][l.col] && !board[l.row + 1][l.col].temporary) ||
+                       (l.col > 0 && board[l.row][l.col - 1] && !board[l.row][l.col - 1].temporary) ||
+                       (l.col < 14 && board[l.row][l.col + 1] && !board[l.row][l.col + 1].temporary);
+            })) {
+                showMessage('Слово должно соединяться с существующими словами', 'error');
+                return false;
+            }
+
+            for (const { word } of words) {
+                if (!dictionary.includes(word)) {
+                    showMessage(`Слово "${word}" не найдено в словаре`, 'error');
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // Calculate Score
+        function calculateScore(words) {
+            let totalScore = 0;
+            let wordMultipliers = [];
+
+            words.forEach(({ positions }) => {
+                let wordScore = 0;
+                let wordMultiplier = 1;
+
+                positions.forEach(({ row, col, letter }) => {
+                    let letterScore = letterValues[letter];
+                    const cell = gameBoardElement.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    if (board[row][col].temporary) {
+                        if (cell.classList.contains('double-letter')) letterScore *= 2;
+                        else if (cell.classList.contains('triple-letter')) letterScore *= 3;
+                        else if (cell.classList.contains('double-word')) wordMultiplier *= 2;
+                        else if (cell.classList.contains('triple-word')) wordMultiplier *= 3;
+                        else if (cell.classList.contains('center')) wordMultiplier *= 2;
+                    }
+                    wordScore += letterScore;
+                });
+
+                totalScore += wordScore * wordMultiplier;
+                wordMultipliers.push(wordMultiplier);
+            });
+
+            // Bonus for using all 7 letters
+            if (placedLetters.length === 7) totalScore += 50;
+
+            return totalScore;
+        }
+
+        // Refill Rack
+        function refillRack() {
+            database.ref(`games/${gameId}/letterBag`).once('value').then(snapshot => {
+                let letterBag = snapshot.val() || letterBagTemplate.slice();
+                while (playerRack.length < 7 && letterBag.length > 0) {
+                    const index = Math.floor(Math.random() * letterBag.length);
+                    playerRack.push(letterBag.splice(index, 1)[0]);
+                }
+                database.ref(`games/${gameId}/letterBag`).set(letterBag);
+                initializeRack();
+            });
+        }
+
+        // Pass Turn
+        function passTurn() {
+            database.ref(`games/${gameId}/moves`).push({
+                playerId: playerId,
+                letters: [],
+                score: 0,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+            myTurn = false;
+            submitWordButton.disabled = true;
+            passTurnButton.disabled = true;
+            updateGameInfo();
+        }
+
+        // Check Game End
+        function checkGameEnd() {
+            database.ref(`games/${gameId}/letterBag`).once('value').then(snapshot => {
+                const letterBag = snapshot.val() || letterBagTemplate.slice();
+                if (letterBag.length === 0 && playerRack.length === 0) {
+                    const maxScore = Math.max(...Object.values(scores));
+                    const winnerId = Object.keys(scores).find(id => scores[id] === maxScore);
+                    database.ref(`games/${gameId}`).update({
+                        winner: winnerId,
+                        endTime: firebase.database.ServerValue.TIMESTAMP,
+                        status: 'finished'
+                    });
+                }
+            });
+        }
+
+        // Join Game
+        function joinGame() {
+            playerName = playerNameInput.value.trim();
+            if (!playerName) {
+                showMessage('Пожалуйста, введите ваше имя', 'error');
+                return;
+            }
+
+            const gamesRef = database.ref('games');
+            gamesRef.once('value').then((snapshot) => {
+                let availableGame = null;
+
+                snapshot.forEach((gameSnapshot) => {
+                    const game = gameSnapshot.val();
+                    if (game.players && Object.keys(game.players).length < 4 && !game.started) {
+                        availableGame = { id: gameSnapshot.key, data: game };
+                        return true;
+                    }
+                });
+
+                if (!availableGame) {
+                    const newGameRef = gamesRef.push();
+                    gameId = newGameRef.key;
+
+                    const playerRef = database.ref(`games/${gameId}/players`).push({
+                        name: playerName,
+                        joined: firebase.database.ServerValue.TIMESTAMP
+                    });
+
+                    playerId = playerRef.key;
+                    playerNumber = 1;
+                    database.ref(`games/${gameId}/letterBag`).set(letterBagTemplate.slice());
+                    showMessage(`Создана новая игра. Ожидание игроков...`, 'info');
+                } else {
+                    gameId = availableGame.id;
+                    const playerRef = database.ref(`games/${gameId}/players`).push({
+                        name: playerName,
+                        joined: firebase.database.ServerValue.TIMESTAMP
+                    });
+                    playerId = playerRef.key;
+                    playerNumber = Object.keys(availableGame.data.players).length + 1;
+                    showMessage(`Вы присоединились к игре`, 'info');
+                }
+
+                playerNameInput.disabled = true;
+                joinGameButton.disabled = true;
+                listenForGameChanges();
+            });
+        }
+
+        // Listen for Game Changes
+        function listenForGameChanges() {
+            const gameRef = database.ref(`games/${gameId}`);
+
+            gameRef.child('players').on('value', (snapshot) => {
+                const players = snapshot.val();
+                if (players && Object.keys(players).length >= 2) {
+                    const playerList = Object.entries(players).map(([id, data]) => data.name).join(', ');
+                    gameInfoElement.innerHTML = `<i class="fas fa-user-friends"></i> Игроки: ${playerList}`;
+                    if (!gameStarted && Object.keys(players).length <= 4) {
+                        startGame();
+                    }
+                }
+            });
+
+            gameRef.child('moves').on('child_added', (snapshot) => {
+                const move = snapshot.val();
+                if (move.playerId !== playerId) {
+                    move.letters.forEach(({ row, col, letter }) => {
+                        board[row][col] = { letter, temporary: false };
+                    });
+                    scores[move.playerId] = (scores[move.playerId] || 0) + move.score;
+                    myTurn = true;
+                    submitWordButton.disabled = false;
+                    passTurnButton.disabled = false;
+                    updateBoardUI();
+                    updateGameInfo();
+                    checkGameEnd();
+                }
+            });
+
+            gameRef.child('status').on('value', (snapshot) => {
+                const status = snapshot.val();
+                if (status === 'finished') {
+                    gameRef.child('winner').once('value').then((winnerSnapshot) => {
+                        const winnerId = winnerSnapshot.val();
+                        gameRef.child('players').once('value').then((playersSnapshot) => {
+                            const players = playersSnapshot.val();
+                            const winnerName = players[winnerId].name;
+                            if (winnerId === playerId) {
+                                showMessage('Поздравляем! Вы победили!', 'success');
+                                gameInfoElement.innerHTML = `<i class="fas fa-trophy"></i> Вы победили! Счёт: ${scores[playerId]}`;
+                            } else {
+                                showMessage(`Победитель: ${winnerName}`, 'error');
+                                gameInfoElement.innerHTML = `<i class="fas fa-skull-crossbones"></i> Победитель: ${winnerName}! Счёт: ${scores[winnerId]}`;
+                            }
+                            myTurn = false;
+                            submitWordButton.disabled = true;
+                            passTurnButton.disabled = true;
+                        });
+                    });
+                }
+            });
+        }
+
+        // Start Game
+        function startGame() {
+            gameStarted = true;
+            myTurn = playerNumber === 1;
+            submitWordButton.disabled = !myTurn;
+            passTurnButton.disabled = !myTurn;
+
+            database.ref(`games/${gameId}`).update({
+                started: true,
+                startTime: firebase.database.ServerValue.TIMESTAMP,
+                status: 'started',
+                currentTurn: 1
+            });
+
+            // Initialize player rack
+            for (let i = 0; i < 7; i++) {
+                const index = Math.floor(Math.random() * letterBagTemplate.length);
+                playerRack.push(letterBagTemplate[index]);
+            }
+
+            updateGameInfo();
+            showMessage('Игра началась!', 'success');
+            initializeRack();
+        }
+
+        // Update Game Info
+        function updateGameInfo() {
+            if (gameStarted) {
+                if (myTurn) {
+                    gameInfoElement.innerHTML = `<i class="fas fa-crosshairs"></i> Ваш ход! Счёт: ${scores[playerId] || 0}`;
+                } else {
+                    gameInfoElement.innerHTML = `<i class="fas fa-hourglass"></i> Ход соперника, ожидайте. Счёт: ${scores[playerId] || 0}`;
+                }
+            }
+        }
+
+        // Show Message
+        function showMessage(text, type = 'info') {
+            messageElement.textContent = text;
+            messageElement.className = `message ${type} visible`;
+            setTimeout(() => {
+                messageElement.classList.remove('visible');
+            }, 5000);
+        }
+
+        // Event Listeners
+        joinGameButton.addEventListener('click', joinGame);
+        submitWordButton.addEventListener('click', submitWord);
+        passTurnButton.addEventListener('click', passTurn);
+
+        // Initialization
+        initializeBoard();
+    </script>
+</body>
+</html>
