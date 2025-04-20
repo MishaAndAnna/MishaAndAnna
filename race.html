@@ -515,7 +515,7 @@
 
         .chat-input:focus {
             outline: none;
-            box-shadow: 0  pleadings: 0 0 15px #33ccff;
+            box-shadow: 0 0 15px #33ccff;
         }
 
         .scanlines {
@@ -875,9 +875,9 @@
                 lastDayNightChange: 0,
                 keys: {
                     player1: {
-                        ArrowLeft: false,
-                        ArrowRight: false,
-                        ArrowUp: false
+                        KeyA: false,
+                        KeyD: false,
+                        KeyW: false
                     },
                     player2: {
                         KeyA: false,
@@ -1001,9 +1001,9 @@
                 stick.style.transform = 'translate(-50%, -50%)';
                 
                 if (gameSettings.isPeer1) {
-                    gameSettings.keys.player1.ArrowLeft = deltaX < -20;
-                    gameSettings.keys.player1.ArrowRight = deltaX > 20;
-                    gameSettings.keys.player1.ArrowUp = deltaY < -20;
+                    gameSettings.keys.player1.KeyA = deltaX < -20;
+                    gameSettings.keys.player1.KeyD = deltaX > 20;
+                    gameSettings.keys.player1.KeyW = deltaY < -20;
                 } else if (gameSettings.isPeer2) {
                     gameSettings.keys.player2.KeyA = deltaX < -20;
                     gameSettings.keys.player2.KeyD = deltaX > 20;
@@ -1016,9 +1016,9 @@
                 stick.style.left = '50%';
                 stick.style.top = '50%';
                 if (gameSettings.isPeer1) {
-                    gameSettings.keys.player1.ArrowLeft = false;
-                    gameSettings.keys.player1.ArrowRight = false;
-                    gameSettings.keys.player1.ArrowUp = false;
+                    gameSettings.keys.player1.KeyA = false;
+                    gameSettings.keys.player1.KeyD = false;
+                    gameSettings.keys.player1.KeyW = false;
                 } else if (gameSettings.isPeer2) {
                     gameSettings.keys.player2.KeyA = false;
                     gameSettings.keys.player2.KeyD = false;
@@ -1029,7 +1029,7 @@
 
             accelerationButton.addEventListener('mousedown', function() {
                 if (gameSettings.isPeer1) {
-                    gameSettings.keys.player1.ArrowUp = true;
+                    gameSettings.keys.player1.KeyW = true;
                 } else if (gameSettings.isPeer2) {
                     gameSettings.keys.player2.KeyW = true;
                 }
@@ -1038,7 +1038,7 @@
             accelerationButton.addEventListener('touchstart', function(e) {
                 e.preventDefault();
                 if (gameSettings.isPeer1) {
-                    gameSettings.keys.player1.ArrowUp = true;
+                    gameSettings.keys.player1.KeyW = true;
                 } else if (gameSettings.isPeer2) {
                     gameSettings.keys.player2.KeyW = true;
                 }
@@ -1046,7 +1046,7 @@
             
             accelerationButton.addEventListener('mouseup', function() {
                 if (gameSettings.isPeer1) {
-                    gameSettings.keys.player1.ArrowUp = false;
+                    gameSettings.keys.player1.KeyW = false;
                 } else if (gameSettings.isPeer2) {
                     gameSettings.keys.player2.KeyW = false;
                 }
@@ -1054,7 +1054,7 @@
             
             accelerationButton.addEventListener('touchend', function() {
                 if (gameSettings.isPeer1) {
-                    gameSettings.keys.player1.ArrowUp = false;
+                    gameSettings.keys.player1.KeyW = false;
                 } else if (gameSettings.isPeer2) {
                     gameSettings.keys.player2.KeyW = false;
                 }
@@ -1179,13 +1179,13 @@
                         minX -= 50;
                         maxX -= 50;
                     }
-                    if (gameSettings.keys.player1.ArrowLeft && gameSettings.player1.x > minX) {
+                    if (gameSettings.keys.player1.KeyA && gameSettings.player1.x > minX) {
                         gameSettings.player1.x -= currentCarSpeed;
                     }
-                    if (gameSettings.keys.player1.ArrowRight && gameSettings.player1.x < maxX) {
+                    if (gameSettings.keys.player1.KeyD && gameSettings.player1.x < maxX) {
                         gameSettings.player1.x += currentCarSpeed;
                     }
-                    if (gameSettings.keys.player1.ArrowUp) {
+                    if (gameSettings.keys.player1.KeyW) {
                         gameSettings.player1.speed = Math.min(gameSettings.player1.speed + 0.1, gameSettings.maxSpeed * (player1Slowed ? 0.5 : gameSettings.player1.boost));
                         car1.querySelector('.exhaust').style.opacity = 1;
                     } else {
@@ -1555,7 +1555,7 @@
             });
 
             tutorialButton.addEventListener('click', function() {
-                alert('Управление:\nИгрок 1:\n- Стрелки влево/вправо: движение\n- Стрелка вверх: ускорение\nИгрок 2:\n- A/D: движение\n- W: ускорение\n\nЦель: первым пересечь финишную линию, собирайте бонусы для ускорения, избегайте луж!\n\nЧат: T для открытия/закрытия, Enter для отправки сообщения.');
+                alert('Управление:\nИгрок 1:\n- A: влево\n- D: вправо\n- W: ускорение\nИгрок 2:\n- A: влево\n- D: вправо\n- W: ускорение\n\nЦель: первым пересечь финишную линию, собирайте бонусы для ускорения, избегайте луж!\n\nЧат: T для открытия/закрытия, Enter для отправки сообщения.');
             });
 
             startButton.addEventListener('click', async function() {
