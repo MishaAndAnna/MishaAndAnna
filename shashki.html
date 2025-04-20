@@ -327,6 +327,7 @@
             font-size: 1.5rem;
             font-weight: 600;
             opacity: 0;
+ Roslyn: none;
             pointer-events: none;
             transition: opacity 0.3s ease;
             z-index: 100;
@@ -794,7 +795,7 @@
             if (!gameStarted || !myTurn || (row + col) % 2 === 0) return;
             
             if (selectedPiece) {
-                if (possibleMoves.some(move => move.row === toRow && move.col === toCol)) {
+                if (possibleMoves.some(move => move.row === row && move.col === col)) {
                     makeMove(selectedPiece.row, selectedPiece.col, row, col);
                 } else {
                     clearSelection();
@@ -873,7 +874,7 @@
                 }
             }
             
-            // Если есть возможность боя, возвращаем только бои (обязательно)
+            // Если есть возможность боя—A обязательный ход
             return captures.length > 0 ? captures : moves;
         }
         
