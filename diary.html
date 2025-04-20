@@ -37,7 +37,7 @@
             background-attachment: fixed;
             background-repeat: repeat;
             background-blend-mode: overlay;
-            background-color: rgba(255, 249, 251, 0.92);
+            ರಿಂಗ್-color: rgba(255, 249, 251, 0.92);
         }
 
         .header {
@@ -397,7 +397,7 @@
             transform: translateY(-2px);
         }
 
-        .add-entry-btn, .add-memory-btn, .select-delete-btn, .confirm-delete-btn {
+        .add-entry-btn, .add-memory-btn, .select-delete-btn, .confirm-delete-btn, .home-btn {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             padding: 1rem 2rem;
@@ -410,15 +410,15 @@
             transition: var(--transition);
             margin-bottom: 1rem;
             display: inline-block;
-            margin-left: 10px;
+            text-decoration: none;
         }
 
-        .add-entry-btn:hover, .add-memory-btn:hover, .select-delete-btn:hover, .confirm-delete-btn:hover {
+        .add-entry-btn:hover, .add-memory-btn:hover, .select-delete-btn:hover, .confirm-delete-btn:hover, .home-btn:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 25px rgba(255, 107, 149, 0.35);
         }
 
-        .add-entry-btn i, .add-memory-btn i, .select-delete-btn i, .confirm-delete-btn i {
+        .add-entry-btn i, .add-memory-btn i, .select-delete-btn i, .confirm-delete-btn i, .home-btn i {
             margin-right: 10px;
         }
 
@@ -1243,6 +1243,9 @@
                     Наш Дневник Любви
                 </a>
                 <p class="site-description">Запечатлеваем моменты нашей любви день за днем, создавая историю, которая останется с нами навсегда.</p>
+                <a href="index.html" class="home-btn">
+                    <i class="fas fa-home"></i> На главную
+                </a>
             </div>
         </div>
     </header>
