@@ -11,21 +11,21 @@
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@400;500;700&display=swap');
 
         :root {
-            --primary-color: #6b4e31; /* Rich coffee brown */
-            --primary-light: #a68a64; /* Light tan */
-            --primary-dark: #4a3723; /* Dark walnut */
-            --secondary-color: #9b2d30; /* Deep burgundy */
-            --secondary-light: #c75b5e; /* Soft rose */
-            --secondary-dark: #7a2426; /* Darker burgundy */
-            --accent-color: #d4a017; /* Warm gold */
-            --accent-dark: #b38712; /* Darker gold */
-            --success-color: #2ea44f; /* Forest green */
-            --danger-color: #dc2626; /* Crimson */
-            --warning-color: #d97706; /* Amber */
-            --background-color: #fdf6e3; /* Cream parchment */
-            --board-bg: #8b5a2b; /* Polished wood */
-            --board-light: #f4e1c1; /* Light wood grain */
-            --board-dark: #3c2f2f; /* Dark wood */
+            --primary-color: #6b4e31;
+            --primary-light: #a68a64;
+            --primary-dark: #4a3723;
+            --secondary-color: #9b2d30;
+            --secondary-light: #c75b5e;
+            --secondary-dark: #7a2426;
+            --accent-color: #d4a017;
+            --accent-dark: #b38712;
+            --success-color: #2ea44f;
+            --danger-color: #dc2626;
+            --warning-color: #d97706;
+            --background-color: #fdf6e3;
+            --board-bg: #8b5a2b;
+            --board-light: #f4e1c1;
+            --board-dark: #3c2f2f;
             --white: #ffffff;
             --black: #1a1a1a;
             --gray-100: #f8f1e9;
@@ -99,7 +99,7 @@
             margin-bottom: 30px;
         }
 
-        .player-input {
+        .player-input, .language-select {
             padding: 14px 20px;
             border: 2px solid var(--gray-300);
             border-radius: var(--border-radius);
@@ -112,7 +112,7 @@
             background-color: var(--gray-100);
         }
 
-        .player-input:focus {
+        .player-input:focus, .language-select:focus {
             border-color: var(--secondary-color);
             outline: none;
             box-shadow: 0 0 0 4px rgba(155, 45, 48, 0.2);
@@ -505,7 +505,7 @@
                 font-size: 0.5rem;
             }
 
-            .player-input {
+            .player-input, .language-select {
                 padding: 12px;
                 font-size: 1rem;
             }
@@ -531,6 +531,10 @@
         <div class="card">
             <div class="player-info">
                 <input type="text" id="playerName" class="player-input" placeholder="Введите ваше имя">
+                <select id="languageSelect" class="language-select">
+                    <option value="ru">Русский</option>
+                    <option value="en">English</option>
+                </select>
                 <button id="joinGame" class="button"><i class="fas fa-play"></i> Присоединиться к игре</button>
             </div>
 
@@ -566,7 +570,7 @@
             <ul>
                 <li>Игроки по очереди составляют слова, размещая буквы горизонтально или вертикально.</li>
                 <li>Слова должны быть соединены с уже существующими словами на доске.</li>
-                <li>Все слова должны быть в словаре (русский язык).</li>
+                <li>Все слова должны быть в словаре (русский или английский, в зависимости от выбранного режима).</li>
                 <li>После хода игрок берёт новые буквы из мешка, чтобы снова иметь 7 букв.</li>
                 <li>Специальные клетки: двойной/тройной счёт буквы или слова применяется только при первом размещении.</li>
             </ul>
@@ -601,9 +605,11 @@
         let playerRack = [];
         let placedLetters = [];
         let scores = {};
+        let language = 'ru';
 
         // DOM Elements
         const playerNameInput = document.getElementById('playerName');
+        const languageSelect = document.getElementById('languageSelect');
         const joinGameButton = document.getElementById('joinGame');
         const messageElement = document.getElementById('message');
         const gameInfoElement = document.getElementById('gameInfo');
@@ -612,32 +618,56 @@
         const submitWordButton = document.getElementById('submitWord');
         const passTurnButton = document.getElementById('passTurn');
 
-        // Letter Values (Russian Scrabble)
+        // Letter Values
         const letterValues = {
-            'А': 1, 'Б': 3, 'В': 2, 'Г': 3, 'Д': 2, 'Е': 1, 'Ё': 3, 'Ж': 5, 'З': 5, 'И': 1,
-            'Й': 4, 'К': 2, 'Л': 2, 'М': 2, 'Н': 1, 'О': 1, 'П': 2, 'Р': 2, 'С': 2, 'Т': 2,
-            'У': 3, 'Ф': 8, 'Х': 5, 'Ц': 5, 'Ч': 5, 'Ш': 8, 'Щ': 10, 'Ъ': 10, 'Ы': 4, 'Ь': 3,
-            'Э': 8, 'Ю': 8, 'Я': 3
+            ru: {
+                'А': 1, 'Б': 3, 'В': 2, 'Г': 3, 'Д': 2, 'Е': 1, 'Ё': 3, 'Ж': 5, 'З': 5, 'И': 1,
+                'Й': 4, 'К': 2, 'Л': 2, 'М': 2, 'Н': 1, 'О': 1, 'П': 2, 'Р': 2, 'С': 2, 'Т': 2,
+                'У': 3, 'Ф': 8, 'Х': 5, 'Ц': 5, 'Ч': 5, 'Ш': 8, 'Щ': 10, 'Ъ': 10, 'Ы': 4, 'Ь': 3,
+                'Э': 8, 'Ю': 8, 'Я': 3
+            },
+            en: {
+                'A': 1, 'B': 3, 'C': 3, 'D': 2, 'E': 1, 'F': 4, 'G': 2, 'H': 4, 'I': 1, 'J': 8,
+                'K': 5, 'L': 1, 'M': 3, 'N': 1, 'O': 1, 'P': 3, 'Q': 10, 'R': 1, 'S': 1, 'T': 1,
+                'U': 1, 'V': 4, 'W': 4, 'X': 8, 'Y': 4, 'Z': 10
+            }
         };
 
-        // Letter Bag (simplified distribution)
-        const letterBagTemplate = [
-            ...Array(8).fill('А'), ...Array(4).fill('Б'), ...Array(5).fill('В'), ...Array(4).fill('Г'),
-            ...Array(5).fill('Д'), ...Array(8).fill('Е'), ...Array(1).fill('Ё'), ...Array(2).fill('Ж'),
-            ...Array(2).fill('З'), ...Array(8).fill('И'), ...Array(2).fill('Й'), ...Array(5).fill('К'),
-            ...Array(5).fill('Л'), ...Array(5).fill('М'), ...Array(8).fill('Н'), ...Array(10).fill('О'),
-            ...Array(5).fill('П'), ...Array(5).fill('Р'), ...Array(5).fill('С'), ...Array(5).fill('Т'),
-            ...Array(4).fill('У'), ...Array(1).fill('Ф'), ...Array(2).fill('Х'), ...Array(2).fill('Ц'),
-            ...Array(2).fill('Ч'), ...Array(1).fill('Ш'), ...Array(1).fill('Щ'), ...Array(1).fill('Ъ'),
-            ...Array(2).fill('Ы'), ...Array(2).fill('Ь'), ...Array(1).fill('Э'), ...Array(1).fill('Ю'),
-            ...Array(3).fill('Я')
-        ];
+        // Letter Bags
+        const letterBagTemplates = {
+            ru: [
+                ...Array(8).fill('А'), ...Array(4).fill('Б'), ...Array(5).fill('В'), ...Array(4).fill('Г'),
+                ...Array(5).fill('Д'), ...Array(8).fill('Е'), ...Array(1).fill('Ё'), ...Array(2).fill('Ж'),
+                ...Array(2).fill('З'), ...Array(8).fill('И'), ...Array(2).fill('Й'), ...Array(5).fill('К'),
+                ...Array(5).fill('Л'), ...Array(5).fill('М'), ...Array(8).fill('Н'), ...Array(10).fill('О'),
+                ...Array(5).fill('П'), ...Array(5).fill('Р'), ...Array(5).fill('С'), ...Array(5).fill('Т'),
+                ...Array(4).fill('У'), ...Array(1).fill('Ф'), ...Array(2).fill('Х'), ...Array(2).fill('Ц'),
+                ...Array(2).fill('Ч'), ...Array(1).fill('Ш'), ...Array(1).fill('Щ'), ...Array(1).fill('Ъ'),
+                ...Array(2).fill('Ы'), ...Array(2).fill('Ь'), ...Array(1).fill('Э'), ...Array(1).fill('Ю'),
+                ...Array(3).fill('Я')
+            ],
+            en: [
+                ...Array(9).fill('A'), ...Array(2).fill('B'), ...Array(2).fill('C'), ...Array(4).fill('D'),
+                ...Array(12).fill('E'), ...Array(2).fill('F'), ...Array(3).fill('G'), ...Array(2).fill('H'),
+                ...Array(9).fill('I'), ...Array(1).fill('J'), ...Array(1).fill('K'), ...Array(4).fill('L'),
+                ...Array(2).fill('M'), ...Array(6).fill('N'), ...Array(8).fill('O'), ...Array(2).fill('P'),
+                ...Array(1).fill('Q'), ...Array(6).fill('R'), ...Array(4).fill('S'), ...Array(6).fill('T'),
+                ...Array(4).fill('U'), ...Array(2).fill('V'), ...Array(2).fill('W'), ...Array(1).fill('X'),
+                ...Array(2).fill('Y'), ...Array(1).fill('Z')
+            ]
+        };
 
-        // Simple Russian Dictionary (extend with a full dictionary)
-        const dictionary = [
-            'ДОМ', 'КОТ', 'СОБАКА', 'СТОЛ', 'КНИГА', 'ДЕРЕВО', 'РЕКА', 'СОЛНЦЕ', 'ЛУНА', 'ЗВЕЗДА',
-            'ПОЛЕ', 'ГОРА', 'МОРЕ', 'НЕБО', 'ЦВЕТОК', 'ПТИЦА', 'РЫБА', 'МАШИНА', 'ДОРОГА', 'ГОРОД'
-        ];
+        // Dictionaries
+        const dictionaries = {
+            ru: [
+                'ДОМ', 'КОТ', 'СОБАКА', 'СТОЛ', 'КНИГА', 'ДЕРЕВО', 'РЕКА', 'СОЛНЦЕ', 'ЛУНА', 'ЗВЕЗДА',
+                'ПОЛЕ', 'ГОРА', 'МОРЕ', 'НЕБО', 'ЦВЕТОК', 'ПТИЦА', 'РЫБА', 'МАШИНА', 'ДОРОГА', 'ГОРОД'
+            ],
+            en: [
+                'HOUSE', 'CAT', 'DOG', 'TABLE', 'BOOK', 'TREE', 'RIVER', 'SUN', 'MOON', 'STAR',
+                'FIELD', 'MOUNTAIN', 'SEA', 'SKY', 'FLOWER', 'BIRD', 'FISH', 'CAR', 'ROAD', 'CITY'
+            ]
+        };
 
         // Initialize Board
         function initializeBoard() {
@@ -660,16 +690,16 @@
 
                     if (specialTiles.tripleWord.some(([r, c]) => r === row && c === col)) {
                         cell.classList.add('triple-word');
-                        cell.textContent = 'Тройной счёт слова';
+                        cell.textContent = language === 'ru' ? 'Тройной счёт слова' : 'Triple Word';
                     } else if (specialTiles.doubleWord.some(([r, c]) => r === row && c === col)) {
                         cell.classList.add('double-word');
-                        cell.textContent = 'Двойной счёт слова';
+                        cell.textContent = language === 'ru' ? 'Двойной счёт слова' : 'Double Word';
                     } else if (specialTiles.tripleLetter.some(([r, c]) => r === row && c === col)) {
                         cell.classList.add('triple-letter');
-                        cell.textContent = 'Тройной счёт буквы';
+                        cell.textContent = language === 'ru' ? 'Тройной счёт буквы' : 'Triple Letter';
                     } else if (specialTiles.doubleLetter.some(([r, c]) => r === row && c === col)) {
                         cell.classList.add('double-letter');
-                        cell.textContent = 'Двойной счёт буквы';
+                        cell.textContent = language === 'ru' ? 'Двойной счёт буквы' : 'Double Letter';
                     } else if (row === 7 && col === 7) {
                         cell.classList.add('center');
                         cell.textContent = '★';
@@ -694,7 +724,7 @@
                 tile.draggable = true;
                 tile.textContent = letter;
                 tile.dataset.letter = letter;
-                tile.innerHTML += `<span class="letter-value">${letterValues[letter]}</span>`;
+                tile.innerHTML += `<span class="letter-value">${letterValues[language][letter]}</span>`;
                 tile.addEventListener('dragstart', handleDragStart);
                 tile.addEventListener('dragend', handleDragEnd);
                 playerRackElement.appendChild(tile);
@@ -719,7 +749,7 @@
             const letter = e.dataTransfer.getData('text/plain');
             if (!board[row][col] && playerRack.includes(letter)) {
                 placedLetters.push({ row, col, letter });
-                board[row][col] = { letter, temporary: true };
+                board[row][col] = { letter, temporary: true }; // Fixed syntax error
                 playerRack.splice(playerRack.indexOf(letter), 1);
                 updateBoardUI();
                 initializeRack();
@@ -737,7 +767,7 @@
                         const letter = document.createElement('div');
                         letter.className = `letter ${board[row][col].temporary ? '' : 'placed'}`;
                         letter.textContent = board[row][col].letter;
-                        letter.innerHTML += `<span class="letter-value">${letterValues[board[row][col].letter]}</span>`;
+                        letter.innerHTML += `<span class="letter-value">${letterValues[language][board[row][col].letter]}</span>`;
                         cell.appendChild(letter);
                     }
                 }
@@ -747,7 +777,7 @@
         // Validate and Score Word
         function submitWord() {
             if (placedLetters.length === 0) {
-                showMessage('Разместите хотя бы одну букву', 'error');
+                showMessage(language === 'ru' ? 'Разместите хотя бы одну букву' : 'Place at least one letter', 'error');
                 return;
             }
 
@@ -787,7 +817,6 @@
             let mainWord = '';
             let mainPositions = [];
 
-            // Check if placed letters are in a line
             if (placedLetters.length === 1) {
                 mainWord = placedLetters[0].letter;
                 mainPositions = [placedLetters[0]];
@@ -798,7 +827,7 @@
                 const isVertical = cols.length === 1;
 
                 if (!isHorizontal && !isVertical) {
-                    showMessage('Буквы должны быть в одной строке или столбце', 'error');
+                    showMessage(language === 'ru' ? 'Буквы должны быть в одной строке или столбце' : 'Letters must be in one row or column', 'error');
                     return [];
                 }
 
@@ -839,7 +868,6 @@
 
             if (mainWord.length > 1) words.push({ word: mainWord, positions: mainPositions });
 
-            // Check for secondary words
             placedLetters.forEach(({ row, col, letter }) => {
                 let word = '';
                 let positions = [];
@@ -861,12 +889,12 @@
         // Validate Words
         function validateWords(words, isFirstMove) {
             if (words.length === 0) {
-                showMessage('Некорректное слово', 'error');
+                showMessage(language === 'ru' ? 'Некорректное слово' : 'Invalid word', 'error');
                 return false;
             }
 
             if (isFirstMove && !placedLetters.some(l => l.row === 7 && l.col === 7)) {
-                showMessage('Первое слово должно проходить через центр (H8)', 'error');
+                showMessage(language === 'ru' ? 'Первое слово должно проходить через центр (H8)' : 'First word must pass through center (H8)', 'error');
                 return false;
             }
 
@@ -876,13 +904,13 @@
                        (l.col > 0 && board[l.row][l.col - 1] && !board[l.row][l.col - 1].temporary) ||
                        (l.col < 14 && board[l.row][l.col + 1] && !board[l.row][l.col + 1].temporary);
             })) {
-                showMessage('Слово должно соединяться с существующими словами', 'error');
+                showMessage(language === 'ru' ? 'Слово должно соединяться с существующими словами' : 'Word must connect to existing words', 'error');
                 return false;
             }
 
             for (const { word } of words) {
-                if (!dictionary.includes(word)) {
-                    showMessage(`Слово "${word}" не найдено в словаре`, 'error');
+                if (!dictionaries[language].includes(word)) {
+                    showMessage(language === 'ru' ? `Слово "${word}" не найдено в словаре` : `Word "${word}" not found in dictionary`, 'error');
                     return false;
                 }
             }
@@ -900,7 +928,7 @@
                 let wordMultiplier = 1;
 
                 positions.forEach(({ row, col, letter }) => {
-                    let letterScore = letterValues[letter];
+                    let letterScore = letterValues[language][letter];
                     const cell = gameBoardElement.querySelector(`[data-row="${row}"][data-col="${col}"]`);
                     if (board[row][col].temporary) {
                         if (cell.classList.contains('double-letter')) letterScore *= 2;
@@ -916,7 +944,6 @@
                 wordMultipliers.push(wordMultiplier);
             });
 
-            // Bonus for using all 7 letters
             if (placedLetters.length === 7) totalScore += 50;
 
             return totalScore;
@@ -925,7 +952,7 @@
         // Refill Rack
         function refillRack() {
             database.ref(`games/${gameId}/letterBag`).once('value').then(snapshot => {
-                let letterBag = snapshot.val() || letterBagTemplate.slice();
+                let letterBag = snapshot.val() || letterBagTemplates[language].slice();
                 while (playerRack.length < 7 && letterBag.length > 0) {
                     const index = Math.floor(Math.random() * letterBag.length);
                     playerRack.push(letterBag.splice(index, 1)[0]);
@@ -952,7 +979,7 @@
         // Check Game End
         function checkGameEnd() {
             database.ref(`games/${gameId}/letterBag`).once('value').then(snapshot => {
-                const letterBag = snapshot.val() || letterBagTemplate.slice();
+                const letterBag = snapshot.val() || letterBagTemplates[language].slice();
                 if (letterBag.length === 0 && playerRack.length === 0) {
                     const maxScore = Math.max(...Object.values(scores));
                     const winnerId = Object.keys(scores).find(id => scores[id] === maxScore);
@@ -968,8 +995,9 @@
         // Join Game
         function joinGame() {
             playerName = playerNameInput.value.trim();
+            language = languageSelect.value;
             if (!playerName) {
-                showMessage('Пожалуйста, введите ваше имя', 'error');
+                showMessage(language === 'ru' ? 'Пожалуйста, введите ваше имя' : 'Please enter your name', 'error');
                 return;
             }
 
@@ -979,7 +1007,7 @@
 
                 snapshot.forEach((gameSnapshot) => {
                     const game = gameSnapshot.val();
-                    if (game.players && Object.keys(game.players).length < 4 && !game.started) {
+                    if (game.players && Object.keys(game.players).length < 4 && !game.started && game.language === language) {
                         availableGame = { id: gameSnapshot.key, data: game };
                         return true;
                     }
@@ -996,8 +1024,9 @@
 
                     playerId = playerRef.key;
                     playerNumber = 1;
-                    database.ref(`games/${gameId}/letterBag`).set(letterBagTemplate.slice());
-                    showMessage(`Создана новая игра. Ожидание игроков...`, 'info');
+                    database.ref(`games/${gameId}/letterBag`).set(letterBagTemplates[language].slice());
+                    database.ref(`games/${gameId}/language`).set(language);
+                    showMessage(language === 'ru' ? `Создана новая игра. Ожидание игроков...` : `New game created. Waiting for players...`, 'info');
                 } else {
                     gameId = availableGame.id;
                     const playerRef = database.ref(`games/${gameId}/players`).push({
@@ -1006,10 +1035,11 @@
                     });
                     playerId = playerRef.key;
                     playerNumber = Object.keys(availableGame.data.players).length + 1;
-                    showMessage(`Вы присоединились к игре`, 'info');
+                    showMessage(language === 'ru' ? `Вы присоединились к игре` : `You joined the game`, 'info');
                 }
 
                 playerNameInput.disabled = true;
+                languageSelect.disabled = true;
                 joinGameButton.disabled = true;
                 listenForGameChanges();
             });
@@ -1023,7 +1053,7 @@
                 const players = snapshot.val();
                 if (players && Object.keys(players).length >= 2) {
                     const playerList = Object.entries(players).map(([id, data]) => data.name).join(', ');
-                    gameInfoElement.innerHTML = `<i class="fas fa-user-friends"></i> Игроки: ${playerList}`;
+                    gameInfoElement.innerHTML = `<i class="fas fa-user-friends"></i> ${language === 'ru' ? 'Игроки' : 'Players'}: ${playerList}`;
                     if (!gameStarted && Object.keys(players).length <= 4) {
                         startGame();
                     }
@@ -1055,11 +1085,11 @@
                             const players = playersSnapshot.val();
                             const winnerName = players[winnerId].name;
                             if (winnerId === playerId) {
-                                showMessage('Поздравляем! Вы победили!', 'success');
-                                gameInfoElement.innerHTML = `<i class="fas fa-trophy"></i> Вы победили! Счёт: ${scores[playerId]}`;
+                                showMessage(language === 'ru' ? 'Поздравляем! Вы победили!' : 'Congratulations! You won!', 'success');
+                                gameInfoElement.innerHTML = `<i class="fas fa-trophy"></i> ${language === 'ru' ? 'Вы победили' : 'You won'}! ${language === 'ru' ? 'Счёт' : 'Score'}: ${scores[playerId]}`;
                             } else {
-                                showMessage(`Победитель: ${winnerName}`, 'error');
-                                gameInfoElement.innerHTML = `<i class="fas fa-skull-crossbones"></i> Победитель: ${winnerName}! Счёт: ${scores[winnerId]}`;
+                                showMessage(language === 'ru' ? `Победитель: ${winnerName}` : `Winner: ${winnerName}`, 'error');
+                                gameInfoElement.innerHTML = `<i class="fas fa-skull-crossbones"></i> ${language === 'ru' ? 'Победитель' : 'Winner'}: ${winnerName}! ${language === 'ru' ? 'Счёт' : 'Score'}: ${scores[winnerId]}`;
                             }
                             myTurn = false;
                             submitWordButton.disabled = true;
@@ -1086,12 +1116,12 @@
 
             // Initialize player rack
             for (let i = 0; i < 7; i++) {
-                const index = Math.floor(Math.random() * letterBagTemplate.length);
-                playerRack.push(letterBagTemplate[index]);
+                const index = Math.floor(Math.random() * letterBagTemplates[language].length);
+                playerRack.push(letterBagTemplates[language][index]);
             }
 
             updateGameInfo();
-            showMessage('Игра началась!', 'success');
+            showMessage(language === 'ru' ? 'Игра началась!' : 'Game started!', 'success');
             initializeRack();
         }
 
@@ -1099,9 +1129,9 @@
         function updateGameInfo() {
             if (gameStarted) {
                 if (myTurn) {
-                    gameInfoElement.innerHTML = `<i class="fas fa-crosshairs"></i> Ваш ход! Счёт: ${scores[playerId] || 0}`;
+                    gameInfoElement.innerHTML = `<i class="fas fa-crosshairs"></i> ${language === 'ru' ? 'Ваш ход' : 'Your turn'}! ${language === 'ru' ? 'Счёт' : 'Score'}: ${scores[playerId] || 0}`;
                 } else {
-                    gameInfoElement.innerHTML = `<i class="fas fa-hourglass"></i> Ход соперника, ожидайте. Счёт: ${scores[playerId] || 0}`;
+                    gameInfoElement.innerHTML = `<i class="fas fa-hourglass"></i> ${language === 'ru' ? 'Ход соперника, ожидайте' : 'Opponent\'s turn, please wait'}. ${language === 'ru' ? 'Счёт' : 'Score'}: ${scores[playerId] || 0}`;
                 }
             }
         }
