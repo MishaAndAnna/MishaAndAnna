@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -398,6 +399,42 @@
             justify-content: center;
         }
 
+        .dictionary-iframe-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--gray-100);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 2px solid var(--primary-dark);
+            width: 100%;
+            max-width: 720px;
+            margin: 30px auto;
+        }
+
+        .dictionary-iframe-container h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dictionary-iframe-container h3 i {
+            margin-right: 10px;
+            color: var(--secondary-color);
+        }
+
+        .dictionary-iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
+            border-radius: 8px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
         .rules {
             padding: 30px;
             background: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
@@ -473,6 +510,10 @@
                 padding: 12px 24px;
                 font-size: 1rem;
             }
+
+            .dictionary-iframe {
+                height: 300px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -519,6 +560,10 @@
             .rules {
                 padding: 20px;
             }
+
+            .dictionary-iframe {
+                height: 250px;
+            }
         }
     </style>
 </head>
@@ -559,6 +604,11 @@
                     </button>
                 </div>
             </div>
+
+            <div class="dictionary-iframe-container" id="dictionaryIframeContainer" style="display: none;">
+                <h3><i class="fas fa-book-open"></i> Словарь для проверки слов</h3>
+                <iframe id="dictionaryIframe" class="dictionary-iframe"></iframe>
+            </div>
         </div>
 
         <div class="rules">
@@ -573,6 +623,7 @@
                 <li>Все слова должны быть в словаре (русский или английский, в зависимости от выбранного режима).</li>
                 <li>После хода игрок берёт новые буквы из мешка, чтобы снова иметь 7 букв.</li>
                 <li>Специальные клетки: двойной/тройной счёт буквы или слова применяется только при первом размещении.</li>
+                <li>В английском режиме пустые плитки (2 шт.) могут заменять любую букву, но имеют 0 очков.</li>
             </ul>
             <p><strong>5. Победа:</strong> Игрок с наибольшим количеством очков после того, как закончатся буквы в мешке, и один из игроков использует все свои буквы.</p>
         </div>
@@ -617,6 +668,14 @@
         const playerRackElement = document.getElementById('playerRack');
         const submitWordButton = document.getElementById('submitWord');
         const passTurnButton = document.getElementById('passTurn');
+        const dictionaryIframeContainer = document.getElementById('dictionaryIframeContainer');
+        const dictionaryIframe = document.getElementById('dictionaryIframe');
+
+        // Dictionary URLs
+        const dictionaryUrls = {
+            ru: 'https://dic.academic.ru/',
+            en: 'https://www.merriam-webster.com/'
+        };
 
         // Letter Values
         const letterValues = {
@@ -629,7 +688,7 @@
             en: {
                 'A': 1, 'B': 3, 'C': 3, 'D': 2, 'E': 1, 'F': 4, 'G': 2, 'H': 4, 'I': 1, 'J': 8,
                 'K': 5, 'L': 1, 'M': 3, 'N': 1, 'O': 1, 'P': 3, 'Q': 10, 'R': 1, 'S': 1, 'T': 1,
-                'U': 1, 'V': 4, 'W': 4, 'X': 8, 'Y': 4, 'Z': 10
+                'U': 1, 'V': 4, 'W': 4, 'X': 8, 'Y': 4, 'Z': 10, '': 0
             }
         };
 
@@ -653,20 +712,42 @@
                 ...Array(2).fill('M'), ...Array(6).fill('N'), ...Array(8).fill('O'), ...Array(2).fill('P'),
                 ...Array(1).fill('Q'), ...Array(6).fill('R'), ...Array(4).fill('S'), ...Array(6).fill('T'),
                 ...Array(4).fill('U'), ...Array(2).fill('V'), ...Array(2).fill('W'), ...Array(1).fill('X'),
-                ...Array(2).fill('Y'), ...Array(1).fill('Z')
+                ...Array(2).fill('Y'), ...Array(1).fill('Z'), ...Array(2).fill('')
             ]
         };
 
-        // Dictionaries
+        // Dictionaries (Expanded)
         const dictionaries = {
             ru: [
-                'ДОМ', 'КОТ', 'СОБАКА', 'СТОЛ', 'КНИГА', 'ДЕРЕВО', 'РЕКА', 'СОЛНЦЕ', 'ЛУНА', 'ЗВЕЗДА',
-                'ПОЛЕ', 'ГОРА', 'МОРЕ', 'НЕБО', 'ЦВЕТОК', 'ПТИЦА', 'РЫБА', 'МАШИНА', 'ДОРОГА', 'ГОРОД'
+                'АВТОР', 'БАБУШКА', 'БЕРЕГ', 'БИЛЕТ', 'БОЛЬ', 'БРАТ', 'ВЕК', 'ВЕСНА', 'ВОДА', 'ВОЛК',
+                'ВОРОН', 'ВРЕМЯ', 'ГЛАЗ', 'ГОЛОС', 'ГОРА', 'ГОРОД', 'ДВЕРЬ', 'ДЕНЬ', 'ДЕРЕВО', 'ДОМ',
+                'ДОРОГА', 'ДРУГ', 'ДУША', 'ЕДА', 'ЖЕНА', 'ЖИЗНЬ', 'ЗВЕЗДА', 'ЗЕМЛЯ', 'ЗИМА', 'ЗНАК',
+                'ИГРА', 'ИМЯ', 'ИСТОРИЯ', 'КАМЕНЬ', 'КАРТА', 'КНИГА', 'КОНЬ', 'КОТ', 'КРОВЬ', 'КРУГ',
+                'ЛЕС', 'ЛИЦО', 'ЛОДКА', 'ЛУНА', 'ЛЮБОВЬ', 'МАМА', 'МАШИНА', 'МЕЧ', 'МИР', 'МОРЕ',
+                'МУЗЫКА', 'МЫСЛЬ', 'НЕБО', 'НОГА', 'НОЧЬ', 'ОГОНЬ', 'ОКНО', 'ОТЕЦ', 'ПЕСНЯ', 'ПИР',
+                'ПЛАМЯ', 'ПОЛЕ', 'ПОРОГ', 'ПРАВДА', 'ПУТЬ', 'РАБОТА', 'РЕКА', 'РОД', 'РУКА', 'РЫБА',
+                'СВЕТ', 'СЕМЬЯ', 'СЕРДЦЕ', 'СИЛА', 'СКАЗКА', 'СЛОВО', 'СНЕГ', 'СОБАКА', 'СОЛНЦЕ', 'СОН',
+                'СТЕНА', 'СТОЛ', 'СТРАНА', 'СТУЛ', 'ТЕЛО', 'ТЕМНОТА', 'ТРАВА', 'ТРОПА', 'ТЫСЯЧА', 'УТРО',
+                'ФАКЕЛ', 'ХЛЕБ', 'ЦВЕТ', 'ЧАС', 'ЧЕЛОВЕК', 'ШКОЛА', 'ЯЗЫК', 'ЯРКОСТЬ'
             ],
             en: [
-                'HOUSE', 'CAT', 'DOG', 'TABLE', 'BOOK', 'TREE', 'RIVER', 'SUN', 'MOON', 'STAR',
-                'FIELD', 'MOUNTAIN', 'SEA', 'SKY', 'FLOWER', 'BIRD', 'FISH', 'CAR', 'ROAD', 'CITY'
+                'APPLE', 'BAG', 'BALL', 'BAND', 'BARK', 'BED', 'BIRD', 'BOAT', 'BOOK', 'BOX',
+                'BRIDGE', 'CAR', 'CAT', 'CHAIR', 'CITY', 'CLOUD', 'COAT', 'CUP', 'DAY', 'DOG',
+                'DOOR', 'DREAM', 'EYE', 'FARM', 'FIELD', 'FIRE', 'FISH', 'FLOWER', 'FOOD', 'FOREST',
+                'GAME', 'GARDEN', 'GATE', 'GOLD', 'HAND', 'HAT', 'HILL', 'HOME', 'HORSE', 'HOUSE',
+                'ICE', 'ISLAND', 'KEY', 'KING', 'LAKE', 'LEAF', 'LIGHT', 'LINE', 'LOVE', 'MAP',
+                'MOON', 'MOUNTAIN', 'MUSIC', 'NIGHT', 'OCEAN', 'PATH', 'PEN', 'PICTURE', 'PLANE', 'PLANT',
+                'RAIN', 'RING', 'RIVER', 'ROAD', 'ROCK', 'ROOM', 'SEA', 'SHIP', 'SHOE', 'SKY',
+                'SNOW', 'SONG', 'STAR', 'STONE', 'STREET', 'SUN', 'TABLE', 'TIME', 'TOWN', 'TREE',
+                'WALL', 'WATER', 'WAVE', 'WAY', 'WIND', 'WINDOW', 'WING', 'WOOD', 'WORD', 'WORLD',
+                'YEAR', 'ZOO', 'ARM', 'BACK', 'BELL', 'CAKE', 'CARD', 'CLOCK', 'FLOOR', 'SMILE'
             ]
+        };
+
+        // Dictionary Sets for Efficient Lookup
+        const dictionarySets = {
+            ru: new Set(dictionaries.ru),
+            en: new Set(dictionaries.en)
         };
 
         // Initialize Board
@@ -722,9 +803,9 @@
                 const tile = document.createElement('div');
                 tile.className = 'letter draggable';
                 tile.draggable = true;
-                tile.textContent = letter;
+                tile.textContent = letter || ' ';
                 tile.dataset.letter = letter;
-                tile.innerHTML += `<span class="letter-value">${letterValues[language][letter]}</span>`;
+                tile.innerHTML += `<span class="letter-value">${letterValues[language][letter] || 0}</span>`;
                 tile.addEventListener('dragstart', handleDragStart);
                 tile.addEventListener('dragend', handleDragEnd);
                 playerRackElement.appendChild(tile);
@@ -746,10 +827,19 @@
         function handleDrop(e, row, col) {
             e.preventDefault();
             if (!myTurn || !gameStarted) return;
-            const letter = e.dataTransfer.getData('text/plain');
+            let letter = e.dataTransfer.getData('text/plain');
             if (!board[row][col] && playerRack.includes(letter)) {
-                placedLetters.push({ row, col, letter });
-                board[row][col] = { letter, temporary: true }; // Fixed syntax error
+                let displayLetter = letter;
+                if (letter === '' && language === 'en') {
+                    const validLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    displayLetter = prompt(language === 'ru' ? 'Выберите букву для пустой плитки (A-Z):' : 'Choose a letter for the blank tile (A-Z):')?.toUpperCase();
+                    if (!displayLetter || !validLetters.includes(displayLetter)) {
+                        showMessage(language === 'ru' ? 'Некорректная буква для пустой плитки' : 'Invalid letter for blank tile', 'error');
+                        return;
+                    }
+                }
+                placedLetters.push({ row, col, letter, displayLetter: displayLetter || letter });
+                board[row][col] = { letter: displayLetter || letter, temporary: true, isBlank: letter === '' };
                 playerRack.splice(playerRack.indexOf(letter), 1);
                 updateBoardUI();
                 initializeRack();
@@ -767,7 +857,7 @@
                         const letter = document.createElement('div');
                         letter.className = `letter ${board[row][col].temporary ? '' : 'placed'}`;
                         letter.textContent = board[row][col].letter;
-                        letter.innerHTML += `<span class="letter-value">${letterValues[language][board[row][col].letter]}</span>`;
+                        letter.innerHTML += `<span class="letter-value">${letterValues[language][board[row][col].isBlank ? '' : board[row][col].letter]}</span>`;
                         cell.appendChild(letter);
                     }
                 }
@@ -788,7 +878,6 @@
             const score = calculateScore(words);
             scores[playerId] = (scores[playerId] || 0) + score;
 
-            // Save move to Firebase
             database.ref(`games/${gameId}/moves`).push({
                 playerId: playerId,
                 letters: placedLetters,
@@ -796,9 +885,8 @@
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             });
 
-            // Confirm letters and refill rack
-            placedLetters.forEach(({ row, col, letter }) => {
-                board[row][col] = { letter, temporary: false };
+            placedLetters.forEach(({ row, col, letter, displayLetter }) => {
+                board[row][col] = { letter: displayLetter || letter, temporary: false, isBlank: letter === '' };
             });
             refillRack();
             placedLetters = [];
@@ -818,7 +906,7 @@
             let mainPositions = [];
 
             if (placedLetters.length === 1) {
-                mainWord = placedLetters[0].letter;
+                mainWord = placedLetters[0].displayLetter || placedLetters[0].letter;
                 mainPositions = [placedLetters[0]];
             } else {
                 const rows = [...new Set(placedLetters.map(l => l.row))];
@@ -868,7 +956,7 @@
 
             if (mainWord.length > 1) words.push({ word: mainWord, positions: mainPositions });
 
-            placedLetters.forEach(({ row, col, letter }) => {
+            placedLetters.forEach(({ row, col, displayLetter, letter }) => {
                 let word = '';
                 let positions = [];
                 if (row > 0 && board[row - 1][col] || row < 14 && board[row + 1][col]) {
@@ -909,7 +997,7 @@
             }
 
             for (const { word } of words) {
-                if (!dictionaries[language].includes(word)) {
+                if (!dictionarySets[language].has(word)) {
                     showMessage(language === 'ru' ? `Слово "${word}" не найдено в словаре` : `Word "${word}" not found in dictionary`, 'error');
                     return false;
                 }
@@ -928,7 +1016,7 @@
                 let wordMultiplier = 1;
 
                 positions.forEach(({ row, col, letter }) => {
-                    let letterScore = letterValues[language][letter];
+                    let letterScore = letterValues[language][board[row][col].isBlank ? '' : letter];
                     const cell = gameBoardElement.querySelector(`[data-row="${row}"][data-col="${col}"]`);
                     if (board[row][col].temporary) {
                         if (cell.classList.contains('double-letter')) letterScore *= 2;
@@ -1063,8 +1151,8 @@
             gameRef.child('moves').on('child_added', (snapshot) => {
                 const move = snapshot.val();
                 if (move.playerId !== playerId) {
-                    move.letters.forEach(({ row, col, letter }) => {
-                        board[row][col] = { letter, temporary: false };
+                    move.letters.forEach(({ row, col, letter, displayLetter }) => {
+                        board[row][col] = { letter: displayLetter || letter, temporary: false, isBlank: letter === '' };
                     });
                     scores[move.playerId] = (scores[move.playerId] || 0) + move.score;
                     myTurn = true;
@@ -1119,6 +1207,10 @@
                 const index = Math.floor(Math.random() * letterBagTemplates[language].length);
                 playerRack.push(letterBagTemplates[language][index]);
             }
+
+            // Show dictionary iframe
+            dictionaryIframe.src = dictionaryUrls[language];
+            dictionaryIframeContainer.style.display = 'block';
 
             updateGameInfo();
             showMessage(language === 'ru' ? 'Игра началась!' : 'Game started!', 'success');
