@@ -97,7 +97,7 @@
             align-items: center;
         }
 
-        .theme-toggle, .reset-coupons {
+        .theme-toggle, .reset-coupons, .home-button {
             background: var(--light);
             border: 2px solid var(--primary-light);
             border-radius: 20px;
@@ -112,7 +112,7 @@
             gap: 6px;
         }
 
-        .theme-toggle:hover, .reset-coupons:hover {
+        .theme-toggle:hover, .reset-coupons:hover, .home-button:hover {
             background: var(--primary-light);
             color: white;
         }
@@ -580,7 +580,7 @@
             color: var(--primary-light);
         }
 
-        body.dark-theme .theme-toggle, body.dark-theme .reset-coupons {
+        body.dark-theme .theme-toggle, body.dark-theme .reset-coupons, body.dark-theme .home-button {
             background: #3d3d55;
             border-color: var(--primary-light);
             color: var(--primary-light);
@@ -692,6 +692,9 @@
             </button>
             <button class="reset-coupons" id="resetCoupons">
                 <i class="fas fa-redo"></i> Сбросить купоны
+            </button>
+            <button class="home-button" onclick="window.location.href='index.html'">
+                <i class="fas fa-home"></i> На главную
             </button>
         </div>
     </header>
