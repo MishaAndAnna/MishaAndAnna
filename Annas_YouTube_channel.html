@@ -15,6 +15,10 @@
             --text-accent: #ff6b9d;
             --gradient-primary: linear-gradient(135deg, var(--primary-pink), var(--primary-purple));
             --gradient-secondary: linear-gradient(135deg, var(--primary-purple), var(--primary-green));
+            /* Light theme variables */
+            --light-bg: #f5f5f5;
+            --light-card-bg: #ffffff;
+            --text-dark: #333333;
         }
 
         * {
@@ -34,6 +38,33 @@
                 radial-gradient(circle at 90% 90%, rgba(74, 224, 181, 0.05) 0%, transparent 70%);
             background-attachment: fixed;
             background-size: 200% 200%;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.light-theme {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            background-image: none;
+        }
+
+        body.light-theme .navbar {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        body.light-theme .card-bg,
+        body.light-theme .video-card,
+        body.light-theme .plave-card,
+        body.light-theme .modal-content {
+            background: var(--light-card-bg);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .cta-section {
+            background: linear-gradient(135deg, #ffffff, #f0f0f0);
+        }
+
+        body.light-theme .quote {
+            background-color: rgba(147, 112, 219, 0.05);
         }
 
         .container {
@@ -82,6 +113,7 @@
         .nav-links {
             display: flex;
             list-style: none;
+            align-items: center;
         }
 
         .nav-links li {
@@ -95,6 +127,10 @@
             font-size: 1rem;
             transition: all 0.3s ease;
             position: relative;
+        }
+
+        body.light-theme .nav-links a {
+            color: var(--text-dark);
         }
 
         .nav-links a:after {
@@ -116,6 +152,31 @@
             display: none;
             cursor: pointer;
             font-size: 1.5rem;
+        }
+
+        .theme-toggle-btn, .home-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 20px;
+            background: var(--gradient-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.2);
+            cursor: pointer;
+        }
+
+        .theme-toggle-btn:hover, .home-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 107, 157, 0.3);
+        }
+
+        .theme-toggle-btn i, .home-btn i {
+            margin-right: 8px;
         }
 
         /* Hero Section */
@@ -163,6 +224,10 @@
             -webkit-text-fill-color: transparent;
         }
 
+        body.light-theme h1 {
+            color: var(--text-dark);
+        }
+
         .subtitle {
             font-size: 1.3rem;
             margin-bottom: 40px;
@@ -170,6 +235,10 @@
             max-width: 700px;
             margin-left: auto;
             margin-right: auto;
+        }
+
+        body.light-theme .subtitle {
+            color: rgba(51, 51, 51, 0.8);
         }
 
         .cta-button {
@@ -250,6 +319,10 @@
             color: rgba(255, 255, 255, 0.7);
             max-width: 700px;
             margin: 0 auto;
+        }
+
+        body.light-theme .section-subtitle {
+            color: rgba(51, 51, 51, 0.7);
         }
 
         .video-gallery {
@@ -348,11 +421,19 @@
             line-height: 1.4;
         }
 
+        body.light-theme .card-title {
+            color: var(--text-dark);
+        }
+
         .card-description {
             font-size: 1rem;
             color: rgba(255, 255, 255, 0.7);
             margin-bottom: 20px;
             line-height: 1.6;
+        }
+
+        body.light-theme .card-description {
+            color: rgba(51, 51, 51, 0.7);
         }
 
         .card-meta {
@@ -361,6 +442,10 @@
             justify-content: space-between;
             font-size: 0.9rem;
             color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.light-theme .card-meta {
+            color: rgba(51, 51, 51, 0.5);
         }
 
         .card-views {
@@ -547,10 +632,18 @@
             font-weight: 600;
         }
 
+        body.light-theme .plave-title {
+            color: var(--text-dark);
+        }
+
         .plave-card p {
             font-size: 1rem;
             color: rgba(255, 255, 255, 0.7);
             line-height: 1.7;
+        }
+
+        body.light-theme .plave-card p {
+            color: rgba(51, 51, 51, 0.7);
         }
 
         /* Inspiration Section */
@@ -601,6 +694,10 @@
             font-size: 1.1rem;
             line-height: 1.8;
             color: rgba(255, 255, 255, 0.85);
+        }
+
+        body.light-theme .inspiration-content p {
+            color: rgba(51, 51, 51, 0.85);
         }
 
         .highlight {
@@ -662,6 +759,10 @@
             color: white;
         }
 
+        body.light-theme .cta-title {
+            color: var(--text-dark);
+        }
+
         .cta-description {
             font-size: 1.2rem;
             margin-bottom: 40px;
@@ -669,6 +770,10 @@
             max-width: 700px;
             margin-left: auto;
             margin-right: auto;
+        }
+
+        body.light-theme .cta-description {
+            color: rgba(51, 51, 51, 0.8);
         }
 
         .social-links {
@@ -690,6 +795,11 @@
             color: var(--text-light);
             transition: all 0.3s ease;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .social-link {
+            background: var(--light-card-bg);
+            color: var(--text-dark);
         }
 
         .social-link:hover {
@@ -724,6 +834,10 @@
             font-weight: 600;
         }
 
+        body.light-theme .footer-title {
+            color: var(--text-dark);
+        }
+
         .footer-links {
             list-style: none;
         }
@@ -736,6 +850,10 @@
             color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
             transition: all 0.3s ease;
+        }
+
+        body.light-theme .footer-links a {
+            color: rgba(51, 51, 51, 0.7);
         }
 
         .footer-links a:hover {
@@ -752,6 +870,11 @@
             font-size: 0.9rem;
         }
 
+        body.light-theme .copyright {
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            color: rgba(51, 51, 51, 0.5);
+        }
+
         /* Modal */
         .modal {
             display: none;
@@ -764,6 +887,10 @@
             z-index: 2000;
             opacity: 0;
             transition: opacity 0.3s ease;
+        }
+
+        body.light-theme .modal {
+            background-color: rgba(0, 0, 0, 0.7);
         }
 
         .modal.active {
@@ -807,6 +934,10 @@
             transition: all 0.3s ease;
         }
 
+        body.light-theme .close-modal {
+            color: var(--text-dark);
+        }
+
         .close-modal:hover {
             background-color: var(--primary-pink);
             transform: rotate(90deg);
@@ -838,10 +969,18 @@
             color: var(--text-light);
         }
 
+        body.light-theme .modal-title {
+            color: var(--text-dark);
+        }
+
         .modal-description {
             font-size: 1.1rem;
             color: rgba(255, 255, 255, 0.8);
             line-height: 1.7;
+        }
+
+        body.light-theme .modal-description {
+            color: rgba(51, 51, 51, 0.8);
         }
 
         /* Media Queries */
@@ -866,6 +1005,25 @@
         @media screen and (max-width: 992px) {
             .nav-links {
                 display: none;
+            }
+            
+            .nav-links.show {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background: rgba(10, 10, 20, 0.95);
+                padding: 20px 0;
+            }
+            
+            body.light-theme .nav-links.show {
+                background: rgba(255, 255, 255, 0.95);
+            }
+            
+            .nav-links.show li {
+                margin: 15px 0;
             }
             
             .mobile-menu-btn {
@@ -946,6 +1104,11 @@
                 height: 50px;
                 font-size: 1.2rem;
             }
+            
+            .theme-toggle-btn, .home-btn {
+                padding: 6px 15px;
+                font-size: 0.8rem;
+            }
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -961,6 +1124,8 @@
                 <li><a href="#videos">Видео</a></li>
                 <li><a href="#plave">О PLAVE</a></li>
                 <li><a href="#inspiration">Вдохновение</a></li>
+                <li><a href="#home" class="home-btn"><i class="fas fa-home"></i> На главную</a></li>
+                <li><button class="theme-toggle-btn"><i class="fas fa-sun"></i> Светлая тема</button></li>
             </ul>
             <div class="mobile-menu-btn">
                 <i class="fas fa-bars"></i>
@@ -1000,406 +1165,427 @@
         </div>
     </section>
 
-<!-- PLAVE Info Section -->
-<section class="plave-section" id="plave">
-    <div class="hex-bg">
-        <div class="hex"></div>
-        <div class="hex"></div>
-        <div class="hex"></div>
-        <div class="hex"></div>
-    </div>
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">Факты о PLAVE</h2>
-            <p class="section-subtitle">Узнайте больше о революционной K-pop группе, покоряющей сердца фанатов по всему миру</p>
+    <!-- PLAVE Info Section -->
+    <section class="plave-section" id="plave">
+        <div class="hex-bg">
+            <div class="hex"></div>
+            <div class="hex"></div>
+            <div class="hex"></div>
+            <div class="hex"></div>
         </div>
-        
-        <div class="plave-grid">
-            <div class="plave-card" style="--delay: 1">
-                <div class="plave-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <h3 class="plave-title">Виртуальные Айдолы</h3>
-                <p>PLAVE — инновационная группа, участники которой представлены как виртуальные айдолы. Они сочетают реальные голоса и танцевальные навыки с передовыми технологиями 3D-моделирования.</p>
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Факты о PLAVE</h2>
+                <p class="section-subtitle">Узнайте больше о революционной K-pop группе, покоряющей сердца фанатов по всему миру</p>
             </div>
             
-            <div class="plave-card" style="--delay: 2">
-                <div class="plave-icon">
-                    <i class="fas fa-microphone-alt"></i>
-                </div>
-                <h3 class="plave-title">Состав Группы</h3>
-                <p>В группу входят пять талантливых участников: Бамби, Ной, Чеён, Йеджун и До-ах. Каждый из них обладает уникальным стилем и харизмой, образуя гармоничный коллектив.</p>
-            </div>
-            
-            <div class="plave-card" style="--delay: 3">
-                <div class="plave-icon">
-                    <i class="fas fa-compact-disc"></i>
-                </div>
-                <h3 class="plave-title">Хитовые Синглы</h3>
-                <p>Группа покорила чарты такими треками как "WAY 4 LUV", "Asterum", "I'll Be There" и "WAY 4 LUV (Remix)". Их музыка сочетает элементы K-pop, электронной музыки и R&B.</p>
-            </div>
-            
-            <div class="plave-card" style="--delay: 4">
-                <div class="plave-icon">
-                    <i class="fas fa-globe-asia"></i>
-                </div>
-                <h3 class="plave-title">Мировое Признание</h3>
-                <p>Несмотря на инновационную концепцию, PLAVE быстро завоевали международное признание, собирая многомиллионную аудиторию на различных стриминговых платформах и социальных сетях.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Inspiration Section -->
-<section class="inspiration-section" id="inspiration">
-    <div class="inspiration-bg"></div>
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">История Вдохновения</h2>
-            <p class="section-subtitle">Как творчество PLAVE повлияло на жизнь и искусство Анны</p>
-        </div>
-        
-        <div class="inspiration-container">
-            <div class="inspiration-image">
-                <img src="/api/placeholder/600/400" alt="Творческое вдохновение">
-            </div>
-            
-            <div class="inspiration-content">
-                <p>Когда Анна впервые услышала песню PLAVE, она почувствовала мгновенную связь с их музыкой. Инновационное сочетание <span class="highlight">виртуальных образов</span> и настоящих эмоций в их творчестве резонировало с её собственным видением искусства.</p>
-                
-                <p>Вдохновлённая их уникальным подходом, она начала создавать видеоконтент, который отражает <span class="highlight">гармонию технологий и человеческих чувств</span>. Каждый её проект — это попытка передать ту же энергию и эмоциональную глубину, которую она находит в музыке PLAVE.</p>
-                
-                <p>"Для меня PLAVE — это не просто музыкальная группа, а источник бесконечного вдохновения. Их творчество показывает, что <span class="highlight">искусство не имеет границ</span>, когда технологии служат выражению искренних эмоций," — объясняет Анна.</p>
-                
-                <p>Сегодня её работы собирают тысячи просмотров и объединяют фанатов PLAVE по всему миру, создавая удивительное сообщество единомышленников, находящих красоту в <span class="highlight">слиянии реального и виртуального миров</span>.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Video Modal -->
-<div class="modal" id="videoModal">
-    <div class="close-modal">&times;</div>
-    <div class="modal-content">
-        <div class="video-container">
-            <iframe id="modalVideo" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </div>
-        <div class="modal-info">
-            <h3 class="modal-title" id="modalTitle">Название видео</h3>
-            <p class="modal-description" id="modalDescription">Описание видео будет здесь.</p>
-        </div>
-    </div>
-</div>
-
-<script>
-   // Navbar Scroll Effect
-window.addEventListener('scroll', function () {
-    const navbar = document.getElementById('navbar');
-    if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-    } else {
-        navbar.classList.remove('scrolled');
-    }
-});
-
-// Функция для извлечения ID видео из URL YouTube
-function getYouTubeVideoId(url) {
-    let videoId = '';
-    if (url.includes('youtu.be/')) {
-        videoId = url.split('youtu.be/')[1].split('?')[0];
-    } else if (url.includes('youtube.com/watch?v=')) {
-        videoId = url.split('watch?v=')[1].split('&')[0];
-    }
-    return videoId;
-}
-
-// Функция для получения URL превью
-function getYouTubeThumbnail(url) {
-    const videoId = getYouTubeVideoId(url);
-    if (videoId) {
-        return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-    }
-    // Запасной вариант, если ID не удалось извлечь
-    return '/api/placeholder/400/225';
-}
-
-// Initialize Video Gallery
-document.addEventListener('DOMContentLoaded', function () {
-    const videos = [
-        {
-            id: 'video1',
-            title: '[eng sub] hamin try not to laugh challenge FAILED｜240216 plave livestream highlights',
-            description: 'he tried. context: yejun’s throat was still recovering and bc of that he couldn’t laugh properly so they tried to do a stream that is a little less chaotic than usual.',
-            videoUrl: 'https://youtu.be/0DaYaLCUe7s?si=OCFsWtf40lQBTdy5',
-            views: '12K',
-            date: '01.06.2024'
-        },
-        {
-            id: 'video2',
-            title: '[eng sub] plave’s last 3 brain cells solve puzzles and make memes | 240129 livestream highlights',
-            description: 'somehow i feel like i’d be worse at that game',
-            videoUrl: 'https://youtu.be/I6kit6AGKdM?si=zAl9KJVflR26P_Sf',
-            views: '20K',
-            date: '02.06.2024'
-        },
-        {
-            id: 'video3',
-            title: '[eng sub] how to survive yeline - guide by eunho | 230919 plave livestream highlights',
-            description: "'it's not that i'm strong, hyungs are just weak' ⓒ hamin",
-            videoUrl: 'https://youtu.be/rCKNxU2h_Lw?si=aZEg4xLRFHiWBj6h',
-            views: '18K',
-            date: '10.06.2024'
-        },
-        {
-            id: 'video4',
-            title: '[eng sub] endless chaos, whining and the stork | 230818 plave livestream highlights',
-            description: 'hamin truly embraced his b̶a̶b̶y̶ maknae role in this one',
-            videoUrl: 'https://youtu.be/lzLkLnKlTPU?si=tv-f62KOPbV37hmo',
-            views: '21K',
-            date: '21.06.2024'
-        },
-        {
-            id: 'video5',
-            title: '[eng sub] the day plave turned against their leader | 240104 livestream highlights',
-            description: "the floor in vlast's studio was sparkling clean after the stream lol",
-            videoUrl: 'https://youtu.be/o0dR-8Y3TA8?si=9J_dLWz6JucI8eT-',
-            views: '26K',
-            date: '30.06.2024'
-        },
-        {
-            id: 'video6',
-            title: "[eng sub] plave's mess of a thank you speech | 240104 livestream highlight",
-            description: 'me trying to keep to the point whenever i tell a story ',
-            videoUrl: 'https://youtu.be/CyeMcBrcvUY?si=_qdeVtvJbEZvSYS8',
-            views: '2K',
-            date: '03.07.2024'
-        },
-         {
-            id: 'video7',
-            title: "[eng sub] yeline’s calm and healing animal crossing stream | 231109 plave livestream highlights",
-            description: 'one day i will make a video with no yeline in it but that day is not today ',
-            videoUrl: 'https://youtu.be/8cBz-oS-FKw?si=DZnNABP_ucueNVqI',
-            views: '12K',
-            date: '12.07.2024'
-        },
-         {
-            id: 'video8',
-            title: "[eng sub] plave’s most relatable stream | 240513 livestream highlights",
-            description: 'i am yejun and yejun is me ',
-            videoUrl: 'https://youtu.be/vCEYSN-NSgg?si=gtP2Fp2rBNxWg7TA',
-            views: '14K',
-            date: '22.07.2024'
-        },
-         {
-            id: 'video9',
-            title: "[eng sub] explaining plave inside lingo",
-            description: 'you can find more here (a great spreadsheet with all the info abt plave you’ll ever need, from general terms to unit and ship names): https://shorturl.at/YzRyW (PLAVE glossary by @peuldoongnuna and @manddediddi)',
-            videoUrl: 'https://youtu.be/4UNi6ipzq04?si=5D073Ot3NXi7WX1R',
-            views: '33K',
-            date: '31.07.2024'
-        },
-         {
-            id: 'video10',
-            title: "[eng sub] bamby's worst investment plan | 240725 plave livestream highlights",
-            description: 'yejun’s list of lines to take over: y̶e̶l̶i̶n̶e̶, b̶a̶m̶l̶i̶n̶e̶, noline',
-            videoUrl: 'https://youtu.be/1kwnZUCv3AA?si=EkygNPOY9NkRgjLs',
-            views: '24K',
-            date: '15.08.2024'
-        },
-         {
-            id: 'video11',
-            title: "[eng sub] venturing into horror with plave | 231204 livestream highlights",
-            description: 'horror berriez are my favourite kind of berriez',
-            videoUrl: 'https://youtu.be/CyeMcBrcvUY?si=_qdeVtvJbEZvSYS8',
-            views: '60K',
-            date: '25.08.2024'
-        },
-         {
-            id: 'video12',
-            title: "[eng sub] the becoming of red eyes",
-            description: 'yejun b-day special video! early happy birthday to our best leader, nam yejun 💙🐬💙🐬💙🐬💙 forever grateful to you for bringing plave together and bringing me and so many other pllis to the group 💙💙💙 ',
-            videoUrl: 'https://youtu.be/z7c8M28qNnk?si=vjRkXSxTTCLziRSz',
-            views: '20K',
-            date: '09.09.2024'
-        },
-         {
-            id: 'video13',
-            title: "[eng sub] plave’s struggler line | 230710 livestream highlights",
-            description: 'a little bit of a break from yejun content on this channel lol',
-            videoUrl: 'https://youtu.be/VXQ9hn65Rqk?si=73t_x9LShO4fj5XL',
-            views: '5.9K',
-            date: '20.09.2024'
-        },
-         {
-            id: 'video14',
-            title: "[eng sub] sports day special | 231027 plave livestream highlights",
-            description: "you'll never guess who wins this lol oooooh intrigue ~(˘▾˘)~ ",
-            videoUrl: 'https://youtu.be/UYRHBu-kFJk?si=SVo8RQHxUrAdoMXf',
-            views: '27K',
-            date: '02.08.2024'
-        },
-         {
-            id: 'video15',
-            title: "[eng sub] the sixth member of plave",
-            description: 'for once, its not ricky',
-            videoUrl: 'https://youtu.be/BqdkbdMG0-c?si=HJQKRoiwML-O9I0X',
-            views: '18K',
-            date: '12.08.2024'
-        },
-         {
-            id: 'video16',
-            title: "[eng sub] yeline vs noline | 230406 plave livestream highlights",
-            description: "noah: why’s my waist so narrow? who did that?! me: interesting. *makes it worse for the thumbnail*",
-            videoUrl: 'https://youtu.be/A0HP2-hXhNY?si=k6U7PZzYNP-NpsWe',
-            views: '23K',
-            date: '02.09.2024'
-        },
-         {
-            id: 'video17',
-            title: "[eng sub] welcome to praise prison",
-            description: "a small disclaimer: every character in the video is fictional and is not based on any real human being. this video is not aimed at anyone. just for fun ^-^",
-            videoUrl: 'https://youtu.be/cgOA7mYZVw0?si=b20ocqcXErSHAmgP',
-            views: '8.8k',
-            date: '16.09.2024'
-        },
-         {
-            id: 'video18',
-            title: "[eng sub] best of pre-debut plave",
-            description: 'wish i was a pre-debut peuldoongie to witness these in real time 😔',
-            videoUrl: 'https://youtu.be/my3RpNaJsV8?si=4rA8HJsKeXCc2Vsp',
-            views: '12',
-            date: '24.09.2024'
-        },
-         {
-            id: 'video19',
-            title: "[eng sub] plave teamwork case study: yataz & yeline",
-            description: 'reasons why yataz took so long: 1. eunho f-ing around 2. thats it. no more reasons',
-            videoUrl: 'https://youtu.be/p6ogfj8t4cE?si=nkqA3a5wPVYTAQC8',
-            views: '13K',
-            date: '29.10.2024'
-        },
-         {
-            id: 'video20',
-            title: "[eng sub] plave comeback waiting room | january streams highlights",
-            description: "stream plave's new album!",
-            videoUrl: 'https://youtu.be/nCJRU-PPaeU?si=YbdI9hOqu72G_1AA',
-            views: '11K',
-            date: '02.02.2025'
-        },
-    ];
-
-    const masonryGrid = document.querySelector('.masonry-grid');
-
-    videos.forEach((video, index) => {
-        const delay = index + 1;
-
-        const videoCard = document.createElement('div');
-        videoCard.className = 'video-card';
-        videoCard.style.setProperty('--delay', delay);
-        videoCard.setAttribute('data-id', video.id);
-        videoCard.setAttribute('data-url', video.videoUrl);
-        videoCard.setAttribute('data-title', video.title);
-        videoCard.setAttribute('data-description', video.description);
-
-        // Получаем URL превью
-        const thumbnailUrl = getYouTubeThumbnail(video.videoUrl);
-
-        videoCard.innerHTML = `
-            <div class="video-thumbnail">
-                <img src="${thumbnailUrl}" alt="${video.title}">
-                <div class="play-button"></div>
-            </div>
-            <div class="card-content">
-                <h3 class="card-title">${video.title}</h3>
-                <p class="card-description">${video.description}</p>
-                <div class="card-meta">
-                    <div class="card-views">
-                        <i class="fas fa-eye"></i> ${video.views} просмотров
+            <div class="plave-grid">
+                <div class="plave-card" style="--delay: 1">
+                    <div class="plave-icon">
+                        <i class="fas fa-users"></i>
                     </div>
-                    <div class="card-date">
-                        <i class="fas fa-calendar-alt"></i> ${video.date}
+                    <h3 class="plave-title">Виртуальные Айдолы</h3>
+                    <p>PLAVE — инновационная группа, участники которой представлены как виртуальные айдолы. Они сочетают реальные голоса и танцевальные навыки с передовыми технологиями 3D-моделирования.</p>
+                </div>
+                
+                <div class="plave-card" style="--delay: 2">
+                    <div class="plave-icon">
+                        <i class="fas fa-microphone-alt"></i>
                     </div>
+                    <h3 class="plave-title">Состав Группы</h3>
+                    <p>В группу входят пять талантливых участников: Бамби, Ной, Чеён, Йеджун и До-ах. Каждый из них обладает уникальным стилем и харизмой, образуя гармоничный коллектив.</p>
+                </div>
+                
+                <div class="plave-card" style="--delay: 3">
+                    <div class="plave-icon">
+                        <i class="fas fa-compact-disc"></i>
+                    </div>
+                    <h3 class="plave-title">Хитовые Синглы</h3>
+                    <p>Группа покорила чарты такими треками как "WAY 4 LUV", "Asterum", "I'll Be There" и "WAY 4 LUV (Remix)". Их музыка сочетает элементы K-pop, электронной музыки и R&B.</p>
+                </div>
+                
+                <div class="plave-card" style="--delay: 4">
+                    <div class="plave-icon">
+                        <i class="fas fa-globe-asia"></i>
+                    </div>
+                    <h3 class="plave-title">Мировое Признание</h3>
+                    <p>Несмотря на инновационную концепцию, PLAVE быстро завоевали международное признание, собирая многомиллионную аудиторию на различных стриминговых платформах и социальных сетях.</p>
                 </div>
             </div>
-        `;
+        </div>
+    </section>
 
-        masonryGrid.appendChild(videoCard);
+    <!-- Inspiration Section -->
+    <section class="inspiration-section" id="inspiration">
+        <div class="inspiration-bg"></div>
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">История Вдохновения</h2>
+                <p class="section-subtitle">Как фандом PLAVE повлиял на жизнь и искусство Анны</p>
+            </div>
+            
+            <div class="inspiration-container">
+                <div class="inspiration-image">
+                    <img src="/api/placeholder/600/400" alt="Творческое вдохновение">
+                </div>
+                
+                <div class="inspiration-content">
+                    <p>Когда Анна впервые услышала песню PLAVE, она почувствовала мгновенную связь с их музыкой. Инновационное сочетание <span class="highlight">виртуальных образов</span> и настоящих эмоций в их творчестве резонировало с её собственным видением искусства.</p>
+                    
+                    <p>Вдохновлённая их уникальным подходом, она начала создавать видеоконтент, который отражает <span class="highlight">гармонию технологий и человеческих чувств</span>. Каждый её проект — это попытка передать ту же энергию и эмоциональную глубину, которую она находит в музыке PLAVE.</p>
+                    
+                    <p>"Для меня PLAVE — это не просто музыкальная группа, а источник бесконечного вдохновения. Их творчество показывает, что <span class="highlight">искусство не имеет границ</span>, когда технологии служат выражению искренних эмоций," — объясняет Анна.</p>
+                    
+                    <p>Сегодня её работы собирают тысячи просмотров и объединяют фанатов PLAVE по всему миру, создавая удивительное сообщество единомышленников, находящих красоту в <span class="highlight">слиянии реального и виртуального миров</span>.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        // Add click event to open modal
-        videoCard.addEventListener('click', function () {
-            const rawUrl = this.getAttribute('data-url');
-            const title = this.getAttribute('data-title');
-            const description = this.getAttribute('data-description');
+    <!-- Video Modal -->
+    <div class="modal" id="videoModal">
+        <div class="close-modal">×</div>
+        <div class="modal-content">
+            <div class="video-container">
+                <iframe id="modalVideo" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <div class="modal-info">
+                <h3 class="modal-title" id="modalTitle">Название видео</h3>
+                <p class="modal-description" id="modalDescription">Описание видео будет здесь.</p>
+            </div>
+        </div>
+    </div>
 
-            // Convert YouTube URL to embed format
-            let embedUrl = rawUrl;
-
-            if (rawUrl.includes('youtu.be/')) {
-                const videoId = rawUrl.split('youtu.be/')[1].split('?')[0];
-                embedUrl = `https://www.youtube.com/embed/${videoId}`;
-            } else if (rawUrl.includes('youtube.com/watch?v=')) {
-                const videoId = rawUrl.split('watch?v=')[1].split('&')[0];
-                embedUrl = `https://www.youtube.com/embed/${videoId}`;
+    <script>
+        // Navbar Scroll Effect
+        window.addEventListener('scroll', function () {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
             }
-
-            const modal = document.getElementById('videoModal');
-            const modalVideo = document.getElementById('modalVideo');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalDescription = document.getElementById('modalDescription');
-
-            modalVideo.src = embedUrl;
-            modalTitle.textContent = title;
-            modalDescription.textContent = description;
-
-            modal.classList.add('active');
         });
-    });
 
-    // Close modal events
-    const closeModal = document.querySelector('.close-modal');
-    const modal = document.getElementById('videoModal');
+        // Theme Toggle Functionality
+        const themeToggleBtn = document.querySelector('.theme-toggle-btn');
+        const body = document.body;
 
-    closeModal.addEventListener('click', function () {
-        modal.classList.remove('active');
-        document.getElementById('modalVideo').src = '';
-    });
-
-    window.addEventListener('click', function (event) {
-        if (event.target === modal) {
-            modal.classList.remove('active');
-            document.getElementById('modalVideo').src = '';
+        // Check for saved theme preference
+        if (localStorage.getItem('theme') === 'light') {
+            body.classList.add('light-theme');
+            themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i> Тёмная тема';
         }
-    });
 
-    // Mobile menu toggle
-    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-    const navLinks = document.querySelector('.nav-links');
-
-    mobileMenuBtn.addEventListener('click', function () {
-        navLinks.classList.toggle('show');
-    });
-
-    // Smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-
-            const targetId = this.getAttribute('href');
-            const targetHTMLElement = document.querySelector(targetId);
-
-            if (targetHTMLElement) {
-                window.scrollTo({
-                    top: targetHTMLElement.offsetTop - 80,
-                    behavior: 'smooth'
-                });
-
-                if (navLinks.classList.contains('show')) {
-                    navLinks.classList.remove('show');
-                }
+        themeToggleBtn.addEventListener('click', function () {
+            body.classList.toggle('light-theme');
+            if (body.classList.contains('light-theme')) {
+                themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i> Тёмная тема';
+                localStorage.setItem('theme', 'light');
+            } else {
+                themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i> Светлая тема';
+                localStorage.setItem('theme', 'dark');
             }
         });
-    });
-});
-</script>
+
+        // Функция для извлечения ID видео из URL YouTube
+        function getYouTubeVideoId(url) {
+            let videoId = '';
+            if (url.includes('youtu.be/')) {
+                videoId = url.split('youtu.be/')[1].split('?')[0];
+            } else if (url.includes('youtube.com/watch?v=')) {
+                videoId = url.split('watch?v=')[1].split('&')[0];
+            }
+            return videoId;
+        }
+
+        // Функция для получения URL превью
+        function getYouTubeThumbnail(url) {
+            const videoId = getYouTubeVideoId(url);
+            if (videoId) {
+                return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+            }
+            // Запасной вариант, если ID не удалось извлечь
+            return '/api/placeholder/400/225';
+        }
+
+        // Initialize Video Gallery
+        document.addEventListener('DOMContentLoaded', function () {
+            const videos = [
+                {
+                    id: 'video1',
+                    title: '[eng sub] hamin try not to laugh challenge FAILED｜240216 plave livestream highlights',
+                    description: 'he tried. context: yejun’s throat was still recovering and bc of that he couldn’t laugh properly so they tried to do a stream that is a little less chaotic than usual.',
+                    videoUrl: 'https://youtu.be/0DaYaLCUe7s?si=OCFsWtf40lQBTdy5',
+                    views: '12K',
+                    date: '01.06.2024'
+                },
+                {
+                    id: 'video2',
+                    title: '[eng sub] plave’s last 3 brain cells solve puzzles and make memes | 240129 livestream highlights',
+                    description: 'somehow i feel like i’d be worse at that game',
+                    videoUrl: 'https://youtu.be/I6kit6AGKdM?si=zAl9KJVflR26P_Sf',
+                    views: '20K',
+                    date: '02.06.2024'
+                },
+                {
+                    id: 'video3',
+                    title: '[eng sub] how to survive yeline - guide by eunho | 230919 plave livestream highlights',
+                    description: "'it's not that i'm strong, hyungs are just weak' ⓒ hamin",
+                    videoUrl: 'https://youtu.be/rCKNxU2h_Lw?si=aZEg4xLRFHiWBj6h',
+                    views: '18K',
+                    date: '10.06.2024'
+                },
+                {
+                    id: 'video4',
+                    title: '[eng sub] endless chaos, whining and the stork | 230818 plave livestream highlights',
+                    description: 'hamin truly embraced his b̶a̶b̶y̶ maknae role in this one',
+                    videoUrl: 'https://youtu.be/lzLkLnKlTPU?si=tv-f62KOPbV37hmo',
+                    views: '21K',
+                    date: '21.06.2024'
+                },
+                {
+                    id: 'video5',
+                    title: '[eng sub] the day plave turned against their leader | 240104 livestream highlights',
+                    description: "the floor in vlast's studio was sparkling clean after the stream lol",
+                    videoUrl: 'https://youtu.be/o0dR-8Y3TA8?si=9J_dLWz6JucI8eT-',
+                    views: '26K',
+                    date: '30.06.2024'
+                },
+                {
+                    id: 'video6',
+                    title: "[eng sub] plave's mess of a thank you speech | 240104 livestream highlight",
+                    description: 'me trying to keep to the point whenever i tell a story ',
+                    videoUrl: 'https://youtu.be/CyeMcBrcvUY?si=_qdeVtvJbEZvSYS8',
+                    views: '2K',
+                    date: '03.07.2024'
+                },
+                {
+                    id: 'video7',
+                    title: "[eng sub] yeline’s calm and healing animal crossing stream | 231109 plave livestream highlights",
+                    description: 'one day i will make a video with no yeline in it but that day is not today ',
+                    videoUrl: 'https://youtu.be/8cBz-oS-FKw?si=DZnNABP_ucueNVqI',
+                    views: '12K',
+                    date: '12.07.2024'
+                },
+                {
+                    id: 'video8',
+                    title: "[eng sub] plave’s most relatable stream | 240513 livestream highlights",
+                    description: 'i am yejun and yejun is me ',
+                    videoUrl: 'https://youtu.be/vCEYSN-NSgg?si=gtP2Fp2rBNxWg7TA',
+                    views: '14K',
+                    date: '22.07.2024'
+                },
+                {
+                    id: 'video9',
+                    title: "[eng sub] explaining plave inside lingo",
+                    description: 'you can find more here (a great spreadsheet with all the info abt plave you’ll ever need, from general terms to unit and ship names): https://shorturl.at/YzRyW (PLAVE glossary by @peuldoongnuna and @manddediddi)',
+                    videoUrl: 'https://youtu.be/4UNi6ipzq04?si=5D073Ot3NXi7WX1R',
+                    views: '33K',
+                    date: '31.07.2024'
+                },
+                {
+                    id: 'video10',
+                    title: "[eng sub] bamby's worst investment plan | 240725 plave livestream highlights",
+                    description: 'yejun’s list of lines to take over: y̶e̶l̶i̶n̶e̶, b̶a̶m̶l̶i̶n̶e̶, noline',
+                    videoUrl: 'https://youtu.be/1kwnZUCv3AA?si=EkygNPOY9NkRgjLs',
+                    views: '24K',
+                    date: '15.08.2024'
+                },
+                {
+                    id: 'video11',
+                    title: "[eng sub] venturing into horror with plave | 231204 livestream highlights",
+                    description: 'horror berriez are my favourite kind of berriez',
+                    videoUrl: 'https://youtu.be/CyeMcBrcvUY?si=_qdeVtvJbEZvSYS8',
+                    views: '60K',
+                    date: '25.08.2024'
+                },
+                {
+                    id: 'video12',
+                    title: "[eng sub] the becoming of red eyes",
+                    description: 'yejun b-day special video! early happy birthday to our best leader, nam yejun 💙🐬💙🐬💙🐬💙 forever grateful to you for bringing plave together and bringing me and so many other pllis to the group 💙💙💙 ',
+                    videoUrl: 'https://youtu.be/z7c8M28qNnk?si=vjRkXSxTTCLziRSz',
+                    views: '20K',
+                    date: '09.09.2024'
+                },
+                {
+                    id: 'video13',
+                    title: "[eng sub] plave’s struggler line | 230710 livestream highlights",
+                    description: 'a little bit of a break from yejun content on this channel lol',
+                    videoUrl: 'https://youtu.be/VXQ9hn65Rqk?si=73t_x9LShO4fj5XL',
+                    views: '5.9K',
+                    date: '20.09.2024'
+                },
+                {
+                    id: 'video14',
+                    title: "[eng sub] sports day special | 231027 plave livestream highlights",
+                    description: "you'll never guess who wins this lol oooooh intrigue ~(˘▾˘)~ ",
+                    videoUrl: 'https://youtu.be/UYRHBu-kFJk?si=SVo8RQHxUrAdoMXf',
+                    views: '27K',
+                    date: '02.08.2024'
+                },
+                {
+                    id: 'video15',
+                    title: "[eng sub] the sixth member of plave",
+                    description: 'for once, its not ricky',
+                    videoUrl: 'https://youtu.be/BqdkbdMG0-c?si=HJQKRoiwML-O9I0X',
+                    views: '18K',
+                    date: '12.08.2024'
+                },
+                {
+                    id: 'video16',
+                    title: "[eng sub] yeline vs noline | 230406 plave livestream highlights",
+                    description: "noah: why’s my waist so narrow? who did that?! me: interesting. *makes it worse for the thumbnail*",
+                    videoUrl: 'https://youtu.be/A0HP2-hXhNY?si=k6U7PZzYNP-NpsWe',
+                    views: '23K',
+                    date: '02.09.2024'
+                },
+                {
+                    id: 'video17',
+                    title: "[eng sub] welcome to praise prison",
+                    description: "a small disclaimer: every character in the video is fictional and is not based on any real human being. this video is not aimed at anyone. just for fun ^-^",
+                    videoUrl: 'https://youtu.be/cgOA7mYZVw0?si=b20ocqcXErSHAmgP',
+                    views: '8.8k',
+                    date: '16.09.2024'
+                },
+                {
+                    id: 'video18',
+                    title: "[eng sub] best of pre-debut plave",
+                    description: 'wish i was a pre-debut peuldoongie to witness these in real time 😔',
+                    videoUrl: 'https://youtu.be/my3RpNaJsV8?si=4rA8HJsKeXCc2Vsp',
+                    views: '12',
+                    date: '24.09.2024'
+                },
+                {
+                    id: 'video19',
+                    title: "[eng sub] plave teamwork case study: yataz & yeline",
+                    description: 'reasons why yataz took so long: 1. eunho f-ing around 2. thats it. no more reasons',
+                    videoUrl: 'https://youtu.be/p6ogfj8t4cE?si=nkqA3a5wPVYTAQC8',
+                    views: '13K',
+                    date: '29.10.2024'
+                },
+                {
+                    id: 'video20',
+                    title: "[eng sub] plave comeback waiting room | january streams highlights",
+                    description: "stream plave's new album!",
+                    videoUrl: 'https://youtu.be/nCJRU-PPaeU?si=YbdI9hOqu72G_1AA',
+                    views: '11K',
+                    date: '02.02.2025'
+                },
+            ];
+
+            const masonryGrid = document.querySelector('.masonry-grid');
+
+            videos.forEach((video, index) => {
+                const delay = index + 1;
+
+                const videoCard = document.createElement('div');
+                videoCard.className = 'video-card';
+                videoCard.style.setProperty('--delay', delay);
+                videoCard.setAttribute('data-id', video.id);
+                videoCard.setAttribute('data-url', video.videoUrl);
+                videoCard.setAttribute('data-title', video.title);
+                videoCard.setAttribute('data-description', video.description);
+
+                // Получаем URL превью
+                const thumbnailUrl = getYouTubeThumbnail(video.videoUrl);
+
+                videoCard.innerHTML = `
+                    <div class="video-thumbnail">
+                        <img src="${thumbnailUrl}" alt="${video.title}">
+                        <div class="play-button"></div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">${video.title}</h3>
+                        <p class="card-description">${video.description}</p>
+                        <div class="card-meta">
+                            <div class="card-views">
+                                <i class="fas fa-eye"></i> ${video.views} просмотров
+                            </div>
+                            <div class="card-date">
+                                <i class="fas fa-calendar-alt"></i> ${video.date}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                masonryGrid.appendChild(videoCard);
+
+                // Add click event to open modal
+                videoCard.addEventListener('click', function () {
+                    const rawUrl = this.getAttribute('data-url');
+                    const title = this.getAttribute('data-title');
+                    const description = this.getAttribute('data-description');
+
+                    // Convert YouTube URL to embed format
+                    let embedUrl = rawUrl;
+
+                    if (rawUrl.includes('youtu.be/')) {
+                        const videoId = rawUrl.split('youtu.be/')[1].split('?')[0];
+                        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                    } else if (rawUrl.includes('youtube.com/watch?v=')) {
+                        const videoId = rawUrl.split('watch?v=')[1].split('&')[0];
+                        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                    }
+
+                    const modal = document.getElementById('videoModal');
+                    const modalVideo = document.getElementById('modalVideo');
+                    const modalTitle = document.getElementById('modalTitle');
+                    const modalDescription = document.getElementById('modalDescription');
+
+                    modalVideo.src = embedUrl;
+                    modalTitle.textContent = title;
+                    modalDescription.textContent = description;
+
+                    modal.classList.add('active');
+                });
+            });
+
+            // Close modal events
+            const closeModal = document.querySelector('.close-modal');
+            const modal = document.getElementById('videoModal');
+
+            closeModal.addEventListener('click', function () {
+                modal.classList.remove('active');
+                document.getElementById('modalVideo').src = '';
+            });
+
+            window.addEventListener('click', function (event) {
+                if (event.target === modal) {
+                    modal.classList.remove('active');
+                    document.getElementById('modalVideo').src = '';
+                }
+            });
+
+            // Mobile menu toggle
+            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+            const navLinks = document.querySelector('.nav-links');
+
+            mobileMenuBtn.addEventListener('click', function () {
+                navLinks.classList.toggle('show');
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    const targetId = this.getAttribute('href');
+                    const targetHTMLElement = document.querySelector(targetId);
+
+                    if (targetHTMLElement) {
+                        window.scrollTo({
+                            top: targetHTMLElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+
+                        if (navLinks.classList.contains('show')) {
+                            navLinks.classList.remove('show');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
