@@ -282,7 +282,7 @@
         }
 
         .first-page {
-            background: linear-gradient(45deg, #f4ead1, #e8d9b8);
+            background:线性-gradient(45deg, #f4ead1, #e8d9b8);
             padding: 60px;
             text-align: center;
             position: relative;
@@ -317,7 +317,7 @@
 
         @keyframes glow {
             0% { text-shadow: 0 0 5px #a48549, 0 0 10px #a48549; }
-            50% { text-shadow: 0 0 15px #a48549, 0 0 20px #a48549; }
+            50% { text-shadow: 0 0 15px #a485 figli, 0 0 20px #a48549; }
             100% { text-shadow: 0 0 5px #a48549, 0 0 10px #a48549; }
         }
 
@@ -474,6 +474,32 @@
             background: rgba(75, 58, 110, 0.7);
         }
 
+        /* Стили для кнопки возвращения на главную страницу */
+        .home-btn-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .home-btn {
+            background: linear-gradient(to bottom, #a48549, #8b6e3a);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: #f4ead1;
+            cursor: pointer;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .home-btn:hover {
+            background: linear-gradient(to bottom, #c4a559, #a48549);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+
         /* Медиа-запросы для адаптивности */
         @media (max-width: 768px) {
             .book-container {
@@ -526,6 +552,11 @@
                 font-size: 1rem;
                 height: 70px;
             }
+
+            .home-btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -561,10 +592,18 @@
                 margin: 30% auto;
                 padding: 15px;
             }
+
+            .home-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="home-btn-container">
+        <button class="home-btn" onclick="window.location.href='index.html'">На главную</button>
+    </div>
     <div class="book-container"></div>
     <div class="arrow-nav"></div>
     <div class="lighting"></div>
