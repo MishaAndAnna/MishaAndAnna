@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Купоны для тебя, любимая</title>
+    <title>Купоны для тебя</title>
     <style>
         :root {
             --primary: #ff5e94;
@@ -31,34 +31,6 @@
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
-        }
-
-        /* Floating Hearts Animation */
-        @keyframes float {
-            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.8; }
-            90% { opacity: 0.6; }
-            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
-        }
-
-        .heart-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .heart {
-            position: absolute;
-            bottom: -50px;
-            font-size: 20px;
-            color: var(--primary-light);
-            animation: float 15s linear infinite;
-            opacity: 0;
         }
 
         header {
@@ -492,15 +464,15 @@
             line-height: 1.6;
         }
 
-        .heartbeat {
-            animation: heartbeat 1.5s ease-in-out infinite;
+        .smilebeat {
+            animation: smilebeat 1.5s ease-in-out infinite;
             display: inline-block;
             margin: 0 5px;
             color: var(--primary);
             font-size: 1.5em;
         }
 
-        @keyframes heartbeat {
+        @keyframes smilebeat {
             0% { transform: scale(1); }
             15% { transform: scale(1.3); }
             30% { transform: scale(1); }
@@ -667,7 +639,7 @@
     <div class="password-overlay" id="passwordOverlay">
         <div class="password-container">
             <h2>Добро пожаловать</h2>
-            <p>Эта страница содержит приватные купоны, созданные специально для вас двоих <span class="heartbeat">♥</span></p>
+            <p>Эта страница содержит приватные купоны, созданные специально для вас двоих <span class="smilebeat">😊</span></p>
             
             <div class="form-group">
                 <label for="password">Пожалуйста, введите пароль</label>
@@ -679,11 +651,9 @@
         </div>
     </div>
 
-    <div class="heart-bg" id="heartBackground"></div>
-
     <header>
         <div class="logo">
-            <i class="fas fa-heart"></i>
+            <i class="fas fa-smile"></i>
             <h1>Купоны для нас</h1>
         </div>
         <div class="header-actions">
@@ -702,7 +672,7 @@
     <main>
         <section class="intro">
             <h2>Наренные купоны</h2>
-            <p>Эти купоны созданы специально для тебя, моя любимая. Каждый из них можно использовать в любой момент, когда захочешь. Просто выбери понравившийся купон, нажми "Использовать", и я исполню написанное в нём обещание.</p>
+            <p>Эти купоны созданы специально для тебя. Каждый из них можно использовать в любой момент, когда захочешь. Просто выбери понравившийся купон, нажми "Использовать", и я исполню написанное в нём обещание.</p>
             <p>Нажми на купон, чтобы увидеть подробности!</p>
         </section>
 
@@ -731,7 +701,7 @@
             <form id="newCouponForm">
                 <div class="form-group">
                     <label for="couponTitle">Название купона</label>
-                    <input type="text" id="couponTitle" required placeholder="Например: Купон на массаж">
+                    <input type="text" id="couponTitle" required placeholder="Например: Купон на квест">
                 </div>
                 
                 <div class="form-group">
@@ -761,6 +731,8 @@
                         <option value="fa-music">🎵 Музыка</option>
                         <option value="fa-car">🚗 Поездка</option>
                         <option value="fa-bed">🛏️ Кровать</option>
+                        <option value="fa-smile">😊 Смайлик</option>
+                        <option value="fa-puzzle-piece">🧩 Пазл</option>
                     </select>
                 </div>
                 
@@ -838,7 +810,6 @@
             const cancelDeleteCoupon = document.getElementById('cancelDeleteCoupon');
             const confirmDeleteCoupon = document.getElementById('confirmDeleteCoupon');
             const themeToggle = document.getElementById('themeToggle');
-            const heartBackground = document.getElementById('heartBackground');
             
             const PASSWORD = "любимая";
             const TELEGRAM_BOT_TOKEN = '8055216192:AAGYBAVgLaVUinW-YqnB7QTSLWljuT9s3Pg';
@@ -851,26 +822,11 @@
                 themeToggle.innerHTML = '<i class="fas fa-sun"></i> Тема';
             }
             
-            function createFloatingHearts() {
-                const heartSymbols = ['❤️', '💕', '💖', '💘', '💗'];
-                for (let i = 0; i < 20; i++) {
-                    const heart = document.createElement('div');
-                    heart.className = 'heart';
-                    heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
-                    heart.style.left = `${Math.random() * 100}%`;
-                    heart.style.opacity = '0';
-                    heart.style.fontSize = `${Math.random() * 20 + 15}px`;
-                    heart.style.animationDuration = `${Math.random() * 10 + 10}s`;
-                    heart.style.animationDelay = `${Math.random() * 10}s`;
-                    heartBackground.appendChild(heart);
-                }
-            }
-            
             const initialCoupons = [
                 {
                     id: 'coupon-1',
                     title: 'Купон на прогулку в кафе в любую желанную тобой минуту',
-                    description: 'Этот купон даёт право встречух с твоими любимыми блюдами. Я всё подготовлю и создам милую атмосферу.',
+                    description: 'Этот купон даёт право встречу с твоими любимыми блюдами. Я всё подготовлю и создам милую атмосферу.',
                     category: 'romantic',
                     icon: 'fa-utensils',
                     used: false
@@ -880,7 +836,7 @@
                     title: 'Купон на квест',
                     description: 'Предъяви этот купон, и мы сейчас же пойдем на какой-то квест или игровое кафе настольных игр',
                     category: 'romantic',
-                    icon: 'fa-spa',
+                    icon: 'fa-puzzle-piece',
                     used: false
                 },
                 {
@@ -912,7 +868,7 @@
                     title: 'День без споров',
                     description: 'Используй этот купон в любой день, и я не буду спорить с тобой в течение всего дня, а лишь смотреть на всё с твоей стороны, что бы ни случилось.',
                     category: 'practical',
-                    icon: 'fa-heart',
+                    icon: 'fa-smile',
                     used: false
                 },
                 {
@@ -965,7 +921,6 @@
                 if (passwordInput.value === PASSWORD) {
                     passwordOverlay.style.display = 'none';
                     localStorage.setItem('lovePassword', passwordInput.value);
-                    createFloatingHearts();
                     renderCoupons();
                 } else {
                     passwordError.style.display = 'block';
@@ -1262,7 +1217,6 @@
             const savedPassword = localStorage.getItem('lovePassword');
             if (savedPassword === PASSWORD) {
                 passwordOverlay.style.display = 'none';
-                createFloatingHearts();
                 renderCoupons();
             }
         });
