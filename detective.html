@@ -29,7 +29,6 @@
             font-family: 'Raleway', sans-serif;
             background-color: var(--deep-black);
             color: var(--light-gray);
-            overflow: hidden;
             background: linear-gradient(135deg, rgba(13, 13, 13, 0.95), rgba(28, 37, 38, 0.9)),
                         url('https://source.unsplash.com/1920x1080/?cyberpunk,neon');
             background-size: cover;
@@ -39,13 +38,13 @@
         .game-container {
             position: relative;
             width: 100vw;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             backdrop-filter: blur(2px);
+            overflow-y: auto;
         }
 
-        /* Header */
         .game-header {
             display: flex;
             justify-content: space-between;
@@ -54,7 +53,8 @@
             height: 80px;
             background: linear-gradient(to bottom, rgba(28, 37, 38, 0.8), transparent);
             border-bottom: 2px solid var(--neon-pink);
-            position: relative;
+            position: sticky;
+            top: 0;
             z-index: 10;
         }
 
@@ -93,23 +93,22 @@
             color: var(--light-gray);
         }
 
-        /* Main Game Area */
         .game-content {
             display: flex;
             flex: 1;
             position: relative;
+            min-height: calc(100vh - 80px);
         }
 
-        /* Game Scene */
         .game-scene {
             flex: 2;
             position: relative;
-            overflow: hidden;
+            overflow-y: auto;
             padding: 2rem;
         }
 
         canvas#gameCanvas {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -220,6 +219,12 @@
             transform: translateY(-3px);
         }
 
+        button:disabled {
+            background: rgba(28, 37, 38, 0.9);
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .heart-choices {
             display: flex;
             gap: 20px;
@@ -236,6 +241,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-family: 'Raleway', sans-serif;
+            position: relative;
         }
 
         .heart-choice:hover {
@@ -244,7 +250,22 @@
             transform: scale(1.05);
         }
 
-        /* Sidebar */
+        .heart-choice:hover:after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(13, 13, 13, 0.9);
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--neon-blue);
+            color: var(--light-gray);
+            font-size: 0.9rem;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
         .game-sidebar {
             flex: 1;
             background: linear-gradient(to bottom, rgba(13, 13, 13, 0.95), rgba(28, 37, 38, 0.9));
@@ -252,6 +273,7 @@
             display: flex;
             flex-direction: column;
             max-width: 400px;
+            overflow-y: auto;
         }
 
         .player-info {
@@ -391,7 +413,6 @@
             transform: translateX(5px);
         }
 
-        /* Settings Panel */
         .settings-panel {
             position: fixed;
             top: 90px;
@@ -449,7 +470,6 @@
             color: var(--light-gray);
         }
 
-        /* Overlays */
         .overlay {
             position: fixed;
             top: 0;
@@ -469,7 +489,7 @@
             pointer-events: none;
         }
 
-        .start-screen {
+        .start-screen, .tutorial-modal, .new-memory-modal, .locked-fragment-modal {
             text-align: center;
             max-width: 700px;
             padding: 3rem;
@@ -480,7 +500,7 @@
             animation: zoomIn 0.7s ease;
         }
 
-        .start-title {
+        .start-title, .modal-title {
             font-family: 'Orbitron', sans-serif;
             font-size: 3.5rem;
             color: var(--neon-pink);
@@ -488,16 +508,33 @@
             margin-bottom: 2rem;
         }
 
-        .start-subtitle {
+        .start-subtitle, .modal-content p {
             font-size: 1.3rem;
             margin-bottom: 2.5rem;
             line-height: 1.8;
         }
 
-        .start-button {
+        .start-button, .modal-button {
             padding: 18px 50px;
             font-size: 1.3rem;
             background: linear-gradient(45deg, var(--neon-purple), var(--neon-blue));
+        }
+
+        .tutorial-modal, .new-memory-modal, .locked-fragment-modal {
+            max-width: 800px;
+        }
+
+        .tutorial-content {
+            text-align: left;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .tutorial-content h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            color: var(--neon-blue);
+            margin: 1rem 0 0.5rem;
         }
 
         .new-memory-modal {
@@ -511,17 +548,9 @@
             animation: zoomIn 0.5s ease;
         }
 
-        .modal-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.5rem;
-            color: var(--neon-blue);
-            text-shadow: var(--glow-intensity) var(--neon-blue);
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        .modal-content {
-            margin-bottom: 2rem;
+        .locked-fragment-modal {
+            background: linear-gradient(45deg, rgba(28, 37, 38, 0.95), rgba(13, 13, 13, 0.9));
+            border: 2px solid var(--neon-pink);
         }
 
         textarea {
@@ -550,12 +579,20 @@
             gap: 20px;
         }
 
-        .modal-button {
-            padding: 15px 30px;
-            font-size: 1.1rem;
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
         }
 
-        /* Animations */
+        .progress-tracker {
+            margin: 1rem 0;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            color: var(--neon-blue);
+        }
+
         @keyframes flicker {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.8; }
@@ -576,7 +613,6 @@
             to { opacity: 1; }
         }
 
-        /* Responsive Design */
         @media (max-width: 1200px) {
             .game-sidebar {
                 max-width: 350px;
@@ -590,7 +626,8 @@
 
             .game-sidebar {
                 max-width: none;
-                height: 350px;
+                height: auto;
+                min-height: 350px;
             }
 
             .memory-container {
@@ -599,7 +636,7 @@
         }
 
         @media (max-width: 768px) {
-            .start-title {
+            .start-title, .modal-title {
                 font-size: 2.5rem;
             }
 
@@ -618,6 +655,11 @@
             .clock-time {
                 font-size: 1.2rem;
             }
+
+            .navigation-buttons {
+                flex-direction: column;
+                gap: 1rem;
+            }
         }
     </style>
 </head>
@@ -626,8 +668,29 @@
     <div class="overlay" id="startOverlay">
         <div class="start-screen">
             <h1 class="start-title">Украденные Воспоминания</h1>
-            <p class="start-subtitle">Ваше прошлое поглощено цифровым туманом 2087 года. Вместе с Анютой, напарником-детективом, вы должны собрать осколки утраченной памяти, разгадывая головоломки в неоновом городе. Создавайте новые воспоминания, раскрывая тайны прошлого.</p>
+            <p class="start-subtitle">2087 год. Ваш разум — лабиринт, где воспоминания растворяются в цифровом эфире. Вместе с Анютой, напарником-детективом, вы погружаетесь в неоновые улицы мегаполиса, чтобы собрать осколки прошлого. Разгадывайте головоломки, делайте выборы, которые свяжут ваши сердца, и раскройте тайну, скрытую в вашем прошлом.</p>
             <button class="start-button" id="startButton">Начать расследование</button>
+        </div>
+    </div>
+
+    <!-- Tutorial Modal -->
+    <div class="overlay hidden" id="tutorialOverlay">
+        <div class="tutorial-modal">
+            <h2 class="modal-title">Добро пожаловать, Детектив</h2>
+            <div class="tutorial-content">
+                <h3>Цель игры</h3>
+                <p>Восстановите утраченные воспоминания, решая головоломки и взаимодействуя с Анютой. Ваши выборы определят, как раскроется история.</p>
+                <h3>Как играть</h3>
+                <p>- <strong>Головоломки</strong>: Читайте подсказки в правой панели и вводите ответы, чтобы разблокировать следующий фрагмент.<br>
+                   - <strong>Чат</strong>: Общайтесь с Анютой для подсказок или обсуждения сюжета.<br>
+                   - <strong>Выборы</strong>: Выбирайте действия, которые влияют на историю и отношения с Анютой.<br>
+                   - <strong>Прогресс</strong>: Завершайте головоломки, чтобы открыть новые фрагменты.</p>
+                <h3>Совет</h3>
+                <p>Ваши выборы — это ключ к сердцу истории. Будьте внимательны к деталям в описаниях и диалогах.</p>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-button" id="closeTutorialButton">Начать</button>
+            </div>
         </div>
     </div>
 
@@ -636,12 +699,25 @@
         <div class="new-memory-modal">
             <h2 class="modal-title">Новое воспоминание</h2>
             <div class="modal-content">
-                <p>Ваши судьбы переплетаются в неоновом свете. Запишите мечту или план, который станет вашим новым началом.</p>
+                <p>В сиянии неона ваши судьбы сплелись. Запишите мечту, обещание или момент, который станет вашим новым началом с Анютой.</p>
                 <textarea id="newMemoryText" placeholder="Опишите ваше новое воспоминание..."></textarea>
             </div>
             <div class="modal-buttons">
                 <button class="modal-button" id="saveMemoryButton">Сохранить</button>
                 <button class="modal-button" id="cancelMemoryButton">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Locked Fragment Modal -->
+    <div class="overlay hidden" id="lockedFragmentOverlay">
+        <div class="locked-fragment-modal">
+            <h2 class="modal-title">Фрагмент заблокирован</h2>
+            <div class="modal-content">
+                <p>Решите головоломку текущего фрагмента, чтобы открыть следующий кусочек вашей истории.</p>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-button" id="closeLockedModalButton">Вернуться</button>
             </div>
         </div>
     </div>
@@ -688,24 +764,71 @@
             <!-- Game Scene -->
             <div class="game-scene">
                 <canvas id="gameCanvas"></canvas>
-                <div class="memory-container">
+                <div class="progress-tracker" id="progressTracker">Фрагмент 1 из 3</div>
+                <div class="navigation-buttons">
+                    <button id="prevMemoryButton" disabled>Предыдущий фрагмент</button>
+                    <button id="nextMemoryButton">Следующий фрагмент</button>
+                </div>
+                <div class="memory-container" id="memory1">
                     <h2 class="memory-title">Фрагмент #1: Первая встреча</h2>
                     <img src="https://source.unsplash.com/600x300/?cyberpunk,cafe" alt="Воспоминание" class="memory-image">
                     <div class="memory-content">
-                        Неоновые вывески отражались в лужах после дождя. В кафе "Хроники" вы впервые встретили Анюту. Она пила черный кофе, вы — зеленый чай. Разговор о загадочных исчезновениях воспоминаний в городе стал началом вашего пути. Тогда вы еще не знали, что сами станете частью этой тайны.
+                        Дождь стучал по стеклам кафе "Хроники", отражая неоновые вывески в лужах. Анюта сидела у окна, ее пальцы обхватывали чашку черного кофе. Вы заказали зеленый чай, и разговор о пропавших воспоминаниях в городе стал искрой, связавшей вас. В ее взгляде мелькнула надежда — или это было что-то большее?
                     </div>
-                    <div class="puzzle-container">
+                    <div class=" Puzzles">
                         <h3 class="puzzle-title">Головоломка: Код встречи</h3>
-                        <p class="puzzle-description">В блокноте найдены даты, отмеченные красным. Расшифруйте их как буквы (А=01, Б=02...) — они укажут место вашей встречи.</p>
+                        <p class="puzzle-description">В блокноте Анюты даты, выделенные красным. Преобразуйте дни в буквы (А=01, Б=02, ..., Я=33). Даты: 24.07, 18.04, 15.14, 09.11, 12.01.</p>
                         <div class="puzzle-input">
-                            <input type="text" placeholder="Введите ответ..." id="puzzleInput">
-                            <button id="checkPuzzleButton">Проверить</button>
+                            <input type="text" placeholder="Введите ответ..." id="puzzleInput1">
+                            <button id="checkPuzzleButton1">Проверить</button>
                         </div>
                     </div>
                     <div class="heart-choices">
-                        <div class="heart-choice">Отправить записку Анюте</div>
-                        <div class="heart-choice">Поделиться подсказкой</div>
+                        <div class="heart-choice" data-tooltip="Отправьте сообщение, чтобы узнать больше о прошлом Анюты">Отправить записку Анюте</div>
+                        <div class="heart-choice" data-tooltip="Помогите Анюте, чтобы укрепить доверие">Поделиться подсказкой</div>
                     </div>
+                </div>
+                <div class="memory-container hidden" id="memory2">
+                    <h2 class="memory-title">Фрагмент #2: Ночной рынок</h2>
+                    <img src="https://source.unsplash.com/600x300/?cyberpunk,market" alt="Воспоминание" class="memory-image">
+                    <div class="memory-content" id="memory2Content">
+                        Ночной рынок бурлил красками и голосами. Анюта вела вас через толпу к старому терминалу, где хранились данные о "Цифровом тумане". Запах синтетической еды и озона наполнял воздух. Она обернулась, и в ее улыбке читалось доверие — или, может, секрет, который она еще не готова раскрыть?
+                    </div>
+                    <div class="puzzle-container">
+                        <h3 class="puzzle-title">Головоломка: Код терминала</h3>
+                        <p class="puzzle-description" id="memory2PuzzleDesc">На терминале выгравированы числа: 3, 15, 4, 5. Каждое — порядковый номер буквы в слове, связанном с рынком. Найдите слово.</p>
+                        <div class="puzzle-input">
+                            <input type="text" placeholder="Введите ответ..." id="puzzleInput2">
+                            <button id="checkPuzzleButton2">Проверить</button>
+                        </div>
+                    </div>
+                    <div class="heart-choices">
+                        <div class="heart-choice" data-tooltip="Попросите Анюту копнуть глубже в данные">Попросить Анюту проверить данные</div>
+                        <div class="heart-choice" data-tooltip="Отвлеките охрану, чтобы выиграть время">Создать отвлечение</div>
+                    </div>
+                </div>
+                <div class="memory-container hidden" id="memory3">
+                    <h2 class="memory-title">Фрагмент #3: Заброшенный архив</h2>
+                    <img src="https://source.unsplash.com/600x300/?cyberpunk,archive" alt="Воспоминание" class="memory-image">
+                    <div class="memory-content" id="memory3Content">
+                        В заброшенном архиве гудели старые серверы, а пыль танцевала в лучах неона. Вы с Анютой нашли записи о проекте "Эхо". Она коснулась вашей руки, шепнув: "Это наш путь". В тот миг вы поняли, что ваша связь — это больше, чем расследование.
+                    </div>
+                    <div class="puzzle-container">
+                        <h3 class="puzzle-title">Головоломка: Код архива</h3>
+                        <p class="puzzle-description" id="memory3PuzzleDesc">На сервере мигает последовательность: 1-2-3-1-2. Это индексы букв в названии проекта. Какое слово зашифровано?</p>
+                        <div class="puzzle-input">
+                            <input type="text" placeholder="Введите ответ..." id="puzzleInput3">
+                            <button id="checkPuzzleButton3">Проверить</button>
+                        </div>
+                    </div>
+                    <div class="heart-choices">
+                        <div class="heart-choice" data-tooltip="Попросите Анюту расшифровать данные">Попросить Анюту декодировать</div>
+                        <div class="heart-choice" data-tooltip="Сохраните данные для будущего">Скачать архив</div>
+                    </div>
+                </div>
+                <div class="navigation-buttons">
+                    <button id="prevMemoryButtonBottom" disabled>Предыдущий фрагмент</button>
+                    <button id="nextMemoryButtonBottom">Следующий фрагмент</button>
                 </div>
             </div>
 
@@ -717,17 +840,16 @@
                     </div>
                     <div class="player-details">
                         <div class="player-name">Анюта</div>
-                        <div class="player-status">Исследует воспоминание #2</div>
+                        <div class="player-status" id="playerStatus">Исследует воспоминание #1</div>
                         <div class="progress-bar">
-                            <div class="progress-fill"></div>
+                            <div class="progress-fill" id="progressFill"></div>
                         </div>
                     </div>
                 </div>
                 <div class="chat-container">
                     <div class="chat-messages" id="chatMessages">
-                        <div class="message incoming">Нашла фото в архивах. Цифры на заднем плане — это ключ?</div>
-                        <div class="message outgoing">Похоже на код. Сравню с датами в блокноте.</div>
-                        <div class="message incoming">Может, это координаты нашей первой операции?</div>
+                        <div class="message incoming">Нашла фото в кафе. Цифры на вывеске — ключ?</div>
+                        <div class="message outgoing">Похоже на шифр. Проверю даты в блокноте.</div>
                     </div>
                     <div class="chat-input-container">
                         <input type="text" class="chat-input" id="chatInput" placeholder="Напишите сообщение...">
@@ -736,8 +858,10 @@
                 </div>
                 <div class="hints-container">
                     <div class="hints-title">Подсказки</div>
-                    <div class="hint-item">Буквы — это номера в алфавите</div>
-                    <div class="hint-item">Красные даты: 24.07, 18.04, 15.14, 09.11, 12.01</div>
+                    <div class="hint-item">Фрагмент #1: Дни дат — это буквы (А=01, Б=02, ...)</div>
+                    <div class="hint-item">Фрагмент #1: Даты: 24.07, 18.04, 15.14, 09.11, 12.01</div>
+                    <div class="hint-item hidden" id="hintMarket">Фрагмент #2: Числа — позиции букв в слове, связанном с рынком</div>
+                    <div class="hint-item hidden" id="hintArchive">Фрагмент #3: Используйте название проекта "Эхо"</div>
                 </div>
             </div>
         </div>
@@ -747,22 +871,52 @@
         // DOM Elements
         const startOverlay = document.getElementById('startOverlay');
         const startButton = document.getElementById('startButton');
+        const tutorialOverlay = document.getElementById('tutorialOverlay');
+        const closeTutorialButton = document.getElementById('closeTutorialButton');
         const newMemoryOverlay = document.getElementById('newMemoryOverlay');
         const saveMemoryButton = document.getElementById('saveMemoryButton');
         const cancelMemoryButton = document.getElementById('cancelMemoryButton');
+        const lockedFragmentOverlay = document.getElementById('lockedFragmentOverlay');
+        const closeLockedModalButton = document.getElementById('closeLockedModalButton');
         const clockTime = document.getElementById('clockTime');
         const clockDate = document.getElementById('clockDate');
         const chatMessages = document.getElementById('chatMessages');
         const chatInput = document.getElementById('chatInput');
         const sendMessageButton = document.getElementById('sendMessageButton');
-        const puzzleInput = document.getElementById('puzzleInput');
-        const checkPuzzleButton = document.getElementById('checkPuzzleButton');
+        const puzzleInputs = [
+            document.getElementById('puzzleInput1'),
+            document.getElementById('puzzleInput2'),
+            document.getElementById('puzzleInput3')
+        ];
+        const checkPuzzleButtons = [
+            document.getElementById('checkPuzzleButton1'),
+            document.getElementById('checkPuzzleButton2'),
+            document.getElementById('checkPuzzleButton3')
+        ];
+        const prevMemoryButtons = [
+            document.getElementById('prevMemoryButton'),
+            document.getElementById('prevMemoryButtonBottom')
+        ];
+        const nextMemoryButtons = [
+            document.getElementById('nextMemoryButton'),
+            document.getElementById('nextMemoryButtonBottom')
+        ];
+        const memories = [
+            document.getElementById('memory1'),
+            document.getElementById('memory2'),
+            document.getElementById('memory3')
+        ];
+        const progressTracker = document.getElementById('progressTracker');
+        const playerStatus = document.getElementById('playerStatus');
+        const progressFill = document.getElementById('progressFill');
         const gameCanvas = document.getElementById('gameCanvas');
         const settingsPanel = document.getElementById('settingsPanel');
         const settingsToggle = document.getElementById('settingsToggle');
         const themeSelect = document.getElementById('themeSelect');
         const fontSizeSelect = document.getElementById('fontSizeSelect');
         const brightnessSlider = document.getElementById('brightnessSlider');
+        const hintMarket = document.getElementById('hintMarket');
+        const hintArchive = document.getElementById('hintArchive');
 
         // Game State
         const gameState = {
@@ -770,6 +924,7 @@
             solvedPuzzles: [],
             memories: [],
             chatHistory: [],
+            choices: {}, // Stores player choices { level: choiceText }
             settings: {
                 theme: 'cyberpunk',
                 fontSize: 'medium',
@@ -777,10 +932,41 @@
             }
         };
 
+        // Memory Data
+        const memoryData = [
+            {
+                id: 1,
+                correctAnswer: "хроники",
+                puzzleInput: puzzleInputs[0],
+                checkButton: checkPuzzleButtons[0]
+            },
+            {
+                id: 2,
+                correctAnswer: "bazaar",
+                puzzleInput: puzzleInputs[1],
+                checkButton: checkPuzzleButtons[2]
+            },
+            {
+                id: 3,
+                correctAnswer: "echo",
+                puzzleInput: puzzleInputs[2],
+                checkButton: checkPuzzleButtons[2]
+            }
+        ];
+
         // Start the game
         startButton.addEventListener('click', () => {
             startOverlay.classList.add('hidden');
+            tutorialOverlay.classList.remove('hidden');
+        });
+
+        closeTutorialButton.addEventListener('click', () => {
+            tutorialOverlay.classList.add('hidden');
             initGame();
+        });
+
+        closeLockedModalButton.addEventListener('click', () => {
+            lockedFragmentOverlay.classList.add('hidden');
         });
 
         // Initialize the game
@@ -790,6 +976,7 @@
             initCanvas();
             setupEventListeners();
             applySettings();
+            updateMemoryDisplay();
         }
 
         // Update retro clock
@@ -811,9 +998,11 @@
             });
 
             // Puzzle checking
-            checkPuzzleButton.addEventListener('click', checkPuzzle);
-            puzzleInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') checkPuzzle();
+            memoryData.forEach(memory => {
+                memory.checkButton.addEventListener('click', () => checkPuzzle(memory.id));
+                memory.puzzleInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') checkPuzzle(memory.id);
+                });
             });
 
             // Heart choices
@@ -821,12 +1010,32 @@
                 choice.addEventListener('click', handleHeartChoice);
             });
 
+            // Navigation buttons
+            prevMemoryButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    if (gameState.currentLevel > 1) {
+                        gameState.currentLevel--;
+                        updateMemoryDisplay();
+                    }
+                });
+            });
+
+            nextMemoryButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    if (gameState.currentLevel < memoryData.length && !gameState.solvedPuzzles.includes(gameState.currentLevel)) {
+                        lockedFragmentOverlay.classList.remove('hidden');
+                    } else if (gameState.currentLevel < memoryData.length) {
+                        gameState.currentLevel++;
+                        updateMemoryDisplay();
+                    }
+                });
+            });
+
             // New memory modal
             saveMemoryButton.addEventListener('click', saveNewMemory);
             cancelMemoryButton.addEventListener('click', () => {
                 newMemoryOverlay.classList.add('hidden');
             });
-
             // Settings
             settingsToggle.addEventListener('click', () => {
                 settingsPanel.classList.toggle('open');
@@ -848,9 +1057,58 @@
             });
         }
 
+        // Update memory display
+        function updateMemoryDisplay() {
+            memories.forEach((memory, index) => {
+                const level = index + 1;
+                const isUnlocked = level === 1 || gameState.solvedPuzzles.includes(level - 1);
+                memory.classList.toggle('hidden', level !== gameState.currentLevel || !isUnlocked);
+            });
+
+            // Update narrative based on choices
+            if (gameState.currentLevel === 2) {
+                const memory2Content = document.getElementById('memory2Content');
+                const memory2PuzzleDesc = document.getElementById('memory2PuzzleDesc');
+                if (gameState.choices[1]?.includes('записку')) {
+                    memory2Content.textContent = "Ночной рынок гудел, но Анюта казалась задумчивой. После вашей записки она рассказала о своем первом деле — краже данных на этом рынке. Вы шли к терминалу, и ее рука слегка дрожала. Была ли это тревога или что-то личное?";
+                    memory2PuzzleDesc.textContent = "На терминале числа: 3, 15, 4, 5. Анюта упомянула, что это слово связано с ее первым делом на рынке. Найдите слово.";
+                    hintMarket.classList.remove('hidden');
+                } else {
+                    memory2Content.textContent = "Ночной рынок бурлил красками и голосами. Анюта вела вас к терминалу с данными о 'Цифровом тумане'. Благодаря вашей подсказке она была уверена в каждом шаге, и вы почувствовали, как ваша связь укрепилась.";
+                    memory2PuzzleDesc.textContent = "На терминале числа: 3, 15, 4, 5. Это буквы в слове, связанном с рынком. Ваше сотрудничество упростило задачу.";
+                    hintMarket.classList.remove('hidden');
+                }
+            } else if (gameState.currentLevel === 3) {
+                const memory3Content = document.getElementById('memory3Content');
+                const memory3PuzzleDesc = document.getElementById('memory3PuzzleDesc');
+                if (gameState.choices[2]?.includes('проверить')) {
+                    memory3Content.textContent = "В архиве гудели серверы, а Анюта копалась в данных, вдохновленная вашим доверием. Она нашла записи о проекте 'Эхо' и шепнула: 'Это наша судьба'. Ее взгляд был полон решимости.";
+                    memory3PuzzleDesc.textContent = "На сервере мигает: 1-2-3-1-2. Анюта подтвердила, что это индексы букв в названии проекта. Какое слово?";
+                    hintArchive.classList.remove('hidden');
+                } else {
+                    memory3Content.textContent = "Архив был холодным, но ваша решимость согревала. Вы отвлекли охрану, дав Анюте время, и она нашла данные 'Эхо'. Ее касание было благодарным: 'Мы — команда'. Но что скрывает проект?";
+                    memory3PuzzleDesc.textContent = "На сервере: 1-2-3-1-2. Это индексы букв в названии проекта. Ваше отвлечение дало ключ.";
+                    hintArchive.classList.remove('hidden');
+                }
+            }
+
+            progressTracker.textContent = `Фрагмент ${gameState.currentLevel} из ${memoryData.length}`;
+            playerStatus.textContent = `Исследует воспоминание #${gameState.currentLevel}`;
+            progressFill.style.width = `${35 + (gameState.currentLevel - 1) * 20}%`;
+
+            prevMemoryButtons.forEach(button => {
+                button.disabled = gameState.currentLevel === 1;
+            });
+
+            nextMemoryButtons.forEach(button => {
+                button.disabled = gameState.currentLevel === memoryData.length || !gameState.solvedPuzzles.includes(gameState.currentLevel);
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         // Apply settings
         function applySettings() {
-            // Theme
             const root = document.documentElement;
             if (gameState.settings.theme === 'retro') {
                 root.style.setProperty('--neon-pink', '#ff6f61');
@@ -866,7 +1124,6 @@
                 root.style.setProperty('--neon-purple', '#d81bff');
             }
 
-            // Font size
             const fontSizes = {
                 small: '0.9rem',
                 medium: '1rem',
@@ -874,7 +1131,6 @@
             };
             document.body.style.fontSize = fontSizes[gameState.settings.fontSize];
 
-            // Brightness
             document.body.style.opacity = gameState.settings.brightness;
         }
 
@@ -905,21 +1161,37 @@
             const lowerMessage = playerMessage.toLowerCase();
 
             if (lowerMessage.includes('подсказк')) {
-                responseText = "Смотри на порядок дат. Может, стоит взять только дни или месяцы?";
+                responseText = gameState.currentLevel === 1
+                    ? "Возьми дни из дат и преврати их в буквы. Первая — 24."
+                    : gameState.currentLevel === 2
+                    ? gameState.choices[1]?.includes('записку')
+                        ? "Рынок связан с ее делом. Числа — это буквы в слове на английском."
+                        : "Мы вместе решили первую задачу, так что это проще. Слово — рынок на английском."
+                    : gameState.choices[2]?.includes('проверить')
+                        ? "Проект называется 'Эхо'. Последовательность — это порядок букв."
+                        : "Отвлечение помогло, но слово — это название проекта, 'Эхо'.";
             } else if (lowerMessage.includes('привет')) {
-                responseText = "Привет! Как дела с твоим фрагментом?";
+                responseText = gameState.currentLevel === 1 && gameState.choices[1]?.includes('записку')
+                    ? "Привет... После твоей записки я задумалась о нас."
+                    : "Привет! Мы на верном пути, да?";
             } else if (lowerMessage.includes('не понимаю')) {
-                responseText = "Давай разберем вместе. Что неясно?";
-            } else if (lowerMessage.includes('фото')) {
-                responseText = "На фото цифры 18, 24, 15. Это часть кода?";
+                responseText = "Давай разберем вместе. Что неясно? Проверь подсказки!";
+            } else if (lowerMessage.includes('фото') || lowerMessage.includes('терминал') || lowerMessage.includes('архив')) {
+                responseText = gameState.currentLevel === 1
+                    ? "На фото цифры 24, 18, 15... Это часть кода?"
+                    : gameState.currentLevel === 2
+                    ? "Терминал показывает 3, 15, 4, 5. Слово связано с рынком."
+                    : "Архив упомянул 'Эхо'. Последовательность — порядок букв.";
             } else {
                 const defaultResponses = [
-                    "Хм, а если посмотреть под другим углом?",
-                    "Моя головоломка тоже не простая. Есть идеи?",
-                    "Чувствую, мы близко к разгадке...",
-                    "Сопоставь даты с нашими местами встреч."
+                    "Попробуй взглянуть иначе. Что-то упускаем?",
+                    "Моя головоломка тоже хитрая. Делимся идеями?",
+                    "Мы близко, я чувствую...",
+                    "Проверь подсказки в панели."
                 ];
-                responseText = defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+                responseText = gameState.choices[gameState.currentLevel]
+                    ? `Твой выбор (${gameState.choices[gameState.currentLevel]}) меняет наш путь. ${defaultResponses[Math.floor(Math.random() * defaultResponses.length)]}`
+                    : defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
             }
 
             const messageElement = document.createElement('div');
@@ -936,39 +1208,81 @@
         }
 
         // Check puzzle answer
-        function checkPuzzle() {
-            const answer = puzzleInput.value.trim().toLowerCase();
-            const correctAnswer = "хроники";
+        function checkPuzzle(level) {
+            const memory = memoryData.find(m => m.id === level);
+            const answer = memory.puzzleInput.value.trim().toLowerCase();
 
-            if (answer === correctAnswer) {
-                alert("Верно! Новый фрагмент воспоминания открыт.");
-                gameState.solvedPuzzles.push(gameState.currentLevel);
-                gameState.currentLevel++;
+            if (answer === memory.correctAnswer) {
+                alert(`Верно! Фрагмент #${level} открыт.`);
+                gameState.solvedPuzzles.push(level);
+                memory.puzzleInput.disabled = true;
+                memory.checkButton.disabled = true;
 
-                if (gameState.currentLevel > 3) {
+                if (gameState.solvedPuzzles.length === memoryData.length) {
                     showNewMemoryModal();
+                } else {
+                    gameState.currentLevel = Math.min(gameState.currentLevel + 1, memoryData.length);
+                    updateMemoryDisplay();
                 }
             } else {
-                alert("Не то. Попробуй еще или спроси Анюту.");
+                alert("Неверно. Проверь подсказки или спроси Анюту.");
             }
         }
 
         // Handle heart choice
         function handleHeartChoice(event) {
-            const choiceText = event.target.textContent;
+            const choiceText = event.target.textContent.toLowerCase();
+            gameState.choices[gameState.currentLevel] = choiceText;
 
-            if (choiceText.includes('записку')) {
-                alert("Записка отправлена! Анюта прислала подсказку.");
-                const hintsContainer = document.querySelector('.hints-container');
-                const newHint = document.createElement('div');
-                newHint.classList.add('hint-item');
-                newHint.textContent = "Первые буквы любимых книг — ключ к шифру";
-                hintsContainer.appendChild(newHint);
-            } else if (choiceText.includes('подсказкой')) {
-                alert("Подсказка отправлена. Анюта продвинулась!");
-                document.querySelector('.player-status').textContent = "Решила головоломку #2";
-                document.querySelector('.progress-fill').style.width = '65%';
+            const hintsContainer = document.querySelector('.hints-container');
+            const newHint = document.createElement('div');
+            newHint.classList.add('hint-item');
+
+            if (gameState.currentLevel === 1) {
+                if (choiceText.includes('записку')) {
+                    alert("Записка отправлена! Анюта поделилась личным воспоминанием.");
+                    newHint.textContent = "Анюта упомянула, что кафе 'Хроники' было ее убежищем.";
+                    hintsContainer.appendChild(newHint);
+                    simulatePartnerResponse("Твоя записка... Она напомнила мне, почему я здесь.");
+                } else if (choiceText.includes('подсказкой')) {
+                    alert("Подсказка отправлена! Анюта доверяет вам больше.");
+                    newHint.textContent = "Ваше сотрудничество упрощает шифр.";
+                    hintsContainer.appendChild(newHint);
+                    playerStatus.textContent = "Доверяет вам в расследовании";
+                    progressFill.style.width = '50%';
+                }
+            } else if (gameState.currentLevel === 2) {
+                if (choiceText.includes('проверить')) {
+                    alert("Анюта копает глубже! Она нашла скрытые данные.");
+                    newHint.textContent = "Анюта подтвердила, что слово связано с рынком.";
+                    hintsContainer.appendChild(newHint);
+                    simulatePartnerResponse("Твое доверие помогает. Я нашла кое-что в данных.");
+                } else if (choiceText.includes('отвлечение')) {
+                    alert("Охрана отвлечена! Анюта получила доступ.");
+                    newHint.textContent = "Отвлечение дало время для терминала.";
+                    hintsContainer.appendChild(newHint);
+                    playerStatus.textContent = "Работает быстро благодаря вам";
+                    progressFill.style.width = '70%';
+                }
+            } else if (gameState.currentLevel === 3) {
+                if (choiceText.includes('декодировать')) {
+                    alert("Анюта расшифровала данные! Вы ближе к правде.");
+                    newHint.textContent = "Анюта подтвердила, что слово — это 'Echo'.";
+                    hintsContainer.appendChild(newHint);
+                    simulatePartnerResponse("Мы почти у цели. Это слово — ключ.");
+                } else if (choiceText.includes('скачать')) {
+                    alert("Архив сохранен! Это защитит вас в будущем.");
+                    newHint.textContent = "Сохранение данных открыло новый путь.";
+                    hintsContainer.appendChild(newHint);
+                    playerStatus.textContent = "Готова к финалу";
+                    progressFill.style.width = '90%';
+                }
             }
+
+            event.target.style.opacity = '0.6';
+            event.target.style.cursor = 'default';
+            event.target.removeEventListener('click', handleHeartChoice);
+            updateMemoryDisplay();
         }
 
         // Show new memory modal
@@ -986,9 +1300,9 @@
                     createdAt: new Date().toISOString()
                 });
                 newMemoryOverlay.classList.add('hidden');
-                alert("Новое воспоминание создано! Ваша история продолжается...");
+                alert("Новое воспоминание сохранено! Ваша история с Анютой продолжается...");
             } else {
-                alert("Напишите воспоминание!");
+                alert("Пожалуйста, напишите воспоминание!");
             }
         }
 
@@ -1006,7 +1320,6 @@
             );
             camera.position.z = 5;
 
-            // Particle system
             const particlesGeometry = new THREE.BufferGeometry();
             const particlesCount = 1500;
             const posArray = new Float32Array(particlesCount * 3);
@@ -1027,7 +1340,6 @@
             const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
             scene.add(particlesMesh);
 
-            // Second particle system
             const particlesGeometry2 = new THREE.BufferGeometry();
             const posArray2 = new Float32Array(particlesCount * 3);
 
@@ -1047,7 +1359,6 @@
             const particlesMesh2 = new THREE.Points(particlesGeometry2, particlesMaterial2);
             scene.add(particlesMesh2);
 
-            // Animation loop
             function animate() {
                 requestAnimationFrame(animate);
                 particlesMesh.rotation.x += 0.0004;
@@ -1057,7 +1368,6 @@
                 renderer.render(scene, camera);
             }
 
-            // Resize handler
             window.addEventListener('resize', () => {
                 const newWidth = gameCanvas.clientWidth;
                 const newHeight = gameCanvas.clientHeight;
