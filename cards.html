@@ -471,10 +471,39 @@
             border-radius: 15px;
             text-align: center;
             max-width: 500px;
+            max-height: 80vh;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             border: var(--golden-border);
             animation: modalAppear 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .rules-content {
+            max-height: 50vh;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+            padding-right: 1rem;
+            text-align: left;
+        }
+        
+        .rules-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .rules-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        .rules-content::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+        
+        .rules-content::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-hover);
         }
         
         @keyframes modalAppear {
@@ -492,7 +521,6 @@
         
         .modal p {
             font-size: 1.1rem;
-            margin-bottom: 2rem;
             line-height: 1.6;
         }
         
@@ -570,6 +598,15 @@
             
             h1 {
                 font-size: 2rem;
+            }
+            
+            .modal-content {
+                max-height: 90vh;
+                padding: 1.5rem;
+            }
+            
+            .rules-content {
+                max-height: 60vh;
             }
         }
         
@@ -716,773 +753,775 @@
     <div id="rules-modal" class="modal">
         <div class="modal-content">
             <h2>Правила игры "Дурак"</h2>
-            <p>
-                <strong>Цель игры:</strong> Избавиться от всех своих карт. Игрок, оставшийся с картами, когда колода пуста, становится "дураком" (проигравшим).<br><br>
-                <strong>Основные правила:</strong><br>
-                1. Используется колода из 36 карт (от 6 до Туза, 4 масти).<br>
-                2. Козырная масть определяется последней картой в колоде. Козыри бьют карты любой другой масти, а также младшие карты своей масти.<br>
-                3. Каждому игроку раздается по 6 карт. Остальные карты составляют колоду.<br>
-                4. Игрок с младшим козырем ходит первым (атакует).<br>
-                5. <strong>Атака:</strong> Атакующий кладет карту на стол. Защищающийся должен побить её, положив карту той же масти большего достоинства или козырь (если атакующая карта не козырная).<br>
-                6. <strong>Подкидывание:</strong> Атакующий может подкинуть карты того же достоинства, что уже лежат на столе (атакующие или защищающие карты), но не более 6 карт за ход и не больше, чем карт в руке защищающегося.<br>
-                7. <strong>Защита:</strong> Если защищающийся побил все карты, атакующий может продолжать атаку. Если не может побить карту, он забирает все карты со стола.<br>
-                8. <strong>Бито:</strong> Если все карты атаки побиты, атакующий говорит "Бито", карты уходят в сброс, и игроки добирают карты из колоды до 6 (сначала атакующий, затем защищающийся).<br>
-                9. Игра продолжается, пока колода не пуста и один из игроков не избавится от всех карт. Если оба игрока одновременно заканчивают карты — ничья.<br>
-                10. После каждого раунда роли меняются: защищающийся становится атакующим, и наоборот.
-            </p>
+            <div class="rules-content">
+                <p>
+                    <strong>Цель игры:</strong> Избавиться от всех своих карт. Игрок, оставшийся с картами, когда колода пуста, становится "дураком" (проигравшим).<br><br>
+                    <strong>Основные правила:</strong><br>
+                    1. Используется колода из 36 карт (от 6 до Туза, 4 масти).<br>
+                    2. Козырная масть определяется последней картой в колоде. Козыри бьют карты любой другой масти, а также младшие карты своей масти.<br>
+                    3. Каждому игроку раздается по 6 карт. Остальные карты составляют колоду.<br>
+                    4. Игрок с младшим козырем ходит первым (атакует).<br>
+                    5. <strong>Атака:</strong> Атакующий кладет карту на стол. Защищающийся должен побить её, положив карту той же масти большего достоинства или козырь (если атакующая карта не козырная).<br>
+                    6. <strong>Подкидывание:</strong> Атакующий может подкинуть карты того же достоинства, что уже лежат на столе (атакующие или защищающие карты), но не более 6 карт за ход и не больше, чем карт в руке защищающегося.<br>
+                    7. <strong>Защита:</strong> Если защищающийся побил все карты, атакующий может продолжать атаку. Если не может побить карту, он забирает все карты со стола.<br>
+                    8. <strong>Бито:</strong> Если все карты атаки побиты, атакующий говорит "Бито", карты уходят в сброс, и игроки добирают карты из колоды до 6 (сначала атакующий, затем защищающийся).<br>
+                    9. Игра продолжается, пока колода не пуста и один из игроков не избавится от всех карт. Если оба игрока одновременно заканчивают карты — ничья.<br>
+                    10. После каждого раунда роли меняются: защищающийся становится атакующим, и наоборот.
+                </p>
+            </div>
             <button id="close-rules-btn"><i class="fas fa-times button-icon"></i>Закрыть</button>
         </div>
     </div>
     
-  <script>
-    // Firebase Configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
-        authDomain: "misha-and-anna-48e4c.firebaseapp.com",
-        databaseURL: "https://misha-and-anna-48e4c-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "misha-and-anna-48e4c",
-        storageBucket: "misha-and-anna-48e4c.firebasestorage.app",
-        messagingSenderId: "822036073579",
-        appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
-        measurementId: "G-XR86X6PXMX"
-    };
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
+            authDomain: "misha-and-anna-48e4c.firebaseapp.com",
+            databaseURL: "https://misha-and-anna-48e4c-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "misha-and-anna-48e4c",
+            storageBucket: "misha-and-anna-48e4c.firebasestorage.app",
+            messagingSenderId: "822036073579",
+            appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
+            measurementId: "G-XR86X6PXMX"
+        };
 
-    // Initialize Firebase
-    let database, gameRef;
-    try {
-        firebase.initializeApp(firebaseConfig);
-        console.log('Firebase initialized successfully');
-        database = firebase.database();
-        gameRef = database.ref('games/game1');
-        database.ref('.info/connected').once('value', () => {
-            console.log('Connected to Firebase Realtime Database');
-        });
-    } catch (error) {
-        console.error('Firebase initialization error:', error);
-        let message = 'Ошибка инициализации Firebase: ';
-        if (error.code === 'app/invalid-app-id') {
-            message += 'Неверный appId. Проверьте firebaseConfig.';
-        } else if (error.code === 'app/network-error') {
-            message += 'Ошибка сети. Проверьте подключение.';
-        } else {
-            message += error.message;
-        }
-        updateGameMessage(message);
-    }
-
-    // Константы
-    const SUITS = ['hearts', 'diamonds', 'clubs', 'spades'];
-    const SUIT_SYMBOLS = {
-        'hearts': '♥',
-        'diamonds': '♦',
-        'clubs': '♣',
-        'spades': '♠'
-    };
-    const RANKS = ['6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-    const RANK_VALUES = {
-        '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
-        'J': 11, 'Q': 12, 'K': 13, 'A': 14
-    };
-
-    // Состояние игры
-    let gameState = {
-        deck: [],
-        discardPile: [],
-        players: [
-            { id: 1, name: '', hand: [], isDefending: false },
-            { id: 2, name: '', hand: [], isDefending: false }
-        ],
-        currentPlayerIndex: null,
-        attackingPlayerIndex: null,
-        defendingPlayerIndex: null,
-        trumpSuit: null,
-        field: [],
-        gameOver: true,
-        maxAttackCards: 6,
-        animationsEnabled: true,
-        status: 'waiting'
-    };
-
-    // Текущий игрок
-    let playerName = null;
-    let playerIndex = null;
-    let isProcessing = false;
-
-    // DOM элементы
-    const joinGameSection = document.getElementById('join-game');
-    const playerNameInput = document.getElementById('player-name');
-    const joinButton = document.getElementById('join-btn');
-    const player1Hand = document.getElementById('player1-hand');
-    const player2Hand = document.getElementById('player2-hand');
-    const playArea = document.getElementById('play-area');
-    const deckElement = document.getElementById('deck');
-    const deckCountElement = document.getElementById('deck-count');
-    const trumpSuitElement = document.getElementById('trump-suit');
-    const player1CountElement = document.getElementById('player1-count');
-    const player2CountElement = document.getElementById('player2-count');
-    const player1Element = document.getElementById('player1');
-    const player2Element = document.getElementById('player2');
-    const player1NameElement = document.getElementById('player1-name');
-    const player2NameElement = document.getElementById('player2-name');
-    const player1Label = document.getElementById('player1-label');
-    const player2Label = document.getElementById('player2-label');
-    const takeButton = document.getElementById('take-btn');
-    const passButton = document.getElementById('pass-btn');
-    const newGameButton = document.getElementById('new-game-btn');
-    const gameMessageElement = document.getElementById('game-message');
-    const endGameModal = document.getElementById('end-game-modal');
-    const winnerMessageElement = document.getElementById('winner-message');
-    const gameResultDetailsElement = document.getElementById('game-result-details');
-    const playAgainButton = document.getElementById('play-again-btn');
-    const rulesButton = document.getElementById('rules-btn');
-    const rulesModal = document.getElementById('rules-modal');
-    const closeRulesButton = document.getElementById('close-rules-btn');
-
-    // Присоединение к игре
-    joinButton.addEventListener('click', () => {
-        const name = playerNameInput.value.trim();
-        if (!name) {
-            updateGameMessage('Введите имя!');
-            return;
-        }
-        joinGame(name);
-    });
-
-    function joinGame(name) {
-        console.log('Attempting to join game with name:', name);
-        gameRef.once('value', (snapshot) => {
-            console.log('Game data fetched:', snapshot.val());
-            const gameData = snapshot.val();
-            if (!gameData || !gameData.status || gameData.status === 'finished') {
-                console.log('Creating new game for', name);
-                gameState = {
-                    deck: createDeck(),
-                    discardPile: [],
-                    players: [
-                        { id: 1, name: name, hand: [], isDefending: false },
-                        { id: 2, name: '', hand: [], isDefending: false }
-                    ],
-                    currentPlayerIndex: null,
-                    attackingPlayerIndex: null,
-                    defendingPlayerIndex: null,
-                    trumpSuit: null,
-                    field: [],
-                    gameOver: true,
-                    maxAttackCards: 6,
-                    animationsEnabled: true,
-                    status: 'waiting'
-                };
-                if (!gameState.deck || gameState.deck.length === 0) {
-                    console.error('Deck creation failed');
-                    updateGameMessage('Ошибка: не удалось создать колоду.');
-                    return;
-                }
-                shuffleDeck(gameState.deck);
-                gameRef.set(gameState).then(() => {
-                    console.log('Game created, playerIndex:', 0);
-                    playerName = name;
-                    playerIndex = 0;
-                    joinGameSection.style.display = 'none';
-                    updateGameMessage('Ожидаем второго игрока...');
-                }).catch((error) => {
-                    console.error('Error creating game:', error);
-                    updateGameMessage('Ошибка при создании игры: ' + error.message);
-                });
-            } else if (gameData.status === 'waiting' && (!gameData.players || !gameData.players[1] || gameData.players[1].name === '')) {
-                console.log('Joining as second player:', name);
-                if (gameData.players && gameData.players[0] && gameData.players[0].name === name) {
-                    updateGameMessage('Это имя уже занято! Выберите другое.');
-                    return;
-                }
-                gameRef.update({
-                    'players/1': { id: 2, name: name, hand: [], isDefending: false },
-                    status: 'active'
-                }).then(() => {
-                    console.log('Joined as second player, playerIndex:', 1);
-                    playerName = name;
-                    playerIndex = 1;
-                    joinGameSection.style.display = 'none';
-                    // Delay initGame to ensure first player's state is saved
-                    setTimeout(() => {
-                        initGame();
-                    }, 1000); // 1-second delay
-                }).catch((error) => {
-                    console.error('Error joining game:', error);
-                    updateGameMessage('Ошибка при присоединении к игре: ' + error.message);
-                });
-            } else {
-                console.log('Game is already in progress');
-                updateGameMessage('Игра уже идет! Попробуйте позже.');
-            }
-        }).catch((error) => {
-            console.error('Error fetching game state:', error);
-            let message = 'Ошибка при загрузке состояния игры: ';
-            if (error.code === 'PERMISSION_DENIED') {
-                message += 'Доступ к базе данных запрещен. Проверьте правила Firebase.';
+        // Initialize Firebase
+        let database, gameRef;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log('Firebase initialized successfully');
+            database = firebase.database();
+            gameRef = database.ref('games/game1');
+            database.ref('.info/connected').once('value', () => {
+                console.log('Connected to Firebase Realtime Database');
+            });
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            let message = 'Ошибка инициализации Firebase: ';
+            if (error.code === 'app/invalid-app-id') {
+                message += 'Неверный appId. Проверьте firebaseConfig.';
+            } else if (error.code === 'app/network-error') {
+                message += 'Ошибка сети. Проверьте подключение.';
             } else {
                 message += error.message;
             }
             updateGameMessage(message);
-        });
-    }
-
-    // Синхронизация состояния игры
-    gameRef.on('value', (snapshot) => {
-        const newState = snapshot.val();
-        console.log('Received game state:', newState);
-        if (!newState || !newState.deck || !newState.players || !newState.players[0] || !newState.players[1]) {
-            console.warn('Invalid game state received:', newState);
-            updateGameMessage('Ожидаем инициализации игры...');
-            return;
         }
-        gameState = newState;
-        updateUI();
-        setButtonState();
-        if (gameState.gameOver && gameState.status === 'finished') {
-            const isPlayer1Winner = (gameState.players[0].hand || []).length === 0;
-            const isPlayer2Winner = (gameState.players[1].hand || []).length === 0;
-            let title, message;
-            if (isPlayer1Winner && isPlayer2Winner) {
-                title = 'Ничья!';
-                message = 'Оба игрока закончили карты!';
-            } else if (isPlayer1Winner) {
-                title = gameState.players[0].name + ' победил!';
-                message = playerIndex === 0 ? 'Поздравляем! Вы избавились от всех карт!' : 'К сожалению, противник оказался хитрее!';
-            } else if (isPlayer2Winner) {
-                title = gameState.players[1].name + ' победил!';
-                message = playerIndex === 1 ? 'Поздравляем! Вы избавились от всех карт!' : 'К сожалению, противник оказался хитрее!';
+
+        // Константы
+        const SUITS = ['hearts', 'diamonds', 'clubs', 'spades'];
+        const SUIT_SYMBOLS = {
+            'hearts': '♥',
+            'diamonds': '♦',
+            'clubs': '♣',
+            'spades': '♠'
+        };
+        const RANKS = ['6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        const RANK_VALUES = {
+            '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+            'J': 11, 'Q': 12, 'K': 13, 'A': 14
+        };
+
+        // Состояние игры
+        let gameState = {
+            deck: [],
+            discardPile: [],
+            players: [
+                { id: 1, name: '', hand: [], isDefending: false },
+                { id: 2, name: '', hand: [], isDefending: false }
+            ],
+            currentPlayerIndex: null,
+            attackingPlayerIndex: null,
+            defendingPlayerIndex: null,
+            trumpSuit: null,
+            field: [],
+            gameOver: true,
+            maxAttackCards: 6,
+            animationsEnabled: true,
+            status: 'waiting'
+        };
+
+        // Текущий игрок
+        let playerName = null;
+        let playerIndex = null;
+        let isProcessing = false;
+
+        // DOM элементы
+        const joinGameSection = document.getElementById('join-game');
+        const playerNameInput = document.getElementById('player-name');
+        const joinButton = document.getElementById('join-btn');
+        const player1Hand = document.getElementById('player1-hand');
+        const player2Hand = document.getElementById('player2-hand');
+        const playArea = document.getElementById('play-area');
+        const deckElement = document.getElementById('deck');
+        const deckCountElement = document.getElementById('deck-count');
+        const trumpSuitElement = document.getElementById('trump-suit');
+        const player1CountElement = document.getElementById('player1-count');
+        const player2CountElement = document.getElementById('player2-count');
+        const player1Element = document.getElementById('player1');
+        const player2Element = document.getElementById('player2');
+        const player1NameElement = document.getElementById('player1-name');
+        const player2NameElement = document.getElementById('player2-name');
+        const player1Label = document.getElementById('player1-label');
+        const player2Label = document.getElementById('player2-label');
+        const takeButton = document.getElementById('take-btn');
+        const passButton = document.getElementById('pass-btn');
+        const newGameButton = document.getElementById('new-game-btn');
+        const gameMessageElement = document.getElementById('game-message');
+        const endGameModal = document.getElementById('end-game-modal');
+        const winnerMessageElement = document.getElementById('winner-message');
+        const gameResultDetailsElement = document.getElementById('game-result-details');
+        const playAgainButton = document.getElementById('play-again-btn');
+        const rulesButton = document.getElementById('rules-btn');
+        const rulesModal = document.getElementById('rules-modal');
+        const closeRulesButton = document.getElementById('close-rules-btn');
+
+        // Присоединение к игре
+        joinButton.addEventListener('click', () => {
+            const name = playerNameInput.value.trim();
+            if (!name) {
+                updateGameMessage('Введите имя!');
+                return;
             }
-            showEndGameModal(title, message);
+            joinGame(name);
+        });
+
+        function joinGame(name) {
+            console.log('Attempting to join game with name:', name);
+            gameRef.once('value', (snapshot) => {
+                console.log('Game data fetched:', snapshot.val());
+                const gameData = snapshot.val();
+                if (!gameData || !gameData.status || gameData.status === 'finished') {
+                    console.log('Creating new game for', name);
+                    gameState = {
+                        deck: createDeck(),
+                        discardPile: [],
+                        players: [
+                            { id: 1, name: name, hand: [], isDefending: false },
+                            { id: 2, name: '', hand: [], isDefending: false }
+                        ],
+                        currentPlayerIndex: null,
+                        attackingPlayerIndex: null,
+                        defendingPlayerIndex: null,
+                        trumpSuit: null,
+                        field: [],
+                        gameOver: true,
+                        maxAttackCards: 6,
+                        animationsEnabled: true,
+                        status: 'waiting'
+                    };
+                    if (!gameState.deck || gameState.deck.length === 0) {
+                        console.error('Deck creation failed');
+                        updateGameMessage('Ошибка: не удалось создать колоду.');
+                        return;
+                    }
+                    shuffleDeck(gameState.deck);
+                    gameRef.set(gameState).then(() => {
+                        console.log('Game created, playerIndex:', 0);
+                        playerName = name;
+                        playerIndex = 0;
+                        joinGameSection.style.display = 'none';
+                        updateGameMessage('Ожидаем второго игрока...');
+                    }).catch((error) => {
+                        console.error('Error creating game:', error);
+                        updateGameMessage('Ошибка при создании игры: ' + error.message);
+                    });
+                } else if (gameData.status === 'waiting' && (!gameData.players || !gameData.players[1] || gameData.players[1].name === '')) {
+                    console.log('Joining as second player:', name);
+                    if (gameData.players && gameData.players[0] && gameData.players[0].name === name) {
+                        updateGameMessage('Это имя уже занято! Выберите другое.');
+                        return;
+                    }
+                    gameRef.update({
+                        'players/1': { id: 2, name: name, hand: [], isDefending: false },
+                        status: 'active'
+                    }).then(() => {
+                        console.log('Joined as second player, playerIndex:', 1);
+                        playerName = name;
+                        playerIndex = 1;
+                        joinGameSection.style.display = 'none';
+                        // Delay initGame to ensure first player's state is saved
+                        setTimeout(() => {
+                            initGame();
+                        }, 1000); // 1-second delay
+                    }).catch((error) => {
+                        console.error('Error joining game:', error);
+                        updateGameMessage('Ошибка при присоединении к игре: ' + error.message);
+                    });
+                } else {
+                    console.log('Game is already in progress');
+                    updateGameMessage('Игра уже идет! Попробуйте позже.');
+                }
+            }).catch((error) => {
+                console.error('Error fetching game state:', error);
+                let message = 'Ошибка при загрузке состояния игры: ';
+                if (error.code === 'PERMISSION_DENIED') {
+                    message += 'Доступ к базе данных запрещен. Проверьте правила Firebase.';
+                } else {
+                    message += error.message;
+                }
+                updateGameMessage(message);
+            });
         }
-    }, (error) => {
-        console.error('Error listening to game state:', error);
-        updateGameMessage('Ошибка синхронизации игры: ' + error.message);
-    });
 
-    // Инициализация игры
-    function initGame() {
-        isProcessing = true;
-        updateGameMessage('Раздаем карты...');
-        console.log('Initializing game...');
+        // Синхронизация состояния игры
+        gameRef.on('value', (snapshot) => {
+            const newState = snapshot.val();
+            console.log('Received game state:', newState);
+            if (!newState || !newState.deck || !newState.players || !newState.players[0] || !newState.players[1]) {
+                console.warn('Invalid game state received:', newState);
+                updateGameMessage('Ожидаем инициализации игры...');
+                return;
+            }
+            gameState = newState;
+            updateUI();
+            setButtonState();
+            if (gameState.gameOver && gameState.status === 'finished') {
+                const isPlayer1Winner = (gameState.players[0].hand || []).length === 0;
+                const isPlayer2Winner = (gameState.players[1].hand || []).length === 0;
+                let title, message;
+                if (isPlayer1Winner && isPlayer2Winner) {
+                    title = 'Ничья!';
+                    message = 'Оба игрока закончили карты!';
+                } else if (isPlayer1Winner) {
+                    title = gameState.players[0].name + ' победил!';
+                    message = playerIndex === 0 ? 'Поздравляем! Вы избавились от всех карт!' : 'К сожалению, противник оказался хитрее!';
+                } else if (isPlayer2Winner) {
+                    title = gameState.players[1].name + ' победил!';
+                    message = playerIndex === 1 ? 'Поздравляем! Вы избавились от всех карт!' : 'К сожалению, противник оказался хитрее!';
+                }
+                showEndGameModal(title, message);
+            }
+        }, (error) => {
+            console.error('Error listening to game state:', error);
+            updateGameMessage('Ошибка синхронизации игры: ' + error.message);
+        });
 
-        // Ensure gameState is valid
-        if (!gameState.deck || gameState.deck.length < 36 || !gameState.players[0] || !gameState.players[1]) {
-            console.error('Invalid gameState for initGame:', gameState);
-            updateGameMessage('Ошибка: некорректное состояние игры.');
-            isProcessing = false;
-            return;
-        }
+        // Инициализация игры
+        function initGame() {
+            isProcessing = true;
+            updateGameMessage('Раздаем карты...');
+            console.log('Initializing game...');
 
-        // Reset critical fields
-        gameState.players[0].hand = [];
-        gameState.players[1].hand = [];
-        gameState.field = [];
-        gameState.discardPile = [];
-        gameState.gameOver = true;
-        gameState.status = 'waiting';
-
-        // Rebuild deck if necessary
-        if (gameState.deck.length !== 36) {
-            console.warn('Rebuilding deck');
-            gameState.deck = createDeck();
-            shuffleDeck(gameState.deck);
-        }
-
-        setTimeout(() => {
-            // Раздаем карты
-            dealCards();
-            console.log('After dealCards, gameState:', gameState);
-
-            // Проверяем, что карты разданы
-            if (!gameState.players[0].hand.length || !gameState.players[1].hand.length) {
-                console.error('Failed to deal cards:', gameState.players);
-                updateGameMessage('Ошибка: не удалось раздать карты.');
+            // Ensure gameState is valid
+            if (!gameState.deck || gameState.deck.length < 36 || !gameState.players[0] || !gameState.players[1]) {
+                console.error('Invalid gameState for initGame:', gameState);
+                updateGameMessage('Ошибка: некорректное состояние игры.');
                 isProcessing = false;
                 return;
             }
 
-            // Выбираем козырную карту
-            gameState.trumpSuit = gameState.deck[gameState.deck.length - 1].suit;
+            // Reset critical fields
+            gameState.players[0].hand = [];
+            gameState.players[1].hand = [];
+            gameState.field = [];
+            gameState.discardPile = [];
+            gameState.gameOver = true;
+            gameState.status = 'waiting';
 
-            // Определяем первого игрока
-            determineFirstPlayer();
+            // Rebuild deck if necessary
+            if (gameState.deck.length !== 36) {
+                console.warn('Rebuilding deck');
+                gameState.deck = createDeck();
+                shuffleDeck(gameState.deck);
+            }
 
-            // Обновляем состояние в Firebase
-            gameState.gameOver = false;
-            gameState.status = 'active';
-            gameRef.set(gameState).then(() => {
-                console.log('Game initialized, gameState:', gameState);
-                updateGameMessage(`Игра началась! ${gameState.players[gameState.attackingPlayerIndex].name} атакует первым.`);
-                isProcessing = false;
-            }).catch((error) => {
-                console.error('Error initializing game:', error);
-                updateGameMessage('Ошибка при старте игры: ' + error.message);
-                isProcessing = false;
-            });
-        }, 500);
-    }
+            setTimeout(() => {
+                // Раздаем карты
+                dealCards();
+                console.log('After dealCards, gameState:', gameState);
 
-    // Создание колоды
-    function createDeck() {
-        const deck = [];
-        for (const suit of SUITS) {
-            for (const rank of RANKS) {
-                deck.push({ suit, rank, value: RANK_VALUES[rank] });
+                // Проверяем, что карты разданы
+                if (!gameState.players[0].hand.length || !gameState.players[1].hand.length) {
+                    console.error('Failed to deal cards:', gameState.players);
+                    updateGameMessage('Ошибка: не удалось раздать карты.');
+                    isProcessing = false;
+                    return;
+                }
+
+                // Выбираем козырную карту
+                gameState.trumpSuit = gameState.deck[gameState.deck.length - 1].suit;
+
+                // Определяем первого игрока
+                determineFirstPlayer();
+
+                // Обновляем состояние в Firebase
+                gameState.gameOver = false;
+                gameState.status = 'active';
+                gameRef.set(gameState).then(() => {
+                    console.log('Game initialized, gameState:', gameState);
+                    updateGameMessage(`Игра началась! ${gameState.players[gameState.attackingPlayerIndex].name} атакует первым.`);
+                    isProcessing = false;
+                }).catch((error) => {
+                    console.error('Error initializing game:', error);
+                    updateGameMessage('Ошибка при старте игры: ' + error.message);
+                    isProcessing = false;
+                });
+            }, 500);
+        }
+
+        // Создание колоды
+        function createDeck() {
+            const deck = [];
+            for (const suit of SUITS) {
+                for (const rank of RANKS) {
+                    deck.push({ suit, rank, value: RANK_VALUES[rank] });
+                }
+            }
+            return deck;
+        }
+
+        // Перемешивание колоды
+        function shuffleDeck(deck) {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
             }
         }
-        return deck;
-    }
 
-    // Перемешивание колоды
-    function shuffleDeck(deck) {
-        for (let i = deck.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [deck[i], deck[j]] = [deck[j], deck[i]];
+        // Раздача карт
+        function dealCards() {
+            console.log('Dealing cards...');
+            gameState.players[0].hand = [];
+            gameState.players[1].hand = [];
+            for (let i = 0; i < 6; i++) {
+                for (let player of gameState.players) {
+                    if (gameState.deck.length > 0) {
+                        player.hand.push(gameState.deck.pop());
+                    }
+                }
+            }
+            sortPlayerHands();
+            console.log('Cards dealt. Player 0 hand:', gameState.players[0].hand, 'Player 1 hand:', gameState.players[1].hand);
         }
-    }
 
-    // Раздача карт
-    function dealCards() {
-        console.log('Dealing cards...');
-        gameState.players[0].hand = [];
-        gameState.players[1].hand = [];
-        for (let i = 0; i < 6; i++) {
+        // Сортировка карт
+        function sortPlayerHands() {
             for (let player of gameState.players) {
-                if (gameState.deck.length > 0) {
-                    player.hand.push(gameState.deck.pop());
+                if (player.hand) {
+                    player.hand.sort((a, b) => {
+                        if (a.suit === gameState.trumpSuit && b.suit !== gameState.trumpSuit) return 1;
+                        if (a.suit !== gameState.trumpSuit && b.suit === gameState.trumpSuit) return -1;
+                        if (a.suit === b.suit) return a.value - b.value;
+                        return SUITS.indexOf(a.suit) - SUITS.indexOf(b.suit);
+                    });
                 }
             }
         }
-        sortPlayerHands();
-        console.log('Cards dealt. Player 0 hand:', gameState.players[0].hand, 'Player 1 hand:', gameState.players[1].hand);
-    }
 
-    // Сортировка карт
-    function sortPlayerHands() {
-        for (let player of gameState.players) {
-            if (player.hand) {
-                player.hand.sort((a, b) => {
-                    if (a.suit === gameState.trumpSuit && b.suit !== gameState.trumpSuit) return 1;
-                    if (a.suit !== gameState.trumpSuit && b.suit === gameState.trumpSuit) return -1;
-                    if (a.suit === b.suit) return a.value - b.value;
-                    return SUITS.indexOf(a.suit) - SUITS.indexOf(b.suit);
+        // Определение первого игрока
+        function determineFirstPlayer() {
+            let minTrumpPlayer0 = null;
+            let minTrumpPlayer1 = null;
+            
+            for (let card of gameState.players[0].hand || []) {
+                if (card.suit === gameState.trumpSuit) {
+                    if (!minTrumpPlayer0 || card.value < minTrumpPlayer0.value) {
+                        minTrumpPlayer0 = card;
+                    }
+                }
+            }
+            
+            for (let card of gameState.players[1].hand || []) {
+                if (card.suit === gameState.trumpSuit) {
+                    if (!minTrumpPlayer1 || card.value < minTrumpPlayer1.value) {
+                        minTrumpPlayer1 = card;
+                    }
+                }
+            }
+            
+            if (minTrumpPlayer0 && minTrumpPlayer1) {
+                gameState.attackingPlayerIndex = minTrumpPlayer0.value < minTrumpPlayer1.value ? 0 : 1;
+            } else if (minTrumpPlayer0) {
+                gameState.attackingPlayerIndex = 0;
+            } else if (minTrumpPlayer1) {
+                gameState.attackingPlayerIndex = 1;
+            } else {
+                gameState.attackingPlayerIndex = Math.floor(Math.random() * 2);
+            }
+            
+            gameState.defendingPlayerIndex = gameState.attackingPlayerIndex === 0 ? 1 : 0;
+            gameState.currentPlayerIndex = gameState.attackingPlayerIndex;
+            gameState.players[gameState.defendingPlayerIndex].isDefending = true;
+            console.log('First player determined. Attacker:', gameState.attackingPlayerIndex);
+        }
+
+        // Обновление UI
+        function updateUI() {
+            console.log('Updating UI with gameState:', gameState);
+            if (!gameState || !gameState.deck || !gameState.players || !gameState.players[0] || !gameState.players[1]) {
+                console.warn('Cannot update UI: invalid gameState', gameState);
+                updateGameMessage('Ошибка: состояние игры недоступно.');
+                return;
+            }
+
+            deckCountElement.textContent = (gameState.deck || []).length;
+            player1CountElement.textContent = (gameState.players[0].hand || []).length;
+            player2CountElement.textContent = (gameState.players[1].hand || []).length;
+            player1NameElement.textContent = gameState.players[0].name || 'Ожидание';
+            player2NameElement.textContent = gameState.players[1].name || 'Ожидание';
+            player1Label.textContent = gameState.players[0].name || 'Ожидание';
+            player2Label.textContent = gameState.players[1].name || 'Ожидание';
+            trumpSuitElement.textContent = SUIT_SYMBOLS[gameState.trumpSuit || 'spades'];
+            trumpSuitElement.className = 'trump-indicator ' + (gameState.trumpSuit || 'spades') + '-suit';
+            
+            player1Element.classList.toggle('player-active', gameState.currentPlayerIndex === 0);
+            player2Element.classList.toggle('player-active', gameState.currentPlayerIndex === 1);
+            
+            renderPlayerHand(0);
+            renderPlayerHand(1);
+            renderPlayArea();
+        }
+
+        // Отрисовка руки игрока
+        function renderPlayerHand(pIndex) {
+            const handElement = document.getElementById(`player${pIndex + 1}-hand`);
+            handElement.innerHTML = '';
+            const playerLabel = document.createElement('div');
+            playerLabel.className = 'player-label';
+            playerLabel.textContent = gameState.players[pIndex].name || 'Ожидание';
+            handElement.appendChild(playerLabel);
+            
+            const player = gameState.players[pIndex];
+            const isOwnHand = pIndex === playerIndex;
+            
+            if (!player.hand) {
+                console.warn(`Player ${pIndex} hand is undefined`);
+                return;
+            }
+            
+            if (!isOwnHand) {
+                for (let i = 0; i < player.hand.length; i++) {
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'card';
+                    cardElement.innerHTML = '<div class="card-back"></div>';
+                    handElement.appendChild(cardElement);
+                }
+            } else {
+                for (let i = 0; i < player.hand.length; i++) {
+                    const card = player.hand[i];
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'card';
+                    cardElement.dataset.index = i;
+                    
+                    if (isCardPlayable(card, pIndex)) {
+                        cardElement.classList.add('available');
+                        cardElement.addEventListener('click', () => handleCardClick(pIndex, i));
+                    }
+                    
+                    cardElement.innerHTML = `
+                        <div class="card-top ${card.suit}">
+                            <span>${card.rank}</span>
+                            <span>${SUIT_SYMBOLS[card.suit]}</span>
+                        </div>
+                        <div class="card-center ${card.suit}">
+                            ${SUIT_SYMBOLS[card.suit]}
+                        </div>
+                        <div class="card-bottom ${card.suit}">
+                            <span>${card.rank}</span>
+                            <span>${SUIT_SYMBOLS[card.suit]}</span>
+                        </div>
+                    `;
+                    handElement.appendChild(cardElement);
+                }
+            }
+        }
+
+        // Проверка, можно ли сыграть карту
+        function isCardPlayable(card, pIndex) {
+            if (isProcessing || gameState.currentPlayerIndex !== pIndex || gameState.gameOver || pIndex !== playerIndex) {
+                return false;
+            }
+            
+            if (pIndex === gameState.attackingPlayerIndex) {
+                if (gameState.field.length > 0) {
+                    const rankValues = gameState.field.map(pair => pair.attackCard?.rank || pair.defenseCard?.rank).filter(rank => rank);
+                    return rankValues.includes(card.rank);
+                }
+                return true;
+            } else if (pIndex === gameState.defendingPlayerIndex) {
+                for (let pair of gameState.field) {
+                    if (pair.attackCard && !pair.defenseCard) {
+                        return canBeat(card, pair.attackCard);
+                    }
+                }
+            }
+            return false;
+        }
+
+        // Проверка, бьет ли карта
+        function canBeat(defenseCard, attackCard) {
+            if (defenseCard.suit === attackCard.suit) {
+                return defenseCard.value > attackCard.value;
+            }
+            return defenseCard.suit === gameState.trumpSuit && attackCard.suit !== gameState.trumpSuit;
+        }
+
+        // Отрисовка игрового поля
+        function renderPlayArea() {
+            playArea.innerHTML = '';
+            if (!gameState.field) {
+                console.warn('Field is undefined');
+                return;
+            }
+            for (let pair of gameState.field) {
+                const pairElement = document.createElement('div');
+                pairElement.className = 'battle-pair';
+                
+                if (pair.attackCard) {
+                    const attackCardElement = createCardElement(pair.attackCard);
+                    attackCardElement.classList.add('attack-card');
+                    pairElement.appendChild(attackCardElement);
+                }
+                
+                if (pair.defenseCard) {
+                    const defenseCardElement = createCardElement(pair.defenseCard);
+                    defenseCardElement.classList.add('defense-card');
+                    pairElement.appendChild(defenseCardElement);
+                }
+                
+                playArea.appendChild(pairElement);
+            }
+        }
+
+        // Создание элемента карты
+        function createCardElement(card) {
+            const cardElement = document.createElement('div');
+            cardElement.className = 'card';
+            cardElement.innerHTML = `
+                <div class="card-top ${card.suit}">
+                    <span>${card.rank}</span>
+                    <span>${SUIT_SYMBOLS[card.suit]}</span>
+                </div>
+                <div class="card-center ${card.suit}">
+                    ${SUIT_SYMBOLS[card.suit]}
+                </div>
+                <div class="card-bottom ${card.suit}">
+                    <span>${card.rank}</span>
+                    <span>${SUIT_SYMBOLS[card.suit]}</span>
+                </div>
+            `;
+            return cardElement;
+        }
+
+        // Обработчик клика по карте
+        function handleCardClick(pIndex, cardIndex) {
+            if (isProcessing || gameState.gameOver || pIndex !== playerIndex) return;
+            
+            isProcessing = true;
+            const player = gameState.players[pIndex];
+            const card = player.hand[cardIndex];
+            const updates = {};
+            
+            if (pIndex === gameState.attackingPlayerIndex) {
+                updates.field = [...gameState.field, { attackCard: card, defenseCard: null }];
+                updates[`players/${pIndex}/hand`] = player.hand.filter((_, i) => i !== cardIndex);
+                updates.currentPlayerIndex = gameState.defendingPlayerIndex;
+                updateGameMessage(`${player.name} атакует картой ${card.rank}${SUIT_SYMBOLS[card.suit]}`);
+            } else if (pIndex === gameState.defendingPlayerIndex) {
+                for (let i = 0; i < gameState.field.length; i++) {
+                    const pair = gameState.field[i];
+                    if (pair.attackCard && !pair.defenseCard && canBeat(card, pair.attackCard)) {
+                        updates[`field/${i}/defenseCard`] = card;
+                        updates[`players/${pIndex}/hand`] = player.hand.filter((_, i) => i !== cardIndex);
+                        updates.currentPlayerIndex = gameState.attackingPlayerIndex;
+                        updateGameMessage(`${player.name} отбивается картой ${card.rank}${SUIT_SYMBOLS[card.suit]}`);
+                        break;
+                    }
+                }
+            }
+            
+            gameRef.update(updates).then(() => {
+                checkEndGame();
+                isProcessing = false;
+            }).catch((error) => {
+                console.error('Error updating game state:', error);
+                updateGameMessage('Ошибка при ходе: ' + error.message);
+                isProcessing = false;
+            });
+        }
+
+        // Обработчик кнопки "Взять"
+        function handleTakeCards() {
+            if (isProcessing || gameState.currentPlayerIndex !== playerIndex || gameState.defendingPlayerIndex !== playerIndex || gameState.gameOver) return;
+            
+            isProcessing = true;
+            const player = gameState.players[gameState.defendingPlayerIndex];
+            const updates = {};
+            
+            const newHand = [...(player.hand || [])];
+            for (let pair of gameState.field) {
+                if (pair.attackCard) newHand.push(pair.attackCard);
+                if (pair.defenseCard) newHand.push(pair.defenseCard);
+            }
+            
+            updates[`players/${gameState.defendingPlayerIndex}/hand`] = newHand;
+            updates.field = [];
+            updates.attackingPlayerIndex = gameState.defendingPlayerIndex;
+            updates.defendingPlayerIndex = gameState.attackingPlayerIndex === 0 ? 1 : 0;
+            updates.currentPlayerIndex = updates.attackingPlayerIndex;
+            updates[`players/0/isDefending`] = updates.defendingPlayerIndex === 0;
+            updates[`players/1/isDefending`] = updates.defendingPlayerIndex === 1;
+            
+            gameRef.update(updates).then(() => {
+                sortPlayerHands();
+                drawCardsAfterRound();
+                updateGameMessage(`${player.name} берет карты`);
+                gameRef.set(gameState).then(() => {
+                    checkEndGame();
+                    isProcessing = false;
+                }).catch((error) => {
+                    console.error('Error saving game state:', error);
+                    updateGameMessage('Ошибка при сохранении: ' + error.message);
+                    isProcessing = false;
+                });
+            }).catch((error) => {
+                console.error('Error taking cards:', error);
+                updateGameMessage('Ошибка при взятии карт: ' + error.message);
+                isProcessing = false;
+            });
+        }
+
+        // Обработчик кнопки "Бито"
+        function handlePass() {
+            if (isProcessing || gameState.currentPlayerIndex !== playerIndex || gameState.attackingPlayerIndex !== playerIndex || gameState.gameOver) return;
+            
+            isProcessing = true;
+            const allCovered = gameState.field.every(pair => pair.defenseCard !== null);
+            if (!allCovered) {
+                isProcessing = false;
+                return;
+            }
+            
+            const updates = {};
+            updates.discardPile = [...(gameState.discardPile || [])];
+            for (let pair of gameState.field) {
+                updates.discardPile.push(pair.attackCard);
+                updates.discardPile.push(pair.defenseCard);
+            }
+            updates.field = [];
+            updates.attackingPlayerIndex = gameState.defendingPlayerIndex;
+            updates.defendingPlayerIndex = gameState.attackingPlayerIndex === 0 ? 1 : 0;
+            updates.currentPlayerIndex = updates.attackingPlayerIndex;
+            updates[`players/0/isDefending`] = updates.defendingPlayerIndex === 0;
+            updates[`players/1/isDefending`] = updates.defendingPlayerIndex === 1;
+            
+            gameRef.update(updates).then(() => {
+                drawCardsAfterRound();
+                updateGameMessage('Бито!');
+                gameRef.set(gameState).then(() => {
+                    checkEndGame();
+                    isProcessing = false;
+                }).catch((error) => {
+                    console.error('Error saving game state:', error);
+                    updateGameMessage('Ошибка при сохранении: ' + error.message);
+                    isProcessing = false;
+                });
+            }).catch((error) => {
+                console.error('Error passing:', error);
+                updateGameMessage('Ошибка при "Бито": ' + error.message);
+                isProcessing = false;
+            });
+        }
+
+        // Добор карт
+        function drawCardsAfterRound() {
+            while (gameState.players[gameState.attackingPlayerIndex].hand.length < 6 && gameState.deck.length > 0) {
+                gameState.players[gameState.attackingPlayerIndex].hand.push(gameState.deck.pop());
+            }
+            while (gameState.players[gameState.defendingPlayerIndex].hand.length < 6 && gameState.deck.length > 0) {
+                gameState.players[gameState.defendingPlayerIndex].hand.push(gameState.deck.pop());
+            }
+            sortPlayerHands();
+        }
+
+        // Проверка окончания игры
+        function checkEndGame() {
+            if ((gameState.deck || []).length === 0 && !gameState.gameOver) {
+                updateGameMessage('Колода пуста! Играйте до конца!');
+            }
+            if ((gameState.deck || []).length === 0 && ((gameState.players[0].hand || []).length === 0 || (gameState.players[1].hand || []).length === 0) && gameState.status === 'active') {
+                gameState.gameOver = true;
+                gameState.status = 'finished';
+                gameRef.set(gameState).catch((error) => {
+                    console.error('Error ending game:', error);
+                    updateGameMessage('Ошибка при завершении игры: ' + error.message);
                 });
             }
         }
-    }
 
-    // Определение первого игрока
-    function determineFirstPlayer() {
-        let minTrumpPlayer0 = null;
-        let minTrumpPlayer1 = null;
-        
-        for (let card of gameState.players[0].hand || []) {
-            if (card.suit === gameState.trumpSuit) {
-                if (!minTrumpPlayer0 || card.value < minTrumpPlayer0.value) {
-                    minTrumpPlayer0 = card;
-                }
-            }
-        }
-        
-        for (let card of gameState.players[1].hand || []) {
-            if (card.suit === gameState.trumpSuit) {
-                if (!minTrumpPlayer1 || card.value < minTrumpPlayer1.value) {
-                    minTrumpPlayer1 = card;
-                }
-            }
-        }
-        
-        if (minTrumpPlayer0 && minTrumpPlayer1) {
-            gameState.attackingPlayerIndex = minTrumpPlayer0.value < minTrumpPlayer1.value ? 0 : 1;
-        } else if (minTrumpPlayer0) {
-            gameState.attackingPlayerIndex = 0;
-        } else if (minTrumpPlayer1) {
-            gameState.attackingPlayerIndex = 1;
-        } else {
-            gameState.attackingPlayerIndex = Math.floor(Math.random() * 2);
-        }
-        
-        gameState.defendingPlayerIndex = gameState.attackingPlayerIndex === 0 ? 1 : 0;
-        gameState.currentPlayerIndex = gameState.attackingPlayerIndex;
-        gameState.players[gameState.defendingPlayerIndex].isDefending = true;
-        console.log('First player determined. Attacker:', gameState.attackingPlayerIndex);
-    }
-
-    // Обновление UI
-    function updateUI() {
-        console.log('Updating UI with gameState:', gameState);
-        if (!gameState || !gameState.deck || !gameState.players || !gameState.players[0] || !gameState.players[1]) {
-            console.warn('Cannot update UI: invalid gameState', gameState);
-            updateGameMessage('Ошибка: состояние игры недоступно.');
-            return;
+        // Показать модальное окно окончания игры
+        function showEndGameModal(title, message) {
+            winnerMessageElement.textContent = title;
+            gameResultDetailsElement.textContent = message;
+            endGameModal.style.display = 'flex';
         }
 
-        deckCountElement.textContent = (gameState.deck || []).length;
-        player1CountElement.textContent = (gameState.players[0].hand || []).length;
-        player2CountElement.textContent = (gameState.players[1].hand || []).length;
-        player1NameElement.textContent = gameState.players[0].name || 'Ожидание';
-        player2NameElement.textContent = gameState.players[1].name || 'Ожидание';
-        player1Label.textContent = gameState.players[0].name || 'Ожидание';
-        player2Label.textContent = gameState.players[1].name || 'Ожидание';
-        trumpSuitElement.textContent = SUIT_SYMBOLS[gameState.trumpSuit || 'spades'];
-        trumpSuitElement.className = 'trump-indicator ' + (gameState.trumpSuit || 'spades') + '-suit';
-        
-        player1Element.classList.toggle('player-active', gameState.currentPlayerIndex === 0);
-        player2Element.classList.toggle('player-active', gameState.currentPlayerIndex === 1);
-        
-        renderPlayerHand(0);
-        renderPlayerHand(1);
-        renderPlayArea();
-    }
+        // Обновление сообщения
+        function updateGameMessage(message) {
+            gameMessageElement.textContent = message;
+            gameMessageElement.classList.remove('fade-in');
+            void gameMessageElement.offsetWidth;
+            gameMessageElement.classList.add('fade-in');
+        }
 
-    // Отрисовка руки игрока
-    function renderPlayerHand(pIndex) {
-        const handElement = document.getElementById(`player${pIndex + 1}-hand`);
-        handElement.innerHTML = '';
-        const playerLabel = document.createElement('div');
-        playerLabel.className = 'player-label';
-        playerLabel.textContent = gameState.players[pIndex].name || 'Ожидание';
-        handElement.appendChild(playerLabel);
-        
-        const player = gameState.players[pIndex];
-        const isOwnHand = pIndex === playerIndex;
-        
-        if (!player.hand) {
-            console.warn(`Player ${pIndex} hand is undefined`);
-            return;
-        }
-        
-        if (!isOwnHand) {
-            for (let i = 0; i < player.hand.length; i++) {
-                const cardElement = document.createElement('div');
-                cardElement.className = 'card';
-                cardElement.innerHTML = '<div class="card-back"></div>';
-                handElement.appendChild(cardElement);
-            }
-        } else {
-            for (let i = 0; i < player.hand.length; i++) {
-                const card = player.hand[i];
-                const cardElement = document.createElement('div');
-                cardElement.className = 'card';
-                cardElement.dataset.index = i;
-                
-                if (isCardPlayable(card, pIndex)) {
-                    cardElement.classList.add('available');
-                    cardElement.addEventListener('click', () => handleCardClick(pIndex, i));
-                }
-                
-                cardElement.innerHTML = `
-                    <div class="card-top ${card.suit}">
-                        <span>${card.rank}</span>
-                        <span>${SUIT_SYMBOLS[card.suit]}</span>
-                    </div>
-                    <div class="card-center ${card.suit}">
-                        ${SUIT_SYMBOLS[card.suit]}
-                    </div>
-                    <div class="card-bottom ${card.suit}">
-                        <span>${card.rank}</span>
-                        <span>${SUIT_SYMBOLS[card.suit]}</span>
-                    </div>
-                `;
-                handElement.appendChild(cardElement);
-            }
-        }
-    }
-
-    // Проверка, можно ли сыграть карту
-    function isCardPlayable(card, pIndex) {
-        if (isProcessing || gameState.currentPlayerIndex !== pIndex || gameState.gameOver || pIndex !== playerIndex) {
-            return false;
-        }
-        
-        if (pIndex === gameState.attackingPlayerIndex) {
-            if (gameState.field.length > 0) {
-                const rankValues = gameState.field.map(pair => pair.attackCard?.rank || pair.defenseCard?.rank).filter(rank => rank);
-                return rankValues.includes(card.rank);
-            }
-            return true;
-        } else if (pIndex === gameState.defendingPlayerIndex) {
-            for (let pair of gameState.field) {
-                if (pair.attackCard && !pair.defenseCard) {
-                    return canBeat(card, pair.attackCard);
-                }
-            }
-        }
-        return false;
-    }
-
-    // Проверка, бьет ли карта
-    function canBeat(defenseCard, attackCard) {
-        if (defenseCard.suit === attackCard.suit) {
-            return defenseCard.value > attackCard.value;
-        }
-        return defenseCard.suit === gameState.trumpSuit && attackCard.suit !== gameState.trumpSuit;
-    }
-
-    // Отрисовка игрового поля
-    function renderPlayArea() {
-        playArea.innerHTML = '';
-        if (!gameState.field) {
-            console.warn('Field is undefined');
-            return;
-        }
-        for (let pair of gameState.field) {
-            const pairElement = document.createElement('div');
-            pairElement.className = 'battle-pair';
+        // Установка состояния кнопок
+        function setButtonState() {
+            takeButton.disabled = !(
+                gameState.currentPlayerIndex === playerIndex &&
+                gameState.defendingPlayerIndex === playerIndex &&
+                (gameState.field || []).some(pair => pair.attackCard && !pair.defenseCard) &&
+                !gameState.gameOver
+            );
             
-            if (pair.attackCard) {
-                const attackCardElement = createCardElement(pair.attackCard);
-                attackCardElement.classList.add('attack-card');
-                pairElement.appendChild(attackCardElement);
-            }
+            passButton.disabled = !(
+                gameState.currentPlayerIndex === playerIndex &&
+                gameState.attackingPlayerIndex === playerIndex &&
+                (gameState.field || []).length > 0 &&
+                (gameState.field || []).every(pair => pair.defenseCard !== null) &&
+                !gameState.gameOver
+            );
             
-            if (pair.defenseCard) {
-                const defenseCardElement = createCardElement(pair.defenseCard);
-                defenseCardElement.classList.add('defense-card');
-                pairElement.appendChild(defenseCardElement);
-            }
-            
-            playArea.appendChild(pairElement);
+            newGameButton.disabled = false;
         }
-    }
 
-    // Создание элемента карты
-    function createCardElement(card) {
-        const cardElement = document.createElement('div');
-        cardElement.className = 'card';
-        cardElement.innerHTML = `
-            <div class="card-top ${card.suit}">
-                <span>${card.rank}</span>
-                <span>${SUIT_SYMBOLS[card.suit]}</span>
-            </div>
-            <div class="card-center ${card.suit}">
-                ${SUIT_SYMBOLS[card.suit]}
-            </div>
-            <div class="card-bottom ${card.suit}">
-                <span>${card.rank}</span>
-                <span>${SUIT_SYMBOLS[card.suit]}</span>
-            </div>
-        `;
-        return cardElement;
-    }
-
-    // Обработчик клика по карте
-    function handleCardClick(pIndex, cardIndex) {
-        if (isProcessing || gameState.gameOver || pIndex !== playerIndex) return;
-        
-        isProcessing = true;
-        const player = gameState.players[pIndex];
-        const card = player.hand[cardIndex];
-        const updates = {};
-        
-        if (pIndex === gameState.attackingPlayerIndex) {
-            updates.field = [...gameState.field, { attackCard: card, defenseCard: null }];
-            updates[`players/${pIndex}/hand`] = player.hand.filter((_, i) => i !== cardIndex);
-            updates.currentPlayerIndex = gameState.defendingPlayerIndex;
-            updateGameMessage(`${player.name} атакует картой ${card.rank}${SUIT_SYMBOLS[card.suit]}`);
-        } else if (pIndex === gameState.defendingPlayerIndex) {
-            for (let i = 0; i < gameState.field.length; i++) {
-                const pair = gameState.field[i];
-                if (pair.attackCard && !pair.defenseCard && canBeat(card, pair.attackCard)) {
-                    updates[`field/${i}/defenseCard`] = card;
-                    updates[`players/${pIndex}/hand`] = player.hand.filter((_, i) => i !== cardIndex);
-                    updates.currentPlayerIndex = gameState.attackingPlayerIndex;
-                    updateGameMessage(`${player.name} отбивается картой ${card.rank}${SUIT_SYMBOLS[card.suit]}`);
-                    break;
-                }
-            }
-        }
-        
-        gameRef.update(updates).then(() => {
-            checkEndGame();
-            isProcessing = false;
-        }).catch((error) => {
-            console.error('Error updating game state:', error);
-            updateGameMessage('Ошибка при ходе: ' + error.message);
-            isProcessing = false;
-        });
-    }
-
-    // Обработчик кнопки "Взять"
-    function handleTakeCards() {
-        if (isProcessing || gameState.currentPlayerIndex !== playerIndex || gameState.defendingPlayerIndex !== playerIndex || gameState.gameOver) return;
-        
-        isProcessing = true;
-        const player = gameState.players[gameState.defendingPlayerIndex];
-        const updates = {};
-        
-        const newHand = [...(player.hand || [])];
-        for (let pair of gameState.field) {
-            if (pair.attackCard) newHand.push(pair.attackCard);
-            if (pair.defenseCard) newHand.push(pair.defenseCard);
-        }
-        
-        updates[`players/${gameState.defendingPlayerIndex}/hand`] = newHand;
-        updates.field = [];
-        updates.attackingPlayerIndex = gameState.defendingPlayerIndex;
-        updates.defendingPlayerIndex = gameState.attackingPlayerIndex === 0 ? 1 : 0;
-        updates.currentPlayerIndex = updates.attackingPlayerIndex;
-        updates[`players/0/isDefending`] = updates.defendingPlayerIndex === 0;
-        updates[`players/1/isDefending`] = updates.defendingPlayerIndex === 1;
-        
-        gameRef.update(updates).then(() => {
-            sortPlayerHands();
-            drawCardsAfterRound();
-            updateGameMessage(`${player.name} берет карты`);
-            gameRef.set(gameState).then(() => {
-                checkEndGame();
-                isProcessing = false;
+        // Обработчики событий
+        takeButton.addEventListener('click', handleTakeCards);
+        passButton.addEventListener('click', handlePass);
+        newGameButton.addEventListener('click', () => {
+            gameRef.remove().then(() => {
+                joinGame(playerNameInput.value.trim() || playerName || 'Игрок');
             }).catch((error) => {
-                console.error('Error saving game state:', error);
-                updateGameMessage('Ошибка при сохранении: ' + error.message);
-                isProcessing = false;
+                console.error('Error resetting game:', error);
+                updateGameMessage('Ошибка при сбросе игры: ' + error.message);
             });
-        }).catch((error) => {
-            console.error('Error taking cards:', error);
-            updateGameMessage('Ошибка при взятии карт: ' + error.message);
-            isProcessing = false;
         });
-    }
-
-    // Обработчик кнопки "Бито"
-    function handlePass() {
-        if (isProcessing || gameState.currentPlayerIndex !== playerIndex || gameState.attackingPlayerIndex !== playerIndex || gameState.gameOver) return;
-        
-        isProcessing = true;
-        const allCovered = gameState.field.every(pair => pair.defenseCard !== null);
-        if (!allCovered) {
-            isProcessing = false;
-            return;
-        }
-        
-        const updates = {};
-        updates.discardPile = [...(gameState.discardPile || [])];
-        for (let pair of gameState.field) {
-            updates.discardPile.push(pair.attackCard);
-            updates.discardPile.push(pair.defenseCard);
-        }
-        updates.field = [];
-        updates.attackingPlayerIndex = gameState.defendingPlayerIndex;
-        updates.defendingPlayerIndex = gameState.attackingPlayerIndex === 0 ? 1 : 0;
-        updates.currentPlayerIndex = updates.attackingPlayerIndex;
-        updates[`players/0/isDefending`] = updates.defendingPlayerIndex === 0;
-        updates[`players/1/isDefending`] = updates.defendingPlayerIndex === 1;
-        
-        gameRef.update(updates).then(() => {
-            drawCardsAfterRound();
-            updateGameMessage('Бито!');
-            gameRef.set(gameState).then(() => {
-                checkEndGame();
-                isProcessing = false;
+        playAgainButton.addEventListener('click', () => {
+            endGameModal.style.display = 'none';
+            gameRef.remove().then(() => {
+                joinGame(playerNameInput.value.trim() || playerName || 'Игрок');
             }).catch((error) => {
-                console.error('Error saving game state:', error);
-                updateGameMessage('Ошибка при сохранении: ' + error.message);
-                isProcessing = false;
+                console.error('Error restarting game:', error);
+                updateGameMessage('Ошибка при перезапуске игры: ' + error.message);
             });
-        }).catch((error) => {
-            console.error('Error passing:', error);
-            updateGameMessage('Ошибка при "Бито": ' + error.message);
-            isProcessing = false;
         });
-    }
-
-    // Добор карт
-    function drawCardsAfterRound() {
-        while (gameState.players[gameState.attackingPlayerIndex].hand.length < 6 && gameState.deck.length > 0) {
-            gameState.players[gameState.attackingPlayerIndex].hand.push(gameState.deck.pop());
-        }
-        while (gameState.players[gameState.defendingPlayerIndex].hand.length < 6 && gameState.deck.length > 0) {
-            gameState.players[gameState.defendingPlayerIndex].hand.push(gameState.deck.pop());
-        }
-        sortPlayerHands();
-    }
-
-    // Проверка окончания игры
-    function checkEndGame() {
-        if ((gameState.deck || []).length === 0 && !gameState.gameOver) {
-            updateGameMessage('Колода пуста! Играйте до конца!');
-        }
-        if ((gameState.deck || []).length === 0 && ((gameState.players[0].hand || []).length === 0 || (gameState.players[1].hand || []).length === 0) && gameState.status === 'active') {
-            gameState.gameOver = true;
-            gameState.status = 'finished';
-            gameRef.set(gameState).catch((error) => {
-                console.error('Error ending game:', error);
-                updateGameMessage('Ошибка при завершении игры: ' + error.message);
-            });
-        }
-    }
-
-    // Показать модальное окно окончания игры
-    function showEndGameModal(title, message) {
-        winnerMessageElement.textContent = title;
-        gameResultDetailsElement.textContent = message;
-        endGameModal.style.display = 'flex';
-    }
-
-    // Обновление сообщения
-    function updateGameMessage(message) {
-        gameMessageElement.textContent = message;
-        gameMessageElement.classList.remove('fade-in');
-        void gameMessageElement.offsetWidth;
-        gameMessageElement.classList.add('fade-in');
-    }
-
-    // Установка состояния кнопок
-    function setButtonState() {
-        takeButton.disabled = !(
-            gameState.currentPlayerIndex === playerIndex &&
-            gameState.defendingPlayerIndex === playerIndex &&
-            (gameState.field || []).some(pair => pair.attackCard && !pair.defenseCard) &&
-            !gameState.gameOver
-        );
-        
-        passButton.disabled = !(
-            gameState.currentPlayerIndex === playerIndex &&
-            gameState.attackingPlayerIndex === playerIndex &&
-            (gameState.field || []).length > 0 &&
-            (gameState.field || []).every(pair => pair.defenseCard !== null) &&
-            !gameState.gameOver
-        );
-        
-        newGameButton.disabled = false;
-    }
-
-    // Обработчики событий
-    takeButton.addEventListener('click', handleTakeCards);
-    passButton.addEventListener('click', handlePass);
-    newGameButton.addEventListener('click', () => {
-        gameRef.remove().then(() => {
-            joinGame(playerNameInput.value.trim() || playerName || 'Игрок');
-        }).catch((error) => {
-            console.error('Error resetting game:', error);
-            updateGameMessage('Ошибка при сбросе игры: ' + error.message);
+        rulesButton.addEventListener('click', () => {
+            rulesModal.style.display = 'flex';
         });
-    });
-    playAgainButton.addEventListener('click', () => {
-        endGameModal.style.display = 'none';
-        gameRef.remove().then(() => {
-            joinGame(playerNameInput.value.trim() || playerName || 'Игрок');
-        }).catch((error) => {
-            console.error('Error restarting game:', error);
-            updateGameMessage('Ошибка при перезапуске игры: ' + error.message);
-        });
-    });
-    rulesButton.addEventListener('click', () => {
-        rulesModal.style.display = 'flex';
-    });
-    closeRulesButton.addEventListener('click', () => {
-        rulesModal.style.display = 'none';
-    });
-    rulesModal.addEventListener('click', (e) => {
-        if (e.target === rulesModal) {
+        closeRulesButton.addEventListener('click', () => {
             rulesModal.style.display = 'none';
-        }
-    });
+        });
+        rulesModal.addEventListener('click', (e) => {
+            if (e.target === rulesModal) {
+                rulesModal.style.display = 'none';
+            }
+        });
 
-    // Инициализация при загрузке
-    window.addEventListener('DOMContentLoaded', () => {
-        updateGameMessage("Добро пожаловать в игру 'Дурак'! Введите имя и присоединяйтесь.");
-    });
-</script>
+        // Инициализация при загрузке
+        window.addEventListener('DOMContentLoaded', () => {
+            updateGameMessage("Добро пожаловать в игру 'Дурак'! Введите имя и присоединяйтесь.");
+        });
+    </script>
 </body>
 </html>
