@@ -59,6 +59,9 @@
       transform-style: preserve-3d;
       border: 2px solid #ffd700;
     }
+    .card.hidden {
+      display: none;
+    }
     .card:hover {
       box-shadow: 0 0 15px #ffd700;
       transform: scale(1.03);
@@ -216,7 +219,7 @@
         align-items: center;
       }
       .game-board {
-        grid-template-columns: repeat(3, 90px);
+        grid-template-columns: repeat(2, 90px);
       }
       .card {
         width: 90px;
@@ -238,6 +241,7 @@
       <option value="genshin">Genshin Impact</option>
       <option value="honkai">Honkai Star Rail</option>
     </select>
+    <button onclick="joinGame()">Присоединиться к игре</button>
     <button onclick="startNewGame()">Новая игра</button>
     <button onclick="requestHint()">Подсказка</button>
   </div>
@@ -281,6 +285,7 @@
     // Глобальные переменные
     let database = null;
     let currentPlayer = null;
+    let playerNumber = null;
     let questionCount = { "Миша": 0, "Анюта": 0 };
     let currentTurn = "Миша";
     const errorMessage = document.getElementById("error-message");
@@ -357,7 +362,7 @@
     };
 
     // Загрузка персонажей на доску
-    function loadCharacters() {
+    function loadCharacters(assignedCharacters = []) {
       const elements = checkDOMElements();
       if (!elements) return;
 
@@ -368,6 +373,10 @@
         const card = document.createElement("div");
         card.classList.add("card");
         card.dataset.index = index;
+        card.dataset.name = char.name;
+        if (assignedCharacters.length && !assignedCharacters.includes(char.name)) {
+          card.classList.add("hidden");
+        }
         card.innerHTML = `
           <img src="${char.img}" alt="${char.name}">
           <div class="back">?</div>
@@ -399,7 +408,39 @@
       }
       currentPlayer = name;
       nameModal.style.display = "none";
-      status.textContent = "Нажми 'Новая игра' для старта!";
+      status.textContent = "Нажми 'Присоединиться к игре'!";
+    }
+
+    // Присоединение к игре
+    function joinGame() {
+      if (!currentPlayer) {
+        showError("Сначала введи имя!");
+        showNameModal();
+        return;
+      }
+      if (!database) {
+        showError("База данных не инициализирована");
+        return;
+      }
+      try {
+        database.ref("game/players").once("value", (snapshot) => {
+          const players = snapshot.val() || {};
+          if (Object.keys(players).length >= 2) {
+            showError("Игра уже заполнена!");
+            return;
+          }
+          const playerData = {
+            name: currentPlayer,
+            timestamp: Date.now(),
+            playerNumber: Object.keys(players).length + 1
+          };
+          database.ref(`game/players/${currentPlayer}`).set(playerData);
+          playerNumber = playerData.playerNumber;
+          status.textContent = `Ты ${currentPlayer} (Игрок ${playerNumber}). Ожидание второго игрока...`;
+        });
+      } catch (error) {
+        showError("Ошибка присоединения к игре: " + error.message);
+      }
     }
 
     // Назначение случайного персонажа
@@ -430,7 +471,7 @@
       const character = characters[game].find(c => c.name === characterName);
       if (character) {
         playerCharacter.innerHTML = `
-          <h3>Твой персонаж:</h3>
+          <h3>Твой персонаж (Игрок ${playerNumber || '?'})</h3>
           <div class="card">
             <img src="${character.img}" alt="${character.name}">
             <div class="back">${character.name}</div>
@@ -442,14 +483,20 @@
     // Проверка готовности игры
     function checkGameReady() {
       try {
-        database.ref("players").once("value", (snapshot) => {
+        database.ref("game/players").once("value", (snapshot) => {
           const players = snapshot.val();
-          if (players && players["Миша"] && players["Анюта"]) {
+          if (players && Object.keys(players).length === 2) {
             status.textContent = `Ход ${currentTurn}: задай вопрос!`;
             document.getElementById("send-button").disabled = false;
             document.getElementById("guess-button").disabled = false;
+            // Скрыть неиспользуемые карточки
+            database.ref("players").once("value", (snapshot) => {
+              const playerData = snapshot.val();
+              const assignedCharacters = Object.values(playerData).map(p => p.character);
+              loadCharacters(assignedCharacters);
+            });
           } else {
-            status.textContent = "Ожидание второго игрока...";
+            status.textContent = `Ты ${currentPlayer} (Игрок ${playerNumber || '?'}). Ожидание второго игрока...`;
           }
         });
       } catch (error) {
@@ -560,14 +607,15 @@
         database.ref("chat").remove();
         database.ref("cards").remove();
         database.ref("players").remove();
+        database.ref("game").remove();
         questionCount = { "Миша": 0, "Анюта": 0 };
         currentTurn = "Миша";
-        status.textContent = "Ожидание второго игрока...";
+        playerNumber = null;
+        status.textContent = "Ожидание присоединения к игре...";
         loadCharacters();
         document.getElementById("player-character").innerHTML = "";
         if (currentPlayer) {
-          assignRandomCharacter();
-          checkGameReady();
+          joinGame();
         }
         document.getElementById("send-button").disabled = true;
         document.getElementById("guess-button").disabled = true;
@@ -580,8 +628,23 @@
     function startNewGame() {
       if (!currentPlayer) {
         showNameModal();
-      } else {
-        resetGame();
+        return;
+      }
+      if (!playerNumber) {
+        showError("Сначала присоединись к игре!");
+        return;
+      }
+      try {
+        database.ref("game/players").once("value", (snapshot) => {
+          const players = snapshot.val();
+          if (!players || Object.keys(players).length < 2) {
+            showError("Ожидание второго игрока!");
+            return;
+          }
+          assignRandomCharacter();
+        });
+      } catch (error) {
+        showError("Ошибка старта игры: " + error.message);
       }
     }
 
@@ -679,6 +742,28 @@
         });
       } catch (error) {
         showError("Ошибка инициализации данных игроков: " + error.message);
+      }
+
+      // Слушаем статус игроков
+      try {
+        database.ref("game/players").on("value", (snapshot) => {
+          try {
+            const players = snapshot.val();
+            if (players && players[currentPlayer]) {
+              playerNumber = players[currentPlayer].playerNumber;
+              status.textContent = `Ты ${currentPlayer} (Игрок ${playerNumber}). Ожидание второго игрока...`;
+              if (Object.keys(players).length === 2) {
+                checkGameReady();
+              }
+            }
+          } catch (error) {
+            showError("Ошибка обработки статуса игроков: " + error.message);
+          }
+        }, (error) => {
+          showError("Ошибка подписки на статус игроков: " + error.message);
+        });
+      } catch (error) {
+        showError("Ошибка инициализации статуса игроков: " + error.message);
       }
 
       // Поддержка Enter
