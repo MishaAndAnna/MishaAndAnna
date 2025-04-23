@@ -32,15 +32,13 @@
     }
     .container {
       display: flex;
-      gap: 20px;
-      padding: 20px;
-      flex-wrap: wrap;
       justify-content: center;
+      padding: 20px;
       max-width: 1200px;
     }
     .game-board {
       display: grid;
-      grid-template-columns: repeat(4, 110px);
+      grid-template-columns: repeat(2, 110px);
       gap: 10px;
       background: rgba(255, 255, 255, 0.1);
       padding: 15px;
@@ -99,48 +97,6 @@
       width: 80px;
       height: 120px;
     }
-    .chat {
-      width: 320px;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    #chat-messages {
-      height: 350px;
-      overflow-y: auto;
-      padding: 10px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.05);
-    }
-    .message {
-      padding: 8px 12px;
-      margin: 5px;
-      border-radius: 10px;
-      max-width: 80%;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .message.user1 { background: #4a90e2; align-self: flex-start; }
-    .message.user2 { background: #e94e77; align-self: flex-end; }
-    .message img.avatar {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-    }
-    #chat-input {
-      width: 100%;
-      padding: 8px;
-      border: none;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-    }
-    #chat-input::placeholder { color: #ccc; }
     button {
       padding: 10px 15px;
       background: linear-gradient(135deg, #ffd700, #ff8c00);
@@ -214,19 +170,12 @@
       margin: 15px 0;
     }
     @media (max-width: 768px) {
-      .container {
-        flex-direction: column;
-        align-items: center;
-      }
       .game-board {
         grid-template-columns: repeat(2, 90px);
       }
       .card {
         width: 90px;
         height: 135px;
-      }
-      .chat {
-        width: 90%;
       }
       h1 { font-size: 28px; }
     }
@@ -244,17 +193,12 @@
     <button onclick="joinGame()">Присоединиться к игре</button>
     <button onclick="startNewGame()">Новая игра</button>
     <button onclick="requestHint()">Подсказка</button>
+    <button id="guess-button" onclick="guess()" disabled>Угадать!</button>
   </div>
   <div class="status" id="status">Ожидание выбора имени...</div>
   <div class="player-character" id="player-character"></div>
   <div class="container">
     <div class="game-board" id="game-board"></div>
-    <div class="chat">
-      <div id="chat-messages"></div>
-      <input type="text" id="chat-input" placeholder="Задай вопрос или ответь Да/Нет">
-      <button id="send-button" onclick="sendMessage()" disabled>Отправить</button>
-      <button id="guess-button" onclick="guess()" disabled>Угадать!</button>
-    </div>
   </div>
   <div id="error-message" class="error-message"></div>
   <div id="name-modal" class="modal">
@@ -314,19 +258,16 @@
     function checkDOMElements() {
       const gameSelect = document.getElementById("game-select");
       const gameBoard = document.getElementById("game-board");
-      const chatMessages = document.getElementById("chat-messages");
-      const chatInput = document.getElementById("chat-input");
-      const sendButton = document.getElementById("send-button");
       const guessButton = document.getElementById("guess-button");
       const nameModal = document.getElementById("name-modal");
       const nameInput = document.getElementById("name-input");
       const playerCharacter = document.getElementById("player-character");
 
-      if (!gameSelect || !gameBoard || !chatMessages || !chatInput || !sendButton || !guessButton || !nameModal || !nameInput || !playerCharacter) {
+      if (!gameSelect || !gameBoard || !guessButton || !nameModal || !nameInput || !playerCharacter) {
         showError("Ошибка: не найдены необходимые элементы интерфейса.");
         return false;
       }
-      return { gameSelect, gameBoard, chatMessages, chatInput, sendButton, guessButton, nameModal, nameInput, playerCharacter };
+      return { gameSelect, gameBoard, guessButton, nameModal, nameInput, playerCharacter };
     }
 
     // Списки персонажей
@@ -487,7 +428,6 @@
           const players = snapshot.val();
           if (players && Object.keys(players).length === 2) {
             status.textContent = `Ход ${currentTurn}: задай вопрос!`;
-            document.getElementById("send-button").disabled = false;
             document.getElementById("guess-button").disabled = false;
             // Скрыть неиспользуемые карточки
             database.ref("players").once("value", (snapshot) => {
@@ -501,34 +441,6 @@
         });
       } catch (error) {
         showError("Ошибка проверки готовности игры: " + error.message);
-      }
-    }
-
-    // Отправка сообщения
-    function sendMessage() {
-      const elements = checkDOMElements();
-      if (!elements) return;
-
-      const { chatInput } = elements;
-      const text = chatInput.value.trim();
-      if (text && database) {
-        try {
-          database.ref("chat").push({
-            user: currentPlayer || "Игрок",
-            text: text
-          });
-          if (text.toLowerCase().includes("да") || text.toLowerCase().includes("нет")) {
-            currentTurn = currentTurn === "Миша" ? "Анюта" : "Миша";
-            status.textContent = `Ход ${currentTurn}: задай вопрос!`;
-          } else {
-            questionCount[currentPlayer]++;
-            currentTurn = currentTurn === "Миша" ? "Анюта" : "Миша";
-            status.textContent = `Ход ${currentTurn}: ответь Да/Нет!`;
-          }
-          chatInput.value = "";
-        } catch (error) {
-          showError("Ошибка отправки сообщения: " + error.message);
-        }
       }
     }
 
@@ -548,6 +460,11 @@
         database.ref(`cards/${index}`).set({
           flipped: card.classList.contains("flipped")
         });
+        // Переключение хода после действия
+        currentTurn = currentTurn === "Миша" ? "Анюта" : "Миша";
+        questionCount[currentPlayer]++;
+        database.ref("game/turn").set(currentTurn);
+        status.textContent = `Ход ${currentTurn}: задай вопрос!`;
       } catch (error) {
         showError("Ошибка обновления карточки: " + error.message);
       }
@@ -562,12 +479,12 @@
       const guess = prompt("Кто это? Введи имя персонажа:");
       if (guess) {
         try {
-          database.ref("chat").push({
-            user: "Игра",
+          database.ref("game/result").set({
+            user: currentPlayer,
             text: `${currentPlayer} угадал: ${guess}! Вопросов: ${questionCount[currentPlayer]}. Нажми "Новая игра" для рестарта.`
           });
-          document.getElementById("send-button").disabled = true;
           document.getElementById("guess-button").disabled = true;
+          status.textContent = `Игра окончена! ${currentPlayer} угадал: ${guess}.`;
         } catch (error) {
           showError("Ошибка отправки угадывания: " + error.message);
         }
@@ -586,10 +503,7 @@
           const game = document.getElementById("game-select").value;
           const character = characters[game].find(c => c.name === opponentCharacter);
           if (character) {
-            database.ref("chat").push({
-              user: "Игра",
-              text: `Подсказка для ${currentPlayer}: Это ${character.category}!`
-            });
+            alert(`Подсказка для ${currentPlayer}: Это ${character.category}!`);
           }
         });
       } catch (error) {
@@ -604,7 +518,6 @@
         return;
       }
       try {
-        database.ref("chat").remove();
         database.ref("cards").remove();
         database.ref("players").remove();
         database.ref("game").remove();
@@ -617,7 +530,6 @@
         if (currentPlayer) {
           joinGame();
         }
-        document.getElementById("send-button").disabled = true;
         document.getElementById("guess-button").disabled = true;
       } catch (error) {
         showError("Ошибка сброса игры: " + error.message);
@@ -653,16 +565,12 @@
       const elements = checkDOMElements();
       if (!elements) {
         document.getElementById("game-select").disabled = true;
-        document.getElementById("send-button").disabled = true;
         document.getElementById("guess-button").disabled = true;
         return;
       }
 
-      const { chatMessages, chatInput } = elements;
-
       if (!initializeFirebase()) {
         elements.gameSelect.disabled = true;
-        elements.sendButton.disabled = true;
         elements.guessButton.disabled = true;
         return;
       }
@@ -673,29 +581,6 @@
       } catch (error) {
         showError("Ошибка загрузки персонажей: " + error.message);
         return;
-      }
-
-      // Слушаем сообщения
-      try {
-        database.ref("chat").on("child_added", (snapshot) => {
-          try {
-            const msg = snapshot.val();
-            const msgDiv = document.createElement("div");
-            msgDiv.classList.add("message", `user${msg.user === "Миша" ? 1 : 2}`);
-            msgDiv.innerHTML = `
-              <img class="avatar" src="${msg.user === "Миша" ? 'https://via.placeholder.com/24?text=М' : 'https://via.placeholder.com/24?text=А'}">
-              ${msg.user}: ${msg.text}
-            `;
-            chatMessages.appendChild(msgDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-          } catch (error) {
-            showError("Ошибка обработки сообщения: " + error.message);
-          }
-        }, (error) => {
-          showError("Ошибка подписки на чат: " + error.message);
-        });
-      } catch (error) {
-        showError("Ошибка инициализации чата: " + error.message);
       }
 
       // Слушаем состояние карточек
@@ -766,13 +651,42 @@
         showError("Ошибка инициализации статуса игроков: " + error.message);
       }
 
-      // Поддержка Enter
+      // Слушаем ход
       try {
-        chatInput.addEventListener("keypress", (e) => {
-          if (e.key === "Enter") sendMessage();
+        database.ref("game/turn").on("value", (snapshot) => {
+          try {
+            const turn = snapshot.val();
+            if (turn) {
+              currentTurn = turn;
+              status.textContent = `Ход ${currentTurn}: задай вопрос!`;
+            }
+          } catch (error) {
+            showError("Ошибка обработки хода: " + error.message);
+          }
+        }, (error) => {
+          showError("Ошибка подписки на ход: " + error.message);
         });
       } catch (error) {
-        showError("Ошибка настройки ввода: " + error.message);
+        showError("Ошибка инициализации хода: " + error.message);
+      }
+
+      // Слушаем результат
+      try {
+        database.ref("game/result").on("value", (snapshot) => {
+          try {
+            const result = snapshot.val();
+            if (result) {
+              status.textContent = `Игра окончена! ${result.user} угадал: ${result.text}`;
+              document.getElementById("guess-button").disabled = true;
+            }
+          } catch (error) {
+            showError("Ошибка обработки результата: " + error.message);
+          }
+        }, (error) => {
+          showError("Ошибка подписки на результат: " + error.message);
+        });
+      } catch (error) {
+        showError("Ошибка инициализации результата: " + error.message);
       }
 
       // Начало игры
