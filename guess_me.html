@@ -5,62 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Угадай, кто я — Миша и Анюта</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #2b5876, #4e4376);
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f);
       color: #fff;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       overflow-x: hidden;
-      position: relative;
     }
-    .stars {
-      position: fixed;
-      top: 0;
-      left: 0;
+    .header {
+      text-align: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.3);
       width: 100%;
-      height: 100%;
-      background: url('https://i.imgur.com/2cOaJ.png') repeat;
-      opacity: 0.3;
-      animation: twinkle 10s infinite;
-      z-index: -1;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 0.5; }
+    h1 {
+      font-size: 36px;
+      margin: 0;
+      color: #ffd700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
     }
     .container {
       display: flex;
-      gap: 30px;
-      padding: 30px;
+      gap: 20px;
+      padding: 20px;
       flex-wrap: wrap;
       justify-content: center;
       max-width: 1200px;
-      margin: 0 auto;
     }
     .game-board {
       display: grid;
-      grid-template-columns: repeat(4, 120px);
-      gap: 15px;
+      grid-template-columns: repeat(4, 110px);
+      gap: 10px;
       background: rgba(255, 255, 255, 0.1);
-      padding: 20px;
-      border-radius: 15px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
     .card {
-      width: 120px;
-      height: 180px;
+      width: 110px;
+      height: 165px;
       background: #fff;
-      border-radius: 10px;
+      border-radius: 8px;
       overflow: hidden;
       position: relative;
       cursor: pointer;
-      transition: transform 0.6s, box-shadow 0.3s;
+      transition: transform 0.5s, box-shadow 0.3s;
       transform-style: preserve-3d;
+      border: 2px solid #ffd700;
     }
     .card:hover {
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 15px #ffd700;
+      transform: scale(1.03);
     }
     .card.flipped {
       transform: rotateY(180deg);
@@ -77,96 +78,137 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, #1e3a8a, #6b7280);
+      background: #2d2d2d;
       transform: rotateY(180deg);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      font-size: 16px;
+      color: #ffd700;
+      font-size: 18px;
       backface-visibility: hidden;
-      border-radius: 10px;
+      border-radius: 8px;
+    }
+    .player-character {
+      margin: 10px 0;
+      text-align: center;
+    }
+    .player-character .card {
+      width: 80px;
+      height: 120px;
     }
     .chat {
-      width: 350px;
-      background: rgba(255, 255, 255, 0.15);
-      padding: 20px;
-      border-radius: 15px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      width: 320px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 10px;
     }
     #chat-messages {
-      height: 400px;
+      height: 350px;
       overflow-y: auto;
-      padding: 15px;
-      border-radius: 10px;
-      background: rgba(0, 0, 0, 0.2);
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
     }
     .message {
       padding: 8px 12px;
-      margin: 5px 0;
+      margin: 5px;
       border-radius: 10px;
       max-width: 80%;
-      word-wrap: break-word;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .message.user1 {
-      background: #60a5fa;
-      align-self: flex-start;
-    }
-    .message.user2 {
-      background: #f472b6;
-      align-self: flex-end;
+    .message.user1 { background: #4a90e2; align-self: flex-start; }
+    .message.user2 { background: #e94e77; align-self: flex-end; }
+    .message img.avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
     }
     #chat-input {
       width: 100%;
-      padding: 10px;
+      padding: 8px;
       border: none;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
       color: #fff;
     }
-    #chat-input::placeholder {
-      color: #ccc;
-    }
-    button, select {
-      padding: 10px 20px;
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    #chat-input::placeholder { color: #ccc; }
+    button {
+      padding: 10px 15px;
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
       color: #fff;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
     }
-    button:hover, select:hover {
+    button:hover {
       transform: scale(1.05);
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 10px #ffd700;
     }
-    button:disabled, select:disabled {
-      background: #6b7280;
+    button:disabled {
+      background: #666;
       cursor: not-allowed;
       transform: none;
       box-shadow: none;
     }
-    h1 {
-      font-size: 32px;
-      text-align: center;
-      background: linear-gradient(45deg, #facc15, #f472b6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin: 20px 0;
-      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    }
     .game-selector {
-      margin-bottom: 20px;
+      margin: 15px 0;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    select {
+      padding: 8px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: none;
+    }
+    .status {
       text-align: center;
+      font-size: 18px;
+      margin: 10px 0;
+      color: #ffd700;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #2d2d2d;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 400px;
+      text-align: center;
+      color: #fff;
+    }
+    .modal-content input {
+      width: 100%;
+      margin: 10px 0;
+      padding: 8px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: none;
     }
     .error-message {
-      color: #f87171;
+      color: #ff6b6b;
       text-align: center;
-      margin: 20px;
+      margin: 15px 0;
     }
     @media (max-width: 768px) {
       .container {
@@ -174,43 +216,54 @@
         align-items: center;
       }
       .game-board {
-        grid-template-columns: repeat(3, 100px);
+        grid-template-columns: repeat(3, 90px);
       }
       .card {
-        width: 100px;
-        height: 150px;
+        width: 90px;
+        height: 135px;
       }
       .chat {
         width: 90%;
       }
+      h1 { font-size: 28px; }
     }
   </style>
 </head>
 <body>
-  <div class="stars"></div>
-  <h1>Угадай, кто я — Миша и Анюта</h1>
+  <div class="header">
+    <h1>Угадай, кто я — Миша и Анюта</h1>
+  </div>
   <div class="game-selector">
-    <select id="game-select" onchange="loadCharacters()">
+    <select id="game-select" onchange="resetGame()">
       <option value="genshin">Genshin Impact</option>
       <option value="honkai">Honkai Star Rail</option>
     </select>
+    <button onclick="startNewGame()">Новая игра</button>
+    <button onclick="requestHint()">Подсказка</button>
   </div>
+  <div class="status" id="status">Ожидание выбора имени...</div>
+  <div class="player-character" id="player-character"></div>
   <div class="container">
     <div class="game-board" id="game-board"></div>
     <div class="chat">
       <div id="chat-messages"></div>
-      <input type="text" id="chat-input" placeholder="Задай вопрос или ответь Да/Нет 😊">
-      <button id="send-button" onclick="sendMessage()">Отправить</button>
-      <button id="guess-button" onclick="guess()">Угадать!</button>
+      <input type="text" id="chat-input" placeholder="Задай вопрос или ответь Да/Нет">
+      <button id="send-button" onclick="sendMessage()" disabled>Отправить</button>
+      <button id="guess-button" onclick="guess()" disabled>Угадать!</button>
     </div>
   </div>
   <div id="error-message" class="error-message"></div>
+  <div id="name-modal" class="modal">
+    <div class="modal-content">
+      <h2>Введи свое имя</h2>
+      <input type="text" id="name-input" placeholder="Миша или Анюта">
+      <button onclick="confirmName()">Подтвердить</button>
+    </div>
+  </div>
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-  <!-- GSAP для анимаций -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
   <script>
     // Firebase конфигурация
@@ -227,7 +280,11 @@
 
     // Глобальные переменные
     let database = null;
+    let currentPlayer = null;
+    let questionCount = { "Миша": 0, "Анюта": 0 };
+    let currentTurn = "Миша";
     const errorMessage = document.getElementById("error-message");
+    const status = document.getElementById("status");
 
     // Функция для показа ошибок
     function showError(message) {
@@ -256,47 +313,50 @@
       const chatInput = document.getElementById("chat-input");
       const sendButton = document.getElementById("send-button");
       const guessButton = document.getElementById("guess-button");
+      const nameModal = document.getElementById("name-modal");
+      const nameInput = document.getElementById("name-input");
+      const playerCharacter = document.getElementById("player-character");
 
-      if (!gameSelect || !gameBoard || !chatMessages || !chatInput || !sendButton || !guessButton) {
+      if (!gameSelect || !gameBoard || !chatMessages || !chatInput || !sendButton || !guessButton || !nameModal || !nameInput || !playerCharacter) {
         showError("Ошибка: не найдены необходимые элементы интерфейса.");
         return false;
       }
-      return { gameSelect, gameBoard, chatMessages, chatInput, sendButton, guessButton };
+      return { gameSelect, gameBoard, chatMessages, chatInput, sendButton, guessButton, nameModal, nameInput, playerCharacter };
     }
 
     // Списки персонажей
     const characters = {
       genshin: [
-        { name: "Невиллет", img: "https://i.pinimg.com/736x/90/fc/72/90fc7293c09cccb104b55b00e5fc9d9d.jpg" },
-        { name: "Странник", img: "https://i.pinimg.com/originals/f0/1e/70/f01e701d6d82ffeac1c6ce6102d774d5.jpg" },
-        { name: "Райден", img: "https://genshin.ch/templates/assets/img/ai_collec/052/wallpaper/f00042-2667934761.webp" },
-        { name: "Фурина", img: "https://i.ytimg.com/vi/fao4JOuJyCo/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AHgCYAC0AWKAgwIABABGEQgSShlMA8=&amp;rs=AOn4CLCVPMJTX5M31imafIQ3eAn09DpgOg" },
-        { name: "Чжун Ли", img: "https://avatars.mds.yandex.net/get-mpic/4114383/img_id1690362300544799707.jpeg/orig" },
-        { name: "Венти", img: "https://upload-os-bbs.hoyolab.com/upload/2024/11/15/327952485/0cf91a2d4a324dcefc261c1a21ca9ae2_1057402059431960410.jpg?x-oss-process=image%2Fresize%2Cs_1000%2Fauto-orient%2C0%2Finterlace%2C1%2Fformat%2Cwebp%2Fquality%2Cq_70" },
-        { name: "Кадзуха", img: "https://i.pinimg.com/originals/c4/88/bb/c488bb009fdafd339dce7734754d77d5.jpg" },
-        { name: "Яэ Мико", img: "https://i.pinimg.com/550x/34/61/ac/3461ac66141d119d34bd66d8e8ac4a79.jpg" },
-        { name: "Гань Юй", img: "https://i.pinimg.com/originals/a9/29/95/a929959cb3e893ad8123f46eed96e722.jpg" },
-        { name: "Ху Тао", img: "https://i.ytimg.com/vi/7GdrGchWWIk/maxresdefault.jpg" },
-        { name: "Фремине", img: "https://wotpack.ru/wp-content/uploads/2023/07/word-image-271120-2.jpeg" },
-        { name: "Сяо", img: "https://i.pinimg.com/736x/05/ce/44/05ce441907dd503d2d41cd35bc1908b3.jpg" }
+        { name: "Невиллет", img: "https://i.pinimg.com/736x/90/fc/72/90fc7293c09cccb104b55b00e5fc9d9d.jpg", category: "Фонтейн, Гидро" },
+        { name: "Странник", img: "https://i.pinimg.com/originals/f0/1e/70/f01e701d6d82ffeac1c6ce6102d774d5.jpg", category: "Сумеру, Анемо" },
+        { name: "Райден", img: "https://genshin.ch/templates/assets/img/ai_collec/052/wallpaper/f00042-2667934761.webp", category: "Инадзума, Электро" },
+        { name: "Фурина", img: "https://i.ytimg.com/vi/fao4JOuJyCo/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AHgCYAC0AWKAgwIABABGEQgSShlMA8=&rs=AOn4CLCVPMJTX5M31imafIQ3eAn09DpgOg", category: "Фонтейн, Гидро" },
+        { name: "Чжун Ли", img: "https://avatars.mds.yandex.net/get-mpic/4114383/img_id1690362300544799707.jpeg/orig", category: "Ли Юэ, Гео" },
+        { name: "Венти", img: "https://upload-os-bbs.hoyolab.com/upload/2024/11/15/327952485/0cf91a2d4a324dcefc261c1a21ca9ae2_1057402059431960410.jpg?x-oss-process=image%2Fresize%2Cs_1000%2Fauto-orient%2C0%2Finterlace%2C1%2Fformat%2Cwebp%2Fquality%2Cq_70", category: "Мондштадт, Анемо" },
+        { name: "Кадзуха", img: "https://i.pinimg.com/originals/c4/88/bb/c488bb009fdafd339dce7734754d77d5.jpg", category: "Инадзума, Анемо" },
+        { name: "Яэ Мико", img: "https://i.pinimg.com/550x/34/61/ac/3461ac66141d119d34bd66d8e8ac4a79.jpg", category: "Инадзума, Электро" },
+        { name: "Гань Юй", img: "https://i.pinimg.com/originals/a9/29/95/a929959cb3e893ad8123f46eed96e722.jpg", category: "Ли Юэ, Крио" },
+        { name: "Ху Тао", img: "https://i.ytimg.com/vi/7GdrGchWWIk/maxresdefault.jpg", category: "Ли Юэ, Пиро" },
+        { name: "Фремине", img: "https://wotpack.ru/wp-content/uploads/2023/07/word-image-271120-2.jpeg", category: "Фонтейн, Крио" },
+        { name: "Сяо", img: "https://i.pinimg.com/736x/05/ce/44/05ce441907dd503d2d41cd35bc1908b3.jpg", category: "Ли Юэ, Анемо" }
       ],
       honkai: [
-        { name: "Дан Хэн", img: "https://i.pinimg.com/736x/06/1e/b6/061eb6b9f45e647814419e43ce8e762b.jpg" },
-        { name: "Марта 7", img: "https://avatars.mds.yandex.net/i?id=932f3a94c884c2fd2f6ec7c9869c3606_l-10135049-images-thumbs&n=13" },
-        { name: "Кафка", img: "https://distribution.faceit-cdn.net/images/d5671a15-0841-4518-a7c7-91b4e76dbb67.jpeg" },
-        { name: "Блэйд", img: "https://i.pinimg.com/originals/1b/c1/a0/1bc1a00ee34ce4538680ec653c18c04d.png" },
-        { name: "Зеле", img: "https://avatars.mds.yandex.net/i?id=4fc806cb8eea60a59511f5f07c540d59_l-12184992-images-thumbs&n=13" },
-        { name: "Авантюрин", img: "https://avatars.mds.yandex.net/get-yapic/38135/TdnyZm3KNDg6x8hYSlRW2fghQU-1/orig" },
-        { name: "Воскресенье", img: "https://www.pcinvasion.com/wp-content/uploads/2024/05/Honkai-Star-Rail-Sunday.jpg?fit=1280%2C720" },
-        { name: "Химеко", img: "https://i.ytimg.com/vi/kZoSXXnW3g4/maxresdefault.jpg" },
-        { name: "Ахерон", img: "https://i.pinimg.com/originals/07/b7/d1/07b7d12670f1ea58bf91230f85c300df.png" },
-        { name: "Лоча", img: "https://www.goha.ru/s/E:N1/pN/m3jVvYO0ys.jpg" },
-        { name: "Светлячок", img: "https://i.pinimg.com/originals/00/64/b7/0064b73b42970aa36ff32e617ebb758f.jpg" },
-        { name: "Аглая", img: "https://i.pinimg.com/736x/75/08/b7/7508b7407c0ae1b13f0745a0afee6fe9.jpg" }
+        { name: "Дан Хэн", img: "https://i.pinimg.com/736x/06/1e/b6/061eb6b9f45e647814419e43ce8e762b.jpg", category: "Астральный Экспресс, Ветер" },
+        { name: "Марта 7", img: "https://avatars.mds.yandex.net/i?id=932f3a94c884c2fd2f6ec7c9869c3606_l-10135049-images-thumbs&n=13", category: "Астральный Экспресс, Лед" },
+        { name: "Кафка", img: "https://distribution.faceit-cdn.net/images/d5671a15-0841-4518-a7c7-91b4e76dbb67.jpeg", category: "Охотники за Стелларонами, Молния" },
+        { name: "Блэйд", img: "https://i.pinimg.com/originals/1b/c1/a0/1bc1a00ee34ce4538680ec653c18c04d.png", category: "Охотники за Стелларонами, Ветер" },
+        { name: "Зеле", img: "https://avatars.mds.yandex.net/i?id=4fc806cb8eea60a59511f5f07c540d59_l-12184992-images-thumbs&n=13", category: "Ярило-VI, Квант" },
+        { name: "Авантюрин", img: "https://avatars.mds.yandex.net/get-yapic/38135/TdnyZm3KNDg6x8hYSlRW2fghQU-1/orig", category: "КММ, Воображаемый" },
+        { name: "Воскресенье", img: "https://www.pcinvasion.com/wp-content/uploads/2024/05/Honkai-Star-Rail-Sunday.jpg?fit=1280%2C720", category: "Пенакония, Воображаемый" },
+        { name: "Химеко", img: "https://i.ytimg.com/vi/kZoSXXnW3g4/maxresdefault.jpg", category: "Астральный Экспресс, Огонь" },
+        { name: "Ахерон", img: "https://i.pinimg.com/originals/07/b7/d1/07b7d12670f1ea58bf91230f85c300df.png", category: "Галактический Странник, Молния" },
+        { name: "Лоча", img: "https://www.goha.ru/s/E:N1/pN/m3jVvYO0ys.jpg", category: "Сяньчжоу Луофу, Воображаемый" },
+        { name: "Светлячок", img: "https://i.pinimg.com/originals/00/64/b7/0064b73b42970aa36ff32e617ebb758f.jpg", category: "Пенакония, Огонь" },
+        { name: "Аглая", img: "https://i.pinimg.com/736x/75/08/b7/7508b7407c0ae1b13f0745a0afee6fe9.jpg", category: "Пенакония, Физический" }
       ]
     };
 
-    // Загрузка персонажей
+    // Загрузка персонажей на доску
     function loadCharacters() {
       const elements = checkDOMElements();
       if (!elements) return;
@@ -314,11 +374,87 @@
         `;
         card.addEventListener("click", () => flipCard(index));
         gameBoard.appendChild(card);
-        gsap.from(card, { opacity: 0, y: 20, duration: 0.5, delay: index * 0.1 });
       });
-      document.body.style.background = game === "genshin"
-        ? "linear-gradient(135deg, #2b5876, #4e4376)"
-        : "linear-gradient(135deg, #1e1b4b, #3b0764)";
+    }
+
+    // Показ модального окна для имени
+    function showNameModal() {
+      const elements = checkDOMElements();
+      if (!elements) return;
+
+      const { nameModal } = elements;
+      nameModal.style.display = "flex";
+    }
+
+    // Подтверждение имени
+    function confirmName() {
+      const elements = checkDOMElements();
+      if (!elements) return;
+
+      const { nameInput, nameModal } = elements;
+      const name = nameInput.value.trim();
+      if (name !== "Миша" && name !== "Анюта") {
+        showError("Пожалуйста, введи имя: Миша или Анюта!");
+        return;
+      }
+      currentPlayer = name;
+      nameModal.style.display = "none";
+      status.textContent = "Нажми 'Новая игра' для старта!";
+    }
+
+    // Назначение случайного персонажа
+    function assignRandomCharacter() {
+      if (!currentPlayer) {
+        showError("Ошибка: имя игрока не определено.");
+        return;
+      }
+      const game = document.getElementById("game-select").value;
+      const charList = characters[game];
+      const randomIndex = Math.floor(Math.random() * charList.length);
+      const selectedCharacter = charList[randomIndex].name;
+      try {
+        database.ref(`players/${currentPlayer}/character`).set(selectedCharacter);
+        displayPlayerCharacter(selectedCharacter);
+      } catch (error) {
+        showError("Ошибка назначения персонажа: " + error.message);
+      }
+    }
+
+    // Отображение персонажа игрока
+    function displayPlayerCharacter(characterName) {
+      const elements = checkDOMElements();
+      if (!elements) return;
+
+      const { playerCharacter, gameSelect } = elements;
+      const game = gameSelect.value;
+      const character = characters[game].find(c => c.name === characterName);
+      if (character) {
+        playerCharacter.innerHTML = `
+          <h3>Твой персонаж:</h3>
+          <div class="card">
+            <img src="${character.img}" alt="${character.name}">
+            <div class="back">${character.name}</div>
+          </div>
+        `;
+      }
+    }
+
+    // Проверка готовности игры
+    function checkGameReady() {
+      try {
+        database.ref("players").once("value", (snapshot) => {
+          const players = snapshot.val();
+          if (players && players["Миша"] && players["Анюта"]) {
+            status.textContent = `Ход ${currentTurn}: задай вопрос!`;
+            document.getElementById("send-button").disabled = false;
+            document.getElementById("guess-button").disabled = false;
+          } else {
+            status.textContent = "Ожидание второго игрока...";
+          }
+        });
+      } catch (error) {
+        showError("Ошибка проверки готовности игры: " + error.message);
+      }
     }
 
     // Отправка сообщения
@@ -331,9 +467,17 @@
       if (text && database) {
         try {
           database.ref("chat").push({
-            user: prompt("Твое имя (Миша или Анюта)?") || "Игрок",
+            user: currentPlayer || "Игрок",
             text: text
           });
+          if (text.toLowerCase().includes("да") || text.toLowerCase().includes("нет")) {
+            currentTurn = currentTurn === "Миша" ? "Анюта" : "Миша";
+            status.textContent = `Ход ${currentTurn}: задай вопрос!`;
+          } else {
+            questionCount[currentPlayer]++;
+            currentTurn = currentTurn === "Миша" ? "Анюта" : "Миша";
+            status.textContent = `Ход ${currentTurn}: ответь Да/Нет!`;
+          }
           chatInput.value = "";
         } catch (error) {
           showError("Ошибка отправки сообщения: " + error.message);
@@ -357,7 +501,6 @@
         database.ref(`cards/${index}`).set({
           flipped: card.classList.contains("flipped")
         });
-        gsap.to(card, { rotationY: card.classList.contains("flipped") ? 180 : 0, duration: 0.6 });
       } catch (error) {
         showError("Ошибка обновления карточки: " + error.message);
       }
@@ -374,11 +517,71 @@
         try {
           database.ref("chat").push({
             user: "Игра",
-            text: `Угадано: ${guess}! Выбери игру заново или перезагрузи страницу.`
+            text: `${currentPlayer} угадал: ${guess}! Вопросов: ${questionCount[currentPlayer]}. Нажми "Новая игра" для рестарта.`
           });
+          document.getElementById("send-button").disabled = true;
+          document.getElementById("guess-button").disabled = true;
         } catch (error) {
           showError("Ошибка отправки угадывания: " + error.message);
         }
+      }
+    }
+
+    // Запрос подсказки
+    function requestHint() {
+      if (!database || questionCount[currentPlayer] < 8) {
+        showError(questionCount[currentPlayer] < 8 ? "Задайте хотя бы 8 вопросов для подсказки!" : "База данных не инициализирована");
+        return;
+      }
+      try {
+        database.ref(`players/${currentTurn === "Миша" ? "Анюта" : "Миша"}/character`).once("value", (snapshot) => {
+          const opponentCharacter = snapshot.val();
+          const game = document.getElementById("game-select").value;
+          const character = characters[game].find(c => c.name === opponentCharacter);
+          if (character) {
+            database.ref("chat").push({
+              user: "Игра",
+              text: `Подсказка для ${currentPlayer}: Это ${character.category}!`
+            });
+          }
+        });
+      } catch (error) {
+        showError("Ошибка получения подсказки: " + error.message);
+      }
+    }
+
+    // Сброс игры
+    function resetGame() {
+      if (!database) {
+        showError("База данных не инициализирована");
+        return;
+      }
+      try {
+        database.ref("chat").remove();
+        database.ref("cards").remove();
+        database.ref("players").remove();
+        questionCount = { "Миша": 0, "Анюта": 0 };
+        currentTurn = "Миша";
+        status.textContent = "Ожидание второго игрока...";
+        loadCharacters();
+        document.getElementById("player-character").innerHTML = "";
+        if (currentPlayer) {
+          assignRandomCharacter();
+          checkGameReady();
+        }
+        document.getElementById("send-button").disabled = true;
+        document.getElementById("guess-button").disabled = true;
+      } catch (error) {
+        showError("Ошибка сброса игры: " + error.message);
+      }
+    }
+
+    // Новая игра
+    function startNewGame() {
+      if (!currentPlayer) {
+        showNameModal();
+      } else {
+        resetGame();
       }
     }
 
@@ -416,10 +619,12 @@
             const msg = snapshot.val();
             const msgDiv = document.createElement("div");
             msgDiv.classList.add("message", `user${msg.user === "Миша" ? 1 : 2}`);
-            msgDiv.textContent = `${msg.user}: ${msg.text}`;
+            msgDiv.innerHTML = `
+              <img class="avatar" src="${msg.user === "Миша" ? 'https://via.placeholder.com/24?text=М' : 'https://via.placeholder.com/24?text=А'}">
+              ${msg.user}: ${msg.text}
+            `;
             chatMessages.appendChild(msgDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
-            gsap.from(msgDiv, { opacity: 0, x: msg.user === "Миша" ? -20 : 20, duration: 0.3 });
           } catch (error) {
             showError("Ошибка обработки сообщения: " + error.message);
           }
@@ -457,6 +662,25 @@
         showError("Ошибка инициализации карточек: " + error.message);
       }
 
+      // Слушаем персонажа игрока
+      try {
+        database.ref("players").on("value", (snapshot) => {
+          try {
+            const players = snapshot.val();
+            if (players && players[currentPlayer] && players[currentPlayer].character) {
+              displayPlayerCharacter(players[currentPlayer].character);
+              checkGameReady();
+            }
+          } catch (error) {
+            showError("Ошибка обработки персонажа игрока: " + error.message);
+          }
+        }, (error) => {
+          showError("Ошибка подписки на данные игроков: " + error.message);
+        });
+      } catch (error) {
+        showError("Ошибка инициализации данных игроков: " + error.message);
+      }
+
       // Поддержка Enter
       try {
         chatInput.addEventListener("keypress", (e) => {
@@ -465,6 +689,9 @@
       } catch (error) {
         showError("Ошибка настройки ввода: " + error.message);
       }
+
+      // Начало игры
+      showNameModal();
     }
 
     // Запуск игры
