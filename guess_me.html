@@ -460,7 +460,7 @@
         database.ref(`cards/${index}`).set({
           flipped: card.classList.contains("flipped")
         });
-        // Переключение хода после действия
+        // Переключение хода
         currentTurn = currentTurn === "Миша" ? "Анюта" : "Миша";
         questionCount[currentPlayer]++;
         database.ref("game/turn").set(currentTurn);
@@ -612,21 +612,21 @@
 
       // Слушаем персонажа игрока
       try {
-        database.ref("players").on("value", (snapshot) => {
+        database.ref(`players/${currentPlayer}`).on("value", (snapshot) => {
           try {
-            const players = snapshot.val();
-            if (players && players[currentPlayer] && players[currentPlayer].character) {
-              displayPlayerCharacter(players[currentPlayer].character);
+            const playerData = snapshot.val();
+            if (playerData && playerData.character) {
+              displayPlayerCharacter(playerData.character);
               checkGameReady();
             }
           } catch (error) {
             showError("Ошибка обработки персонажа игрока: " + error.message);
           }
         }, (error) => {
-          showError("Ошибка подписки на данные игроков: " + error.message);
+          showError("Ошибка подписки на данные игрока: " + error.message);
         });
       } catch (error) {
-        showError("Ошибка инициализации данных игроков: " + error.message);
+        showError("Ошибка инициализации данных игрока: " + error.message);
       }
 
       // Слушаем статус игроков
