@@ -50,6 +50,7 @@
             padding: 0;
             margin: 0;
             min-height: 100vh;
+            overflow: hidden;
         }
         
         .app-header {
@@ -72,6 +73,8 @@
             max-width: 1280px;
             margin: 0 auto;
             padding: 24px;
+            overflow-y: auto;
+            height: calc(100vh - 96px);
         }
         
         .card {
@@ -1279,6 +1282,11 @@
         function handleKeyPress(event) {
             try {
                 if (localPlayer.gameState !== 'playing') return;
+                
+                // Prevent default scrolling behavior for movement keys
+                if (['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', ' '].includes(event.key)) {
+                    event.preventDefault();
+                }
                 
                 switch (event.key) {
                     case 'ArrowLeft':
