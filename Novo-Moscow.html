@@ -6,10 +6,9 @@
   <title>Неоновая Сага: Киберпанк-Фэнтези</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Firebase SDK -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-app-compat.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-database-compat.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-auth-compat.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js"></script>
   <style>
     :root {
       --primary: #8257e6;
@@ -327,13 +326,7 @@
 
     .chapter-card p {
       color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.6;
-      display: -webkit-box;
-      -webkit-line-clamp: 4;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      margin-bottom: var(--spacing-lg);
+      font-size: 0.9rem;
     }
 
     .card-footer {
@@ -544,10 +537,6 @@
       font-size: 1.2rem;
     }
 
-    .toast-message {
-      flex-grow: 1;
-    }
-
     .toast.success .toast-icon {
       color: #4CAF50;
     }
@@ -559,371 +548,70 @@
     .toast.warning .toast-icon {
       color: #FFC107;
     }
-
-    /* Стили для авторизации */
-    .auth-container {
-      max-width: 400px;
-      margin: 100px auto;
-      background: var(--surface);
-      border-radius: var(--border-radius);
-      padding: var(--spacing-xl);
-      box-shadow: var(--shadow-lg);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .auth-header {
-      text-align: center;
-      margin-bottom: var(--spacing-xl);
-    }
-
-    .auth-header h2 {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 700;
-      font-size: 1.8rem;
-      color: var(--text);
-      margin-bottom: var(--spacing-md);
-    }
-
-    .auth-form .form-group {
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .auth-form input {
-      width: 100%;
-      padding: var(--spacing-md);
-      background: var(--surface-light);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text);
-      font-family: 'Space Grotesk', sans-serif;
-      border-radius: 8px;
-      font-size: 1rem;
-    }
-
-    .auth-form input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(130, 87, 230, 0.2);
-    }
-
-    .auth-btn {
-      width: 100%;
-      padding: var(--spacing-md);
-      background: linear-gradient(135deg, var(--primary), #9672e6);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .auth-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .auth-links {
-      text-align: center;
-      margin-top: var(--spacing-lg);
-    }
-
-    .auth-links a {
-      color: var(--primary);
-      text-decoration: none;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
-    }
-
-    .auth-links a:hover {
-      color: var(--secondary);
-    }
-
-    .auth-toggle {
-      margin-top: var(--spacing-md);
-      text-align: center;
-    }
-
-    .auth-toggle button {
-      background: transparent;
-      border: none;
-      color: var(--primary);
-      cursor: pointer;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
-    }
-
-    .auth-toggle button:hover {
-      color: var(--secondary);
-    }
-
-    .user-profile {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
-    }
-
-    .user-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      color: white;
-      font-size: 1.1rem;
-    }
-
-    .user-info {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .user-name {
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-
-    .user-email {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .logout-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s ease;
-      padding: 4px 8px;
-      border-radius: 4px;
-    }
-
-    .logout-btn:hover {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text);
-    }
-
-    @media (max-width: 768px) {
-      .logo {
-        font-size: 1.4rem;
-      }
-
-      .container {
-        padding: var(--spacing-lg);
-      }
-
-      .chapter-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .modal-content {
-        width: 95%;
-      }
-
-      .chapter-form {
-        padding: var(--spacing-lg);
-      }
-
-      .action-bar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-md);
-      }
-
-      .right-actions {
-        align-self: flex-end;
-      }
-    }
-
-    @media (max-width: 480px) {
-      header {
-        padding: var(--spacing-md);
-      }
-
-      .logo {
-        font-size: 1.2rem;
-      }
-
-      .toggle-form-btn span {
-        display: none;
-      }
-
-      .chapter-card {
-        padding: var(--spacing-md);
-      }
-
-      .chapter-card h3 {
-        font-size: 1.2rem;
-      }
-    }
-
-    body.light-theme {
-      --background: #f5f7fa;
-      --surface: #ffffff;
-      --surface-light: #f0f2f5;
-      --text: #333340;
-      --text-muted: #767683;
-    }
-
-    .light-theme header {
-      background: rgba(245, 247, 250, 0.8);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .light-theme .chapter-card,
-    .light-theme .chapter-form,
-    .light-theme .modal-content {
-      border: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .light-theme .card-footer {
-      background: rgba(0, 0, 0, 0.03);
-      border-top: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .light-theme .modal-header {
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .light-theme .modal {
-      background: rgba(245, 247, 250, 0.9);
-    }
-
-    .light-theme .toast {
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      background: white;
-    }
-
-    /* Скрываем элементы в зависимости от состояния авторизации */
-    .authenticated-only {
-      display: none;
-    }
-
-    .unauthenticated-only {
-      display: none;
-    }
   </style>
 </head>
 <body>
+  <!-- Loader -->
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Main Application -->
   <header>
     <div class="logo-container">
-      <a href="#" class="logo">Искры Вечности</a>
+      <a href="#" class="logo">Неоновая Сага</a>
     </div>
-    <div class="right-header">
-      <div class="user-profile authenticated-only">
-        <div class="user-avatar" id="userAvatar">М</div>
-        <div class="user-info">
-          <div class="user-name" id="userName">Михаил</div>
-          <div class="user-email" id="userEmail"></div>
-        </div>
-        <button id="logoutBtn" class="logout-btn">
-          <i class="fas fa-sign-out-alt"></i> Выйти
-        </button>
-      </div>
-      <button class="theme-toggle" id="themeToggle">
+    <div class="right-actions">
+      <button class="theme-toggle" id="themeToggle" title="Сменить тему">
         <i class="fas fa-moon"></i>
       </button>
     </div>
   </header>
 
-  <!-- Аутентификация -->
-  <div id="authContainer" class="auth-container unauthenticated-only">
-    <div class="auth-header">
-      <h2>Искры Вечности</h2>
-      <p>Войдите, чтобы создавать и редактировать главы вашей истории</p>
+  <div class="container">
+    <div class="action-bar">
+      <div class="status-indicator">
+        <span class="status-dot offline" id="statusDot"></span>
+        <span id="statusText">Оффлайн</span>
+      </div>
+      <button class="toggle-form-btn" id="toggleFormBtn">
+        <i class="fas fa-plus"></i> Новая глава
+      </button>
     </div>
-    
-    <div id="loginForm" class="auth-form">
-      <div class="form-group">
-        <label for="loginEmail">Email</label>
-        <input type="email" id="loginEmail" placeholder="Введите ваш email">
+
+    <div class="chapter-form" id="chapterForm">
+      <div class="form-header">
+        <h2 id="formTitle">Новая глава</h2>
       </div>
       <div class="form-group">
-        <label for="loginPassword">Пароль</label>
-        <input type="password" id="loginPassword" placeholder="Введите ваш пароль">
+        <label for="chapterTitle">Заголовок</label>
+        <input type="text" id="chapterTitle" required>
       </div>
-      <button id="loginButton" class="auth-btn">Войти</button>
-      
-      <div class="auth-toggle">
-        <button id="showRegisterForm">Нет аккаунта? Зарегистрироваться</button>
+      <div class="form-group">
+        <label for="chapterContent">Содержание</label>
+        <textarea id="chapterContent" required></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" id="cancelBtn">Отмена</button>
+        <button class="btn btn-primary" id="saveBtn">Сохранить</button>
       </div>
     </div>
-    
-    <div id="registerForm" class="auth-form" style="display: none;">
-      <div class="form-group">
-        <label for="registerName">Имя</label>
-        <input type="text" id="registerName" placeholder="Введите ваше имя">
-      </div>
-      <div class="form-group">
-        <label for="registerEmail">Email</label>
-        <input type="email" id="registerEmail" placeholder="Введите ваш email">
-      </div>
-      <div class="form-group">
-        <label for="registerPassword">Пароль</label>
-        <input type="password" id="registerPassword" placeholder="Создайте пароль">
-      </div>
-      <button id="registerButton" class="auth-btn">Зарегистрироваться</button>
-      
-      <div class="auth-toggle">
-        <button id="showLoginForm">Уже есть аккаунт? Войти</button>
-      </div>
+
+    <div class="chapter-grid" id="chapterGrid"></div>
+
+    <div class="empty-state" id="emptyState">
+      <i class="fas fa-book-open"></i>
+      <h3>Пока нет глав</h3>
+      <p>Начните писать свою историю, добавив первую главу!</p>
     </div>
   </div>
 
-  <div id="appContainer" class="authenticated-only">
-    <div class="container">
-      <div class="action-bar">
-        <div class="status-indicator">
-          <span id="statusDot" class="status-dot online"></span>
-          <span id="statusText">Соединение с базой данных</span>
-        </div>
-        <div class="right-actions">
-          <button class="toggle-form-btn" id="toggleFormBtn">
-            <i class="fas fa-plus"></i>
-            <span>Новая глава</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="chapter-form" id="chapterForm">
-        <div class="form-header">
-          <h2 id="formTitle">Создать новую главу</h2>
-        </div>
-        <div class="form-group">
-          <label for="chapterTitle">Название главы</label>
-          <input type="text" id="chapterTitle" placeholder="Введите название главы" required>
-        </div>
-        <div class="form-group">
-          <label for="chapterContent">Содержание главы</label>
-          <textarea id="chapterContent" placeholder="Начните писать вашу историю..." required></textarea>
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-secondary" id="cancelBtn">Отмена</button>
-          <button class="btn btn-primary" id="saveBtn">Сохранить</button>
-        </div>
-      </div>
-
-      <div class="chapter-grid" id="chapterGrid"></div>
-    </div>
-  </div>
-
+  <!-- Modal for Viewing Chapters -->
   <div class="modal" id="chapterModal">
     <div class="modal-content">
       <div class="modal-header">
         <h2 id="modalTitle"></h2>
-        <button class="close-btn" id="closeModalBtn">
-          <i class="fas fa-times"></i>
-        </button>
+        <button class="close-btn" id="closeModalBtn">×</button>
       </div>
       <div class="modal-body">
         <p id="modalContent"></p>
@@ -931,377 +619,293 @@
     </div>
   </div>
 
-     <div class="loader" id="loader">
-        <div class="spinner"></div>
-    </div>
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDPDG2j29r3Ay0xS0Y2g1NLYGlJNY0yUJI",
+      authDomain: "misha-and-anna-48e4c.firebaseapp.com",
+      databaseURL: "https://misha-and-anna-48e4c-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "misha-and-anna-48e4c",
+      storageBucket: "misha-and-anna-48e4c.appspot.com",
+      messagingSenderId: "985103413436",
+      appId: "1:985103413436:web:c0b6d10b5ed58b9f0d0ae0"
+    };
 
-    <div class="toast" id="toast">
-        <i class="toast-icon" id="toastIcon"></i>
-        <span class="toast-message" id="toastMessage"></span>
-    </div>
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
 
-    <script>
-        // Firebase Configuration
-       const firebaseConfig = {
-  apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
-  authDomain: "misha-and-anna-48e4c.firebaseapp.com",
-  databaseURL: "https://misha-and-anna-48e4c-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "misha-and-anna-48e4c",
-  storageBucket: "misha-and-anna-48e4c.firebasestorage.app",
-  messagingSenderId: "822036073579",
-  appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
-  measurementId: "G-XR86X6PXMX"
-};
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const auth = firebase.auth();
+    // DOM Elements
+    const toggleFormBtn = document.getElementById('toggleFormBtn');
+    const chapterForm = document.getElementById('chapterForm');
+    const chapterTitle = document.getElementById('chapterTitle');
+    const chapterContent = document.getElementById('chapterContent');
+    const saveBtn = document.getElementById('saveBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const formTitle = document.getElementById('formTitle');
+    const chapterGrid = document.getElementById('chapterGrid');
+    const emptyState = document.getElementById('emptyState');
+    const chapterModal = document.getElementById('chapterModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalContent = document.getElementById('modalContent');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const loader = document.getElementById('loader');
 
-        // DOM Elements
-        const chapterForm = document.getElementById('chapterForm');
-        const toggleFormBtn = document.getElementById('toggleFormBtn');
-        const cancelBtn = document.getElementById('cancelBtn');
-        const saveBtn = document.getElementById('saveBtn');
-        const chapterGrid = document.getElementById('chapterGrid');
-        const chapterModal = document.getElementById('chapterModal');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalContent = document.getElementById('modalContent');
-        const formTitle = document.getElementById('formTitle');
-        const statusDot = document.getElementById('statusDot');
-        const statusText = document.getElementById('statusText');
-        const themeToggle = document.getElementById('themeToggle');
-        const loader = document.getElementById('loader');
-        const toast = document.getElementById('toast');
-        const toastIcon = document.getElementById('toastIcon');
-        const toastMessage = document.getElementById('toastMessage');
+    // State
+    let isEditing = false;
+    let editingChapterId = null;
 
-        // Auth Elements
-        const authContainer = document.getElementById('authContainer');
-        const appContainer = document.getElementById('appContainer');
-        const loginForm = document.getElementById('loginForm');
-        const registerForm = document.getElementById('registerForm');
-        const loginButton = document.getElementById('loginButton');
-        const registerButton = document.getElementById('registerButton');
-        const showRegisterForm = document.getElementById('showRegisterForm');
-        const showLoginForm = document.getElementById('showLoginForm');
-        const userAvatar = document.getElementById('userAvatar');
-        const userName = document.getElementById('userName');
-        const userEmail = document.getElementById('userEmail');
-        const logoutBtn = document.getElementById('logoutBtn');
+    // Utility Functions
+    function showLoader() {
+      loader.style.display = 'flex';
+    }
 
-        let editingChapterId = null;
+    function hideLoader() {
+      loader.style.display = 'none';
+    }
 
-        // Theme Toggle
-        themeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('light-theme');
-            themeToggle.innerHTML = document.body.classList.contains('light-theme') 
-                ? '<i class="fas fa-sun"></i>' 
-                : '<i class="fas fa-moon"></i>';
-        });
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type} show`;
+      toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} toast-icon"></i>
+        <span class="toast-message">${message}</span>
+      `;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
 
-        // Authentication
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // User is signed in
-                authContainer.classList.remove('unauthenticated-only');
-                appContainer.classList.add('authenticated-only');
-                document.querySelector('.user-profile').classList.add('authenticated-only');
-                
-                userName.textContent = user.displayName || 'Пользователь';
-                userEmail.textContent = user.email;
-                userAvatar.textContent = user.displayName ? user.displayName[0].toUpperCase() : 'U';
-                
-                loadChapters();
-            } else {
-                // No user is signed in
-                authContainer.classList.add('unauthenticated-only');
-                appContainer.classList.remove('authenticated-only');
-                document.querySelector('.user-profile').classList.remove('authenticated-only');
-            }
-        });
+    function updateStatus(status, message) {
+      statusDot.className = `status-dot ${status}`;
+      statusText.textContent = message;
+    }
 
-        // Login
-        loginButton.addEventListener('click', () => {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            showLoader();
-            auth.signInWithEmailAndPassword(email, password)
-                .then(() => {
-                    showToast('Успешный вход!', 'success');
-                })
-                .catch((error) => {
-                    showToast(`Ошибка входа: ${error.message}`, 'error');
-                })
-                .finally(() => {
-                    hideLoader();
-                });
-        });
+    function sanitizeHTML(str) {
+      return DOMPurify.sanitize(str);
+    }
 
-        // Register
-        registerButton.addEventListener('click', () => {
-            const name = document.getElementById('registerName').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            
-            showLoader();
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    return userCredential.user.updateProfile({
-                        displayName: name
-                    });
-                })
-                .then(() => {
-                    showToast('Регистрация успешна!', 'success');
-                })
-                .catch((error) => {
-                    showToast(`Ошибка регистрации: ${error.message}`, 'error');
-                })
-                .finally(() => {
-                    hideLoader();
-                });
-        });
+    // Chapter Form Handling
+    toggleFormBtn.addEventListener('click', () => {
+      chapterForm.style.display = chapterForm.style.display === 'block' ? 'none' : 'block';
+      if (chapterForm.style.display === 'block') {
+        resetForm();
+      }
+    });
 
-        // Toggle Auth Forms
-        showRegisterForm.addEventListener('click', () => {
-            loginForm.style.display = 'none';
-            registerForm.style.display = 'block';
-        });
+    cancelBtn.addEventListener('click', () => {
+      chapterForm.style.display = 'none';
+      resetForm();
+    });
 
-        showLoginForm.addEventListener('click', () => {
-            registerForm.style.display = 'none';
-            loginForm.style.display = 'block';
-        });
+    saveBtn.addEventListener('click', () => {
+      const title = chapterTitle.value.trim();
+      const content = chapterContent.value.trim();
 
-        // Logout
-        logoutBtn.addEventListener('click', () => {
-            showLoader();
-            auth.signOut()
-                .then(() => {
-                    showToast('Вы успешно вышли', 'success');
-                })
-                .catch((error) => {
-                    showToast(`Ошибка выхода: ${error.message}`, 'error');
-                })
-                .finally(() => {
-                    hideLoader();
-                });
-        });
+      if (!title || !content) {
+        showToast('Заполните все поля', 'error');
+        return;
+      }
 
-        // Form Toggle
-        toggleFormBtn.addEventListener('click', () => {
-            chapterForm.style.display = chapterForm.style.display === 'block' ? 'none' : 'block';
-            if (chapterForm.style.display === 'block') {
-                resetForm();
-            }
-        });
+      showLoader();
+      const chapterData = {
+        title,
+        content,
+        timestamp: Date.now()
+      };
 
-        cancelBtn.addEventListener('click', () => {
+      if (isEditing) {
+        database.ref(`chapters/${editingChapterId}`).update(chapterData)
+          .then(() => {
+            showToast('Глава обновлена!', 'success');
             chapterForm.style.display = 'none';
             resetForm();
-        });
+            hideLoader();
+          })
+          .catch((error) => {
+            showToast(`Ошибка обновления: ${error.message}`, 'error');
+            hideLoader();
+          });
+      } else {
+        database.ref('chapters').push(chapterData)
+          .then(() => {
+            showToast('Глава сохранена!', 'success');
+            chapterForm.style.display = 'none';
+            resetForm();
+            hideLoader();
+          })
+          .catch((error) => {
+            showToast(`Ошибка сохранения: ${error.message}`, 'error');
+            hideLoader();
+          });
+      }
+    });
 
-        // Save Chapter
-        saveBtn.addEventListener('click', () => {
-            const title = document.getElementById('chapterTitle').value;
-            const content = document.getElementById('chapterContent').value;
-            const user = auth.currentUser;
+    function resetForm() {
+      chapterTitle.value = '';
+      chapterContent.value = '';
+      formTitle.textContent = 'Новая глава';
+      isEditing = false;
+      editingChapterId = null;
+    }
 
-            if (!title || !content) {
-                showToast('Пожалуйста, заполните все поля', 'warning');
-                return;
-            }
+    // Load Chapters
+    function loadChapters() {
+      showLoader();
+      try {
+        database.ref('chapters').on('value', (snapshot) => {
+          chapterGrid.innerHTML = '';
+          const chapters = snapshot.val();
+          
+          if (!chapters) {
+            emptyState.style.display = 'block';
+            hideLoader();
+            updateStatus('online', 'Соединение с базой данных');
+            return;
+          }
 
-            showLoader();
-            const chapterData = {
-                title,
-                content,
-                userId: user.uid,
-                createdAt: firebase.database.ServerValue.TIMESTAMP
-            };
+          emptyState.style.display = 'none';
+          Object.entries(chapters).forEach(([id, chapter]) => {
+            const card = document.createElement('div');
+            card.className = 'chapter-card';
+            card.innerHTML = `
+              <div class="card-content">
+                <h3>${sanitizeHTML(chapter.title)}</h3>
+                <p>${sanitizeHTML(chapter.content.substring(0, 150))}...</p>
+              </div>
+              <div class="card-footer">
+                <button class="card-btn view-btn" data-id="${id}">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="card-btn edit-btn" data-id="${id}">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="card-btn delete-btn" data-id="${id}">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            `;
+            chapterGrid.appendChild(card);
+          });
 
-            if (editingChapterId) {
-                // Update existing chapter
-                database.ref(`chapters/${editingChapterId}`).update(chapterData)
-                    .then(() => {
-                        showToast('Глава обновлена!', 'success');
-                        resetForm();
-                        chapterForm.style.display = 'none';
-                    })
-                    .catch((error) => {
-                        showToast(`Ошибка: ${error.message}`, 'error');
-                    })
-                    .finally(() => {
-                        hideLoader();
-                    });
-            } else {
-                // Create new chapter
-                database.ref('chapters').push(chapterData)
-                    .then(() => {
-                        showToast('Глава сохранена!', 'success');
-                        resetForm();
-                        chapterForm.style.display = 'none';
-                    })
-                    .catch((error) => {
-                        showToast(`Ошибка: ${error.message}`, 'error');
-                    })
-                    .finally(() => {
-                        hideLoader();
-                    });
-            }
-        });
-
-        // Load Chapters
-        function loadChapters() {
-            const user = auth.currentUser;
-            statusDot.classList.add('syncing');
-            statusText.textContent = 'Синхронизация данных...';
-
-            database.ref('chapters').orderByChild('userId').equalTo(user.uid).on('value', (snapshot) => {
-                chapterGrid.innerHTML = '';
-                const chapters = snapshot.val();
-
-                if (!chapters) {
-                    chapterGrid.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-book-open"></i>
-                            <h3>Пока нет глав</h3>
-                            <p>Нажмите "Новая глава", чтобы начать писать вашу историю!</p>
-                        </div>
-                    `;
-                    updateStatus('online', 'Соединение с базой данных');
-                    return;
-                }
-
-                Object.entries(chapters).forEach(([id, chapter]) => {
-                    const card = document.createElement('div');
-                    card.className = 'chapter-card';
-                    card.innerHTML = `
-                        <div class="card-content">
-                            <h3>${chapter.title}</h3>
-                            <p>${chapter.content.substring(0, 150)}...</p>
-                        </div>
-                        <div class="card-footer">
-                            <button class="card-btn view-btn" data-id="${id}">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="card-btn edit-btn" data-id="${id}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="card-btn delete-btn" data-id="${id}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    `;
-                    chapterGrid.appendChild(card);
-                });
-
-                // Add event listeners for card buttons
-                document.querySelectorAll('.view-btn').forEach(btn => {
-                    btn.addEventListener('click', () => viewChapter(btn.dataset.id));
-                });
-
-                document.querySelectorAll('.edit-btn').forEach(btn => {
-                    btn.addEventListener('click', () => editChapter(btn.dataset.id));
-                });
-
-                document.querySelectorAll('.delete-btn').forEach(btn => {
-                    btn.addEventListener('click', () => deleteChapter(btn.dataset.id));
-                });
-
-                updateStatus('online', 'Соединение с базой данных');
-            }, (error) => {
-                updateStatus('offline', 'Ошибка соединения');
-                showToast(`Ошибка загрузки: ${error.message}`, 'error');
+          document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              viewChapter(btn.dataset.id);
             });
-        }
+          });
 
-        // View Chapter
-        function viewChapter(id) {
-            database.ref(`chapters/${id}`).once('value').then((snapshot) => {
-                const chapter = snapshot.val();
-                modalTitle.textContent = chapter.title;
-                modalContent.textContent = chapter.content;
-                chapterModal.style.display = 'flex';
+          document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              editChapter(btn.dataset.id);
             });
-        }
+          });
 
-        // Edit Chapter
-        function editChapter(id) {
-            database.ref(`chapters/${id}`).once('value').then((snapshot) => {
-                const chapter = snapshot.val();
-                document.getElementById('chapterTitle').value = chapter.title;
-                document.getElementById('chapterContent').value = chapter.content;
-                formTitle.textContent = 'Редактировать главу';
-                editingChapterId = id;
-                chapterForm.style.display = 'block';
+          document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              deleteChapter(btn.dataset.id);
             });
-        }
+          });
 
-        // Delete Chapter
-        function deleteChapter(id) {
-            if (confirm('Вы уверены, что хотите удалить эту главу?')) {
-                showLoader();
-                database.ref(`chapters/${id}`).remove()
-                    .then(() => {
-                        showToast('Глава удалена', 'success');
-                    })
-                    .catch((error) => {
-                        showToast(`Ошибка: ${error.message}`, 'error');
-                    })
-                    .finally(() => {
-                        hideLoader();
-                    });
-            }
-        }
-
-        // Reset Form
-        function resetForm() {
-            document.getElementById('chapterTitle').value = '';
-            document.getElementById('chapterContent').value = '';
-            formTitle.textContent = 'Создать новую главу';
-            editingChapterId = null;
-        }
-
-        // Status Update
-        function updateStatus(status, message) {
-            statusDot.className = `status-dot ${status}`;
-            statusText.textContent = message;
-        }
-
-        // Loader
-        function showLoader() {
-            loader.style.display = 'flex';
-        }
-
-        function hideLoader() {
-            loader.style.display = 'none';
-        }
-
-        // Toast Notification
-        function showToast(message, type) {
-            toastMessage.textContent = message;
-            toast.className = `toast ${type}`;
-            toastIcon.className = `toast-icon fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}`;
-            toast.classList.add('show');
-
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        // Close Modal
-        closeModalBtn.addEventListener('click', () => {
-            chapterModal.style.display = 'none';
+          hideLoader();
+          updateStatus('online', 'Соединение с базой данных');
+        }, (error) => {
+          console.error('Error loading chapters:', error);
+          let userMessage = 'Ошибка загрузки глав';
+          if (error.code === 'PERMISSION_DENIED') {
+            userMessage = 'Нет доступа к данным. Проверьте настройки.';
+          } else if (error.code === 'NETWORK_ERROR') {
+            userMessage = 'Нет подключения к интернету.';
+          }
+          updateStatus('offline', userMessage);
+          showToast(userMessage, 'error');
+          hideLoader();
         });
+      } catch (error) {
+        console.error('Error in loadChapters:', error);
+        showToast(`Ошибка загрузки глав: ${error.message}`, 'error');
+        hideLoader();
+      }
+    }
 
-        // Close modal on outside click
-        chapterModal.addEventListener('click', (e) => {
-            if (e.target === chapterModal) {
-                chapterModal.style.display = 'none';
-            }
+    // View Chapter
+    function viewChapter(id) {
+      showLoader();
+      database.ref(`chapters/${id}`).once('value')
+        .then((snapshot) => {
+          const chapter = snapshot.val();
+          if (chapter) {
+            modalTitle.textContent = sanitizeHTML(chapter.title);
+            modalContent.textContent = chapter.content;
+            chapterModal.style.display = 'flex';
+          } else {
+            showToast('Глава не найдена', 'error');
+          }
+          hideLoader();
+        })
+        .catch((error) => {
+          showToast(`Ошибка загрузки главы: ${error.message}`, 'error');
+          hideLoader();
         });
-    </script>
+    }
+
+    // Edit Chapter
+    function editChapter(id) {
+      showLoader();
+      database.ref(`chapters/${id}`).once('value')
+        .then((snapshot) => {
+          const chapter = snapshot.val();
+          if (chapter) {
+            chapterTitle.value = chapter.title;
+            chapterContent.value = chapter.content;
+            formTitle.textContent = 'Редактировать главу';
+            isEditing = true;
+            editingChapterId = id;
+            chapterForm.style.display = 'block';
+          } else {
+            showToast('Глава не найдена', 'error');
+          }
+          hideLoader();
+        })
+        .catch((error) => {
+          showToast(`Ошибка загрузки главы: ${error.message}`, 'error');
+          hideLoader();
+        });
+    }
+
+    // Delete Chapter
+    function deleteChapter(id) {
+      if (confirm('Вы уверены, что хотите удалить эту главу?')) {
+        showLoader();
+        database.ref(`chapters/${id}`).remove()
+          .then(() => {
+            showToast('Глава удалена!', 'success');
+            hideLoader();
+          })
+          .catch((error) => {
+            showToast(`Ошибка удаления: ${error.message}`, 'error');
+            hideLoader();
+          });
+      }
+    }
+
+    // Modal Close
+    closeModalBtn.addEventListener('click', () => {
+      chapterModal.style.display = 'none';
+    });
+
+    // Theme Toggle (Placeholder)
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      showToast('Переключение темы пока не реализовано', 'warning');
+    });
+
+    // Initialize
+    console.log('App initialized');
+    updateStatus('online', 'Соединение с базой данных');
+    loadChapters();
+  </script>
 </body>
 </html>
