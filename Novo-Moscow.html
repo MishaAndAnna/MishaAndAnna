@@ -3,414 +3,1305 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Искры Вечности - киберпанк-фэнтези роман с элементами славянской мифологии. Читайте 18 глав эпического приключения Михаила, Анюты, Гордея, Любавы и Яромира в Ладово.">
-  <meta name="keywords" content="Искры Вечности, киберпанк, фэнтези, славянская мифология, роман, чтение онлайн">
-  <meta name="author" content="Автор Искр Вечности">
-  <title>Искры Вечности - Читать онлайн</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <title>Неоновая Сага: Киберпанк-Фэнтези</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Firebase SDK -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-app-compat.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-database-compat.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-auth-compat.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono&family=Special+Elite&display=swap');
-
-    body {
-      background: linear-gradient(135deg, #0d0b1e 0%, #1e1b3a 50%, #1a1733 100%);
-      color: #e0e0e0;
-      font-family: 'Roboto Mono', monospace;
-      overflow-x: hidden;
-      position: relative;
-      margin: 0;
+    :root {
+      --primary: #8257e6;
+      --secondary: #ff5e5e;
+      --accent: #00e6cc;
+      --background: #0c0e14;
+      --surface: #171a23;
+      --surface-light: #222532;
+      --text: #f1f1f6;
+      --text-muted: #a0a0b0;
+      --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.15);
+      --shadow-lg: 0 15px 35px rgba(0, 0, 0, 0.2);
+      --border-radius: 16px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
     }
 
-    /* Эфирный фон с анимацией звёзд и параллакса */
-    .ether-bg {
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Space Grotesk', 'Montserrat', sans-serif;
+      background-color: var(--background);
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(130, 87, 230, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(255, 94, 94, 0.1) 0%, transparent 40%);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    header {
+      background: rgba(12, 14, 20, 0.8);
+      backdrop-filter: blur(12px);
+      padding: var(--spacing-lg) var(--spacing-xl);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+      color: var(--text);
+      position: relative;
+      text-decoration: none;
+    }
+
+    .logo::before {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 70%;
+      background: linear-gradient(to bottom, var(--primary), var(--secondary));
+      border-radius: 2px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--spacing-xl);
+    }
+
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-lg);
+      align-items: center;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: var(--spacing-sm);
+    }
+
+    .status-dot.online {
+      background: #4CAF50;
+    }
+
+    .status-dot.offline {
+      background: #FF5722;
+    }
+
+    .status-dot.syncing {
+      background: #FFC107;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+
+    .right-actions {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .toggle-form-btn {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: var(--text);
+      border: none;
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-md);
+    }
+
+    .toggle-form-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .toggle-form-btn i {
+      font-size: 0.9rem;
+    }
+
+    .chapter-form {
+      background: var(--surface);
+      padding: var(--spacing-xl);
+      border-radius: var(--border-radius);
+      margin-bottom: var(--spacing-xl);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: none;
+      animation: slideDown 0.4s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .form-header h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--text);
+    }
+
+    .form-group {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: var(--spacing-sm);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .chapter-form input,
+    .chapter-form textarea {
+      width: 100%;
+      padding: var(--spacing-md);
+      background: var(--surface-light);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .chapter-form input:focus,
+    .chapter-form textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(130, 87, 230, 0.2);
+    }
+
+    .chapter-form textarea {
+      min-height: 250px;
+      resize: vertical;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-md);
+    }
+
+    .btn {
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #9672e6);
+      color: white;
+      border: none;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .chapter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--spacing-lg);
+    }
+
+    .chapter-card {
+      background: var(--surface);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chapter-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(130, 87, 230, 0.3);
+    }
+
+    .chapter-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    }
+
+    .card-content {
+      padding: var(--spacing-lg);
+      flex-grow: 1;
+    }
+
+    .chapter-card h3 {
+      color: var(--text);
+      margin-bottom: var(--spacing-md);
+      font-size: 1.3rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .chapter-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .card-footer {
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: rgba(0, 0, 0, 0.2);
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-sm);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: var(--spacing-sm);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .card-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+    }
+
+    .card-btn i {
+      font-size: 1rem;
+    }
+
+    .modal {
+      display: none;
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: -1;
-      pointer-events: none;
-      background: transparent;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      overflow-y: auto;
     }
 
-    .ether-bg::before,
-    .ether-bg::after {
-      content: '';
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      background: #0ff;
-      box-shadow: 0 0 8px #0ff, 0 0 15px #0ff;
-      animation: twinkle 2.5s infinite, drift 20s linear infinite;
-      opacity: 0.6;
-    }
-
-    .ether-bg::after {
-      background: #ff007f;
-      box-shadow: 0 0 8px #ff007f, 0 0 15px #ff007f;
-      animation: twinkle 3.5s infinite, drift 25s linear infinite;
-    }
-
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.4; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.3); }
-    }
-
-    @keyframes drift {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(100vw, 100vh); }
-    }
-
-    /* Неоновый текст с эффектом сканирования */
-    .neon-text {
-      text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff;
-      color: #0ff;
+    .modal-content {
+      background: var(--surface);
+      border-radius: var(--border-radius);
+      max-width: 800px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
       position: relative;
-      animation: scan 3s infinite alternate;
+      animation: fadeIn 0.3s ease;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .neon-text::after {
-      content: '';
-      position: absolute;
+    .modal-header {
+      padding: var(--spacing-lg) var(--spacing-xl);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--text);
+    }
+
+    .modal-body {
+      padding: var(--spacing-xl);
+    }
+
+    .modal-body p {
+      line-height: 1.8;
+      color: var(--text);
+      white-space: pre-wrap;
+      font-size: 1.05rem;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: var(--spacing-xl) 0;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: var(--spacing-lg);
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-size: 1.3rem;
+      margin-bottom: var(--spacing-md);
+      color: var(--text);
+    }
+
+    .empty-state p {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .theme-toggle {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+    }
+
+    .loader {
+      display: none;
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(transparent, rgba(0, 255, 255, 0.2), transparent);
-      animation: scan-line 1.5s infinite;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 3000;
+      justify-content: center;
+      align-items: center;
     }
 
-    @keyframes scan {
-      0% { text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff; }
-      100% { text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff; }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 4px solid var(--primary);
+      animation: spin 1s linear infinite;
     }
 
-    @keyframes scan-line {
-      0% { transform: translateY(-100%); }
-      100% { transform: translateY(100%); }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
-    /* Рунический текст */
-    .rune-text {
-      font-family: 'Orbitron', sans-serif;
-      color: #ff007f;
-      text-shadow: 0 0 5px #ff007f, 0 0 10px #ff007f;
-      position: relative;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
     }
 
-    .rune-text::before {
-      content: 'ᚱ';
-      position: absolute;
-      left: -20px;
-      color: #ff007f;
-      opacity: 0.5;
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--surface);
+      color: var(--text);
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      z-index: 2500;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      max-width: 320px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast-icon {
       font-size: 1.2rem;
     }
 
-    /* Голографические карточки с 3D-эффектом */
-    .holo-card {
-      background: linear-gradient(45deg, rgba(0, 255, 255, 0.15), rgba(255, 0, 127, 0.15));
-      border: 2px solid rgba(0, 255, 255, 0.4);
-      transition: transform 0.4s, box-shadow 0.4s;
-      position: relative;
-      overflow: hidden;
-      transform: perspective(600px) rotateX(0deg) rotateY(0deg);
+    .toast-message {
+      flex-grow: 1;
     }
 
-    .holo-card:hover {
-      transform: perspective(600px) rotateX(5deg) rotateY(5deg);
-      box-shadow: 0 0 30px rgba(0, 255, 255, 0.6), 0 0 40px rgba(255, 0, 127, 0.4);
+    .toast.success .toast-icon {
+      color: #4CAF50;
     }
 
-    .holo-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(0, 255, 255, 0.3), transparent);
-      transform: rotate(45deg);
-      transition: all 0.6s;
+    .toast.error .toast-icon {
+      color: #FF5722;
     }
 
-    .holo-card:hover::before {
-      top: -20%;
-      left: -20%;
+    .toast.warning .toast-icon {
+      color: #FFC107;
     }
 
-    /* Кнопки с голографическим эффектом */
-    .neon-button {
-      background: linear-gradient(45deg, #0ff, #ff007f);
-      border: none;
-      color: #000;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: bold;
-      transition: all 0.3s;
-      position: relative;
-      overflow: hidden;
-      z-index: 1;
+    /* Стили для авторизации */
+    .auth-container {
+      max-width: 400px;
+      margin: 100px auto;
+      background: var(--surface);
+      border-radius: var(--border-radius);
+      padding: var(--spacing-xl);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .neon-button::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
+    .auth-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .auth-header h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: var(--text);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .auth-form .form-group {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .auth-form input {
       width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transition: all 0.4s;
-      z-index: -1;
+      padding: var(--spacing-md);
+      background: var(--surface-light);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      border-radius: 8px;
+      font-size: 1rem;
     }
 
-    .neon-button:hover::before {
-      left: 100%;
+    .auth-form input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(130, 87, 230, 0.2);
     }
 
-    .neon-button:hover {
-      box-shadow: 0 0 20px #0ff, 0 0 30px #ff007f;
-      transform: scale(1.05);
-    }
-
-    /* Меню-гамбургер для мобильных */
-    .hamburger {
-      display: none;
+    .auth-btn {
+      width: 100%;
+      padding: var(--spacing-md);
+      background: linear-gradient(135deg, var(--primary), #9672e6);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
       cursor: pointer;
-      z-index: 50;
+      transition: all 0.3s ease;
+      margin-bottom: var(--spacing-lg);
     }
 
-    .hamburger span {
-      display: block;
-      width: 30px;
-      height: 4px;
-      background: #0ff;
-      margin: 6px 0;
-      transition: all 0.3s;
-      box-shadow: 0 0 5px #0ff;
+    .auth-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
     }
 
-    .hamburger.active span:nth-child(1) {
-      transform: rotate(45deg) translate(8px, 8px);
+    .auth-links {
+      text-align: center;
+      margin-top: var(--spacing-lg);
     }
 
-    .hamburger.active span:nth-child(2) {
-      opacity: 0;
+    .auth-links a {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
     }
 
-    .hamburger.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(8px, -8px);
+    .auth-links a:hover {
+      color: var(--secondary);
+    }
+
+    .auth-toggle {
+      margin-top: var(--spacing-md);
+      text-align: center;
+    }
+
+    .auth-toggle button {
+      background: transparent;
+      border: none;
+      color: var(--primary);
+      cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .auth-toggle button:hover {
+      color: var(--secondary);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: white;
+      font-size: 1.1rem;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .user-email {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .logout-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
     }
 
     @media (max-width: 768px) {
-      .hamburger {
-        display: block;
+      .logo {
+        font-size: 1.4rem;
       }
-      .sidebar {
-        transform: translateX(100%);
-        transition: transform 0.3s;
-        position: fixed;
-        top: 0;
-        right: 0;
-        height: 100%;
-        width: 250px;
-        z-index: 40;
+
+      .container {
+        padding: var(--spacing-lg);
       }
-      .sidebar.active {
-        transform: translateX(0);
-      }
-      .neon-text {
-        font-size: 2.5rem;
-      }
-      .grid {
+
+      .chapter-grid {
         grid-template-columns: 1fr;
       }
+
+      .modal-content {
+        width: 95%;
+      }
+
+      .chapter-form {
+        padding: var(--spacing-lg);
+      }
+
+      .action-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+      }
+
+      .right-actions {
+        align-self: flex-end;
+      }
+    }
+
+    @media (max-width: 480px) {
+      header {
+        padding: var(--spacing-md);
+      }
+
+      .logo {
+        font-size: 1.2rem;
+      }
+
+      .toggle-form-btn span {
+        display: none;
+      }
+
+      .chapter-card {
+        padding: var(--spacing-md);
+      }
+
+      .chapter-card h3 {
+        font-size: 1.2rem;
+      }
+    }
+
+    body.light-theme {
+      --background: #f5f7fa;
+      --surface: #ffffff;
+      --surface-light: #f0f2f5;
+      --text: #333340;
+      --text-muted: #767683;
+    }
+
+    .light-theme header {
+      background: rgba(245, 247, 250, 0.8);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .light-theme .chapter-card,
+    .light-theme .chapter-form,
+    .light-theme .modal-content {
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .light-theme .card-footer {
+      background: rgba(0, 0, 0, 0.03);
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .light-theme .modal-header {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .light-theme .modal {
+      background: rgba(245, 247, 250, 0.9);
+    }
+
+    .light-theme .toast {
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      background: white;
+    }
+
+    /* Скрываем элементы в зависимости от состояния авторизации */
+    .authenticated-only {
+      display: none;
+    }
+
+    .unauthenticated-only {
+      display: none;
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
-  <div class="ether-bg"></div>
-  <div id="root"></div>
-
-  <script type="text/babel">
-    const chapters = [
-      { id: 1, title: "Глава 1: Падение в Ладово", summary: "Михаил и Анюта попадают в Ладово, где сталкиваются с лесом и тайной звёзд." },
-      { id: 2, title: "Глава 2: Шёпот мха", summary: "Герои встречают Гордея и узнают о Мокоши." },
-      { id: 3, title: "Глава 3: Код Светоча", summary: "Анюта раскрывает связь звёзд с кодом Светоча." },
-      { id: 4, title: "Глава 4: Тени леса", summary: "Команда сталкивается с первыми тенями." },
-      { id: 5, title: "Глава 5: Песнь Любавы", summary: "Любава присоединяется, её песнь отгоняет тени." },
-      { id: 6, title: "Глава 6: Хранитель звёзд", summary: "Яромир рассказывает о своём прошлом." },
-      { id: 7, title: "Глава 7: Эфирный поток", summary: "Герои ищут источник звёздного потока." },
-      { id: 8, title: "Глава 8: Руны Мокоши", summary: "Анюта расшифровывает древние руны." },
-      { id: 9, title: "Глава 9: Гнев Перуна", summary: "Команда сталкивается с молниями Перуна." },
-      { id: 10, title: "Глава 10: Сердце леса", summary: "Герои находят сердце Ладово." },
-      { id: 11, title: "Глава 11: Светоч пробуждается", summary: "Код Светоча активирует новую угрозу." },
-      { id: 12, title: "Глава 12: Танец теней", summary: "Тени становятся сильнее, команда объединяется." },
-      { id: 13, title: "Глава 13: Путь Гордея", summary: "Гордей обретает цель." },
-      { id: 14, title: "Глава 14: Глас Велеса", summary: "Велес испытывает героев." },
-      { id: 15, title: "Глава 15: Эхо Мокоши", summary: "Герои останавливают эхо в роще." },
-      { id: 16, title: "Глава 16: Небесная твердь", summary: "Команда уравновешивает звёздный поток." },
-      { id: 17, title: "Глава 17: Подземная твердь", summary: "Герои запечатывают разрыв Велеса." },
-      { id: 18, title: "Глава 18: Огненная роща", summary: "Герои тушат звёздное пламя Мокоши." },
-    ];
-
-    const App = () => {
-      const [currentChapter, setCurrentChapter] = React.useState(null);
-      const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
-
-      const handleChapterClick = (chapter) => {
-        setCurrentChapter(chapter);
-        setIsSidebarOpen(false);
-      };
-
-      const handleBackToIndex = () => {
-        setCurrentChapter(null);
-        setIsSidebarOpen(false);
-      };
-
-      const handleNextChapter = () => {
-        const nextId = currentChapter.id < chapters.length ? currentChapter.id + 1 : 1;
-        setCurrentChapter(chapters.find((ch) => ch.id === nextId));
-      };
-
-      const handlePrevChapter = () => {
-        const prevId = currentChapter.id > 1 ? currentChapter.id - 1 : chapters.length;
-        setCurrentChapter(chapters.find((ch) => ch.id === prevId));
-      };
-
-      const handleSubscribe = (e) => {
-        e.preventDefault();
-        alert("Спасибо за подписку! Вы будете получать уведомления о новых главах.");
-      };
-
-      const toggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
-      };
-
-      return (
-        <div className="container mx-auto p-4 md:p-8 relative">
-          <header className="text-center py-12 relative">
-            <div className="hamburger fixed top-4 right-4 md:hidden" onClick={toggleSidebar}>
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold neon-text mb-4">Искры Вечности</h1>
-            <p className="text-lg md:text-xl rune-text mb-2">Киберпанк-фэнтези с элементами славянской мифологии</p>
-            <p className="text-md max-w-2xl mx-auto">Погрузитесь в эпическое приключение Михаила, Анюты, Гордея, Любавы и Яромира в Ладово, где звёзды хранят тайны богов и код Светоча.</p>
-            <svg className="mt-4 mx-auto w-24 h-6" viewBox="0 0 100 20">
-              <path d="M10 10 L20 15 L30 10 L40 15 L50 10 L60 15 L70 10 L80 15 L90 10" stroke="#ff007f" strokeWidth="2" fill="none" />
-            </svg>
-          </header>
-
-          {currentChapter ? (
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="md:w-3/4 bg-gray-900 bg-opacity-90 p-8 rounded-lg shadow-lg border border-cyan-500">
-                <h2 className="text-4xl font-bold rune-text mb-6">{currentChapter.title}</h2>
-                <p className="text-lg mb-6 italic text-gray-400">{currentChapter.summary}</p>
-                <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
-                  <p>[Здесь будет текст главы {currentChapter.id}. Замените этот текст полным содержимым главы.]</p>
-                  <p>Пример: Рассвет над Ладово пылает, как расплавленный металл, и воздух дрожит, будто перегретый токами...</p>
-                </div>
-                <div className="flex gap-4 mt-8">
-                  <button
-                    onClick={handlePrevChapter}
-                    className="neon-button py-2 px-6 rounded-lg"
-                  >
-                    Предыдущая
-                  </button>
-                  <button
-                    onClick={handleBackToIndex}
-                    className="neon-button py-2 px-6 rounded-lg"
-                  >
-                    К главам
-                  </button>
-                  <button
-                    onClick={handleNextChapter}
-                    className="neon-button py-2 px-6 rounded-lg"
-                  >
-                    Следующая
-                  </button>
-                </div>
-              </div>
-              <aside className={`sidebar md:w-1/4 bg-gray-800 bg-opacity-90 p-6 rounded-lg shadow-lg border border-pink-500 ${isSidebarOpen ? 'active' : ''}`}>
-                <h3 className="text-xl rune-text mb-4">Навигация</h3>
-                <ul className="space-y-2">
-                  {chapters.map((chapter) => (
-                    <li key={chapter.id}>
-                      <button
-                        onClick={() => handleChapterClick(chapter)}
-                        className={`w-full text-left py-2 px-4 rounded hover:bg-cyan-500 hover:text-black transition ${
-                          currentChapter.id === chapter.id ? 'bg-cyan-500 text-black' : ''
-                        }`}
-                      >
-                        {chapter.title}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </aside>
-            </div>
-          ) : (
-            <div>
-              <section className="mb-12">
-                <h2 className="text-3xl font-bold rune-text mb-6 text-center">Главы</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {chapters.map((chapter) => (
-                    <div
-                      key={chapter.id}
-                      onClick={() => handleChapterClick(chapter)}
-                      className="holo-card p-6 rounded-lg cursor-pointer"
-                    >
-                      <h3 className="text-2xl font-bold neon-text mb-2">{chapter.title}</h3>
-                      <p className="text-gray-300">{chapter.summary}</p>
-                      <svg className="mt-4 w-12 h-4" viewBox="0 0 50 10">
-                        <path d="M5 5 L10 7 L15 5 L20 7 L25 5 L30 7 L35 5 L40 7 L45 5" stroke="#0ff" strokeWidth="1" fill="none" />
-                      </svg>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              <section className="text-center py-12 bg-gray-900 bg-opacity-90 rounded-lg border border-cyan-500">
-                <h2 className="text-3xl font-bold rune-text mb-6">Подпишитесь на обновления</h2>
-                <form onSubmit={handleSubscribe} className="flex flex-col items-center max-w-md mx-auto">
-                  <input
-                    type="email"
-                    placeholder="Ваш email"
-                    className="w-full p-3 mb-4 rounded bg-gray-800 text-white border border-cyan-500 focus:outline-none focus:border-pink-500 focus:shadow-[0_0_10px_#ff007f]"
-                    required
-                  />
-                  <button
-                    type="submit"
-                    className="neon-button py-3 px-6 rounded-lg"
-                  >
-                    Подписаться
-                  </button>
-                </form>
-                <svg className="mt-4 mx-auto w-24 h-6" viewBox="0 0 100 20">
-                  <path d="M10 10 L20 15 L30 10 L40 15 L50 10 L60 15 L70 10 L80 15 L90 10" stroke="#ff007f" strokeWidth="2" fill="none" />
-                </svg>
-              </section>
-            </div>
-          )}
-
-          <footer className="mt-12 text-center py-8">
-            <p className="text-gray-400">© 2025 Искры Вечности. Все права защищены.</p>
-            <p className="rune-text mt-2">Звёзды всегда найдут нас.</p>
-            <svg className="mt-4 mx-auto w-16 h-4" viewBox="0 0 50 10">
-              <path d="M5 5 L10 7 L15 5 L20 7 L25 5 L30 7 L35 5 L40 7 L45 5" stroke="#0ff" strokeWidth="1" fill="none" />
-            </svg>
-          </footer>
+<body>
+  <header>
+    <div class="logo-container">
+      <a href="#" class="logo">Искры Вечности</a>
+    </div>
+    <div class="right-header">
+      <div class="user-profile authenticated-only">
+        <div class="user-avatar" id="userAvatar">М</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">Михаил</div>
+          <div class="user-email" id="userEmail"></div>
         </div>
-      );
-    };
+        <button id="logoutBtn" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i> Выйти
+        </button>
+      </div>
+      <button class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+  </header>
 
-    ReactDOM.render(<App />, document.getElementById('root'));
-  </script>
+  <!-- Аутентификация -->
+  <div id="authContainer" class="auth-container unauthenticated-only">
+    <div class="auth-header">
+      <h2>Искры Вечности</h2>
+      <p>Войдите, чтобы создавать и редактировать главы вашей истории</p>
+    </div>
+    
+    <div id="loginForm" class="auth-form">
+      <div class="form-group">
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" placeholder="Введите ваш email">
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Пароль</label>
+        <input type="password" id="loginPassword" placeholder="Введите ваш пароль">
+      </div>
+      <button id="loginButton" class="auth-btn">Войти</button>
+      
+      <div class="auth-toggle">
+        <button id="showRegisterForm">Нет аккаунта? Зарегистрироваться</button>
+      </div>
+    </div>
+    
+    <div id="registerForm" class="auth-form" style="display: none;">
+      <div class="form-group">
+        <label for="registerName">Имя</label>
+        <input type="text" id="registerName" placeholder="Введите ваше имя">
+      </div>
+      <div class="form-group">
+        <label for="registerEmail">Email</label>
+        <input type="email" id="registerEmail" placeholder="Введите ваш email">
+      </div>
+      <div class="form-group">
+        <label for="registerPassword">Пароль</label>
+        <input type="password" id="registerPassword" placeholder="Создайте пароль">
+      </div>
+      <button id="registerButton" class="auth-btn">Зарегистрироваться</button>
+      
+      <div class="auth-toggle">
+        <button id="showLoginForm">Уже есть аккаунт? Войти</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="appContainer" class="authenticated-only">
+    <div class="container">
+      <div class="action-bar">
+        <div class="status-indicator">
+          <span id="statusDot" class="status-dot online"></span>
+          <span id="statusText">Соединение с базой данных</span>
+        </div>
+        <div class="right-actions">
+          <button class="toggle-form-btn" id="toggleFormBtn">
+            <i class="fas fa-plus"></i>
+            <span>Новая глава</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="chapter-form" id="chapterForm">
+        <div class="form-header">
+          <h2 id="formTitle">Создать новую главу</h2>
+        </div>
+        <div class="form-group">
+          <label for="chapterTitle">Название главы</label>
+          <input type="text" id="chapterTitle" placeholder="Введите название главы" required>
+        </div>
+        <div class="form-group">
+          <label for="chapterContent">Содержание главы</label>
+          <textarea id="chapterContent" placeholder="Начните писать вашу историю..." required></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-secondary" id="cancelBtn">Отмена</button>
+          <button class="btn btn-primary" id="saveBtn">Сохранить</button>
+        </div>
+      </div>
+
+      <div class="chapter-grid" id="chapterGrid"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="chapterModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle"></h2>
+        <button class="close-btn" id="closeModalBtn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="modalContent"></p>
+      </div>
+    </div>
+  </div>
+
+     <div class="loader" id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="toast-icon" id="toastIcon"></i>
+        <span class="toast-message" id="toastMessage"></span>
+    </div>
+
+    <script>
+        // Firebase Configuration
+       const firebaseConfig = {
+  apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
+  authDomain: "misha-and-anna-48e4c.firebaseapp.com",
+  databaseURL: "https://misha-and-anna-48e4c-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "misha-and-anna-48e4c",
+  storageBucket: "misha-and-anna-48e4c.firebasestorage.app",
+  messagingSenderId: "822036073579",
+  appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
+  measurementId: "G-XR86X6PXMX"
+};
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        // DOM Elements
+        const chapterForm = document.getElementById('chapterForm');
+        const toggleFormBtn = document.getElementById('toggleFormBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const chapterGrid = document.getElementById('chapterGrid');
+        const chapterModal = document.getElementById('chapterModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+        const formTitle = document.getElementById('formTitle');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const themeToggle = document.getElementById('themeToggle');
+        const loader = document.getElementById('loader');
+        const toast = document.getElementById('toast');
+        const toastIcon = document.getElementById('toastIcon');
+        const toastMessage = document.getElementById('toastMessage');
+
+        // Auth Elements
+        const authContainer = document.getElementById('authContainer');
+        const appContainer = document.getElementById('appContainer');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const loginButton = document.getElementById('loginButton');
+        const registerButton = document.getElementById('registerButton');
+        const showRegisterForm = document.getElementById('showRegisterForm');
+        const showLoginForm = document.getElementById('showLoginForm');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        let editingChapterId = null;
+
+        // Theme Toggle
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            themeToggle.innerHTML = document.body.classList.contains('light-theme') 
+                ? '<i class="fas fa-sun"></i>' 
+                : '<i class="fas fa-moon"></i>';
+        });
+
+        // Authentication
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // User is signed in
+                authContainer.classList.remove('unauthenticated-only');
+                appContainer.classList.add('authenticated-only');
+                document.querySelector('.user-profile').classList.add('authenticated-only');
+                
+                userName.textContent = user.displayName || 'Пользователь';
+                userEmail.textContent = user.email;
+                userAvatar.textContent = user.displayName ? user.displayName[0].toUpperCase() : 'U';
+                
+                loadChapters();
+            } else {
+                // No user is signed in
+                authContainer.classList.add('unauthenticated-only');
+                appContainer.classList.remove('authenticated-only');
+                document.querySelector('.user-profile').classList.remove('authenticated-only');
+            }
+        });
+
+        // Login
+        loginButton.addEventListener('click', () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            showLoader();
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    showToast('Успешный вход!', 'success');
+                })
+                .catch((error) => {
+                    showToast(`Ошибка входа: ${error.message}`, 'error');
+                })
+                .finally(() => {
+                    hideLoader();
+                });
+        });
+
+        // Register
+        registerButton.addEventListener('click', () => {
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            showLoader();
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    return userCredential.user.updateProfile({
+                        displayName: name
+                    });
+                })
+                .then(() => {
+                    showToast('Регистрация успешна!', 'success');
+                })
+                .catch((error) => {
+                    showToast(`Ошибка регистрации: ${error.message}`, 'error');
+                })
+                .finally(() => {
+                    hideLoader();
+                });
+        });
+
+        // Toggle Auth Forms
+        showRegisterForm.addEventListener('click', () => {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+        });
+
+        showLoginForm.addEventListener('click', () => {
+            registerForm.style.display = 'none';
+            loginForm.style.display = 'block';
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            showLoader();
+            auth.signOut()
+                .then(() => {
+                    showToast('Вы успешно вышли', 'success');
+                })
+                .catch((error) => {
+                    showToast(`Ошибка выхода: ${error.message}`, 'error');
+                })
+                .finally(() => {
+                    hideLoader();
+                });
+        });
+
+        // Form Toggle
+        toggleFormBtn.addEventListener('click', () => {
+            chapterForm.style.display = chapterForm.style.display === 'block' ? 'none' : 'block';
+            if (chapterForm.style.display === 'block') {
+                resetForm();
+            }
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            chapterForm.style.display = 'none';
+            resetForm();
+        });
+
+        // Save Chapter
+        saveBtn.addEventListener('click', () => {
+            const title = document.getElementById('chapterTitle').value;
+            const content = document.getElementById('chapterContent').value;
+            const user = auth.currentUser;
+
+            if (!title || !content) {
+                showToast('Пожалуйста, заполните все поля', 'warning');
+                return;
+            }
+
+            showLoader();
+            const chapterData = {
+                title,
+                content,
+                userId: user.uid,
+                createdAt: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            if (editingChapterId) {
+                // Update existing chapter
+                database.ref(`chapters/${editingChapterId}`).update(chapterData)
+                    .then(() => {
+                        showToast('Глава обновлена!', 'success');
+                        resetForm();
+                        chapterForm.style.display = 'none';
+                    })
+                    .catch((error) => {
+                        showToast(`Ошибка: ${error.message}`, 'error');
+                    })
+                    .finally(() => {
+                        hideLoader();
+                    });
+            } else {
+                // Create new chapter
+                database.ref('chapters').push(chapterData)
+                    .then(() => {
+                        showToast('Глава сохранена!', 'success');
+                        resetForm();
+                        chapterForm.style.display = 'none';
+                    })
+                    .catch((error) => {
+                        showToast(`Ошибка: ${error.message}`, 'error');
+                    })
+                    .finally(() => {
+                        hideLoader();
+                    });
+            }
+        });
+
+        // Load Chapters
+        function loadChapters() {
+            const user = auth.currentUser;
+            statusDot.classList.add('syncing');
+            statusText.textContent = 'Синхронизация данных...';
+
+            database.ref('chapters').orderByChild('userId').equalTo(user.uid).on('value', (snapshot) => {
+                chapterGrid.innerHTML = '';
+                const chapters = snapshot.val();
+
+                if (!chapters) {
+                    chapterGrid.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-book-open"></i>
+                            <h3>Пока нет глав</h3>
+                            <p>Нажмите "Новая глава", чтобы начать писать вашу историю!</p>
+                        </div>
+                    `;
+                    updateStatus('online', 'Соединение с базой данных');
+                    return;
+                }
+
+                Object.entries(chapters).forEach(([id, chapter]) => {
+                    const card = document.createElement('div');
+                    card.className = 'chapter-card';
+                    card.innerHTML = `
+                        <div class="card-content">
+                            <h3>${chapter.title}</h3>
+                            <p>${chapter.content.substring(0, 150)}...</p>
+                        </div>
+                        <div class="card-footer">
+                            <button class="card-btn view-btn" data-id="${id}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="card-btn edit-btn" data-id="${id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="card-btn delete-btn" data-id="${id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    chapterGrid.appendChild(card);
+                });
+
+                // Add event listeners for card buttons
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    btn.addEventListener('click', () => viewChapter(btn.dataset.id));
+                });
+
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', () => editChapter(btn.dataset.id));
+                });
+
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', () => deleteChapter(btn.dataset.id));
+                });
+
+                updateStatus('online', 'Соединение с базой данных');
+            }, (error) => {
+                updateStatus('offline', 'Ошибка соединения');
+                showToast(`Ошибка загрузки: ${error.message}`, 'error');
+            });
+        }
+
+        // View Chapter
+        function viewChapter(id) {
+            database.ref(`chapters/${id}`).once('value').then((snapshot) => {
+                const chapter = snapshot.val();
+                modalTitle.textContent = chapter.title;
+                modalContent.textContent = chapter.content;
+                chapterModal.style.display = 'flex';
+            });
+        }
+
+        // Edit Chapter
+        function editChapter(id) {
+            database.ref(`chapters/${id}`).once('value').then((snapshot) => {
+                const chapter = snapshot.val();
+                document.getElementById('chapterTitle').value = chapter.title;
+                document.getElementById('chapterContent').value = chapter.content;
+                formTitle.textContent = 'Редактировать главу';
+                editingChapterId = id;
+                chapterForm.style.display = 'block';
+            });
+        }
+
+        // Delete Chapter
+        function deleteChapter(id) {
+            if (confirm('Вы уверены, что хотите удалить эту главу?')) {
+                showLoader();
+                database.ref(`chapters/${id}`).remove()
+                    .then(() => {
+                        showToast('Глава удалена', 'success');
+                    })
+                    .catch((error) => {
+                        showToast(`Ошибка: ${error.message}`, 'error');
+                    })
+                    .finally(() => {
+                        hideLoader();
+                    });
+            }
+        }
+
+        // Reset Form
+        function resetForm() {
+            document.getElementById('chapterTitle').value = '';
+            document.getElementById('chapterContent').value = '';
+            formTitle.textContent = 'Создать новую главу';
+            editingChapterId = null;
+        }
+
+        // Status Update
+        function updateStatus(status, message) {
+            statusDot.className = `status-dot ${status}`;
+            statusText.textContent = message;
+        }
+
+        // Loader
+        function showLoader() {
+            loader.style.display = 'flex';
+        }
+
+        function hideLoader() {
+            loader.style.display = 'none';
+        }
+
+        // Toast Notification
+        function showToast(message, type) {
+            toastMessage.textContent = message;
+            toast.className = `toast ${type}`;
+            toastIcon.className = `toast-icon fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}`;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close Modal
+        closeModalBtn.addEventListener('click', () => {
+            chapterModal.style.display = 'none';
+        });
+
+        // Close modal on outside click
+        chapterModal.addEventListener('click', (e) => {
+            if (e.target === chapterModal) {
+                chapterModal.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
