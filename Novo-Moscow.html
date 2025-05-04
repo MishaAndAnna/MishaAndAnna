@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Искры Вечности - киберпанк-фэнтези роман с элементами славянской мифологии. Читайте 18 глав эпического приключения Михаила, Анюты, Гордея, Любавы и Яромира в Ладово.">
+  <meta name="keywords" content="Искры Вечности, киберпанк, фэнтези, славянская мифология, роман, чтение онлайн">
+  <meta name="author" content="Автор Искр Вечности">
+  <title>Искры Вечности - Читать онлайн</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono&family=Special+Elite&display=swap');
+
+    body {
+      background: linear-gradient(135deg, #0d0b1e 0%, #1e1b3a 50%, #1a1733 100%);
+      color: #e0e0e0;
+      font-family: 'Roboto Mono', monospace;
+      overflow-x: hidden;
+      position: relative;
+      margin: 0;
+    }
+
+    /* Эфирный фон с анимацией звёзд и параллакса */
+    .ether-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+      background: transparent;
+    }
+
+    .ether-bg::before,
+    .ether-bg::after {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #0ff;
+      box-shadow: 0 0 8px #0ff, 0 0 15px #0ff;
+      animation: twinkle 2.5s infinite, drift 20s linear infinite;
+      opacity: 0.6;
+    }
+
+    .ether-bg::after {
+      background: #ff007f;
+      box-shadow: 0 0 8px #ff007f, 0 0 15px #ff007f;
+      animation: twinkle 3.5s infinite, drift 25s linear infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+
+    @keyframes drift {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(100vw, 100vh); }
+    }
+
+    /* Неоновый текст с эффектом сканирования */
+    .neon-text {
+      text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff;
+      color: #0ff;
+      position: relative;
+      animation: scan 3s infinite alternate;
+    }
+
+    .neon-text::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(transparent, rgba(0, 255, 255, 0.2), transparent);
+      animation: scan-line 1.5s infinite;
+    }
+
+    @keyframes scan {
+      0% { text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff; }
+      100% { text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff; }
+    }
+
+    @keyframes scan-line {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
+
+    /* Рунический текст */
+    .rune-text {
+      font-family: 'Orbitron', sans-serif;
+      color: #ff007f;
+      text-shadow: 0 0 5px #ff007f, 0 0 10px #ff007f;
+      position: relative;
+    }
+
+    .rune-text::before {
+      content: 'ᚱ';
+      position: absolute;
+      left: -20px;
+      color: #ff007f;
+      opacity: 0.5;
+      font-size: 1.2rem;
+    }
+
+    /* Голографические карточки с 3D-эффектом */
+    .holo-card {
+      background: linear-gradient(45deg, rgba(0, 255, 255, 0.15), rgba(255, 0, 127, 0.15));
+      border: 2px solid rgba(0, 255, 255, 0.4);
+      transition: transform 0.4s, box-shadow 0.4s;
+      position: relative;
+      overflow: hidden;
+      transform: perspective(600px) rotateX(0deg) rotateY(0deg);
+    }
+
+    .holo-card:hover {
+      transform: perspective(600px) rotateX(5deg) rotateY(5deg);
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.6), 0 0 40px rgba(255, 0, 127, 0.4);
+    }
+
+    .holo-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 255, 255, 0.3), transparent);
+      transform: rotate(45deg);
+      transition: all 0.6s;
+    }
+
+    .holo-card:hover::before {
+      top: -20%;
+      left: -20%;
+    }
+
+    /* Кнопки с голографическим эффектом */
+    .neon-button {
+      background: linear-gradient(45deg, #0ff, #ff007f);
+      border: none;
+      color: #000;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: bold;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .neon-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: all 0.4s;
+      z-index: -1;
+    }
+
+    .neon-button:hover::before {
+      left: 100%;
+    }
+
+    .neon-button:hover {
+      box-shadow: 0 0 20px #0ff, 0 0 30px #ff007f;
+      transform: scale(1.05);
+    }
+
+    /* Меню-гамбургер для мобильных */
+    .hamburger {
+      display: none;
+      cursor: pointer;
+      z-index: 50;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 30px;
+      height: 4px;
+      background: #0ff;
+      margin: 6px 0;
+      transition: all 0.3s;
+      box-shadow: 0 0 5px #0ff;
+    }
+
+    .hamburger.active span:nth-child(1) {
+      transform: rotate(45deg) translate(8px, 8px);
+    }
+
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(8px, -8px);
+    }
+
+    @media (max-width: 768px) {
+      .hamburger {
+        display: block;
+      }
+      .sidebar {
+        transform: translateX(100%);
+        transition: transform 0.3s;
+        position: fixed;
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: 250px;
+        z-index: 40;
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      .neon-text {
+        font-size: 2.5rem;
+      }
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <div class="ether-bg"></div>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const chapters = [
+      { id: 1, title: "Глава 1: Падение в Ладово", summary: "Михаил и Анюта попадают в Ладово, где сталкиваются с лесом и тайной звёзд." },
+      { id: 2, title: "Глава 2: Шёпот мха", summary: "Герои встречают Гордея и узнают о Мокоши." },
+      { id: 3, title: "Глава 3: Код Светоча", summary: "Анюта раскрывает связь звёзд с кодом Светоча." },
+      { id: 4, title: "Глава 4: Тени леса", summary: "Команда сталкивается с первыми тенями." },
+      { id: 5, title: "Глава 5: Песнь Любавы", summary: "Любава присоединяется, её песнь отгоняет тени." },
+      { id: 6, title: "Глава 6: Хранитель звёзд", summary: "Яромир рассказывает о своём прошлом." },
+      { id: 7, title: "Глава 7: Эфирный поток", summary: "Герои ищут источник звёздного потока." },
+      { id: 8, title: "Глава 8: Руны Мокоши", summary: "Анюта расшифровывает древние руны." },
+      { id: 9, title: "Глава 9: Гнев Перуна", summary: "Команда сталкивается с молниями Перуна." },
+      { id: 10, title: "Глава 10: Сердце леса", summary: "Герои находят сердце Ладово." },
+      { id: 11, title: "Глава 11: Светоч пробуждается", summary: "Код Светоча активирует новую угрозу." },
+      { id: 12, title: "Глава 12: Танец теней", summary: "Тени становятся сильнее, команда объединяется." },
+      { id: 13, title: "Глава 13: Путь Гордея", summary: "Гордей обретает цель." },
+      { id: 14, title: "Глава 14: Глас Велеса", summary: "Велес испытывает героев." },
+      { id: 15, title: "Глава 15: Эхо Мокоши", summary: "Герои останавливают эхо в роще." },
+      { id: 16, title: "Глава 16: Небесная твердь", summary: "Команда уравновешивает звёздный поток." },
+      { id: 17, title: "Глава 17: Подземная твердь", summary: "Герои запечатывают разрыв Велеса." },
+      { id: 18, title: "Глава 18: Огненная роща", summary: "Герои тушат звёздное пламя Мокоши." },
+    ];
+
+    const App = () => {
+      const [currentChapter, setCurrentChapter] = React.useState(null);
+      const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+
+      const handleChapterClick = (chapter) => {
+        setCurrentChapter(chapter);
+        setIsSidebarOpen(false);
+      };
+
+      const handleBackToIndex = () => {
+        setCurrentChapter(null);
+        setIsSidebarOpen(false);
+      };
+
+      const handleNextChapter = () => {
+        const nextId = currentChapter.id < chapters.length ? currentChapter.id + 1 : 1;
+        setCurrentChapter(chapters.find((ch) => ch.id === nextId));
+      };
+
+      const handlePrevChapter = () => {
+        const prevId = currentChapter.id > 1 ? currentChapter.id - 1 : chapters.length;
+        setCurrentChapter(chapters.find((ch) => ch.id === prevId));
+      };
+
+      const handleSubscribe = (e) => {
+        e.preventDefault();
+        alert("Спасибо за подписку! Вы будете получать уведомления о новых главах.");
+      };
+
+      const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+      };
+
+      return (
+        <div className="container mx-auto p-4 md:p-8 relative">
+          <header className="text-center py-12 relative">
+            <div className="hamburger fixed top-4 right-4 md:hidden" onClick={toggleSidebar}>
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold neon-text mb-4">Искры Вечности</h1>
+            <p className="text-lg md:text-xl rune-text mb-2">Киберпанк-фэнтези с элементами славянской мифологии</p>
+            <p className="text-md max-w-2xl mx-auto">Погрузитесь в эпическое приключение Михаила, Анюты, Гордея, Любавы и Яромира в Ладово, где звёзды хранят тайны богов и код Светоча.</p>
+            <svg className="mt-4 mx-auto w-24 h-6" viewBox="0 0 100 20">
+              <path d="M10 10 L20 15 L30 10 L40 15 L50 10 L60 15 L70 10 L80 15 L90 10" stroke="#ff007f" strokeWidth="2" fill="none" />
+            </svg>
+          </header>
+
+          {currentChapter ? (
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="md:w-3/4 bg-gray-900 bg-opacity-90 p-8 rounded-lg shadow-lg border border-cyan-500">
+                <h2 className="text-4xl font-bold rune-text mb-6">{currentChapter.title}</h2>
+                <p className="text-lg mb-6 italic text-gray-400">{currentChapter.summary}</p>
+                <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
+                  <p>[Здесь будет текст главы {currentChapter.id}. Замените этот текст полным содержимым главы.]</p>
+                  <p>Пример: Рассвет над Ладово пылает, как расплавленный металл, и воздух дрожит, будто перегретый токами...</p>
+                </div>
+                <div className="flex gap-4 mt-8">
+                  <button
+                    onClick={handlePrevChapter}
+                    className="neon-button py-2 px-6 rounded-lg"
+                  >
+                    Предыдущая
+                  </button>
+                  <button
+                    onClick={handleBackToIndex}
+                    className="neon-button py-2 px-6 rounded-lg"
+                  >
+                    К главам
+                  </button>
+                  <button
+                    onClick={handleNextChapter}
+                    className="neon-button py-2 px-6 rounded-lg"
+                  >
+                    Следующая
+                  </button>
+                </div>
+              </div>
+              <aside className={`sidebar md:w-1/4 bg-gray-800 bg-opacity-90 p-6 rounded-lg shadow-lg border border-pink-500 ${isSidebarOpen ? 'active' : ''}`}>
+                <h3 className="text-xl rune-text mb-4">Навигация</h3>
+                <ul className="space-y-2">
+                  {chapters.map((chapter) => (
+                    <li key={chapter.id}>
+                      <button
+                        onClick={() => handleChapterClick(chapter)}
+                        className={`w-full text-left py-2 px-4 rounded hover:bg-cyan-500 hover:text-black transition ${
+                          currentChapter.id === chapter.id ? 'bg-cyan-500 text-black' : ''
+                        }`}
+                      >
+                        {chapter.title}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </aside>
+            </div>
+          ) : (
+            <div>
+              <section className="mb-12">
+                <h2 className="text-3xl font-bold rune-text mb-6 text-center">Главы</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {chapters.map((chapter) => (
+                    <div
+                      key={chapter.id}
+                      onClick={() => handleChapterClick(chapter)}
+                      className="holo-card p-6 rounded-lg cursor-pointer"
+                    >
+                      <h3 className="text-2xl font-bold neon-text mb-2">{chapter.title}</h3>
+                      <p className="text-gray-300">{chapter.summary}</p>
+                      <svg className="mt-4 w-12 h-4" viewBox="0 0 50 10">
+                        <path d="M5 5 L10 7 L15 5 L20 7 L25 5 L30 7 L35 5 L40 7 L45 5" stroke="#0ff" strokeWidth="1" fill="none" />
+                      </svg>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="text-center py-12 bg-gray-900 bg-opacity-90 rounded-lg border border-cyan-500">
+                <h2 className="text-3xl font-bold rune-text mb-6">Подпишитесь на обновления</h2>
+                <form onSubmit={handleSubscribe} className="flex flex-col items-center max-w-md mx-auto">
+                  <input
+                    type="email"
+                    placeholder="Ваш email"
+                    className="w-full p-3 mb-4 rounded bg-gray-800 text-white border border-cyan-500 focus:outline-none focus:border-pink-500 focus:shadow-[0_0_10px_#ff007f]"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="neon-button py-3 px-6 rounded-lg"
+                  >
+                    Подписаться
+                  </button>
+                </form>
+                <svg className="mt-4 mx-auto w-24 h-6" viewBox="0 0 100 20">
+                  <path d="M10 10 L20 15 L30 10 L40 15 L50 10 L60 15 L70 10 L80 15 L90 10" stroke="#ff007f" strokeWidth="2" fill="none" />
+                </svg>
+              </section>
+            </div>
+          )}
+
+          <footer className="mt-12 text-center py-8">
+            <p className="text-gray-400">© 2025 Искры Вечности. Все права защищены.</p>
+            <p className="rune-text mt-2">Звёзды всегда найдут нас.</p>
+            <svg className="mt-4 mx-auto w-16 h-4" viewBox="0 0 50 10">
+              <path d="M5 5 L10 7 L15 5 L20 7 L25 5 L30 7 L35 5 L40 7 L45 5" stroke="#0ff" strokeWidth="1" fill="none" />
+            </svg>
+          </footer>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
