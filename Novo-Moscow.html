@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-app-compat.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-database-compat.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-storage-compat.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js"></script>
   <style>
     :root {
@@ -39,9 +38,6 @@
     body {
       font-family: 'Space Grotesk', 'Montserrat', sans-serif;
       background-color: var(--background);
-      background-image: 
-        radial-gradient(circle at 20% 30%, rgba(130, 87, 230, 0.15) 0%, transparent 40%),
-        radial-gradient(circle at 80% 70%, rgba(255, 94, 94, 0.1) 0%, transparent 40%);
       color: var(--text);
       min-height: 100vh;
       overflow-x: hidden;
@@ -52,8 +48,9 @@
       background: rgba(12, 14, 20, 0.8);
       backdrop-filter: blur(12px);
       padding: var(--spacing-lg) var(--spacing-xl);
-      position: sticky;
+      position: fixed;
       top: 0;
+      width: 100%;
       z-index: 100;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       display: flex;
@@ -92,29 +89,101 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: var(--spacing-xl);
+      display: none;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .container.visible {
+      display: block;
+      opacity: 1;
     }
 
     .book-cover-section {
-      background: var(--surface);
-      padding: var(--spacing-lg);
-      border-radius: var(--border-radius);
-      margin-bottom: var(--spacing-xl);
-      box-shadow: var(--shadow-md);
+      position: relative;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       text-align: center;
+      background: var(--background);
+      overflow: hidden;
+    }
+
+    .book-cover-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                  url('https://raw.githubusercontent.com/MishaAndAnna/MishaAndAnna/main/Book_cover.png') no-repeat center center/cover;
+      background-size: cover;
+      background-position: center;
+      z-index: -1;
+      animation: zoom 20s infinite alternate;
+    }
+
+    @keyframes zoom {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
     }
 
     .book-cover-section img {
-      max-width: 200px;
-      max-height: 300px;
+      max-width: 500px;
+      max-height: 750px;
+      width: 40vw;
+      height: auto;
       object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: var(--spacing-md);
-      box-shadow: var(--shadow-sm);
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg), 0 0 20px rgba(130, 87, 230, 0.3);
+      margin-bottom: var(--spacing-xl);
+      z-index: 1;
+      transition: transform 0.3s ease;
+    }
+
+    .book-cover-section img:hover {
+      transform: scale(1.02);
     }
 
     .book-cover-section p {
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 1.2rem;
+      max-width: 600px;
+      z-index: 1;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .explore-btn {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: var(--text);
+      border: none;
+      padding: var(--spacing-md) var(--spacing-xl);
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-md), 0 0 10px rgba(130, 87, 230, 0.5);
+      z-index: 1;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .explore-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg), 0 0 20px rgba(130, 87, 230, 0.7);
+      background: linear-gradient(135deg, var(--secondary), var(--primary));
+    }
+
+    .explore-btn i {
+      font-size: 1.2rem;
     }
 
     .action-bar {
@@ -237,9 +306,7 @@
     }
 
     .chapter-form input[type="text"],
-    .chapter-form input[type="url"],
-    .chapter-form textarea,
-    .chapter-form input[type="file"] {
+    .chapter-form textarea {
       width: 100%;
       padding: var(--spacing-md);
       background: var(--surface-light);
@@ -252,9 +319,7 @@
     }
 
     .chapter-form input:focus,
-    .chapter-form textarea:focus,
-    .chapter-form input[type="file"]:focus,
-    .chapter-form input[type="url"]:focus {
+    .chapter-form textarea:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 2px rgba(130, 87, 230, 0.2);
@@ -263,11 +328,6 @@
     .chapter-form textarea {
       min-height: 250px;
       resize: vertical;
-    }
-
-    .chapter-form input[type="file"],
-    .chapter-form input[type="url"] {
-      padding: var(--spacing-sm);
     }
 
     .form-actions {
@@ -601,12 +661,15 @@
     </div>
   </header>
 
-  <div class="container">
-    <div class="book-cover-section" id="bookCoverSection">
-      <img id="bookCoverImage" src="" alt="Обложка книги" style="display: none;">
-      <p id="bookCoverPlaceholder">Обложка книги не загружена</p>
-    </div>
+  <div class="book-cover-section" id="bookCoverSection">
+    <img id="bookCoverImage" src="https://raw.githubusercontent.com/MishaAndAnna/MishaAndAnna/main/Book_cover.png" alt="Обложка книги">
+    <p>Погрузитесь в мир киберпанк-фэнтези, где неон и магия сливаются воедино!</p>
+    <button class="explore-btn" id="exploreChaptersBtn">
+      <i class="fas fa-book-open"></i> Перейти к главам
+    </button>
+  </div>
 
+  <div class="container" id="chaptersSection">
     <div class="action-bar">
       <div class="status-indicator">
         <span class="status-dot offline" id="statusDot"></span>
@@ -628,14 +691,6 @@
       <div class="form-group">
         <label for="chapterContent">Содержание</label>
         <textarea id="chapterContent" required></textarea>
-      </div>
-      <div class="form-group">
-        <label for="bookCoverFile">Обложка книги (файл, опционально)</label>
-        <input type="file" id="bookCoverFile" accept="image/*">
-      </div>
-      <div class="form-group">
-        <label for="bookCoverUrl">Обложка книги (URL, опционально)</label>
-        <input type="url" id="bookCoverUrl" placeholder="https://raw.githubusercontent.com/...">
       </div>
       <div class="form-actions">
         <button class="btn btn-secondary" id="cancelBtn">Отмена</button>
@@ -680,15 +735,12 @@
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    const storage = firebase.storage();
 
     // DOM Elements
     const toggleFormBtn = document.getElementById('toggleFormBtn');
     const chapterForm = document.getElementById('chapterForm');
     const chapterTitle = document.getElementById('chapterTitle');
     const chapterContent = document.getElementById('chapterContent');
-    const bookCoverFile = document.getElementById('bookCoverFile');
-    const bookCoverUrl = document.getElementById('bookCoverUrl');
     const saveBtn = document.getElementById('saveBtn');
     const cancelBtn = document.getElementById('cancelBtn');
     const formTitle = document.getElementById('formTitle');
@@ -701,9 +753,9 @@
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
     const loader = document.getElementById('loader');
-    const bookCoverSection = document.getElementById('bookCoverSection');
     const bookCoverImage = document.getElementById('bookCoverImage');
-    const bookCoverPlaceholder = document.getElementById('bookCoverPlaceholder');
+    const exploreChaptersBtn = document.getElementById('exploreChaptersBtn');
+    const chaptersSection = document.getElementById('chaptersSection');
 
     // State
     let isEditing = false;
@@ -743,23 +795,16 @@
 
     // Load Book Cover
     function loadBookCover() {
-      database.ref('bookCover').once('value')
-        .then((snapshot) => {
-          const coverUrl = snapshot.val();
-          if (coverUrl) {
-            bookCoverImage.src = coverUrl;
-            bookCoverImage.style.display = 'block';
-            bookCoverPlaceholder.style.display = 'none';
-          } else {
-            bookCoverImage.style.display = 'none';
-            bookCoverPlaceholder.style.display = 'block';
-          }
-        })
-        .catch((error) => {
-          console.error('Error loading book cover:', error);
-          showToast('Ошибка загрузки обложки', 'error');
-        });
+      const coverUrl = 'https://raw.githubusercontent.com/MishaAndAnna/MishaAndAnna/main/Book_cover.png';
+      bookCoverImage.src = coverUrl;
+      bookCoverImage.style.display = 'block';
     }
+
+    // Show Chapters
+    exploreChaptersBtn.addEventListener('click', () => {
+      chaptersSection.classList.add('visible');
+      chaptersSection.scrollIntoView({ behavior: 'smooth' });
+    });
 
     // Chapter Form Handling
     toggleFormBtn.addEventListener('click', () => {
@@ -777,16 +822,9 @@
     saveBtn.addEventListener('click', async () => {
       const title = chapterTitle.value.trim();
       const content = chapterContent.value.trim();
-      const coverFile = bookCoverFile.files[0];
-      const coverUrlInput = bookCoverUrl.value.trim();
 
       if (!title || !content) {
         showToast('Заполните все поля', 'error');
-        return;
-      }
-
-      if (coverFile && coverUrlInput) {
-        showToast('Выберите либо файл, либо URL для обложки, но не оба', 'error');
         return;
       }
 
@@ -798,28 +836,6 @@
       };
 
       try {
-        // Handle cover image
-        let coverUrl = null;
-        if (coverFile) {
-          const storageRef = storage.ref(`bookCovers/cover_${Date.now()}`);
-          const snapshot = await storageRef.put(coverFile);
-          coverUrl = await snapshot.ref.getDownloadURL();
-        } else if (coverUrlInput) {
-          // Validate URL
-          try {
-            new URL(coverUrlInput);
-            coverUrl = coverUrlInput;
-          } catch {
-            showToast('Недействительный URL обложки', 'error');
-            hideLoader();
-            return;
-          }
-        }
-
-        if (coverUrl) {
-          await database.ref('bookCover').set(coverUrl);
-        }
-
         // Save or update chapter
         if (isEditing) {
           await database.ref(`chapters/${editingChapterId}`).update(chapterData);
@@ -831,7 +847,6 @@
 
         chapterForm.style.display = 'none';
         resetForm();
-        if (coverUrl) loadBookCover();
         hideLoader();
       } catch (error) {
         showToast(`Ошибка: ${error.message}`, 'error');
@@ -842,8 +857,6 @@
     function resetForm() {
       chapterTitle.value = '';
       chapterContent.value = '';
-      bookCoverFile.value = '';
-      bookCoverUrl.value = '';
       formTitle.textContent = 'Новая глава';
       isEditing = false;
       editingChapterId = null;
