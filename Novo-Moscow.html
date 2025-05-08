@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-app-compat.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-database-compat.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-storage-compat.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js"></script>
   <style>
     :root {
@@ -91,6 +92,29 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: var(--spacing-xl);
+    }
+
+    .book-cover-section {
+      background: var(--surface);
+      padding: var(--spacing-lg);
+      border-radius: var(--border-radius);
+      margin-bottom: var(--spacing-xl);
+      box-shadow: var(--shadow-md);
+      text-align: center;
+    }
+
+    .book-cover-section img {
+      max-width: 200px;
+      max-height: 300px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: var(--spacing-md);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .book-cover-section p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
     }
 
     .action-bar {
@@ -212,8 +236,9 @@
       font-size: 0.9rem;
     }
 
-    .chapter-form input,
-    .chapter-form textarea {
+    .chapter-form input[type="text"],
+    .chapter-form textarea,
+    .chapter-form input[type="file"] {
       width: 100%;
       padding: var(--spacing-md);
       background: var(--surface-light);
@@ -226,7 +251,8 @@
     }
 
     .chapter-form input:focus,
-    .chapter-form textarea:focus {
+    .chapter-form textarea:focus,
+    .chapter-form input[type="file"]:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 2px rgba(130, 87, 230, 0.2);
@@ -235,6 +261,10 @@
     .chapter-form textarea {
       min-height: 250px;
       resize: vertical;
+    }
+
+    .chapter-form input[type="file"] {
+      padding: var(--spacing-sm);
     }
 
     .form-actions {
@@ -569,6 +599,11 @@
   </header>
 
   <div class="container">
+    <div class="book-cover-section" id="bookCoverSection">
+      <img id="bookCoverImage" src="" alt="Обложка книги" style="display: none;">
+      <p id="bookCoverPlaceholder">Обложка книги не загружена</p>
+    </div>
+
     <div class="action-bar">
       <div class="status-indicator">
         <span class="status-dot offline" id="statusDot"></span>
@@ -590,6 +625,10 @@
       <div class="form-group">
         <label for="chapterContent">Содержание</label>
         <textarea id="chapterContent" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="bookCover">Обложка книги (опционально)</label>
+        <input type="file" id="bookCover" accept="image/*">
       </div>
       <div class="form-actions">
         <button class="btn btn-secondary" id="cancelBtn">Отмена</button>
@@ -634,12 +673,14 @@
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
+    const storage = firebase.storage();
 
     // DOM Elements
     const toggleFormBtn = document.getElementById('toggleFormBtn');
     const chapterForm = document.getElementById('chapterForm');
     const chapterTitle = document.getElementById('chapterTitle');
     const chapterContent = document.getElementById('chapterContent');
+    const bookCover = document.getElementById('bookCover');
     const saveBtn = document.getElementById('saveBtn');
     const cancelBtn = document.getElementById('cancelBtn');
     const formTitle = document.getElementById('formTitle');
@@ -652,6 +693,9 @@
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
     const loader = document.getElementById('loader');
+    const bookCoverSection = document.getElementById('bookCoverSection');
+    const bookCoverImage = document.getElementById('bookCoverImage');
+    const bookCoverPlaceholder = document.getElementById('bookCoverPlaceholder');
 
     // State
     let isEditing = false;
@@ -689,6 +733,26 @@
       return DOMPurify.sanitize(str);
     }
 
+    // Load Book Cover
+    function loadBookCover() {
+      database.ref('bookCover').once('value')
+        .then((snapshot) => {
+          const coverUrl = snapshot.val();
+          if (coverUrl) {
+            bookCoverImage.src = coverUrl;
+            bookCoverImage.style.display = 'block';
+            bookCoverPlaceholder.style.display = 'none';
+          } else {
+            bookCoverImage.style.display = 'none';
+            bookCoverPlaceholder.style.display = 'block';
+          }
+        })
+        .catch((error) => {
+          console.error('Error loading book cover:', error);
+          showToast('Ошибка загрузки обложки', 'error');
+        });
+    }
+
     // Chapter Form Handling
     toggleFormBtn.addEventListener('click', () => {
       chapterForm.style.display = chapterForm.style.display === 'block' ? 'none' : 'block';
@@ -702,9 +766,10 @@
       resetForm();
     });
 
-    saveBtn.addEventListener('click', () => {
+    saveBtn.addEventListener('click', async () => {
       const title = chapterTitle.value.trim();
       const content = chapterContent.value.trim();
+      const coverFile = bookCover.files[0];
 
       if (!title || !content) {
         showToast('Заполните все поля', 'error');
@@ -718,36 +783,39 @@
         timestamp: Date.now()
       };
 
-      if (isEditing) {
-        database.ref(`chapters/${editingChapterId}`).update(chapterData)
-          .then(() => {
-            showToast('Глава обновлена!', 'success');
-            chapterForm.style.display = 'none';
-            resetForm();
-            hideLoader();
-          })
-          .catch((error) => {
-            showToast(`Ошибка обновления: ${error.message}`, 'error');
-            hideLoader();
-          });
-      } else {
-        database.ref('chapters').push(chapterData)
-          .then(() => {
-            showToast('Глава сохранена!', 'success');
-            chapterForm.style.display = 'none';
-            resetForm();
-            hideLoader();
-          })
-          .catch((error) => {
-            showToast(`Ошибка сохранения: ${error.message}`, 'error');
-            hideLoader();
-          });
+      try {
+        // Handle cover image upload
+        let coverUrl = null;
+        if (coverFile) {
+          const storageRef = storage.ref(`bookCovers/cover_${Date.now()}`);
+          const snapshot = await storageRef.put(coverFile);
+          coverUrl = await snapshot.ref.getDownloadURL();
+          await database.ref('bookCover').set(coverUrl);
+        }
+
+        // Save or update chapter
+        if (isEditing) {
+          await database.ref(`chapters/${editingChapterId}`).update(chapterData);
+          showToast('Глава обновлена!', 'success');
+        } else {
+          await database.ref('chapters').push(chapterData);
+          showToast('Глава сохранена!', 'success');
+        }
+
+        chapterForm.style.display = 'none';
+        resetForm();
+        if (coverUrl) loadBookCover();
+        hideLoader();
+      } catch (error) {
+        showToast(`Ошибка: ${error.message}`, 'error');
+        hideLoader();
       }
     });
 
     function resetForm() {
       chapterTitle.value = '';
       chapterContent.value = '';
+      bookCover.value = '';
       formTitle.textContent = 'Новая глава';
       isEditing = false;
       editingChapterId = null;
@@ -906,6 +974,7 @@
     console.log('App initialized');
     updateStatus('online', 'Соединение с базой данных');
     loadChapters();
+    loadBookCover();
   </script>
 </body>
 </html>
