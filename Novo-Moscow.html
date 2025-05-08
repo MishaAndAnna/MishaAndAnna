@@ -237,6 +237,7 @@
     }
 
     .chapter-form input[type="text"],
+    .chapter-form input[type="url"],
     .chapter-form textarea,
     .chapter-form input[type="file"] {
       width: 100%;
@@ -252,7 +253,8 @@
 
     .chapter-form input:focus,
     .chapter-form textarea:focus,
-    .chapter-form input[type="file"]:focus {
+    .chapter-form input[type="file"]:focus,
+    .chapter-form input[type="url"]:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 2px rgba(130, 87, 230, 0.2);
@@ -263,7 +265,8 @@
       resize: vertical;
     }
 
-    .chapter-form input[type="file"] {
+    .chapter-form input[type="file"],
+    .chapter-form input[type="url"] {
       padding: var(--spacing-sm);
     }
 
@@ -627,8 +630,12 @@
         <textarea id="chapterContent" required></textarea>
       </div>
       <div class="form-group">
-        <label for="bookCover">Обложка книги (опционально)</label>
-        <input type="file" id="bookCover" accept="image/*">
+        <label for="bookCoverFile">Обложка книги (файл, опционально)</label>
+        <input type="file" id="bookCoverFile" accept="image/*">
+      </div>
+      <div class="form-group">
+        <label for="bookCoverUrl">Обложка книги (URL, опционально)</label>
+        <input type="url" id="bookCoverUrl" placeholder="https://raw.githubusercontent.com/...">
       </div>
       <div class="form-actions">
         <button class="btn btn-secondary" id="cancelBtn">Отмена</button>
@@ -680,7 +687,8 @@
     const chapterForm = document.getElementById('chapterForm');
     const chapterTitle = document.getElementById('chapterTitle');
     const chapterContent = document.getElementById('chapterContent');
-    const bookCover = document.getElementById('bookCover');
+    const bookCoverFile = document.getElementById('bookCoverFile');
+    const bookCoverUrl = document.getElementById('bookCoverUrl');
     const saveBtn = document.getElementById('saveBtn');
     const cancelBtn = document.getElementById('cancelBtn');
     const formTitle = document.getElementById('formTitle');
@@ -769,10 +777,16 @@
     saveBtn.addEventListener('click', async () => {
       const title = chapterTitle.value.trim();
       const content = chapterContent.value.trim();
-      const coverFile = bookCover.files[0];
+      const coverFile = bookCoverFile.files[0];
+      const coverUrlInput = bookCoverUrl.value.trim();
 
       if (!title || !content) {
         showToast('Заполните все поля', 'error');
+        return;
+      }
+
+      if (coverFile && coverUrlInput) {
+        showToast('Выберите либо файл, либо URL для обложки, но не оба', 'error');
         return;
       }
 
@@ -784,12 +798,25 @@
       };
 
       try {
-        // Handle cover image upload
+        // Handle cover image
         let coverUrl = null;
         if (coverFile) {
           const storageRef = storage.ref(`bookCovers/cover_${Date.now()}`);
           const snapshot = await storageRef.put(coverFile);
           coverUrl = await snapshot.ref.getDownloadURL();
+        } else if (coverUrlInput) {
+          // Validate URL
+          try {
+            new URL(coverUrlInput);
+            coverUrl = coverUrlInput;
+          } catch {
+            showToast('Недействительный URL обложки', 'error');
+            hideLoader();
+            return;
+          }
+        }
+
+        if (coverUrl) {
           await database.ref('bookCover').set(coverUrl);
         }
 
@@ -815,7 +842,8 @@
     function resetForm() {
       chapterTitle.value = '';
       chapterContent.value = '';
-      bookCover.value = '';
+      bookCoverFile.value = '';
+      bookCoverUrl.value = '';
       formTitle.textContent = 'Новая глава';
       isEditing = false;
       editingChapterId = null;
