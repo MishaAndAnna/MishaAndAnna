@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Тени Истоков: Киберпанк-Прелюдия</title>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-app-compat.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-database-compat.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js"></script>
+  <style>
+    :root {
+      --primary: #b100cd; /* Electric purple */
+      --secondary: #ff007a; /* Neon magenta */
+      --accent: #39ff14; /* Acid green */
+      --background: #0d001a; /* Deep void purple */
+      --surface: #1a0033; /* Darker purple for cards */
+      --surface-light: #26004d; /* Lighter for inputs */
+      --text: #f0e6ff; /* Pale lavender */
+      --text-muted: #b3a3cc; /* Muted purple */
+      --glow: 0 0 20px rgba(177, 0, 205, 0.6);
+      --shadow-sm: 0 6px 15px rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0 15px 50px rgba(0, 0, 0, 0.6);
+      --border-radius: 10px;
+      --spacing-sm: 10px;
+      --spacing-md: 20px;
+      --spacing-lg: 30px;
+      --spacing-xl: 40px;
+    }
+
+    body.light-theme {
+      --background: #f5e6ff;
+      --surface: #ffffff;
+      --surface-light: #f0e6ff;
+      --text: #1a0033;
+      --text-muted: #664080;
+      --glow: 0 0 20px rgba(177, 0, 205, 0.4);
+      --shadow-sm: 0 6px 15px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.15);
+      --shadow-lg: 0 15px 50px rgba(0, 0, 0, 0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background-color: var(--background);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.7;
+      position: relative;
+      transition: background-color 0.4s ease, color 0.4s ease;
+    }
+
+    /* Glitch Background */
+    #glitch-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(rgba(13, 0, 26, 0.9), rgba(13, 0, 26, 0.9)),
+                  url('https://via.placeholder.com/1920x1080/1a0033/b100cd?text=Glitch+Background') no-repeat center center/cover;
+      z-index: -2;
+      animation: glitch 5s infinite;
+      opacity: 0.3;
+    }
+
+    @keyframes glitch {
+      0%, 100% { transform: translate(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translate(calc(-1 * var(--spacing-sm)), calc(-1 * var(--spacing-sm))); }
+      20%, 40%, 60%, 80% { transform: translate(var(--spacing-sm), var(--spacing-sm)); }
+    }
+
+    header {
+      background: linear-gradient(to right, rgba(13, 0, 26, 0.95), rgba(26, 0, 51, 0.85));
+      backdrop-filter: blur(20px);
+      padding: var(--spacing-md) var(--spacing-xl);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-sm), var(--glow);
+      clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+    }
+
+    body.light-theme header {
+      background: linear-gradient(to right, rgba(255, 255, 255, 0.95), rgba(245, 230, 255, 0.85));
+      box-shadow: var(--shadow-sm);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 2.2rem;
+      letter-spacing: 3px;
+      color: var(--text);
+      text-decoration: none;
+      position: relative;
+      text-transform: uppercase;
+      transition: color 0.3s ease;
+    }
+
+    .logo:hover {
+      color: var(--accent);
+      animation: glitch-text 0.3s;
+    }
+
+    @keyframes glitch-text {
+      0%, 100% { transform: translate(0); }
+      50% { transform: translate(2px, -2px); }
+    }
+
+    .logo::before {
+      content: '';
+      position: absolute;
+      left: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 90%;
+      background: linear-gradient(to bottom, var(--primary), var(--secondary));
+      border-radius: 4px;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: center;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1rem;
+      padding: var(--spacing-sm) var(--spacing-md);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      text-transform: uppercase;
+    }
+
+    .nav-btn:hover {
+      color: var(--accent);
+      text-shadow: var(--glow);
+    }
+
+    .nav-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    .nav-btn:hover::after {
+      width: 80%;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--spacing-xl);
+      display: none;
+      opacity: 0;
+      transition: opacity 0.7s ease-in-out;
+      position: relative;
+    }
+
+    .container.visible {
+      display: block;
+      opacity: 1;
+    }
+
+    .book-cover-section {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: var(--background);
+      overflow: hidden;
+      clip-path: polygon(0 0, 100% 0, 100% 85%, 0 95%);
+    }
+
+    .book-cover-wrapper {
+      perspective: 1000px;
+    }
+
+    .book-cover-section img {
+      max-width: 600px;
+      max-height: 850px;
+      width: 50vw;
+      height: auto;
+      object-fit: cover;
+      border-radius: 14px;
+      box-shadow: var(--shadow-lg), var(--glow);
+      z-index: 1;
+      transition: transform 0.5s ease, box-shadow 0.5s ease;
+      border: 3px solid rgba(57, 255, 20, 0.3);
+      transform: rotateY(15deg) translateZ(50px);
+    }
+
+    .book-cover-section img:hover {
+      transform: rotateY(0deg) translateZ(100px);
+      box-shadow: var(--shadow-lg), 0 0 30px rgba(177, 0, 205, 0.8);
+    }
+
+    .book-cover-section p {
+      color: var(--text-muted);
+      font-size: 1.4rem;
+      max-width: 700px;
+      z-index: 1;
+      margin-bottom: var(--spacing-lg);
+      font-family: 'Share Tech Mono', monospace;
+      text-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
+      animation: fadeInText 2s ease-in-out;
+    }
+
+    @keyframes fadeInText {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .explore-btn {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: var(--text);
+      border: none;
+      padding: var(--spacing-md) calc(var(--spacing-xl) + 10px);
+      border-radius: 8px;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 600;
+      font-size: 1.3rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      transition: all 0.4s ease;
+      box-shadow: var(--shadow-md), var(--glow);
+      z-index: 1;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .explore-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(57, 255, 20, 0.4), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .explore-btn:hover::before {
+      left: 100%;
+    }
+
+    .explore-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg), 0 0 35px rgba(177, 0, 205, 0.9);
+      background: linear-gradient(135deg, var(--secondary), var(--primary));
+    }
+
+    .explore-btn i {
+      font-size: 1.4rem;
+    }
+
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-lg);
+      align-items: center;
+      background: rgba(26, 0, 51, 0.5);
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: var(--spacing-sm);
+    }
+
+    .status-dot.online {
+      background: var(--accent);
+    }
+
+    .status-dot.offline {
+      background: #ff007a;
+    }
+
+    .status-dot.syncing {
+      background: #ffd700;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    .toggle-form-btn {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: var(--text);
+      border: none;
+      padding: var(--spacing-md) calc(var(--spacing-lg) + 5px);
+      border-radius: 8px;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      transition: all 0.4s ease;
+      box-shadow: var(--shadow-md);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .toggle-form-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg), var(--glow);
+    }
+
+    .toggle-form-btn i {
+      font-size: 1rem;
+    }
+
+    .chapter-form {
+      background: var(--surface);
+      padding: var(--spacing-xl);
+      border-radius: var(--border-radius);
+      margin-bottom: var(--spacing-xl);
+      box-shadow: var(--shadow-lg), var(--glow);
+      border: 2px solid rgba(57, 255, 20, 0.2);
+      display: none;
+      animation: slideDown 0.6s ease-out;
+      clip-path: polygon(0 0, 95% 0, 100% 100%, 5% 100%);
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .form-header h2 {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: var(--text);
+      text-shadow: 0 0 10px rgba(177, 0, 205, 0.4);
+    }
+
+    .form-group {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: var(--spacing-sm);
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .chapter-form input[type="text"],
+    .chapter-form textarea {
+      width: 100%;
+      padding: var(--spacing-md);
+      background: var(--surface-light);
+      border: 2px solid rgba(57, 255, 20, 0.2);
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      transition: all 0.4s ease;
+    }
+
+    .chapter-form input:focus,
+    .chapter-form textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(57, 255, 20, 0.4);
+    }
+
+    .chapter-form textarea {
+      min-height: 350px;
+      resize: vertical;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-md);
+    }
+
+    .btn {
+      padding: var(--spacing-md) calc(var(--spacing-lg) + 5px);
+      border-radius: 8px;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.4s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: var(--text);
+      border: none;
+      box-shadow: var(--shadow-sm), var(--glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md), 0 0 25px rgba(177, 0, 205, 0.8);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-muted);
+      border: 2px solid rgba(57, 255, 20, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(57, 255, 20, 0.15);
+      color: var(--text);
+    }
+
+    .chapter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: var(--spacing-lg);
+    }
+
+    .chapter-card {
+      background: var(--surface);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      transition: all 0.5s ease;
+      cursor: pointer;
+      position: relative;
+      box-shadow: var(--shadow-md), var(--glow);
+      border: 2px solid rgba(57, 255, 20, 0.2);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+    }
+
+    .chapter-card:hover {
+      transform: translateY(-10px) rotate(1deg);
+      box-shadow: var(--shadow-lg), 0 0 40px rgba(177, 0, 205, 0.9);
+      border-color: rgba(57, 255, 20, 0.5);
+    }
+
+    .chapter-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    }
+
+    .card-content {
+      padding: var(--spacing-lg);
+      flex-grow: 1;
+    }
+
+    .chapter-card h3 {
+      color: var(--text);
+      margin-bottom: var(--spacing-md);
+      font-size: 1.5rem;
+      font-weight: 600;
+      font-family: 'Exo 2', sans-serif;
+      line-height: 1.3;
+      text-shadow: 0 0 5px rgba(177, 0, 205, 0.3);
+    }
+
+    .chapter-card p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .card-footer {
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: rgba(0, 0, 0, 0.15);
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-sm);
+      border-top: 2px solid rgba(57, 255, 20, 0.2);
+    }
+
+    .card-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: var(--spacing-sm);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .card-btn:hover {
+      background: rgba(57, 255, 20, 0.25);
+      color: var(--accent);
+    }
+
+    .card-btn i {
+      font-size: 1.2rem;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(15px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      overflow-y: auto;
+    }
+
+    body.light-theme .modal {
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    .modal-content {
+      background: var(--surface);
+      border-radius: var(--border-radius);
+      max-width: 1000px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      animation: fadeIn 0.5s ease;
+      box-shadow: var(--shadow-lg), var(--glow);
+      border: 2px solid rgba(57, 255, 20, 0.2);
+      clip-path: polygon(0 0, 95% 0, 100% 100%, 5% 100%);
+    }
+
+    .modal-header {
+      padding: var(--spacing-lg) var(--spacing-xl);
+      border-bottom: 2px solid rgba(57, 255, 20, 0.2);
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: var(--text);
+      text-shadow: 0 0 10px rgba(177, 0, 205, 0.4);
+    }
+
+    .modal-body {
+      padding: var(--spacing-xl);
+    }
+
+    .modal-body p {
+      line-height: 2;
+      color: var(--text);
+      white-space: pre-wrap;
+      font-size: 1.2rem;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.8rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .close-btn:hover {
+      background: rgba(57, 255, 20, 0.25);
+      color: var(--accent);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: var(--spacing-xl) 0;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: var(--spacing-lg);
+      opacity: 0.7;
+      text-shadow: var(--glow);
+    }
+
+    .empty-state h3 {
+      font-size: 1.6rem;
+      margin-bottom: var(--spacing-md);
+      color: var(--text);
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    .empty-state p {
+      max-width: 600px;
+      margin: 0 auto;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .theme-toggle {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      background: rgba(57, 255, 20, 0.25);
+      color: var(--accent);
+    }
+
+    .loader {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 3000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    body.light-theme .loader {
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .spinner {
+      width: 70px;
+      height: 70px;
+      border: 6px solid rgba(57, 255, 20, 0.3);
+      border-radius: 50%;
+      border-top: 6px solid var(--accent);
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 40px;
+      right: 40px;
+      background: var(--surface);
+      color: var(--text);
+      padding: var(--spacing-md) calc(var(--spacing-lg) + 5px);
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg), var(--glow);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      z-index: 2500;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.5s ease;
+      max-width: 400px;
+      border: 2px solid rgba(57, 255, 20, 0.2);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast-icon {
+      font-size: 1.4rem;
+    }
+
+    .toast.success .toast-icon {
+      color: var(--accent);
+    }
+
+    .toast.error .toast-icon {
+      color: #ff007a;
+    }
+
+    .toast.warning .toast-icon {
+      color: #ffd700;
+    }
+  </style>
+</head>
+<body>
+  <!-- Glitch Background -->
+  <div id="glitch-bg"></div>
+
+  <!-- Loader -->
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Main Application -->
+  <header>
+    <div class="logo-container">
+      <a href="#" class="logo">Тени Истоков</a>
+    </div>
+    <div class="nav-actions">
+      <button class="nav-btn" id="exploreChaptersBtn">Главы</button>
+      <button class="nav-btn" id="toggleFormBtn">Новая глава</button>
+      <button class="theme-toggle" id="themeToggle" title="Сменить тему">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="book-cover-section" id="bookCoverSection">
+    <div class="book-cover-wrapper">
+      <img id="bookCoverImage" src="https://via.placeholder.com/600x850/1a0033/b100cd?text=Precursor+Cover" alt="Обложка книги">
+    </div>
+    <p>Взломайте код мироздания в эпической предыстории киберпанк-саги!</p>
+    <button class="explore-btn" id="exploreChaptersBtnSecondary">
+      <i class="fas fa-book-open"></i> Взломать главы
+    </button>
+  </div>
+
+  <div class="container" id="chaptersSection">
+    <div class="action-bar">
+      <div class="status-indicator">
+        <span class="status-dot offline" id="statusDot"></span>
+        <span id="statusText">Оффлайн</span>
+      </div>
+    </div>
+
+    <div class="chapter-form" id="chapterForm">
+      <div class="form-header">
+        <h2 id="formTitle">Новая глава</h2>
+      </div>
+      <div class="form-group">
+        <label for="chapterTitle">Заголовок</label>
+        <input type="text" id="chapterTitle" required>
+      </div>
+      <div class="form-group">
+        <label for="chapterContent">Содержание</label>
+        <textarea id="chapterContent" required></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" id="cancelBtn">Отмена</button>
+        <button class="btn btn-primary" id="saveBtn">Сохранить</button>
+      </div>
+    </div>
+
+    <div class="chapter-grid" id="chapterGrid"></div>
+
+    <div class="empty-state" id="emptyState">
+      <i class="fas fa-book-open"></i>
+      <h3>Матрица пуста</h3>
+      <p>Запустите код новой главы, чтобы начать легенду киберпанк-предыстории!</p>
+    </div>
+  </div>
+
+  <!-- Modal for Viewing Chapters -->
+  <div class="modal" id="chapterModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle"></h2>
+        <button class="close-btn" id="closeModalBtn">×</button>
+      </div>
+      <div class="modal-body">
+        <p id="modalContent"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDPDG2j29r3Ay0xS0Y2g1NLYGlJNY0yUJI",
+      authDomain: "misha-and-anna-48e4c.firebaseapp.com",
+      databaseURL: "https://misha-and-anna-48e4c-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "misha-and-anna-48e4c",
+      storageBucket: "misha-and-anna-48e4c.appspot.com",
+      messagingSenderId: "985103413436",
+      appId: "1:985103413436:web:c0b6d10b5ed58b9f0d0ae0"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // DOM Elements
+    const toggleFormBtn = document.getElementById('toggleFormBtn');
+    const chapterForm = document.getElementById('chapterForm');
+    const chapterTitle = document.getElementById('chapterTitle');
+    const chapterContent = document.getElementById('chapterContent');
+    const saveBtn = document.getElementById('saveBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const formTitle = document.getElementById('formTitle');
+    const chapterGrid = document.getElementById('chapterGrid');
+    const emptyState = document.getElementById('emptyState');
+    const chapterModal = document.getElementById('chapterModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalContent = document.getElementById('modalContent');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const loader = document.getElementById('loader');
+    const bookCoverImage = document.getElementById('bookCoverImage');
+    const exploreChaptersBtn = document.getElementById('exploreChaptersBtn');
+    const exploreChaptersBtnSecondary = document.getElementById('exploreChaptersBtnSecondary');
+    const chaptersSection = document.getElementById('chaptersSection');
+    const themeToggle = document.getElementById('themeToggle');
+
+    // State
+    let isEditing = false;
+    let editingChapterId = null;
+
+    // Utility Functions
+    function showLoader() {
+      loader.style.display = 'flex';
+    }
+
+    function hideLoader() {
+      loader.style.display = 'none';
+    }
+
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type} show`;
+      toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} toast-icon"></i>
+        <span class="toast-message">${message}</span>
+      `;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 500);
+      }, 4000);
+    }
+
+    function updateStatus(status, message) {
+      statusDot.className = `status-dot ${status}`;
+      statusText.textContent = message;
+    }
+
+    function sanitizeHTML(str) {
+      return DOMPurify.sanitize(str);
+    }
+
+    // Theme Toggle
+    function toggleTheme() {
+      const isLightTheme = document.body.classList.toggle('light-theme');
+      themeToggle.innerHTML = `<i class="fas fa-${isLightTheme ? 'moon' : 'sun'}"></i>`;
+      localStorage.setItem('theme', isLightTheme ? 'light' : 'dark');
+      showToast(`Тема изменена на ${isLightTheme ? 'светлую' : 'темную'}`, 'success');
+    }
+
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+      } else {
+        document.body.classList.remove('light-theme');
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+      }
+    }
+
+    themeToggle.addEventListener('click', toggleTheme);
+
+    // Load Book Cover
+    function loadBookCover() {
+      const coverUrl = 'https://via.placeholder.com/600x850/1a0033/b100cd?text=Precursor+Cover';
+      bookCoverImage.src = coverUrl;
+      bookCoverImage.style.display = 'block';
+    }
+
+    // Show Chapters
+    function showChapters() {
+      chaptersSection.classList.add('visible');
+      chaptersSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    exploreChaptersBtn.addEventListener('click', showChapters);
+    exploreChaptersBtnSecondary.addEventListener('click', showChapters);
+
+    // Chapter Form Handling
+    toggleFormBtn.addEventListener('click', () => {
+      chapterForm.style.display = chapterForm.style.display === 'block' ? 'none' : 'block';
+      if (chapterForm.style.display === 'block') {
+        resetForm();
+      }
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      chapterForm.style.display = 'none';
+      resetForm();
+    });
+
+    saveBtn.addEventListener('click', async () => {
+      const title = chapterTitle.value.trim();
+      const content = chapterContent.value.trim();
+
+      if (!title || !content) {
+        showToast('Заполните все поля', 'error');
+        return;
+      }
+
+      showLoader();
+      const chapterData = {
+        title,
+        content,
+        timestamp: Date.now()
+      };
+
+      try {
+        if (isEditing) {
+          await database.ref(`precursor_chapters/${editingChapterId}`).update(chapterData);
+          showToast('Главаs updated!', 'success');
+        } else {
+          await database.ref('precursor_chapters').push(chapterData);
+          showToast('Глава сохранена!', 'success');
+        }
+
+        chapterForm.style.display = 'none';
+        resetForm();
+        hideLoader();
+      } catch (error) {
+        showToast(`Ошибка: ${error.message}`, 'error');
+        hideLoader();
+      }
+    });
+
+    function resetForm() {
+      chapterTitle.value = '';
+      chapterContent.value = '';
+      formTitle.textContent = 'Новая глава';
+      isEditing = false;
+      editingChapterId = null;
+    }
+
+    // Load Chapters
+    function loadChapters() {
+      showLoader();
+      try {
+        database.ref('precursor_chapters').on('value', (snapshot) => {
+          chapterGrid.innerHTML = '';
+          const chapters = snapshot.val();
+          
+          if (!chapters) {
+            emptyState.style.display = 'block';
+            hideLoader();
+            updateStatus('online', 'Соединение с базой данных');
+            return;
+          }
+
+          emptyState.style.display = 'none';
+          Object.entries(chapters).forEach(([id, chapter]) => {
+            const card = document.createElement('div');
+            card.className = 'chapter-card';
+            card.innerHTML = `
+              <div class="card-content">
+                <h3>${sanitizeHTML(chapter.title)}</h3>
+                <p>${sanitizeHTML(chapter.content.substring(0, 150))}...</p>
+              </div>
+              <div class="card-footer">
+                <button class="card-btn view-btn" data-id="${id}">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="card-btn edit-btn" data-id="${id}">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="card-btn delete-btn" data-id="${id}">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            `;
+            chapterGrid.appendChild(card);
+          });
+
+          document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              viewChapter(btn.dataset.id);
+            });
+          });
+
+          document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              editChapter(btn.dataset.id);
+            });
+          });
+
+          document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              deleteChapter(btn.dataset.id);
+            });
+          });
+
+          hideLoader();
+          updateStatus('online', 'Соединение с базой данных');
+        }, (error) => {
+          console.error('Error loading chapters:', error);
+          let userMessage = 'Ошибка загрузки глав';
+          if (error.code === 'PERMISSION_DENIED') {
+            userMessage = 'Нет доступа к данным. Проверьте настройки.';
+          } else if (error.code === 'NETWORK_ERROR') {
+            userMessage = 'Нет подключения к интернету.';
+          }
+          updateStatus('offline', userMessage);
+          showToast(userMessage, 'error');
+          hideLoader();
+        });
+      } catch (error) {
+        console.error('Error in loadChapters:', error);
+        showToast(`Ошибка загрузки глав: ${error.message}`, 'error');
+        hideLoader();
+      }
+    }
+
+    // View Chapter
+    function viewChapter(id) {
+      showLoader();
+      database.ref(`precursor_chapters/${id}`).once('value')
+        .then((snapshot) => {
+          const chapter = snapshot.val();
+          if (chapter) {
+            modalTitle.textContent = sanitizeHTML(chapter.title);
+            modalContent.textContent = chapter.content;
+            chapterModal.style.display = 'flex';
+          } else {
+            showToast('Глава не найдена', 'error');
+          }
+          hideLoader();
+        })
+        .catch((error) => {
+          showToast(`Ошибка загрузки главы: ${error.message}`, 'error');
+          hideLoader();
+        });
+    }
+
+    // Edit Chapter
+    function editChapter(id) {
+      showLoader();
+      database.ref(`precursor_chapters/${id}`).once('value')
+        .then((snapshot) => {
+          const chapter = snapshot.val();
+          if (chapter) {
+            chapterTitle.value = chapter.title;
+            chapterContent.value = chapter.content;
+            formTitle.textContent = 'Редактировать главу';
+            isEditing = true;
+            editingChapterId = id;
+            chapterForm.style.display = 'block';
+          } else {
+            showToast('Глава не найдена', 'error');
+          }
+          hideLoader();
+        })
+        .catch((error) => {
+          showToast(`Ошибка загрузки главы: ${error.message}`, 'error');
+          hideLoader();
+        });
+    }
+
+    // Delete Chapter
+    function deleteChapter(id) {
+      if (confirm('Вы уверены, что хотите удалить эту главу?')) {
+        showLoader();
+        database.ref(`precursor_chapters/${id}`).remove()
+          .then(() => {
+            showToast('Глава удалена!', 'success');
+            hideLoader();
+          })
+          .catch((error) => {
+            showToast(`Ошибка удаления: ${error.message}`, 'error');
+            hideLoader();
+          });
+      }
+    }
+
+    // Modal Close
+    closeModalBtn.addEventListener('click', () => {
+      chapterModal.style.display = 'none';
+    });
+
+    // Initialize
+    console.log('App initialized');
+    updateStatus('online', 'Соединение с базой данных');
+    loadTheme();
+    loadChapters();
+    loadBookCover();
+  </script>
+</body>
+</html>
