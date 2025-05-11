@@ -29,6 +29,17 @@
       --spacing-xl: 32px;
     }
 
+    body.light-theme {
+      --background: #f5f5f5;
+      --surface: #ffffff;
+      --surface-light: #e8ecef;
+      --text: #1a1a1a;
+      --text-muted: #6b7280;
+      --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 15px 35px rgba(0, 0, 0, 0.15);
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -42,6 +53,7 @@
       min-height: 100vh;
       overflow-x: hidden;
       line-height: 1.6;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     header {
@@ -56,6 +68,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+
+    body.light-theme header {
+      background: rgba(255, 255, 255, 0.9);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .logo-container {
@@ -124,6 +141,11 @@
       background-position: center;
       z-index: -1;
       animation: zoom 20s infinite alternate;
+    }
+
+    body.light-theme .book-cover-section::before {
+      background: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)),
+                  url('https://raw.githubusercontent.com/MishaAndAnna/MishaAndAnna/main/Book_cover.png') no-repeat center center/cover;
     }
 
     @keyframes zoom {
@@ -264,7 +286,7 @@
       border-radius: var(--border-radius);
       margin-bottom: var(--spacing-xl);
       box-shadow: var(--shadow-lg);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.05);
       display: none;
       animation: slideDown 0.4s ease-out;
     }
@@ -310,7 +332,7 @@
       width: 100%;
       padding: var(--spacing-md);
       background: var(--surface-light);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0. Zent);
       color: var(--text);
       font-family: 'Space Grotesk', sans-serif;
       border-radius: 8px;
@@ -361,11 +383,11 @@
     .btn-secondary {
       background: transparent;
       color: var(--text-muted);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.05);
     }
 
     .chapter-grid {
@@ -382,7 +404,7 @@
       cursor: pointer;
       position: relative;
       box-shadow: var(--shadow-md);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.05);
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -424,11 +446,11 @@
 
     .card-footer {
       padding: var(--spacing-md) var(--spacing-lg);
-      background: rgba(0, 0, 0, 0.2);
+      background: rgba(0, 0, 0, 0.05);
       display: flex;
       justify-content: flex-end;
       gap: var(--spacing-sm);
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
     }
 
     .card-btn {
@@ -442,7 +464,7 @@
     }
 
     .card-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.1);
       color: var(--text);
     }
 
@@ -465,6 +487,10 @@
       overflow-y: auto;
     }
 
+    body.light-theme .modal {
+      background: rgba(255, 255, 255, 0.85);
+    }
+
     .modal-content {
       background: var(--surface);
       border-radius: var(--border-radius);
@@ -475,12 +501,12 @@
       position: relative;
       animation: fadeIn 0.3s ease;
       box-shadow: var(--shadow-lg);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.05);
     }
 
     .modal-header {
       padding: var(--spacing-lg) var(--spacing-xl);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
       position: sticky;
       top: 0;
       background: var(--surface);
@@ -524,7 +550,7 @@
     }
 
     .close-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.1);
       color: var(--text);
     }
 
@@ -566,7 +592,7 @@
     }
 
     .theme-toggle:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.1);
       color: var(--text);
     }
 
@@ -583,10 +609,14 @@
       align-items: center;
     }
 
+    body.light-theme .loader {
+      background: rgba(255, 255, 255, 0.7);
+    }
+
     .spinner {
       width: 50px;
       height: 50px;
-      border: 4px solid rgba(255, 255, 255, 0.3);
+      border: 4px solid rgba(0, 0, 0, 0.1);
       border-radius: 50%;
       border-top: 4px solid var(--primary);
       animation: spin 1s linear infinite;
@@ -663,7 +693,7 @@
 
   <div class="book-cover-section" id="bookCoverSection">
     <img id="bookCoverImage" src="https://raw.githubusercontent.com/MishaAndAnna/MishaAndAnna/main/Book_cover.png" alt="Обложка книги">
-    <p>Погрузитесь в мир киберпанк-фэнтези, где неон и магия сливаются воедино!</p>
+    <p>Погрузитесь в мир киберпанк-фэнтези, где неон и магия сливаются воедино!</-Regular>
     <button class="explore-btn" id="exploreChaptersBtn">
       <i class="fas fa-book-open"></i> Перейти к главам
     </button>
@@ -682,7 +712,7 @@
 
     <div class="chapter-form" id="chapterForm">
       <div class="form-header">
-        <h2 id="formTitle">Новая глава</h2>
+        <h2 id="formTitle">Н    </h2>
       </div>
       <div class="form-group">
         <label for="chapterTitle">Заголовок</label>
@@ -756,6 +786,7 @@
     const bookCoverImage = document.getElementById('bookCoverImage');
     const exploreChaptersBtn = document.getElementById('exploreChaptersBtn');
     const chaptersSection = document.getElementById('chaptersSection');
+    const themeToggle = document.getElementById('themeToggle');
 
     // State
     let isEditing = false;
@@ -792,6 +823,27 @@
     function sanitizeHTML(str) {
       return DOMPurify.sanitize(str);
     }
+
+    // Theme Toggle
+    function toggleTheme() {
+      const isLightTheme = document.body.classList.toggle('light-theme');
+      themeToggle.innerHTML = `<i class="fas fa-${isLightTheme ? 'moon' : 'sun'}"></i>`;
+      localStorage.setItem('theme', isLightTheme ? 'light' : 'dark');
+      showToast(`Тема изменена на ${isLightTheme ? 'светлую' : 'темную'}`, 'success');
+    }
+
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+      } else {
+        document.body.classList.remove('light-theme');
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+      }
+    }
+
+    themeToggle.addEventListener('click', toggleTheme);
 
     // Load Book Cover
     function loadBookCover() {
@@ -1006,14 +1058,10 @@
       chapterModal.style.display = 'none';
     });
 
-    // Theme Toggle (Placeholder)
-    document.getElementById('themeToggle').addEventListener('click', () => {
-      showToast('Переключение темы пока не реализовано', 'warning');
-    });
-
     // Initialize
     console.log('App initialized');
     updateStatus('online', 'Соединение с базой данных');
+    loadTheme();
     loadChapters();
     loadBookCover();
   </script>
