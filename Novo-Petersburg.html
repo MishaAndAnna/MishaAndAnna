@@ -197,6 +197,7 @@
     .book-cover-section {
       position: relative;
       height: 100vh;
+      min-height: 600px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -204,7 +205,6 @@
       text-align: center;
       background: var(--background);
       overflow: hidden;
-      clip-path: polygon(0 0, 100% 0, 100% 85%, 0 95%);
     }
 
     .book-cover-wrapper {
@@ -223,6 +223,7 @@
       transition: transform 0.5s ease, box-shadow 0.5s ease;
       border: 3px solid rgba(57, 255, 20, 0.3);
       transform: rotateY(15deg) translateZ(50px);
+      display: block;
     }
 
     .book-cover-section img:hover {
@@ -314,7 +315,7 @@
 
     .status-dot {
       display: inline-block;
-      width: 12px;
+      width:  communicating with database12px;
       height: 12px;
       border-radius: 50%;
       margin-right: var(--spacing-sm);
@@ -954,9 +955,25 @@
 
     // Load Book Cover
     function loadBookCover() {
-      const coverUrl = 'https://via.placeholder.com/600x850/1a0033/b100cd?text=Precursor+Cover';
-      bookCoverImage.src = coverUrl;
+      console.log('Loading book cover...');
+      const coverUrl = 'https://raw.githubusercontent.com/MishaAndAnna/MishaAndAnna/main/Cover.png';
+      if (!bookCoverImage) {
+        console.error('bookCoverImage element not found');
+        showToast('Элемент обложки не найден', 'error');
+        return;
+      }
+      bookCoverImage.src = coverUrl + '?v=' + Date.now(); // Prevent caching
       bookCoverImage.style.display = 'block';
+      
+      bookCoverImage.onerror = () => {
+        console.error('Failed to load book cover');
+        bookCoverImage.src = 'https://via.placeholder.com/600x850/1a0033/b100cd?text=Cover+Not+Found';
+        showToast('Не удалось загрузить обложку', 'error');
+      };
+      
+      bookCoverImage.onload = () => {
+        console.log('Book cover loaded successfully');
+      };
     }
 
     // Show Chapters
@@ -1000,7 +1017,7 @@
       try {
         if (isEditing) {
           await database.ref(`precursor_chapters/${editingChapterId}`).update(chapterData);
-          showToast('Главаs updated!', 'success');
+          showToast('Глава обновлена!', 'success');
         } else {
           await database.ref('precursor_chapters').push(chapterData);
           showToast('Глава сохранена!', 'success');
@@ -1168,11 +1185,13 @@
     });
 
     // Initialize
-    console.log('App initialized');
-    updateStatus('online', 'Соединение с базой данных');
-    loadTheme();
-    loadChapters();
-    loadBookCover();
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('App initialized');
+      updateStatus('online', 'Соединение с базой данных');
+      loadTheme();
+      loadChapters();
+      loadBookCover();
+    });
   </script>
 </body>
 </html>
