@@ -11,14 +11,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js"></script>
   <style>
     :root {
-      --primary: #b100cd; /* Electric purple */
-      --secondary: #ff007a; /* Neon magenta */
-      --accent: #39ff14; /* Acid green */
-      --background: #0d001a; /* Deep void purple */
-      --surface: #1a0033; /* Darker purple for cards */
-      --surface-light: #26004d; /* Lighter for inputs */
-      --text: #f0e6ff; /* Pale lavender */
-      --text-muted: #b3a3cc; /* Muted purple */
+      --primary: #b100cd;
+      --secondary: #ff007a;
+      --accent: #39ff14;
+      --background: #0d001a;
+      --surface: #1a0033;
+      --surface-light: #26004d;
+      --text: #f0e6ff;
+      --text-muted: #b3a3cc;
       --glow: 0 0 20px rgba(177, 0, 205, 0.6);
       --shadow-sm: 0 6px 15px rgba(0, 0, 0, 0.4);
       --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -59,7 +59,6 @@
       transition: background-color 0.4s ease, color 0.4s ease;
     }
 
-    /* Glitch Background */
     #glitch-bg {
       position: fixed;
       top: 0;
@@ -268,6 +267,7 @@
       letter-spacing: 2px;
       position: relative;
       overflow: hidden;
+      margin: var(--spacing-sm);
     }
 
     .explore-btn::before {
@@ -369,7 +369,7 @@
       font-size: 1rem;
     }
 
-    .chapter-form {
+    .chapter-form, .gallery-form {
       background: var(--surface);
       padding: var(--spacing-xl);
       border-radius: var(--border-radius);
@@ -420,7 +420,9 @@
     }
 
     .chapter-form input[type="text"],
-    .chapter-form textarea {
+    .chapter-form textarea,
+    .gallery-form input[type="text"],
+    .gallery-form input[type="url"] {
       width: 100%;
       padding: var(--spacing-md);
       background: var(--surface-light);
@@ -433,7 +435,8 @@
     }
 
     .chapter-form input:focus,
-    .chapter-form textarea:focus {
+    .chapter-form textarea:focus,
+    .gallery-form input:focus {
       outline: none;
       border-color: var(--accent);
       box-shadow: 0 0 0 4px rgba(57, 255, 20, 0.4);
@@ -442,6 +445,60 @@
     .chapter-form textarea {
       min-height: 350px;
       resize: vertical;
+    }
+
+    .character-input-group {
+      display: flex;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+      align-items: center;
+    }
+
+    .character-input-group input {
+      flex: 1;
+    }
+
+    .character-input-group .remove-character-btn {
+      background: transparent;
+      border: 2px solid #ff007a;
+      color: #ff007a;
+      padding: var(--spacing-sm);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+    }
+
+    .character-input-group .remove-character-btn:hover {
+      background: rgba(255, 0, 122, 0.2);
+      color: var(--accent);
+    }
+
+    .add-character-btn {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: var(--text);
+      border: none;
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-radius: 8px;
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      transition: all 0.4s ease;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .add-character-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md), var(--glow);
     }
 
     .form-actions {
@@ -483,13 +540,13 @@
       color: var(--text);
     }
 
-    .chapter-grid {
+    .chapter-grid, .gallery-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
       gap: var(--spacing-lg);
     }
 
-    .chapter-card {
+    .chapter-card, .location-card {
       background: var(--surface);
       border-radius: var(--border-radius);
       overflow: hidden;
@@ -504,13 +561,13 @@
       clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
     }
 
-    .chapter-card:hover {
+    .chapter-card:hover, .location-card:hover {
       transform: translateY(-10px) rotate(1deg);
       box-shadow: var(--shadow-lg), 0 0 40px rgba(177, 0, 205, 0.9);
       border-color: rgba(57, 255, 20, 0.5);
     }
 
-    .chapter-card::before {
+    .chapter-card::before, .location-card::before {
       content: '';
       position: absolute;
       top: 0;
@@ -525,7 +582,7 @@
       flex-grow: 1;
     }
 
-    .chapter-card h3 {
+    .chapter-card h3, .location-title {
       color: var(--text);
       margin-bottom: var(--spacing-md);
       font-size: 1.5rem;
@@ -776,7 +833,67 @@
       color: #ffd700;
     }
 
-    /* Responsive adjustments */
+    .gallery-section {
+      padding: var(--spacing-xl);
+      background: var(--background);
+    }
+
+    .location-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .location-title {
+      padding: var(--spacing-md);
+      text-align: center;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 1.3rem;
+      color: var(--text);
+      text-shadow: 0 0 5px rgba(177, 0, 205, 0.3);
+    }
+
+    .character-grid {
+      display: none;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--spacing-md);
+      padding: var(--spacing-md);
+      background: rgba(0, 0, 0, 0.15);
+      border-top: 2px solid rgba(57, 255, 20, 0.2);
+    }
+
+    .character-grid.active {
+      display: grid;
+    }
+
+    .character-card {
+      background: var(--surface-light);
+      border-radius: 6px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .character-card:hover {
+      transform: scale(1.05);
+      box-shadow: var(--shadow-md), 0 0 20px rgba(57, 255, 20, 0.4);
+    }
+
+    .character-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .character-name {
+      padding: var(--spacing-sm);
+      text-align: center;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1rem;
+      color: var(--text);
+    }
+
     @media (max-width: 768px) {
       .book-cover-section {
         padding: var(--spacing-lg) var(--spacing-sm);
@@ -805,6 +922,18 @@
         font-size: 0.9rem;
         padding: var(--spacing-sm);
       }
+
+      .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      }
+
+      .location-card img {
+        height: 150px;
+      }
+
+      .character-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
     }
 
     @media (max-width: 480px) {
@@ -821,32 +950,44 @@
         font-size: 1rem;
         padding: var(--spacing-sm) var(--spacing-md);
       }
+
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .location-card img {
+        height: 120px;
+      }
+
+      .character-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      }
+
+      .character-card img {
+        height: 100px;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Glitch Background -->
   <div id="glitch-bg"></div>
-
-  <!-- Loader -->
   <div class="loader" id="loader">
     <div class="spinner"></div>
   </div>
-
-  <!-- Main Application -->
   <header>
     <div class="logo-container">
       <a href="#" class="logo">Тени Истоков</a>
     </div>
     <div class="nav-actions">
+      <button class="nav-btn" id="exploreGalleryBtn">Галерея</button>
       <button class="nav-btn" id="exploreChaptersBtn">Главы</button>
-      <button class="nav-btn" id="toggleFormBtn">Новая глава</button>
+      <button class="nav-btn" id="toggleChapterFormBtn">Новая глава</button>
+      <button class="nav-btn" id="toggleGalleryFormBtn">Новая локация</button>
       <button class="theme-toggle" id="themeToggle" title="Сменить тему">
         <i class="fas fa-moon"></i>
       </button>
     </div>
   </header>
-
   <div class="book-cover-section" id="bookCoverSection">
     <div class="book-cover-wrapper">
       <img id="bookCoverImage" src="https://raw.githubusercontent.com/MishaAndAnna/MishaAndAnna/main/Cover.png" alt="Обложка книги">
@@ -855,19 +996,68 @@
     <button class="explore-btn" id="exploreChaptersBtnSecondary">
       <i class="fas fa-book-open"></i> Взломать главы
     </button>
+    <button class="explore-btn" id="exploreGalleryBtnSecondary">
+      <i class="fas fa-image"></i> Исследовать галерею
+    </button>
   </div>
-
+  <div class="container" id="gallerySection">
+    <div class="gallery-section">
+      <div class="action-bar">
+        <div class="status-indicator">
+          <span class="status-dot offline" id="galleryStatusDot"></span>
+          <span id="galleryStatusText">Оффлайн</span>
+        </div>
+      </div>
+      <div class="gallery-form" id="galleryForm">
+        <div class="form-header">
+          <h2 id="galleryFormTitle">Новая локация</h2>
+        </div>
+        <div class="form-group">
+          <label for="locationTitle">Название локации</label>
+          <input type="text" id="locationTitle" required>
+        </div>
+        <div class="form-group">
+          <label for="locationImage">Ссылка на изображение локации (GitHub URL)</label>
+          <input type="url" id="locationImage" required>
+        </div>
+        <div class="form-group">
+          <label>Персонажи (имя и ссылка на изображение)</label>
+          <div id="characterInputs">
+            <div class="character-input-group">
+              <input type="text" class="character-name" placeholder="Имя персонажа" required>
+              <input type="url" class="character-image" placeholder="Ссылка на изображение" required>
+              <button class="remove-character-btn" title="Удалить персонажа">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          <button class="add-character-btn" id="addCharacterBtn">
+            <i class="fas fa-plus"></i> Добавить персонажа
+          </button>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-secondary" id="cancelGalleryBtn">Отмена</button>
+          <button class="btn btn-primary" id="saveGalleryBtn">Сохранить</button>
+        </div>
+      </div>
+      <div class="gallery-grid" id="galleryGrid"></div>
+      <div class="empty-state" id="galleryEmptyState">
+        <i class="fas fa-image"></i>
+        <h3>Галерея пуста</h3>
+        <p>Добавьте новую локацию с персонажами, чтобы оживить киберпанк-мир!</p>
+      </div>
+    </div>
+  </div>
   <div class="container" id="chaptersSection">
     <div class="action-bar">
       <div class="status-indicator">
-        <span class="status-dot offline" id="statusDot"></span>
-        <span id="statusText">Оффлайн</span>
+        <span class="status-dot offline" id="chapterStatusDot"></span>
+        <span id="chapterStatusText">Оффлайн</span>
       </div>
     </div>
-
     <div class="chapter-form" id="chapterForm">
       <div class="form-header">
-        <h2 id="formTitle">Новая глава</h2>
+        <h2 id="chapterFormTitle">Новая глава</h2>
       </div>
       <div class="form-group">
         <label for="chapterTitle">Заголовок</label>
@@ -878,21 +1068,17 @@
         <textarea id="chapterContent" required></textarea>
       </div>
       <div class="form-actions">
-        <button class="btn btn-secondary" id="cancelBtn">Отмена</button>
-        <button class="btn btn-primary" id="saveBtn">Сохранить</button>
+        <button class="btn btn-secondary" id="cancelChapterBtn">Отмена</button>
+        <button class="btn btn-primary" id="saveChapterBtn">Сохранить</button>
       </div>
     </div>
-
     <div class="chapter-grid" id="chapterGrid"></div>
-
-    <div class="empty-state" id="emptyState">
+    <div class="empty-state" id="chapterEmptyState">
       <i class="fas fa-book-open"></i>
       <h3>Матрица пуста</h3>
       <p>Запустите код новой главы, чтобы начать легенду киберпанк-предыстории!</p>
     </div>
   </div>
-
-  <!-- Modal for Viewing Chapters -->
   <div class="modal" id="chapterModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -904,9 +1090,7 @@
       </div>
     </div>
   </div>
-
   <script>
-    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDPDG2j29r3Ay0xS0Y2g1NLYGlJNY0yUJI",
       authDomain: "misha-and-anna-48e4c.firebaseapp.com",
@@ -916,39 +1100,51 @@
       messagingSenderId: "985103413436",
       appId: "1:985103413436:web:c0b6d10b5ed58b9f0d0ae0"
     };
-
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-
-    // DOM Elements
-    const toggleFormBtn = document.getElementById('toggleFormBtn');
+    const toggleChapterFormBtn = document.getElementById('toggleChapterFormBtn');
     const chapterForm = document.getElementById('chapterForm');
     const chapterTitle = document.getElementById('chapterTitle');
     const chapterContent = document.getElementById('chapterContent');
-    const saveBtn = document.getElementById('saveBtn');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const formTitle = document.getElementById('formTitle');
+    const saveChapterBtn = document.getElementById('saveChapterBtn');
+    const cancelChapterBtn = document.getElementById('cancelChapterBtn');
+    const chapterFormTitle = document.getElementById('chapterFormTitle');
     const chapterGrid = document.getElementById('chapterGrid');
-    const emptyState = document.getElementById('emptyState');
+    const chapterEmptyState = document.getElementById('chapterEmptyState');
     const chapterModal = document.getElementById('chapterModal');
     const modalTitle = document.getElementById('modalTitle');
     const modalContent = document.getElementById('modalContent');
     const closeModalBtn = document.getElementById('closeModalBtn');
-    const statusDot = document.getElementById('statusDot');
-    const statusText = document.getElementById('statusText');
+    const chapterStatusDot = document.getElementById('chapterStatusDot');
+    const chapterStatusText = document.getElementById('chapterStatusText');
+    const toggleGalleryFormBtn = document.getElementById('toggleGalleryFormBtn');
+    const galleryForm = document.getElementById('galleryForm');
+    const locationTitle = document.getElementById('locationTitle');
+    const locationImage = document.getElementById('locationImage');
+    const characterInputs = document.getElementById('characterInputs');
+    const addCharacterBtn = document.getElementById('addCharacterBtn');
+    const saveGalleryBtn = document.getElementById('saveGalleryBtn');
+    const cancelGalleryBtn = document.getElementById('cancelGalleryBtn');
+    const galleryFormTitle = document.getElementById('galleryFormTitle');
+    const galleryGrid = document.getElementById('galleryGrid');
+    const galleryEmptyState = document.getElementById('galleryEmptyState');
+    const galleryStatusDot = document.getElementById('galleryStatusDot');
+    const galleryStatusText = document.getElementById('galleryStatusText');
     const loader = document.getElementById('loader');
     const bookCoverImage = document.getElementById('bookCoverImage');
     const exploreChaptersBtn = document.getElementById('exploreChaptersBtn');
     const exploreChaptersBtnSecondary = document.getElementById('exploreChaptersBtnSecondary');
+    const exploreGalleryBtn = document.getElementById('exploreGalleryBtn');
+    const exploreGalleryBtnSecondary = document.getElementById('exploreGalleryBtnSecondary');
     const chaptersSection = document.getElementById('chaptersSection');
+    const gallerySection = document.getElementById('gallerySection');
+    const bookCoverSection = document.getElementById('bookCoverSection');
     const themeToggle = document.getElementById('themeToggle');
-
-    // State
-    let isEditing = false;
+    let isEditingChapter = false;
     let editingChapterId = null;
+    let isEditingLocation = false;
+    let editingLocationId = null;
 
-    // Utility Functions
     function showLoader() {
       loader.style.display = 'flex';
     }
@@ -971,16 +1167,20 @@
       }, 4000);
     }
 
-    function updateStatus(status, message) {
-      statusDot.className = `status-dot ${status}`;
-      statusText.textContent = message;
+    function updateChapterStatus(status, message) {
+      chapterStatusDot.className = `status-dot ${status}`;
+      chapterStatusText.textContent = message;
+    }
+
+    function updateGalleryStatus(status, message) {
+      galleryStatusDot.className = `status-dot ${status}`;
+      galleryStatusText.textContent = message;
     }
 
     function sanitizeHTML(str) {
       return DOMPurify.sanitize(str);
     }
 
-    // Theme Toggle
     function toggleTheme() {
       const isLightTheme = document.body.classList.toggle('light-theme');
       themeToggle.innerHTML = `<i class="fas fa-${isLightTheme ? 'moon' : 'sun'}"></i>`;
@@ -1001,7 +1201,6 @@
 
     themeToggle.addEventListener('click', toggleTheme);
 
-    // Load Book Cover
     function loadBookCover() {
       console.log('Loading book cover...');
       const coverUrl = 'https://raw.githubusercontent.com/MishaAndAnna/MishaAndAnna/main/Cover.png';
@@ -1010,69 +1209,79 @@
         showToast('Элемент обложки не найден', 'error');
         return;
       }
-      bookCoverImage.src = coverUrl + '?v=' + Date.now(); // Prevent caching
+      bookCoverImage.src = coverUrl + '?v=' + Date.now();
       bookCoverImage.style.display = 'block';
-      
       bookCoverImage.onerror = () => {
         console.error('Failed to load book cover');
         bookCoverImage.src = 'https://via.placeholder.com/500x750/1a0033/b100cd?text=Cover+Not+Found';
         showToast('Не удалось загрузить обложку', 'error');
       };
-      
       bookCoverImage.onload = () => {
         console.log('Book cover loaded successfully');
       };
     }
 
-    // Show Chapters
     function showChapters() {
+      bookCoverSection.classList.remove('visible');
       chaptersSection.classList.add('visible');
+      gallerySection.classList.remove('visible');
       chaptersSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function showGallery() {
+      bookCoverSection.classList.remove('visible');
+      gallerySection.classList.add('visible');
+      chaptersSection.classList.remove('visible');
+      gallerySection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function showBookCover() {
+      bookCoverSection.classList.add('visible');
+      gallerySection.classList.remove('visible');
+      chaptersSection.classList.remove('visible');
+      bookCoverSection.scrollIntoView({ behavior: 'smooth' });
     }
 
     exploreChaptersBtn.addEventListener('click', showChapters);
     exploreChaptersBtnSecondary.addEventListener('click', showChapters);
+    exploreGalleryBtn.addEventListener('click', showGallery);
+    exploreGalleryBtnSecondary.addEventListener('click', showGallery);
 
-    // Chapter Form Handling
-    toggleFormBtn.addEventListener('click', () => {
+    toggleChapterFormBtn.addEventListener('click', () => {
       chapterForm.style.display = chapterForm.style.display === 'block' ? 'none' : 'block';
       if (chapterForm.style.display === 'block') {
-        resetForm();
+        resetChapterForm();
       }
     });
 
-    cancelBtn.addEventListener('click', () => {
+    cancelChapterBtn.addEventListener('click', () => {
       chapterForm.style.display = 'none';
-      resetForm();
+      resetChapterForm();
     });
 
-    saveBtn.addEventListener('click', async () => {
+    saveChapterBtn.addEventListener('click', async () => {
       const title = chapterTitle.value.trim();
       const content = chapterContent.value.trim();
-
       if (!title || !content) {
         showToast('Заполните все поля', 'error');
         return;
       }
-
       showLoader();
       const chapterData = {
         title,
         content,
         timestamp: Date.now()
       };
-
       try {
-        if (isEditing) {
+        if (isEditingChapter) {
           await database.ref(`precursor_chapters/${editingChapterId}`).update(chapterData);
           showToast('Глава обновлена!', 'success');
         } else {
           await database.ref('precursor_chapters').push(chapterData);
           showToast('Глава сохранена!', 'success');
         }
-
         chapterForm.style.display = 'none';
-        resetForm();
+        resetChapterForm();
         hideLoader();
       } catch (error) {
         showToast(`Ошибка: ${error.message}`, 'error');
@@ -1080,30 +1289,27 @@
       }
     });
 
-    function resetForm() {
+    function resetChapterForm() {
       chapterTitle.value = '';
       chapterContent.value = '';
-      formTitle.textContent = 'Новая глава';
-      isEditing = false;
+      chapterFormTitle.textContent = 'Новая глава';
+      isEditingChapter = false;
       editingChapterId = null;
     }
 
-    // Load Chapters
     function loadChapters() {
       showLoader();
       try {
         database.ref('precursor_chapters').on('value', (snapshot) => {
           chapterGrid.innerHTML = '';
           const chapters = snapshot.val();
-          
           if (!chapters) {
-            emptyState.style.display = 'block';
+            chapterEmptyState.style.display = 'block';
             hideLoader();
-            updateStatus('online', 'Соединение с базой данных');
+            updateChapterStatus('online', 'Соединение с базой данных');
             return;
           }
-
-          emptyState.style.display = 'none';
+          chapterEmptyState.style.display = 'none';
           Object.entries(chapters).forEach(([id, chapter]) => {
             const card = document.createElement('div');
             card.className = 'chapter-card';
@@ -1126,27 +1332,23 @@
             `;
             chapterGrid.appendChild(card);
           });
-
           document.querySelectorAll('.view-btn').forEach(btn => {
             btn.addEventListener('click', () => {
               viewChapter(btn.dataset.id);
             });
           });
-
           document.querySelectorAll('.edit-btn').forEach(btn => {
             btn.addEventListener('click', () => {
               editChapter(btn.dataset.id);
             });
           });
-
           document.querySelectorAll('.delete-btn').forEach(btn => {
             btn.addEventListener('click', () => {
               deleteChapter(btn.dataset.id);
             });
           });
-
           hideLoader();
-          updateStatus('online', 'Соединение с базой данных');
+          updateChapterStatus('online', 'Соединение с базой данных');
         }, (error) => {
           console.error('Error loading chapters:', error);
           let userMessage = 'Ошибка загрузки глав';
@@ -1155,7 +1357,7 @@
           } else if (error.code === 'NETWORK_ERROR') {
             userMessage = 'Нет подключения к интернету.';
           }
-          updateStatus('offline', userMessage);
+          updateChapterStatus('offline', userMessage);
           showToast(userMessage, 'error');
           hideLoader();
         });
@@ -1166,7 +1368,6 @@
       }
     }
 
-    // View Chapter
     function viewChapter(id) {
       showLoader();
       database.ref(`precursor_chapters/${id}`).once('value')
@@ -1187,7 +1388,6 @@
         });
     }
 
-    // Edit Chapter
     function editChapter(id) {
       showLoader();
       database.ref(`precursor_chapters/${id}`).once('value')
@@ -1196,8 +1396,8 @@
           if (chapter) {
             chapterTitle.value = chapter.title;
             chapterContent.value = chapter.content;
-            formTitle.textContent = 'Редактировать главу';
-            isEditing = true;
+            chapterFormTitle.textContent = 'Редактировать главу';
+            isEditingChapter = true;
             editingChapterId = id;
             chapterForm.style.display = 'block';
           } else {
@@ -1211,7 +1411,6 @@
         });
     }
 
-    // Delete Chapter
     function deleteChapter(id) {
       if (confirm('Вы уверены, что хотите удалить эту главу?')) {
         showLoader();
@@ -1227,18 +1426,223 @@
       }
     }
 
-    // Modal Close
     closeModalBtn.addEventListener('click', () => {
       chapterModal.style.display = 'none';
     });
 
-    // Initialize
+    toggleGalleryFormBtn.addEventListener('click', () => {
+      galleryForm.style.display = galleryForm.style.display === 'block' ? 'none' : 'block';
+      if (galleryForm.style.display === 'block') {
+        resetGalleryForm();
+      }
+    });
+
+    cancelGalleryBtn.addEventListener('click', () => {
+      galleryForm.style.display = 'none';
+      resetGalleryForm();
+    });
+
+    function addCharacterInput(name = '', image = '') {
+      const characterGroup = document.createElement('div');
+      characterGroup.className = 'character-input-group';
+      characterGroup.innerHTML = `
+        <input type="text" class="character-name" placeholder="Имя персонажа" value="${sanitizeHTML(name)}" required>
+        <input type="url" class="character-image" placeholder="Ссылка на изображение" value="${sanitizeHTML(image)}" required>
+        <button class="remove-character-btn" title="Удалить персонажа">
+          <i class="fas fa-trash"></i>
+        </button>
+      `;
+      characterInputs.appendChild(characterGroup);
+      characterGroup.querySelector('.remove-character-btn').addEventListener('click', () => {
+        if (characterInputs.querySelectorAll('.character-input-group').length > 1) {
+          characterGroup.remove();
+        } else {
+          showToast('Должен быть хотя бы один персонаж', 'warning');
+        }
+      });
+    }
+
+    addCharacterBtn.addEventListener('click', () => {
+      addCharacterInput();
+    });
+
+    saveGalleryBtn.addEventListener('click', async () => {
+      const title = locationTitle.value.trim();
+      const image = locationImage.value.trim();
+      const characters = Array.from(characterInputs.querySelectorAll('.character-input-group')).map(group => ({
+        name: group.querySelector('.character-name').value.trim(),
+        image: group.querySelector('.character-image').value.trim()
+      }));
+      if (!title || !image || characters.some(char => !char.name || !char.image)) {
+        showToast('Заполните все поля', 'error');
+        return;
+      }
+      showLoader();
+      const locationData = {
+        location: { title, image },
+        characters,
+        timestamp: Date.now()
+      };
+      try {
+        if (isEditingLocation) {
+          await database.ref(`gallery_locations/${editingLocationId}`).update(locationData);
+          showToast('Локация обновлена!', 'success');
+        } else {
+          await database.ref('gallery_locations').push(locationData);
+          showToast('Локация сохранена!', 'success');
+        }
+        galleryForm.style.display = 'none';
+        resetGalleryForm();
+        hideLoader();
+      } catch (error) {
+        showToast(`Ошибка: ${error.message}`, 'error');
+        hideLoader();
+      }
+    });
+
+    function resetGalleryForm() {
+      locationTitle.value = '';
+      locationImage.value = '';
+      characterInputs.innerHTML = '';
+      addCharacterInput();
+      galleryFormTitle.textContent = 'Новая локация';
+      isEditingLocation = false;
+      editingLocationId = null;
+    }
+
+    function loadGallery() {
+      showLoader();
+      try {
+        database.ref('gallery_locations').on('value', (snapshot) => {
+          galleryGrid.innerHTML = '';
+          const locations = snapshot.val();
+          if (!locations) {
+            galleryEmptyState.style.display = 'block';
+            hideLoader();
+            updateGalleryStatus('online', 'Соединение с базой данных');
+            return;
+          }
+          galleryEmptyState.style.display = 'none';
+          Object.entries(locations).forEach(([id, item], index) => {
+            const locationCard = document.createElement('div');
+            locationCard.className = 'location-card';
+            locationCard.dataset.locationId = id;
+            locationCard.innerHTML = `
+              <img src="${sanitizeHTML(item.location.image)}" alt="${sanitizeHTML(item.location.title)}" onerror="this.src='https://via.placeholder.com/600x400/1a0033/b100cd?text=Image+Not+Found'">
+              <div class="location-title">${sanitizeHTML(item.location.title)}</div>
+              <div class="character-grid" id="characterGrid-${id}">
+                ${item.characters
+                  .map(
+                    (char) => `
+                  <div class="character-card">
+                    <img src="${sanitizeHTML(char.image)}" alt="${sanitizeHTML(char.name)}" onerror="this.src='https://via.placeholder.com/300x300/1a0033/b100cd?text=Character+Not+Found'">
+                    <div class="character-name">${sanitizeHTML(char.name)}</div>
+                  </div>
+                `
+                  )
+                  .join('')}
+              </div>
+              <div class="card-footer">
+                <button class="card-btn edit-btn" data-id="${id}">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="card-btn delete-btn" data-id="${id}">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            `;
+            galleryGrid.appendChild(locationCard);
+            locationCard.querySelector('.edit-btn').addEventListener('click', (e) => {
+              e.stopPropagation();
+              editLocation(id);
+            });
+            locationCard.querySelector('.delete-btn').addEventListener('click', (e) => {
+              e.stopPropagation();
+              deleteLocation(id);
+            });
+            locationCard.addEventListener('click', () => {
+              const characterGrid = document.getElementById(`characterGrid-${id}`);
+              const isActive = characterGrid.classList.contains('active');
+              document.querySelectorAll('.character-grid').forEach((grid) => {
+                grid.classList.remove('active');
+              });
+              if (!isActive) {
+                characterGrid.classList.add('active');
+              }
+            });
+          });
+          hideLoader();
+          updateGalleryStatus('online', 'Соединение с базой данных');
+        }, (error) => {
+          console.error('Error loading gallery:', error);
+          let userMessage = 'Ошибка загрузки галереи';
+          if (error.code === 'PERMISSION_DENIED') {
+            userMessage = 'Нет доступа к данным. Проверьте настройки.';
+          } else if (error.code === 'NETWORK_ERROR') {
+            userMessage = 'Нет подключения к интернету.';
+          }
+          updateGalleryStatus('offline', userMessage);
+          showToast(userMessage, 'error');
+          hideLoader();
+        });
+      } catch (error) {
+        console.error('Error in loadGallery:', error);
+        showToast(`Ошибка загрузки галереи: ${error.message}`, 'error');
+        hideLoader();
+      }
+    }
+
+    function editLocation(id) {
+      showLoader();
+      database.ref(`gallery_locations/${id}`).once('value')
+        .then((snapshot) => {
+          const location = snapshot.val();
+          if (location) {
+            locationTitle.value = location.location.title;
+            locationImage.value = location.location.image;
+            characterInputs.innerHTML = '';
+            location.characters.forEach((char) => {
+              addCharacterInput(char.name, char.image);
+            });
+            galleryFormTitle.textContent = 'Редактировать локацию';
+            isEditingLocation = true;
+            editingLocationId = id;
+            galleryForm.style.display = 'block';
+          } else {
+            showToast('Локация не найдена', 'error');
+          }
+          hideLoader();
+        })
+        .catch((error) => {
+          showToast(`Ошибка загрузки локации: ${error.message}`, 'error');
+          hideLoader();
+        });
+    }
+
+    function deleteLocation(id) {
+      if (confirm('Вы уверены, что хотите удалить эту локацию?')) {
+        showLoader();
+        database.ref(`gallery_locations/${id}`).remove()
+          .then(() => {
+            showToast('Локация удалена!', 'success');
+            hideLoader();
+          })
+          .catch((error) => {
+            showToast(`Ошибка удаления: ${error.message}`, 'error');
+            hideLoader();
+          });
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       console.log('App initialized');
-      updateStatus('online', 'Соединение с базой данных');
+      updateChapterStatus('online', 'Соединение с базой данных');
+      updateGalleryStatus('online', 'Соединение с базой данных');
       loadTheme();
       loadChapters();
       loadBookCover();
+      loadGallery();
+      bookCoverSection.classList.add('visible');
     });
   </script>
 </body>
