@@ -659,6 +659,34 @@
       clip-path: polygon(0 0, 95% 0, 100% 100%, 5% 100%);
     }
 
+    .modal#galleryModal .modal-content {
+      max-width: 90vw;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .modal#galleryModal .modal-body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: var(--spacing-md);
+    }
+
+    .modal#galleryModal img {
+      max-width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      border: 2px solid rgba(57, 255, 20, 0.3);
+      box-shadow: var(--shadow-lg), var(--glow);
+      transition: transform 0.3s ease;
+    }
+
+    .modal#galleryModal img:hover {
+      transform: scale(1.05);
+    }
+
     .modal-header {
       padding: var(--spacing-lg) var(--spacing-xl);
       border-bottom: 2px solid rgba(57, 255, 20, 0.2);
@@ -843,6 +871,7 @@
       height: 200px;
       object-fit: cover;
       display: block;
+      cursor: pointer;
     }
 
     .location-title {
@@ -884,6 +913,7 @@
       width: 100%;
       height: 150px;
       object-fit: cover;
+      cursor: pointer;
     }
 
     .character-name {
@@ -1090,6 +1120,17 @@
       </div>
     </div>
   </div>
+  <div class="modal" id="galleryModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="galleryModalTitle"></h2>
+        <button class="close-btn" id="closeGalleryModalBtn">×</button>
+      </div>
+      <div class="modal-body">
+        <img id="galleryModalImage" src="" alt="Изображение локации или персонажа" style="width: 100%; height: auto; max-height: 80vh; object-fit: contain; border-radius: 8px;">
+      </div>
+    </div>
+  </div>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDPDG2j29r3Ay0xS0Y2g1NLYGlJNY0yUJI",
@@ -1140,6 +1181,10 @@
     const gallerySection = document.getElementById('gallerySection');
     const bookCoverSection = document.getElementById('bookCoverSection');
     const themeToggle = document.getElementById('themeToggle');
+    const galleryModal = document.getElementById('galleryModal');
+    const galleryModalTitle = document.getElementById('galleryModalTitle');
+    const galleryModalImage = document.getElementById('galleryModalImage');
+    const closeGalleryModalBtn = document.getElementById('closeGalleryModalBtn');
     let isEditingChapter = false;
     let editingChapterId = null;
     let isEditingLocation = false;
@@ -1510,6 +1555,20 @@
       editingLocationId = null;
     }
 
+    function showGalleryModal(title, imageUrl) {
+      galleryModalTitle.textContent = sanitizeHTML(title);
+      galleryModalImage.src = sanitizeHTML(imageUrl) + '?v=' + Date.now();
+      galleryModalImage.onerror = () => {
+        galleryModalImage.src = 'https://via.placeholder.com/600x400/1a0033/b100cd?text=Image+Not+Found';
+        showToast('Не удалось загрузить изображение', 'error');
+      };
+      galleryModal.style.display = 'flex';
+    }
+
+    closeGalleryModalBtn.addEventListener('click', () => {
+      galleryModal.style.display = 'none';
+    });
+
     function loadGallery() {
       showLoader();
       try {
@@ -1528,14 +1587,14 @@
             locationCard.className = 'location-card';
             locationCard.dataset.locationId = id;
             locationCard.innerHTML = `
-              <img src="${sanitizeHTML(item.location.image)}" alt="${sanitizeHTML(item.location.title)}" onerror="this.src='https://via.placeholder.com/600x400/1a0033/b100cd?text=Image+Not+Found'">
+              <img src="${sanitizeHTML(item.location.image)}" alt="${sanitizeHTML(item.location.title)}" class="location-image" onerror="this.src='https://via.placeholder.com/600x400/1a0033/b100cd?text=Image+Not+Found'">
               <div class="location-title">${sanitizeHTML(item.location.title)}</div>
               <div class="character-grid" id="characterGrid-${id}">
                 ${item.characters
                   .map(
                     (char) => `
                   <div class="character-card">
-                    <img src="${sanitizeHTML(char.image)}" alt="${sanitizeHTML(char.name)}" onerror="this.src='https://via.placeholder.com/300x300/1a0033/b100cd?text=Character+Not+Found'">
+                    <img src="${sanitizeHTML(char.image)}" alt="${sanitizeHTML(char.name)}" class="character-image" onerror="this.src='https://via.placeholder.com/300x300/1a0033/b100cd?text=Character+Not+Found'">
                     <div class="character-name">${sanitizeHTML(char.name)}</div>
                   </div>
                 `
@@ -1552,6 +1611,18 @@
               </div>
             `;
             galleryGrid.appendChild(locationCard);
+            // Обработчик клика на изображение локации
+            locationCard.querySelector('.location-image').addEventListener('click', (e) => {
+              e.stopPropagation();
+              showGalleryModal(item.location.title, item.location.image);
+            });
+            // Обработчик клика на изображения персонажей
+            locationCard.querySelectorAll('.character-image').forEach((img, charIndex) => {
+              img.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showGalleryModal(item.characters[charIndex].name, item.characters[charIndex].image);
+              });
+            });
             locationCard.querySelector('.edit-btn').addEventListener('click', (e) => {
               e.stopPropagation();
               editLocation(id);
@@ -1560,14 +1631,16 @@
               e.stopPropagation();
               deleteLocation(id);
             });
-            locationCard.addEventListener('click', () => {
-              const characterGrid = document.getElementById(`characterGrid-${id}`);
-              const isActive = characterGrid.classList.contains('active');
-              document.querySelectorAll('.character-grid').forEach((grid) => {
-                grid.classList.remove('active');
-              });
-              if (!isActive) {
-                characterGrid.classList.add('active');
+            locationCard.addEventListener('click', (e) => {
+              if (!e.target.classList.contains('location-image') && !e.target.classList.contains('character-image')) {
+                const characterGrid = document.getElementById(`characterGrid-${id}`);
+                const isActive = characterGrid.classList.contains('active');
+                document.querySelectorAll('.character-grid').forEach((grid) => {
+                  grid.classList.remove('active');
+                });
+                if (!isActive) {
+                  characterGrid.classList.add('active');
+                }
               }
             });
           });
