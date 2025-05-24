@@ -924,6 +924,70 @@
       color: var(--text);
     }
 
+    .login-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(15px);
+      z-index: 2500;
+      align-items: center;
+      justify-content: center;
+    }
+
+    body.light-theme .login-modal {
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    .login-modal-content {
+      background: var(--surface);
+      border-radius: var(--border-radius);
+      max-width: 500px;
+      width: 90%;
+      padding: var(--spacing-xl);
+      box-shadow: var(--shadow-lg), var(--glow);
+      border: 2px solid rgba(57, 255, 20, 0.2);
+      clip-path: polygon(0 0, 95% 0, 100% 100%, 5% 100%);
+    }
+
+    .login-modal-content h2 {
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: var(--text);
+      text-shadow: 0 0 10px rgba(177, 0, 205, 0.4);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .login-form-group {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .login-form-group input {
+      width: 100%;
+      padding: var(--spacing-md);
+      background: var(--surface-light);
+      border: 2px solid rgba(57, 255, 20, 0.2);
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      transition: all 0.4s ease;
+    }
+
+    .login-form-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(57, 255, 20, 0.4);
+    }
+
+    .hidden-btn {
+      display: none !important;
+    }
+
     @media (max-width: 768px) {
       .book-cover-section {
         padding: var(--spacing-lg) var(--spacing-sm);
@@ -1011,13 +1075,27 @@
     <div class="nav-actions">
       <button class="nav-btn" id="exploreGalleryBtn">Галерея</button>
       <button class="nav-btn" id="exploreChaptersBtn">Главы</button>
-      <button class="nav-btn" id="toggleChapterFormBtn">Новая глава</button>
-      <button class="nav-btn" id="toggleGalleryFormBtn">Новая локация</button>
+      <button class="nav-btn admin-only" id="toggleChapterFormBtn">Новая глава</button>
+      <button class="nav-btn admin-only" id="toggleGalleryFormBtn">Новая локация</button>
       <button class="theme-toggle" id="themeToggle" title="Сменить тему">
         <i class="fas fa-moon"></i>
       </button>
+      <button class="nav-btn" id="loginBtn">Войти</button>
     </div>
   </header>
+  <div class="login-modal" id="loginModal">
+    <div class="login-modal-content">
+      <h2>Вход</h2>
+      <div class="login-form-group">
+        <label for="username">Имя пользователя</label>
+        <input type="text" id="username" placeholder="Введите ваше имя" required>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" id="cancelLoginBtn">Отмена</button>
+        <button class="btn btn-primary" id="submitLoginBtn">Войти</button>
+      </div>
+    </div>
+  </div>
   <div class="book-cover-section" id="bookCoverSection">
     <div class="book-cover-wrapper">
       <img id="bookCoverImage" src="https://raw.githubusercontent.com/MishaAndAnna/MishaAndAnna/main/Cover.png" alt="Обложка книги">
@@ -1185,10 +1263,16 @@
     const galleryModalTitle = document.getElementById('galleryModalTitle');
     const galleryModalImage = document.getElementById('galleryModalImage');
     const closeGalleryModalBtn = document.getElementById('closeGalleryModalBtn');
+    const loginModal = document.getElementById('loginModal');
+    const usernameInput = document.getElementById('username');
+    const submitLoginBtn = document.getElementById('submitLoginBtn');
+    const cancelLoginBtn = document.getElementById('cancelLoginBtn');
+    const loginBtn = document.getElementById('loginBtn');
     let isEditingChapter = false;
     let editingChapterId = null;
     let isEditingLocation = false;
     let editingLocationId = null;
+    let isAdmin = false;
 
     function showLoader() {
       loader.style.display = 'flex';
@@ -1292,7 +1376,43 @@
     exploreGalleryBtn.addEventListener('click', showGallery);
     exploreGalleryBtnSecondary.addEventListener('click', showGallery);
 
+    function showLoginModal() {
+      loginModal.style.display = 'flex';
+      usernameInput.focus();
+    }
+
+    function handleLogin() {
+      const username = usernameInput.value.trim();
+      if (!username) {
+        showToast('Введите имя пользователя', 'error');
+        return;
+      }
+      isAdmin = username === 'Михаил Калепназ';
+      localStorage.setItem('username', username);
+      localStorage.setItem('isAdmin', isAdmin);
+      loginModal.style.display = 'none';
+      updateButtonVisibility();
+      showToast(`Добро пожаловать, ${username}!`, 'success');
+    }
+
+    function updateButtonVisibility() {
+      document.querySelectorAll('.admin-only, .edit-btn, .delete-btn').forEach(btn => {
+        btn.classList.toggle('hidden-btn', !isAdmin);
+      });
+    }
+
+    loginBtn.addEventListener('click', showLoginModal);
+    submitLoginBtn.addEventListener('click', handleLogin);
+    cancelLoginBtn.addEventListener('click', () => {
+      loginModal.style.display = 'none';
+      usernameInput.value = '';
+    });
+
     toggleChapterFormBtn.addEventListener('click', () => {
+      if (!isAdmin) {
+        showToast('Только администратор может добавлять главы', 'error');
+        return;
+      }
       chapterForm.style.display = chapterForm.style.display === 'block' ? 'none' : 'block';
       if (chapterForm.style.display === 'block') {
         resetChapterForm();
@@ -1305,6 +1425,10 @@
     });
 
     saveChapterBtn.addEventListener('click', async () => {
+      if (!isAdmin) {
+        showToast('Только администратор может сохранять главы', 'error');
+        return;
+      }
       const title = chapterTitle.value.trim();
       const content = chapterContent.value.trim();
       if (!title || !content) {
@@ -1342,6 +1466,31 @@
       editingChapterId = null;
     }
 
+    function copyChapter(id) {
+      showLoader();
+      database.ref(`precursor_chapters/${id}`).once('value')
+        .then((snapshot) => {
+          const chapter = snapshot.val();
+          if (chapter) {
+            const text = `# ${chapter.title}\n\n${chapter.content}`;
+            navigator.clipboard.writeText(text)
+              .then(() => {
+                showToast('Текст главы скопирован в буфер обмена!', 'success');
+              })
+              .catch((err) => {
+                showToast('Ошибка копирования: ' + err.message, 'error');
+              });
+          } else {
+            showToast('Глава не найдена', 'error');
+          }
+          hideLoader();
+        })
+        .catch((error) => {
+          showToast(`Ошибка загрузки главы: ${error.message}`, 'error');
+          hideLoader();
+        });
+    }
+
     function loadChapters() {
       showLoader();
       try {
@@ -1367,11 +1516,14 @@
                 <button class="card-btn view-btn" data-id="${id}">
                   <i class="fas fa-eye"></i>
                 </button>
-                <button class="card-btn edit-btn" data-id="${id}">
+                <button class="card-btn edit-btn admin-only" data-id="${id}">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="card-btn delete-btn" data-id="${id}">
+                <button class="card-btn delete-btn admin-only" data-id="${id}">
                   <i class="fas fa-trash"></i>
+                </button>
+                <button class="card-btn copy-btn" data-id="${id}">
+                  <i class="fas fa-copy"></i>
                 </button>
               </div>
             `;
@@ -1384,14 +1536,28 @@
           });
           document.querySelectorAll('.edit-btn').forEach(btn => {
             btn.addEventListener('click', () => {
+              if (!isAdmin) {
+                showToast('Только администратор может редактировать главы', 'error');
+                return;
+              }
               editChapter(btn.dataset.id);
             });
           });
           document.querySelectorAll('.delete-btn').forEach(btn => {
             btn.addEventListener('click', () => {
+              if (!isAdmin) {
+                showToast('Только администратор может удалять главы', 'error');
+                return;
+              }
               deleteChapter(btn.dataset.id);
             });
           });
+          document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              copyChapter(btn.dataset.id);
+            });
+          });
+          updateButtonVisibility();
           hideLoader();
           updateChapterStatus('online', 'Соединение с базой данных');
         }, (error) => {
@@ -1476,6 +1642,10 @@
     });
 
     toggleGalleryFormBtn.addEventListener('click', () => {
+      if (!isAdmin) {
+        showToast('Только администратор может добавлять локации', 'error');
+        return;
+      }
       galleryForm.style.display = galleryForm.style.display === 'block' ? 'none' : 'block';
       if (galleryForm.style.display === 'block') {
         resetGalleryForm();
@@ -1512,6 +1682,10 @@
     });
 
     saveGalleryBtn.addEventListener('click', async () => {
+      if (!isAdmin) {
+        showToast('Только администратор может сохранять локации', 'error');
+        return;
+      }
       const title = locationTitle.value.trim();
       const image = locationImage.value.trim();
       const characters = Array.from(characterInputs.querySelectorAll('.character-input-group')).map(group => ({
@@ -1582,7 +1756,7 @@
             return;
           }
           galleryEmptyState.style.display = 'none';
-          Object.entries(locations).forEach(([id, item], index) => {
+          Object.entries(locations).forEach(([id, item]) => {
             const locationCard = document.createElement('div');
             locationCard.className = 'location-card';
             locationCard.dataset.locationId = id;
@@ -1602,21 +1776,19 @@
                   .join('')}
               </div>
               <div class="card-footer">
-                <button class="card-btn edit-btn" data-id="${id}">
+                <button class="card-btn edit-btn admin-only" data-id="${id}">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="card-btn delete-btn" data-id="${id}">
+                <button class="card-btn delete-btn admin-only" data-id="${id}">
                   <i class="fas fa-trash"></i>
                 </button>
               </div>
             `;
             galleryGrid.appendChild(locationCard);
-            // Обработчик клика на изображение локации
             locationCard.querySelector('.location-image').addEventListener('click', (e) => {
               e.stopPropagation();
               showGalleryModal(item.location.title, item.location.image);
             });
-            // Обработчик клика на изображения персонажей
             locationCard.querySelectorAll('.character-image').forEach((img, charIndex) => {
               img.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -1625,10 +1797,18 @@
             });
             locationCard.querySelector('.edit-btn').addEventListener('click', (e) => {
               e.stopPropagation();
+              if (!isAdmin) {
+                showToast('Только администратор может редактировать локации', 'error');
+                return;
+              }
               editLocation(id);
             });
             locationCard.querySelector('.delete-btn').addEventListener('click', (e) => {
               e.stopPropagation();
+              if (!isAdmin) {
+                showToast('Только администратор может удалять локации', 'error');
+                return;
+              }
               deleteLocation(id);
             });
             locationCard.addEventListener('click', (e) => {
@@ -1644,6 +1824,7 @@
               }
             });
           });
+          updateButtonVisibility();
           hideLoader();
           updateGalleryStatus('online', 'Соединение с базой данных');
         }, (error) => {
@@ -1666,6 +1847,10 @@
     }
 
     function editLocation(id) {
+      if (!isAdmin) {
+        showToast('Только администратор может редактировать локации', 'error');
+        return;
+      }
       showLoader();
       database.ref(`gallery_locations/${id}`).once('value')
         .then((snapshot) => {
@@ -1708,15 +1893,23 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('App initialized');
-      updateChapterStatus('online', 'Соединение с базой данных');
-      updateGalleryStatus('online', 'Соединение с базой данных');
-      loadTheme();
-      loadChapters();
-      loadBookCover();
-      loadGallery();
-      bookCoverSection.classList.add('visible');
-    });
+  console.log('App initialized');
+  updateChapterStatus('online', 'Соединение с базой данных');
+  updateGalleryStatus('online', 'Соединение с базой данных');
+  loadTheme();
+  loadChapters();
+  loadBookCover();
+  loadGallery();
+  bookCoverSection.classList.add('visible');
+  const savedUsername = localStorage.getItem('username');
+  if (savedUsername) {
+    isAdmin = savedUsername === 'Михаил Калепназ';
+    localStorage.setItem('isAdmin', isAdmin);
+    updateButtonVisibility();
+  } else {
+    showLoginModal(); // Показываем модальное окно входа, если пользователь не авторизован
+  }
+});
   </script>
 </body>
 </html>
