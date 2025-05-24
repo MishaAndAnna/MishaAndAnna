@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Academy of Refined English</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Crimson+Text:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: linear-gradient(135deg, #2c1810 0%, #5d4e37 100%);
+            color: #f4f1e8;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #d4af37;
+            padding: 20px 0;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.2);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #d4af37;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav a {
+            color: #f4f1e8;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+
+        nav a:hover, nav a.active {
+            color: #d4af37;
+            background: rgba(212, 175, 55, 0.1);
+            transform: translateY(-2px);
+        }
+
+        main {
+            padding: 40px 0;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 60px 0;
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%23d4af37" opacity="0.1"><path d="M10,50 Q25,10 40,50 T70,50 Q85,90 100,50 V100 H0 Z"/></svg>');
+            border-radius: 15px;
+            margin-bottom: 40px;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            color: #d4af37;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .quote-box {
+            background: rgba(212, 175, 55, 0.1);
+            border-left: 4px solid #d4af37;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 0 10px 10px 0;
+            font-style: italic;
+            font-size: 1.2rem;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #d4af37, #f4d03f);
+            color: #2c1810;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: #d4af37;
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 3px;
+            background: #d4af37;
+            margin: 15px auto;
+            border-radius: 2px;
+        }
+
+        .word-card {
+            background: rgba(244, 241, 232, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .word-card:hover {
+            border-color: #d4af37;
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .word-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: #d4af37;
+            margin-bottom: 10px;
+        }
+
+        .transcription {
+            color: #b8a082;
+            font-style: italic;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .definition {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .example {
+            font-style: italic;
+            color: #e8dcc0;
+            border-left: 3px solid #d4af37;
+            padding-left: 15px;
+        }
+
+        .exercise-card {
+            background: rgba(244, 241, 232, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .exercise-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #d4af37;
+            margin-bottom: 15px;
+        }
+
+        .task-text {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #d4af37;
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            background: rgba(244, 241, 232, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            color: #f4f1e8;
+            font-family: 'Crimson Text', serif;
+            font-size: 1.1rem;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+
+        .score-display {
+            text-align: center;
+            background: rgba(212, 175, 55, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .score-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: #d4af37;
+            margin-bottom: 10px;
+        }
+
+        .library-text {
+            background: rgba(244, 241, 232, 0.05);
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #d4af37;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .author-info {
+            text-align: right;
+            font-style: italic;
+            color: #d4af37;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 20px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #d4af37;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">The Academy</div>
+                <nav>
+                    <ul>
+                        <li><a href="#" onclick="showPage('home')" class="nav-link active">Главная</a></li>
+                        <li><a href="#" onclick="showPage('dictionary')" class="nav-link">Словарь</a></li>
+                        <li><a href="#" onclick="showPage('exercises')" class="nav-link">Задания</a></li>
+                        <li><a href="#" onclick="showPage('library')" class="nav-link">Библиотека</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- Главная страница -->
+            <div id="home" class="page active">
+                <div class="hero">
+                    <h1>The Academy of Refined English</h1>
+                    <p>Discover the elegance of aristocratic speech</p>
+                    <div class="quote-box">
+                        <p id="dailyQuote">"The limits of my language mean the limits of my world."</p>
+                        <small>— Ludwig Wittgenstein</small>
+                    </div>
+                    <button class="btn" onclick="showPage('dictionary')">Начать изучение</button>
+                </div>
+            </div>
+
+            <!-- Словарь -->
+            <div id="dictionary" class="page">
+                <h2 class="section-title">Словарь изысканных слов</h2>
+                <div id="dictionaryContent">
+                    <div class="loading">Загружаем словарь...</div>
+                </div>
+            </div>
+
+            <!-- Задания -->
+            <div id="exercises" class="page">
+                <h2 class="section-title">Упражнения в благородстве речи</h2>
+                
+                <div class="score-display">
+                    <div class="score-title">Ваш титул</div>
+                    <div id="currentTitle">Начинающий джентльмен</div>
+                    <div>Очки: <span id="scoreDisplay">0</span></div>
+                </div>
+
+                <div class="exercise-card">
+                    <div class="exercise-title">Преобразование речи</div>
+                    <div class="task-text">
+                        Превратите грубую фразу в изысканную:
+                        <br><strong id="roughPhrase">"Заткнись!"</strong>
+                    </div>
+                    <textarea id="refinedAnswer" placeholder="Введите ваш изысканный вариант..."></textarea>
+                    <button class="btn" onclick="checkRefinement()">Проверить</button>
+                    <div id="refinementResult"></div>
+                </div>
+
+                <div class="exercise-card">
+                    <div class="exercise-title">Письмо в викторианском стиле</div>
+                    <div class="task-text">
+                        Напишите краткое письмо-извинение за опоздание на светский раут:
+                    </div>
+                    <textarea id="letterAnswer" placeholder="Dear Sir/Madam..."></textarea>
+                    <button class="btn" onclick="checkLetter()">Оценить письмо</button>
+                    <div id="letterResult"></div>
+                </div>
+            </div>
+
+            <!-- Библиотека -->
+            <div id="library" class="page">
+                <h2 class="section-title">Библиотека классических текстов</h2>
+                
+                <div class="library-text">
+                    <p>"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered the rightful property of some one or other of their daughters."</p>
+                    <div class="author-info">— Jane Austen, "Pride and Prejudice"</div>
+                </div>
+
+                <div class="library-text">
+                    <p>"We can judge the heart of a man by his treatment of animals. I have found that whenever people are rude to waiters or unkind to servants, they are invariably of an inferior moral character. A gentleman reveals himself in the manner by which he treats those who are beneath him in social station."</p>
+                    <div class="author-info">— Oscar Wilde</div>
+                </div>
+
+                <div class="library-text">
+                    <p>"The real distinction is not between those who affirm and those who deny, but between those who are willing to take responsibility for the consequences of their beliefs and those who are not."</p>
+                    <div class="author-info">— Henry James</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Firebase SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.15.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.15.0/firebase-database-compat.min.js"></script>
+
+    <script>
+       // Firebase конфигурация
+        const firebaseConfig = {
+            apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
+            authDomain: "misha-and-anna-48e4c.firebaseapp.com",
+            databaseURL: "https://misha-and-anna-48e4c-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "misha-and-anna-48e4c",
+            storageBucket: "misha-and-anna-48e4c.firebasestorage.app",
+            messagingSenderId: "822036073579",
+            appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
+            measurementId: "G-XR86X6PXMX"
+        };
+
+        // Инициализация Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Данные словаря с категориями
+        const dictionaryWords = [
+            {
+                category: "Вежливость и этикет",
+                description: "Слова, отражающие утончённые манеры, изысканное обхождение и аристократический этикет.",
+                words: [
+                    { word: "Gracious", transcription: "[ˈɡreɪʃəs]", definition: "Любезный; проявляющий доброту и теплоту.", example: "She was gracious in welcoming her guests to the estate." },
+                    { word: "Courteous", transcription: "[ˈkɜːrtiəs]", definition: "Учтивый; проявляющий вежливость и уважение.", example: "His courteous bow charmed the assembly." },
+                    { word: "Obliging", transcription: "[əˈblaɪdʒɪŋ]", definition: "Готовый помочь; услужливый и внимательный.", example: "The obliging servant attended to every request promptly." },
+                    { word: "Polite", transcription: "[pəˈlaɪt]", definition: "Вежливый; демонстрирующий хорошие манеры.", example: "Her polite refusal was met with understanding." },
+                    { word: "Well-mannered", transcription: "[ˌwel ˈmænərd]", definition: "С хорошими манерами; воспитанный.", example: "The well-mannered youth impressed the elders." },
+                    { word: "Refined", transcription: "[rɪˈfaɪnd]", definition: "Утончённый; обладающий изысканными манерами.", example: "Her refined sensibilities shone in conversation." },
+                    { word: "Civil", transcription: "[ˈsɪvl]", definition: "Обходительный; вежливый в обществе.", example: "He maintained a civil tone despite the disagreement." },
+                    { word: "Considerate", transcription: "[kənˈsɪdərət]", definition: "Деликатный; внимательный к другим.", example: "It was considerate of him to offer his seat." },
+                    { word: "Humble", transcription: "[ˈhʌmbl]", definition: "Скромный; лишённый высокомерия.", example: "His humble demeanor won many hearts." },
+                    { word: "Respectful", transcription: "[rɪˈspektfl]", definition: "Почтительный; выражающий уважение.", example: "She was respectful to all, regardless of station." },
+                    { word: "Honoured", transcription: "[ˈɒnərd]", definition: "Удостоенный чести; польщённый.", example: "I am honoured by your gracious invitation." },
+                    { word: "Tactful", transcription: "[ˈtæktfl]", definition: "Тактичный; умеющий избегать обид.", example: "Her tactful response diffused the tension." },
+                    { word: "Accommodating", transcription: "[əˈkɒmədeɪtɪŋ]", definition: "Услужливый; готовый пойти навстречу.", example: "The accommodating host ensured everyone’s comfort." },
+                    { word: "Deferential", transcription: "[ˌdefəˈrenʃl]", definition: "Почтительный; проявляющий уважение к старшим.", example: "His deferential manner pleased the duke." },
+                    { word: "Urbane", transcription: "[ɜːrˈbeɪn]", definition: "Изысканный, светский; утончённый в общении.", example: "His urbane conversation captivated the salon." },
+                    { word: "Exquisite", transcription: "[ɪkˈskwɪzɪt]", definition: "Изящный; исключительно утончённый.", example: "Her exquisite manners were the talk of the evening." },
+                    { word: "Polished", transcription: "[ˈpɒlɪʃt]", definition: "Отточенный, изысканный; совершенный в манерах.", example: "His polished speech reflected years of refinement." },
+                    { word: "Gallant", transcription: "[ˈɡælənt]", definition: "Галантный; рыцарски учтивый.", example: "The gallant gentleman escorted her to the ball." },
+                    { word: "Decorous", transcription: "[ˈdekərəs]", definition: "Благопристойный; соответствующий этикету.", example: "Her decorous conduct was exemplary." },
+                    { word: "Suave", transcription: "[swɑːv]", definition: "Утончённо-обходительный; гладкий в общении.", example: "His suave demeanor won over the skeptics." },
+                    { word: "Dignity", transcription: "[ˈdɪɡnəti]", definition: "Достоинство; чувство собственного величия.", example: "She carried herself with unparalleled dignity." },
+                    { word: "Courtesy", transcription: "[ˈkɜːrtəsi]", definition: "Учтивость; проявление вежливости.", example: "His courtesy to the staff was admirable." },
+                    { word: "Decorum", transcription: "[dɪˈkɔːrəm]", definition: "Благопристойность; соответствие нормам.", example: "The decorum of the event was strictly observed." },
+                    { word: "Respect", transcription: "[rɪˈspekt]", definition: "Уважение; почтение к другим.", example: "He showed respect to all opinions voiced." },
+                    { word: "Politeness", transcription: "[pəˈlaɪtnəs]", definition: "Вежливость; качество хороших манер.", example: "Her politeness endeared her to the guests." },
+                    { word: "Grace", transcription: "[ɡreɪs]", definition: "Грация; изящество в движениях и манерах.", example: "She moved with the grace of a dancer." },
+                    { word: "Elegance", transcription: "[ˈelɪɡəns]", definition: "Элегантность; утончённый стиль.", example: "The elegance of her speech was unmatched." },
+                    { word: "Refinement", transcription: "[rɪˈfaɪnmənt]", definition: "Утончённость; изысканность манер.", example: "His refinement shone in every gesture." },
+                    { word: "Poise", transcription: "[pɔɪz]", definition: "Выдержка, изящество; уверенность в манерах.", example: "Her poise under pressure was remarkable." },
+                    { word: "Civility", transcription: "[sɪˈvɪləti]", definition: "Изысканная обходительность; вежливость.", example: "Civility prevailed in their discourse." },
+                    { word: "Condescend", transcription: "[ˌkɒndɪˈsend]", definition: "Снисходить; проявлять благосклонность.", example: "She condescended to join the humble gathering." },
+                    { word: "Deign", transcription: "[deɪn]", definition: "Соблаговолить; снизойти до действия.", example: "He deigned to answer the novice’s query." },
+                    { word: "Vouchsafe", transcription: "[ˈvaʊtʃseɪf]", definition: "Удостоить; милостиво предоставить.", example: "She vouchsafed a smile to the admirer." },
+                    { word: "Bestow", transcription: "[bɪˈstəʊ]", definition: "Даровать; милостиво вручить.", example: "He bestowed his wisdom upon the young scholar." },
+                    { word: "Accord", transcription: "[əˈkɔːrd]", definition: "Предоставлять, оказывать; проявлять уважение.", example: "She accorded him the highest respect." },
+                    { word: "Exalt", transcription: "[ɪɡˈzɔːlt]", definition: "Возвышать; прославлять.", example: "His deeds exalted him in the eyes of peers." },
+                    { word: "Revere", transcription: "[rɪˈvɪər]", definition: "Почитать; относиться с глубоким уважением.", example: "They revered their wise mentor." },
+                    { word: "Compliment", transcription: "[ˈkɒmplɪmənt]", definition: "Изящно хвалить; делать комплименты.", example: "He complimented her elegant attire." },
+                    { word: "Felicitous", transcription: "[fɪˈlɪsɪtəs]", definition: "Уместно выражающий; удачно подобранный.", example: "Her felicitous remark eased the tension." },
+                    { word: "Adorn", transcription: "[əˈdɔːrn]", definition: "Украшать манеры; придавать изысканность.", example: "Her words adorned the conversation beautifully." }
+                ]
+            },
+            {
+                category: "Литературная речь и эмоции",
+                description: "Слова, передающие глубокие чувства с аристократическим и утончённым оттенком.",
+                words: [
+                    { word: "Melancholy", transcription: "[ˈmelənkəli]", definition: "Меланхолия; состояние глубокой грусти.", example: "A melancholy air hung over the old manor." },
+                    { word: "Elated", transcription: "[ɪˈleɪtɪd]", definition: "Приподнятый; полный радости.", example: "She was elated by the unexpected compliment." },
+                    { word: "Bewildered", transcription: "[bɪˈwɪldərd]", definition: "Озадаченный; сбитый с толку.", example: "He stood bewildered by her sudden departure." },
+                    { word: "Enchanted", transcription: "[ɪnˈtʃæntɪd]", definition: "Очарованный; захваченный магией момента.", example: "She was enchanted by the moonlit garden." },
+                    { word: "Delighted", transcription: "[dɪˈlaɪtɪd]", definition: "Восхищённый; полный удовольствия.", example: "He was delighted by her gracious hospitality." },
+                    { word: "Distressed", transcription: "[dɪˈstrest]", definition: "Огорчённый; испытывающий душевную боль.", example: "She was distressed by the news of loss." },
+                    { word: "Serene", transcription: "[sɪˈriːn]", definition: "Безмятежный; спокойный и умиротворённый.", example: "Her serene smile calmed the room." },
+                    { word: "Forlorn", transcription: "[fəˈlɔːrn]", definition: "Покинутый, несчастный; полный печали.", example: "The forlorn widow gazed at the horizon." },
+                    { word: "Astonished", transcription: "[əˈstɒnɪʃt]", definition: "Изумлённый; поражённый удивлением.", example: "He was astonished by her eloquence." },
+                    { word: "Mortified", transcription: "[ˈmɔːrtɪfaɪd]", definition: "Уязвлённый; испытывающий стыд.", example: "She was mortified by her social blunder." },
+                    { word: "Exuberant", transcription: "[ɪɡˈzjuːbərənt]", definition: "Буйно радостный; полный энергии.", example: "His exuberant laughter filled the hall." },
+                    { word: "Poignant", transcription: "[ˈpɔɪnjənt]", definition: "Трогательный; вызывающий глубокие чувства.", example: "Her poignant tale moved the audience." },
+                    { word: "Mournful", transcription: "[ˈmɔːrnfl]", definition: "Скорбный; выражающий печаль.", example: "The mournful melody echoed through the chapel." },
+                    { word: "Rapturous", transcription: "[ˈræptʃərəs]", definition: "Восторженный; полный экстаза.", example: "The crowd gave rapturous applause." },
+                    { word: "Wistful", transcription: "[ˈwɪstfl]", definition: "Тоскующий; полный светлой грусти.", example: "Her wistful gaze lingered on the past." },
+                    { word: "Enraptured", transcription: "[ɪnˈræptʃərd]", definition: "В восторге; захваченный эмоциями.", example: "He was enraptured by her performance." },
+                    { word: "Pensive", transcription: "[ˈpensɪv]", definition: "Задумчивый; погружённый в размышления.", example: "His pensive mood suited the quiet evening." },
+                    { word: "Languid", transcription: "[ˈlæŋɡwɪd]", definition: "Томный; медленный и расслабленный.", example: "She moved with languid grace." },
+                    { word: "Exalted", transcription: "[ɪɡˈzɔːltɪd]", definition: "Возвышенный; полный величия.", example: "His exalted spirit inspired all around." },
+                    { word: "Sublime", transcription: "[səˈblaɪm]", definition: "Возвышенный, утончённый; вызывающий благоговение.", example: "The sublime beauty of the poem touched her soul." },
+                    { word: "Sorrow", transcription: "[ˈsɒrəʊ]", definition: "Скорбь; глубокая печаль.", example: "Her sorrow was palpable at the farewell." },
+                    { word: "Rapture", transcription: "[ˈræptʃər]", definition: "Восторг; состояние экстаза.", example: "The music filled her with rapture." },
+                    { word: "Yearning", transcription: "[ˈjɜːrnɪŋ]", definition: "Томление; сильное желание.", example: "His yearning for home was evident." },
+                    { word: "Pathos", transcription: "[ˈpeɪθɒs]", definition: "Пафос; глубокое чувство, вызывающее сочувствие.", example: "The pathos of her speech moved the crowd." },
+                    { word: "Bliss", transcription: "[blɪs]", definition: "Блаженство; совершенное счастье.", example: "Their reunion was pure bliss." },
+                    { word: "Lamentation", transcription: "[ˌlæmənˈteɪʃn]", definition: "Стенание; выражение скорби.", example: "Her lamentation echoed through the halls." },
+                    { word: "Ardour", transcription: "[ˈɑːrdər]", definition: "Пыл; страстное воодушевление.", example: "His ardour for poetry was contagious." },
+                    { word: "Fervour", transcription: "[ˈfɜːrvər]", definition: "Жар души; пылкое чувство.", example: "She spoke with fervour about her cause." },
+                    { word: "Ecstasy", transcription: "[ˈekstəsi]", definition: "Экстаз; высшая степень восторга.", example: "The performance left her in ecstasy." },
+                    { word: "Tenderness", transcription: "[ˈtendərnəs]", definition: "Нежность; мягкость чувств.", example: "His tenderness toward her was touching." },
+                    { word: "Lament", transcription: "[ləˈment]", definition: "Оплакивать; выражать скорбь.", example: "She lamented the loss of her youth." },
+                    { word: "Exult", transcription: "[ɪɡˈzʌlt]", definition: "Торжествовать; радоваться победе.", example: "He exulted in his newfound freedom." },
+                    { word: "Muse", transcription: "[mjuːz]", definition: "Размышлять, мечтать; погружаться в думы.", example: "She mused over the beauty of the stars." },
+                    { word: "Yearn", transcription: "[jɜːrn]", definition: "Томиться; сильно желать.", example: "He yearned for the days of old." },
+                    { word: "Enthrall", transcription: "[ɪnˈθrɔːl]", definition: "Завораживать; захватывать внимание.", example: "Her story enthralled the listeners." },
+                    { word: "Soothe", transcription: "[suːð]", definition: "Умиротворять; успокаивать.", example: "Her voice soothed his troubled mind." },
+                    { word: "Beguile", transcription: "[bɪˈɡaɪl]", definition: "Очаровывать; пленять.", example: "Her charm beguiled all who met her." },
+                    { word: "Ravish", transcription: "[ˈrævɪʃ]", definition: "Восхищать; приводить в восторг.", example: "The music ravished her senses." },
+                    { word: "Contemplate", transcription: "[ˈkɒntəmpleɪt]", definition: "Созерцать; глубоко размышлять.", example: "He contemplated the meaning of life." },
+                    { word: "Adore", transcription: "[əˈdɔːr]", definition: "Обожать; испытывать глубокую любовь.", example: "She adored the elegance of the ball." }
+                ]
+            },
+            {
+                category: "Высокий стиль и редкие слова",
+                description: "Слова, подчёркивающие аристократический, возвышенный и редкий стиль речи.",
+                words: [
+                    { word: "Eloquent", transcription: "[ˈɛləkwənt]", definition: "Красноречивый; обладающий силой выражения.", example: "Her eloquent discourse captivated the assembly." },
+                    { word: "Articulate", transcription: "[ɑːrˈtɪkjələt]", definition: "Ясно выражающийся; чётко формулирующий мысли.", example: "He was articulate in his defense." },
+                    { word: "Sagacious", transcription: "[səˈɡeɪʃəs]", definition: "Проницательный; обладающий острым умом.", example: "Her sagacious advice guided the council." },
+                    { word: "Prudent", transcription: "[ˈpruːdnt]", definition: "Благоразумный; осторожный и мудрый.", example: "His prudent decisions saved the estate." },
+                    { word: "Gallant", transcription: "[ˈɡælənt]", definition: "Галантный; рыцарски учтивый.", example: "The gallant knight won her favor." },
+                    { word: "Dignified", transcription: "[ˈdɪɡnɪfaɪd]", definition: "Полный достоинства; величественный.", example: "His dignified presence commanded respect." },
+                    { word: "Resplendent", transcription: "[rɪˈsplendənt]", definition: "Блистательный; сияющий великолепием.", example: "She appeared resplendent in her gown." },
+                    { word: "Austere", transcription: "[ɔːˈstɪr]", definition: "Строгий, аскетичный; лишённый излишеств.", example: "His austere lifestyle was admired." },
+                    { word: "Noble", transcription: "[ˈnəʊbl]", definition: "Благородный; высокий по духу.", example: "Her noble actions inspired others." },
+                    { word: "Magnanimous", transcription: "[mæɡˈnænɪməs]", definition: "Великодушный; благородный в поступках.", example: "His magnanimous gesture forgave the offense." },
+                    { word: "Virtuous", transcription: "[ˈvɜːrtʃuəs]", definition: "Добродетельный; моральный и честный.", example: "She was known for her virtuous character." },
+                    { word: "Honourable", transcription: "[ˈɒnərəbl]", definition: "Честный; достойный уважения.", example: "His honourable conduct was exemplary." },
+                    { word: "Immaculate", transcription: "[ɪˈmækjələt]", definition: "Безупречный; чистый и совершенный.", example: "Her immaculate manners were flawless." },
+                    { word: "Chivalrous", transcription: "[ˈʃɪvəlrəs]", definition: "Рыцарский; благородный и учтивый.", example: "His chivalrous act saved her honor." },
+                    { word: "Sublime", transcription: "[səˈblaɪm]", definition: "Возвышенный; вызывающий благоговение.", example: "The sublime poetry moved the audience." },
+                    { word: "Exalted", transcription: "[ɪɡˈzɔːltɪd]", definition: "Возвышенный; полный величия.", example: "Her exalted ideals inspired reform." },
+                    { word: "Erudite", transcription: "[ˈerʊdaɪt]", definition: "Эрудированный; обладающий глубокими знаниями.", example: "The erudite scholar lectured with ease." },
+                    { word: "August", transcription: "[ɔːˈɡʌst]", definition: "Величественный; внушающий уважение.", example: "The august assembly gathered in silence." },
+                    { word: "Refulgent", transcription: "[rɪˈfʌldʒənt]", definition: "Сияющий, великолепный; полный блеска.", example: "The refulgent chandelier lit the hall." },
+                    { word: "Stately", transcription: "[ˈsteɪtli]", definition: "Величавый; полный достоинства.", example: "The stately procession moved slowly." },
+                    { word: "Eloquence", transcription: "[ˈɛləkwəns]", definition: "Красноречие; искусство выразительной речи.", example: "Her eloquence won the debate." },
+                    { word: "Grandeur", transcription: "[ˈɡrændʒər]", definition: "Величие; пышность и великолепие.", example: "The grandeur of the palace was awe-inspiring." },
+                    { word: "Nobility", transcription: "[nəʊˈbɪləti]", definition: "Благородство; высокие моральные качества.", example: "Her nobility shone in her actions." },
+                    { word: "Virtue", transcription: "[ˈvɜːrtʃuː]", definition: "Добродетель; моральная чистота.", example: "She was a paragon of virtue." },
+                    { word: "Splendour", transcription: "[ˈsplendər]", definition: "Великолепие; роскошь и блеск.", example: "The splendour of the ball was unmatched." },
+                    { word: "Rectitude", transcription: "[ˈrektɪtjuːd]", definition: "Праведность; непреклонная честность.", example: "His rectitude earned him trust." },
+                    { word: "Sagacity", transcription: "[səˈɡæsəti]", definition: "Проницательность; мудрость и остроумие.", example: "Her sagacity guided the decision." },
+                    { word: "Valour", transcription: "[ˈvælər]", definition: "Доблесть; отвага и смелость.", example: "His valour was celebrated in song." },
+                    { word: "Magnificence", transcription: "[mæɡˈnɪfɪsns]", definition: "Пышность; великолепие и роскошь.", example: "The magnificence of the estate was breathtaking." },
+                    { word: "Paragon", transcription: "[ˈpærəɡən]", definition: "Образец совершенства; идеал.", example: "She was a paragon of grace." },
+                    { word: "Extol", transcription: "[ɪkˈstəʊl]", definition: "Превозносить; высоко хвалить.", example: "They extolled her virtues publicly." },
+                    { word: "Venerate", transcription: "[ˈvenəreɪt]", definition: "Почитать; относиться с глубоким уважением.", example: "They venerated their ancestors." },
+                    { word: "Ennoble", transcription: "[ɪˈnəʊbl]", definition: "Облагораживать; придавать достоинство.", example: "Her actions ennobled her family name." },
+                    { word: "Exalt", transcription: "[ɪɡˈzɔːlt]", definition: "Возвышать; прославлять.", example: "His poetry exalted the human spirit." },
+                    { word: "Adorn", transcription: "[əˈdɔːrn]", definition: "Украшать; придавать изысканность.", example: "Her words adorned the discourse." },
+                    { word: "Illumine", transcription: "[ɪˈluːmɪn]", definition: "Озарять; просвещать.", example: "Her wisdom illumined the path forward." },
+                    { word: "Proclaim", transcription: "[prəˈkleɪm]", definition: "Провозглашать; публично объявлять.", example: "He proclaimed his loyalty to the crown." },
+                    { word: "Emulate", transcription: "[ˈemjəleɪt]", definition: "Стремиться сравниться; подражать.", example: "She emulated her mentor’s elegance." },
+                    { word: "Laud", transcription: "[lɔːd]", definition: "Восхвалять; прославлять.", example: "They lauded her charitable works." },
+                    { word: "Enshrine", transcription: "[ɪnˈʃraɪn]", definition: "Хранить как святыню; высоко чтить.", example: "Her memory was enshrined in their hearts." }
+                ]
+            },
+            {
+                category: "Фразы для писем и светских бесед",
+                description: "Выражения, пропитанные утончённостью, элегантностью и аристократическим шармом.",
+                words: [
+                    { word: "I am most obliged to you.", transcription: "[aɪ æm məʊst əˈblaɪdʒd tə juː]", definition: "Я вам весьма признателен.", example: "I am most obliged to you for your generous hospitality." },
+                    { word: "Might I inquire…?", transcription: "[maɪt aɪ ɪnˈkwaɪər]", definition: "Могу ли я поинтересоваться…?", example: "Might I inquire as to your plans for the evening?" },
+                    { word: "Pray, do tell.", transcription: "[preɪ, duː tel]", definition: "Прошу, расскажите.", example: "Pray, do tell about your travels abroad." },
+                    { word: "It would be my pleasure.", transcription: "[ɪt wʊd biː maɪ ˈpleʒər]", definition: "Для меня будет честью.", example: "It would be my pleasure to escort you." },
+                    { word: "It is with deepest regret…", transcription: "[ɪt ɪz wɪð ˈdiːpɪst rɪˈɡret]", definition: "С глубочайшим сожалением…", example: "It is with deepest regret that I must decline." },
+                    { word: "Permit me to express…", transcription: "[pərˈmɪt miː tə ɪkˈspres]", definition: "Позвольте выразить…", example: "Permit me to express my heartfelt gratitude." },
+                    { word: "I dare say…", transcription: "[aɪ deər seɪ]", definition: "Осмелюсь сказать…", example: "I dare say this is the finest tea I’ve tasted." },
+                    { word: "How delightful.", transcription: "[haʊ dɪˈlaɪtfl]", definition: "Как восхитительно.", example: "How delightful to meet such a charming company." },
+                    { word: "I trust you are well.", transcription: "[aɪ trʌst juː ɑːr wel]", definition: "Надеюсь, вы в добром здравии.", example: "I trust you are well after your journey." },
+                    { word: "Do forgive my intrusion.", transcription: "[duː fərˈɡɪv maɪ ɪnˈtruːʒn]", definition: "Простите моё вторжение.", example: "Do forgive my intrusion into your evening." },
+                    { word: "I remain your humble servant.", transcription: "[aɪ rɪˈmeɪn jɔːr ˈhʌmbl ˈsɜːrvənt]", definition: "Остаюсь вашим покорным слугой.", example: "I remain your humble servant in this matter." },
+                    { word: "With profound esteem…", transcription: "[wɪð prəˈfaʊnd ɪˈstiːm]", definition: "С глубочайшим почтением…", example: "With profound esteem, I bid you farewell." },
+                    { word: "Your gracious condescension…", transcription: "[jɔːr ˈɡreɪʃəs ˌkɒndɪˈsenʃn]", definition: "Ваше любезное снисхождение…", example: "Your gracious condescension honors us all." },
+                    { word: "I humbly entreat…", transcription: "[aɪ ˈhʌmbli ɪnˈtriːt]", definition: "Смиренно умоляю…", example: "I humbly entreat your assistance." },
+                    { word: "It is most gracious of you.", transcription: "[ɪt ɪz məʊst ˈɡreɪʃəs əv juː]", definition: "Это чрезвычайно любезно с вашей стороны.", example: "It is most gracious of you to invite me." },
+                    { word: "Allow me to convey my admiration.", transcription: "[əˈlaʊ miː tə kənˈveɪ maɪ ˌædməˈreɪʃn]", definition: "Позвольте выразить моё восхищение.", example: "Allow me to convey my admiration for your work." },
+                    { word: "My fervent gratitude…", transcription: "[maɪ ˈfɜːrvənt ˈɡrætɪtjuːd]", definition: "Моя горячая благодарность…", example: "My fervent gratitude for your kindness knows no bounds." },
+                    { word: "I am profoundly indebted.", transcription: "[aɪ æm prəˈfaʊndli ɪnˈdetɪd]", definition: "Я в неоплатном долгу.", example: "I am profoundly indebted for your generosity." },
+                    { word: "Pray, accept my contrition.", transcription: "[preɪ, əkˈsept maɪ kənˈtrɪʃn]", definition: "Прошу, примите мои извинения.", example: "Pray, accept my contrition for the oversight." },
+                    { word: "It is an exquisite honour.", transcription: "[ɪt ɪz ən ˈekskwɪzɪt ˈɒnər]", definition: "Это изысканная честь.", example: "It is an exquisite honour to dine with you." },
+                    { word: "With utmost deference…", transcription: "[wɪð ˈʌtməʊst ˈdefərəns]", definition: "С величайшим почтением…", example: "With utmost deference, I present my request." },
+                    { word: "I crave your indulgence.", transcription: "[aɪ kreɪv jɔːr ɪnˈdʌldʒəns]", definition: "Прошу вашего сни Woe betide those who defy the king." },
+                    { word: "Doth", transcription: "[dʌθ]", definition: "Делает; архаичная форма глагола.", example: "She doth sing with angelic grace." },
+                    { word: "Shalt", transcription: "[ʃælt]", definition: "Будешь; архаичная форма глагола.", example: "Thou shalt prevail, brave knight." },
+                    { word: "Woe", transcription: "[wəʊ]", definition: "Горе; глубокая печаль.", example: "Woe unto those who betray trust." },
+                    { word: "Knell", transcription: "[nel]", definition: "Погребальный звон; зловещий звук.", example: "The knell signaled the end of an era." },
+                    { word: "Squire", transcription: "[skwaɪər]", definition: "Оруженосец, дворянин; молодой аристократ.", example: "The squire served his lord faithfully." },
+                    { word: "Thence", transcription: "[ðens]", definition: "Оттуда; указание на место.", example: "He came thence with urgent news." },
+                    { word: "Prithee", transcription: "[ˈprɪði]", definition: "Прошу тебя; архаичная просьба.", example: "Prithee, lend me thine ear." },
+                    { word: "Beguile", transcription: "[bɪˈɡaɪl]", definition: "Обольщать; очаровывать.", example: "Her smile did beguile the company." },
+                    { word: "Enjoin", transcription: "[ɪnˈdʒɔɪn]", definition: "Предписывать; строго указывать.", example: "He enjoined silence upon the crowd." }
+                ]
+            },
+            {
+                category: "Настроения, атмосферы и пейзажи",
+                description: "Слова, создающие утончённые образы природы, настроений и атмосферы.",
+                words: [
+                    { word: "Gloom", transcription: "[ɡluːm]", definition: "Мрак; тёмная и угнетающая атмосфера.", example: "A gloom settled over the silent forest." },
+                    { word: "Twilight", transcription: "[ˈtwaɪlaɪt]", definition: "Сумерки; мягкий полумрак.", example: "The twilight cast a serene glow." },
+                    { word: "Ember", transcription: "[ˈembər]", definition: "Тлеющий уголёк; символ угасающего света.", example: "The ember glowed faintly in the hearth." },
+                    { word: "Frost", transcription: "[frɒst]", definition: "Иней; холодное покрытие на поверхностях.", example: "The frost adorned the winter meadow." },
+                    { word: "Mirth", transcription: "[mɜːrθ]", definition: "Веселье; радостное настроение.", example: "The hall was filled with mirth." },
+                    { word: "Glee", transcription: "[ɡliː]", definition: "Ликование; бурная радость.", example: "Her glee was infectious at the festival." },
+                    { word: "Stillness", transcription: "[ˈstɪlnəs]", definition: "Безмолвие; полное спокойствие.", example: "The stillness of the lake was profound." },
+                    { word: "Tranquility", transcription: "[træŋˈkwɪləti]", definition: "Спокойствие; умиротворённое состояние.", example: "The tranquility of the garden soothed her." },
+                    { word: "Dreariness", transcription: "[ˈdrɪərɪnəs]", definition: "Уныние; мрачное настроение.", example: "The dreariness of the day weighed heavily." },
+                    { word: "Radiance", transcription: "[ˈreɪdiəns]", definition: "Сияние; яркий свет или блеск.", example: "Her radiance lit up the room." },
+                    { word: "Ether", transcription: "[ˈiːθər]", definition: "Эфир, высь; небесное пространство.", example: "The stars shone in the ether above." },
+                    { word: "Mist", transcription: "[mɪst]", definition: "Туман; лёгкая дымка.", example: "A mist veiled the distant hills." },
+                    { word: "Zephyr", transcription: "[ˈzefər]", definition: "Зефир; лёгкий ветер.", example: "A zephyr rustled through the leaves." },
+                    { word: "Luster", transcription: "[ˈlʌstər]", definition: "Блеск; сияющая красота.", example: "The luster of the moon enchanted her." },
+                    { word: "Verdure", transcription: "[ˈvɜːrdʒər]", definition: "Зелень, пышность; свежая растительность.", example: "The verdure of spring was breathtaking." },
+                    { word: "Serenity", transcription: "[sɪˈrenəti]", definition: "Безмятежность; спокойное состояние.", example: "The serenity of the lake was unmatched." },
+                    { word: "Effulgence", transcription: "[ɪˈfʌldʒəns]", definition: "Сияние; яркий свет.", example: "The effulgence of the sunrise was glorious." },
+                    { word: "Penumbra", transcription: "[pɪˈnʌmbrə]", definition: "Полутень; область мягкого света.", example: "The penumbra softened the room’s glow." },
+                    { word: "Rapture", transcription: "[ˈræptʃər]", definition: "Восторг; состояние экстаза.", example: "The rapture of the music overwhelmed her." },
+                    { word: "Solitude", transcription: "[ˈsɒlɪtjuːd]", definition: "Уединение; состояние покоя в одиночестве.", example: "She cherished the solitude of the woods." },
+                    { word: "Ethereal", transcription: "[ɪˈθɪəriəl]", definition: "Эфирный; лёгкий и неземной.", example: "Her ethereal beauty captivated all." },
+                    { word: "Luminous", transcription: "[ˈluːmɪnəs]", definition: "Светящийся; излучающий свет.", example: "The luminous stars guided their path." },
+                    { word: "Sublime", transcription: "[səˈblaɪm]", definition: "Возвышенный; вызывающий благоговение.", example: "The sublime landscape inspired poetry." },
+                    { word: "Verdant", transcription: "[ˈvɜːrdnt]", definition: "Цветущий; полный зелени.", example: "The verdant meadows bloomed vibrantly." },
+                    { word: "Resplendent", transcription: "[rɪˈsplendənt]", definition: "Блистательный; сияющий великолепием.", example: "The resplendent sunset painted the sky." },
+                    { word: "Diaphanous", transcription: "[daɪˈæfənəs]", definition: "Прозрачный; лёгкий и тонкий.", example: "Her diaphanous gown flowed like mist." },
+                    { word: "Halcyon", transcription: "[ˈhælsiən]", definition: "Безмятежный, идиллический; мирный.", example: "Those were halcyon days of youth." },
+                    { word: "Sombre", transcription: "[ˈsɒmbər]", definition: "Мрачный; тёмный и меланхоличный.", example: "The sombre clouds foretold a storm." },
+                    { word: "Refulgent", transcription: "[rɪˈfʌldʒənt]", definition: "Сияющий; полный блеска.", example: "The refulgent dawn broke over the hills." },
+                    { word: "Celestial", transcription: "[sɪˈlestiəl]", definition: "Небесный; божественный и возвышенный.", example: "The celestial beauty of the night sky awed her." },
+                    { word: "Shimmer", transcription: "[ˈʃɪmər]", definition: "Мерцать; мягко светиться.", example: "The lake shimmered under the moonlight." },
+                    { word: "Glimmer", transcription: "[ˈɡlɪmər]", definition: "Сверкать; слабо светиться.", example: "A glimmer of hope shone in her eyes." },
+                    { word: "Envelop", transcription: "[ɪnˈveləp]", definition: "Окутывать; окружать полностью.", example: "Mist enveloped the quiet valley." },
+                    { word: "Illumine", transcription: "[ɪˈluːmɪn]", definition: "Озарять; освещать светом или идеями.", example: "The stars illumined the path below." },
+                    { word: "Murmur", transcription: "[ˈmɜːrmər]", definition: "Журчать, шептать; издавать мягкий звук.", example: "The brook murmured softly nearby." },
+                    { word: "Effuse", transcription: "[ɪˈfjuːz]", definition: "Изливаться; распространять эмоции.", example: "Her joy effused through her words." },
+                    { word: "Glisten", transcription: "[ˈɡlɪsn]", definition: "Блестеть; сиять от влаги.", example: "Dew glistened on the morning grass." },
+                    { word: "Waft", transcription: "[wæft]", definition: "Доноситься; переноситься ветром.", example: "The scent of roses wafted through the air." },
+                    { word: "Enshroud", transcription: "[ɪnˈʃraʊd]", definition: "Окутывать; скрывать в тайне.", example: "Fog enshrouded the ancient castle." },
+                    { word: "Radiate", transcription: "[ˈreɪdieɪt]", definition: "Излучать; распространять свет или тепло.", example: "Her smile radiated warmth to all." }
+                ]
+            },
+            {
+                category: "Для описания характера и поведения",
+                description: "Слова, описывающие утончённые, аристократические черты характера и поведения.",
+                words: [
+                    { word: "Amiable", transcription: "[ˈeɪmiəbl]", definition: "Дружелюбный; приятный в общении.", example: "Her amiable nature won many friends." },
+                    { word: "Earnest", transcription: "[ˈɜːrnɪst]", definition: "Искренний; серьёзный и честный.", example: "His earnest plea moved the council." },
+                    { word: "Sincere", transcription: "[sɪnˈsɪr]", definition: "Честный, искренний; лишённый притворства.", example: "Her sincere apology was accepted." },
+                    { word: "Discreet", transcription: "[dɪˈskriːt]", definition: "Сдержанный; осторожный в словах.", example: "He was discreet in sensitive matters." },
+                    { word: "Modest", transcription: "[ˈmɒdɪst]", definition: "Скромный; лишённый хвастовства.", example: "Her modest demeanor was refreshing." },
+                    { word: "Gallant", transcription: "[ˈɡælənt]", definition: "Отважный, благородный; рыцарский.", example: "His gallant rescue was heroic." },
+                    { word: "Reserved", transcription: "[rɪˈzɜːrvd]", definition: "Сдержанный; сдерживающий эмоции.", example: "His reserved nature hid deep wisdom." },
+                    { word: "Gentle", transcription: "[ˈdʒentl]", definition: "Мягкий; добрый и деликатный.", example: "Her gentle touch soothed the child." },
+                    { word: "Temperate", transcription: "[ˈtempərət]", definition: "Умеренный; сдержанный в привычках.", example: "His temperate lifestyle was admired." },
+                    { word: "Faithful", transcription: "[ˈfeɪθfl]", definition: "Верный; преданный долгу.", example: "She remained faithful to her principles." },
+                    { word: "Refined", transcription: "[rɪˈfaɪnd]", definition: "Утончённый; обладающий изысканными манерами.", example: "His refined taste was evident." },
+                    { word: "Exquisite", transcription: "[ɪkˈskwɪzɪt]", definition: "Изысканный; исключительно утончённый.", example: "Her exquisite manners charmed all." },
+                    { word: "Dignified", transcription: "[ˈdɪɡnɪfaɪd]", definition: "Полный достоинства; величественный.", example: "He bore himself with dignified grace." },
+                    { word: "Magnanimous", transcription: "[mæɡˈnænɪməs]", definition: "Великодушный; благородный в поступках.", example: "Her magnanimous gesture forgave all." },
+                    { word: "Chivalrous", transcription: "[ˈʃɪvəlrəs]", definition: "Рыцарский; благородный и учтивый.", example: "His chivalrous act won her heart." },
+                    { word: "Noble", transcription: "[ˈnəʊbl]", definition: "Благородный; высокий по духу.", example: "Her noble actions inspired others." },
+                    { word: "Virtuous", transcription: "[ˈvɜːrtʃuəs]", definition: "Добродетельный; моральный и честный.", example: "She was known for her virtuous character." },
+                    { word: "Honest", transcription: "[ˈɒnɪst]", definition: "Честный; прямой и правдивый.", example: "His honest opinion was valued." },
+                    { word: "Prudent", transcription: "[ˈpruːdnt]", definition: "Благоразумный; осторожный и мудрый.", example: "Her prudent advice saved the day." },
+                    { word: "Sagacious", transcription: "[səˈɡeɪʃəs]", definition: "Проницательный; обладающий острым умом.", example: "His sagacious judgment guided the group." },
+                    { word: "Erudite", transcription: "[ˈerʊdaɪt]", definition: "Эрудированный; обладающий глубокими знаниями.", example: "The erudite professor inspired his students." },
+                    { word: "Courteous", transcription: "[ˈkɜːrtiəs]", definition: "Учтивый; проявляющий вежливость.", example: "His courteous demeanor was noted by all." },
+                    { word: "Polished", transcription: "[ˈpɒlɪʃt]", definition: "Отточенный; совершенный в манерах.", example: "Her polished speech impressed the audience." },
+                    { word: "Suave", transcription: "[swɑːv]", definition: "Утончённо-обходительный; гладкий в общении.", example: "His suave charm won many allies." },
+                    { word: "Gracious", transcription: "[ˈɡreɪʃəs]", definition: "Любезный; проявляющий доброту.", example: "She was gracious even under pressure." },
+                    { word: "Tactful", transcription: "[ˈtæktfl]", definition: "Тактичный; умеющий избегать обид.", example: "His tactful response avoided conflict." },
+                    { word: "Poised", transcription: "[pɔɪzd]", definition: "Сдержанный, уверенный; полный самообладания.", example: "She remained poised during the debate." },
+                    { word: "Affable", transcription: "[ˈæfəbl]", definition: "Приветливый; доброжелательный и открытый.", example: "His affable nature made him popular." },
+                    { word: "Benevolent", transcription: "[bɪˈnevələnt]", definition: "Благожелательный; добрый и щедрый.", example: "Her benevolent actions helped the poor." },
+                    { word: "Cordial", transcription: "[ˈkɔːrdʒəl]", definition: "Сердечный; тёплый и искренний.", example: "He offered a cordial welcome to guests." },
+                    { word: "Decorous", transcription: "[ˈdekərəs]", definition: "Благопристойный; соответствующий этикету.", example: "Her decorous behavior was exemplary." },
+                    { word: "Rectitude", transcription: "[ˈrektɪtjuːd]", definition: "Праведность; непреклонная честность.", example: "His rectitude earned him respect." },
+                    { word: "Valiant", transcription: "[ˈvæliənt]", definition: "Отважный; смелый и героический.", example: "The valiant soldier defended the fort." },
+                    { word: "Steadfast", transcription: "[ˈstedfæst]", definition: "Непоколебимый; твёрдый в убеждениях.", example: "Her steadfast loyalty was admirable." },
+                    { word: "Resolute", transcription: "[ˈrezəluːt]", definition: "Решительный; твёрдый в намерениях.", example: "He was resolute in his decision." },
+                    { word: "Scrupulous", transcription: "[ˈskruːpjələs]", definition: "Щепетильный; внимательный к морали.", example: "Her scrupulous honesty was unquestioned." },
+                    { word: "Candid", transcription: "[ˈkændɪd]", definition: "Откровенный; прямой и честный.", example: "His candid feedback was appreciated." },
+                    { word: "Upright", transcription: "[ˈʌpraɪt]", definition: "Честный; прямолинейный и моральный.", example: "He was an upright man of principle." },
+                    { word: "Forthright", transcription: "[ˈfɔːrθraɪt]", definition: "Прямолинейный; открытый и честный.", example: "Her forthright manner was refreshing." },
+                    { word: "Munificent", transcription: "[mjuːˈnɪfɪsnt]", definition: "Щедрый; исключительно великодушный.", example: "His munificent donation aided the cause." }
+                ]
+            }
+        ];
+
+        // Функция загрузки словаря с группировкой по категориям
+        function loadDictionary() {
+            const dictionaryContent = document.getElementById('dictionaryContent');
+            dictionaryContent.innerHTML = ''; // Очищаем содержимое
+
+            dictionaryWords.forEach(category => {
+                // Создаём заголовок категории
+                const categoryDiv = document.createElement('div');
+                const categoryTitle = document.createElement('h3');
+                categoryTitle.className = 'category-title';
+                categoryTitle.textContent = category.category;
+                categoryDiv.appendChild(categoryTitle);
+
+                // Добавляем описание категории
+                const categoryDescription = document.createElement('p');
+                categoryDescription.className = 'category-description';
+                categoryDescription.textContent = category.description;
+                categoryDiv.appendChild(categoryDescription);
+
+                // Добавляем слова в категорию
+                category.words.forEach(word => {
+                    const wordCard = document.createElement('div');
+                    wordCard.className = 'word-card';
+                    wordCard.innerHTML = `
+                        <h4 class="word-title">${word.word}</h4>
+                        <p class="transcription">${word.transcription}</p>
+                        <p class="definition">${word.definition}</p>
+                        <p class="example">${word.example}</p>
+                    `;
+                    categoryDiv.appendChild(wordCard);
+                });
+
+                dictionaryContent.appendChild(categoryDiv);
+            });
+
+            // Скрываем индикатор загрузки
+            const loading = dictionaryContent.querySelector('.loading');
+            if (loading) {
+                loading.classList.add('hidden');
+            }
+        }
+
+        // Функция переключения страниц
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelector(`[onclick="showPage('${pageId}')"]`).classList.add('active');
+
+            if (pageId === 'dictionary') {
+                loadDictionary();
+            }
+        }
+
+        // Загрузка словаря при открытии страницы словаря
+        document.addEventListener('DOMContentLoaded', () => {
+            if (document.getElementById('dictionary').classList.contains('active')) {
+                loadDictionary();
+            }
+        });
+
+        // Функции для упражнений (оставлены без изменений)
+        let score = 0;
+        const titles = [
+            { threshold: 0, title: "Начинающий джентльмен" },
+            { threshold: 50, title: "Изысканный собеседник" },
+            { threshold: 100, title: "Благородный оратор" },
+            { threshold: 200, title: "Лорд красноречия" }
+        ];
+
+        function updateScore(points) {
+            score += points;
+            document.getElementById('scoreDisplay').textContent = score;
+            const currentTitle = titles.reduce((acc, title) => score >= title.threshold ? title.title : acc, titles[0].title);
+            document.getElementById('currentTitle').textContent = currentTitle;
+            database.ref('scores').push({ score, title: currentTitle, timestamp: firebase.database.ServerValue.TIMESTAMP });
+        }
+
+        function checkRefinement() {
+            const answer = document.getElementById('refinedAnswer').value.trim().toLowerCase();
+            const roughPhrase = document.getElementById('roughPhrase').textContent.toLowerCase();
+            const resultDiv = document.getElementById('refinementResult');
+            
+            if (answer.includes('please') || answer.includes('kindly') || answer.includes('silence')) {
+                resultDiv.innerHTML = '<p style="color: #d4af37;">Splendid! Your refinement is commendable.</p>';
+                updateScore(10);
+            } else {
+                resultDiv.innerHTML = '<p style="color: #b8a082;">A valiant effort, but perhaps more grace is needed.</p>';
+            }
+        }
+
+        function checkLetter() {
+            const answer = document.getElementById('letterAnswer').value.trim().toLowerCase();
+            const resultDiv = document.getElementById('letterResult');
+            
+            if (answer.includes('regret') && answer.includes('honour') && answer.length > 50) {
+                resultDiv.innerHTML = '<p style="color: #d4af37;">A most elegant letter! Your prose is exemplary.</p>';
+                updateScore(20);
+            } else {
+                resultDiv.innerHTML = '<p style="color: #b8a082;">A fair attempt, but strive for greater refinement.</p>';
+            }
+        }
+    </script>
+</body>
+</html>
