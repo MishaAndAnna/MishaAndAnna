@@ -341,7 +341,7 @@
       100% { opacity: 0.4; }
     }
 
-    .toggle-form-btn {
+    .toggle-form-btn, .language-toggle-btn {
       background: linear-gradient(135deg, var(--primary), var(--secondary));
       color: var(--text);
       border: none;
@@ -360,12 +360,12 @@
       letter-spacing: 1.5px;
     }
 
-    .toggle-form-btn:hover {
+    .toggle-form-btn:hover, .language-toggle-btn:hover {
       transform: translateY(-4px);
       box-shadow: var(--shadow-lg), var(--glow);
     }
 
-    .toggle-form-btn i {
+    .toggle-form-btn i, .language-toggle-btn i {
       font-size: 1rem;
     }
 
@@ -1162,18 +1162,29 @@
         <span class="status-dot offline" id="chapterStatusDot"></span>
         <span id="chapterStatusText">Оффлайн</span>
       </div>
+      <button class="language-toggle-btn" id="toggleLanguageBtn">
+        <i class="fas fa-globe"></i> <span id="languageText">English</span>
+      </button>
     </div>
     <div class="chapter-form" id="chapterForm">
       <div class="form-header">
         <h2 id="chapterFormTitle">Новая глава</h2>
       </div>
       <div class="form-group">
-        <label for="chapterTitle">Заголовок</label>
+        <label for="chapterTitle">Заголовок (Русский)</label>
         <input type="text" id="chapterTitle" required>
       </div>
       <div class="form-group">
-        <label for="chapterContent">Содержание</label>
+        <label for="chapterTitleEn">Заголовок (Английский)</label>
+        <input type="text" id="chapterTitleEn">
+      </div>
+      <div class="form-group">
+        <label for="chapterContent">Содержание (Русский)</label>
         <textarea id="chapterContent" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="chapterContentEn">Содержание (Английский)</label>
+        <textarea id="chapterContentEn"></textarea>
       </div>
       <div class="form-actions">
         <button class="btn btn-secondary" id="cancelChapterBtn">Отмена</button>
@@ -1182,16 +1193,18 @@
     </div>
     <div class="chapter-grid" id="chapterGrid"></div>
     <div class="empty-state" id="chapterEmptyState">
-      <i class="fas fa-book-open"></i>
-      <h3>Матрица пуста</h3>
-      <p>Запустите код новой главы, чтобы начать легенду киберпанк-предыстории!</p>
+      <i class="fas fa-book"></i>
+      <h3>Главы отсутствуют</h3>
+      <p>Создайте новую главу, чтобы начать киберпанк-приключение!</p>
     </div>
   </div>
   <div class="modal" id="chapterModal">
     <div class="modal-content">
       <div class="modal-header">
         <h2 id="modalTitle"></h2>
-        <button class="close-btn" id="closeModalBtn">×</button>
+        <button class="close-btn" id="closeModalBtn">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
       <div class="modal-body">
         <p id="modalContent"></p>
@@ -1202,10 +1215,12 @@
     <div class="modal-content">
       <div class="modal-header">
         <h2 id="galleryModalTitle"></h2>
-        <button class="close-btn" id="closeGalleryModalBtn">×</button>
+        <button class="close-btn" id="closeGalleryModalBtn">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
       <div class="modal-body">
-        <img id="galleryModalImage" src="" alt="Изображение локации или персонажа" style="width: 100%; height: auto; max-height: 80vh; object-fit: contain; border-radius: 8px;">
+        <img id="galleryModalImage" src="" alt="Изображение локации">
       </div>
     </div>
   </div>
@@ -1219,12 +1234,21 @@
       messagingSenderId: "985103413436",
       appId: "1:985103413436:web:c0b6d10b5ed58b9f0d0ae0"
     };
-    firebase.initializeApp(firebaseConfig);
+
+    try {
+      firebase.initializeApp(firebaseConfig);
+    } catch (error) {
+      console.error('Firebase initialization error:', error);
+      alert('Ошибка инициализации Firebase. Проверьте конфигурацию.');
+    }
     const database = firebase.database();
+
     const toggleChapterFormBtn = document.getElementById('toggleChapterFormBtn');
     const chapterForm = document.getElementById('chapterForm');
     const chapterTitle = document.getElementById('chapterTitle');
+    const chapterTitleEn = document.getElementById('chapterTitleEn');
     const chapterContent = document.getElementById('chapterContent');
+    const chapterContentEn = document.getElementById('chapterContentEn');
     const saveChapterBtn = document.getElementById('saveChapterBtn');
     const cancelChapterBtn = document.getElementById('cancelChapterBtn');
     const chapterFormTitle = document.getElementById('chapterFormTitle');
@@ -1268,11 +1292,15 @@
     const submitLoginBtn = document.getElementById('submitLoginBtn');
     const cancelLoginBtn = document.getElementById('cancelLoginBtn');
     const loginBtn = document.getElementById('loginBtn');
+    const toggleLanguageBtn = document.getElementById('toggleLanguageBtn');
+    const languageText = document.getElementById('languageText');
+
     let isEditingChapter = false;
     let editingChapterId = null;
     let isEditingLocation = false;
     let editingLocationId = null;
     let isAdmin = false;
+    let currentLanguage = 'ru';
 
     function showLoader() {
       loader.style.display = 'flex';
@@ -1307,6 +1335,10 @@
     }
 
     function sanitizeHTML(str) {
+      if (typeof DOMPurify === 'undefined') {
+        console.error('DOMPurify is not loaded');
+        return str;
+      }
       return DOMPurify.sanitize(str);
     }
 
@@ -1328,26 +1360,148 @@
       }
     }
 
-    themeToggle.addEventListener('click', toggleTheme);
+    function showLoginModal() {
+      loginModal.style.display = 'flex';
+      usernameInput.focus();
+    }
 
-    function loadBookCover() {
-      console.log('Loading book cover...');
-      const coverUrl = 'https://raw.githubusercontent.com/MishaAndAnna/MishaAndAnna/main/Cover.png';
-      if (!bookCoverImage) {
-        console.error('bookCoverImage element not found');
-        showToast('Элемент обложки не найден', 'error');
-        return;
+    function hideLoginModal() {
+      loginModal.style.display = 'none';
+      usernameInput.value = '';
+    }
+
+    function updateButtonVisibility() {
+      document.querySelectorAll('.admin-only, .edit-btn, .delete-btn').forEach(btn => {
+        btn.classList.toggle('hidden-btn', !isAdmin);
+      });
+      loginBtn.textContent = localStorage.getItem('username') ? 'Выйти' : 'Войти';
+    }
+
+    function toggleLanguage() {
+      console.log('Toggling language, current:', currentLanguage);
+      currentLanguage = currentLanguage === 'ru' ? 'en' : 'ru';
+      languageText.textContent = currentLanguage === 'ru' ? 'English' : 'Русский';
+      loadChapters();
+      showToast(`Язык изменен на ${currentLanguage === 'ru' ? 'русский' : 'английский'}`, 'success');
+    }
+
+    async function loadChapters() {
+      try {
+        showLoader();
+        const snapshot = await database.ref(`precursor_chapters${currentLanguage === 'en' ? '_en' : ''}`).once('value');
+        const chapters = snapshot.val();
+        chapterGrid.innerHTML = '';
+        if (chapters) {
+          Object.entries(chapters).forEach(([id, chapter]) => {
+            const card = document.createElement('div');
+            card.className = 'chapter-card';
+            card.innerHTML = `
+              <div class="card-content">
+                <h3>${sanitizeHTML(chapter.title)}</h3>
+                <p>${sanitizeHTML(chapter.content.substring(0, 100))}...</p>
+              </div>
+              <div class="card-footer">
+                <button class="card-btn view-btn" data-id="${id}">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="card-btn copy-btn" data-id="${id}" title="Копировать текст главы">
+                  <i class="fas fa-copy"></i>
+                </button>
+                ${isAdmin ? `
+                  <button class="card-btn edit-btn" data-id="${id}">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="card-btn delete-btn" data-id="${id}">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                ` : ''}
+              </div>
+            `;
+            chapterGrid.appendChild(card);
+          });
+          chapterEmptyState.style.display = 'none';
+        } else {
+          chapterEmptyState.style.display = 'block';
+        }
+        updateChapterStatus('online', 'Главы загружены');
+      } catch (error) {
+        console.error('Error loading chapters:', error);
+        updateChapterStatus('offline', 'Ошибка загрузки');
+        showToast('Ошибка загрузки глав', 'error');
+      } finally {
+        hideLoader();
       }
-      bookCoverImage.src = coverUrl + '?v=' + Date.now();
-      bookCoverImage.style.display = 'block';
-      bookCoverImage.onerror = () => {
-        console.error('Failed to load book cover');
-        bookCoverImage.src = 'https://via.placeholder.com/500x750/1a0033/b100cd?text=Cover+Not+Found';
-        showToast('Не удалось загрузить обложку', 'error');
-      };
-      bookCoverImage.onload = () => {
-        console.log('Book cover loaded successfully');
-      };
+    }
+
+    async function loadGallery() {
+      try {
+        showLoader();
+        const snapshot = await database.ref('gallery_locations').once('value');
+        const locations = snapshot.val();
+        galleryGrid.innerHTML = '';
+        if (locations) {
+          Object.entries(locations).forEach(([id, location]) => {
+            const card = document.createElement('div');
+            card.className = 'location-card';
+            card.innerHTML = `
+              <img src="${sanitizeHTML(location.image)}" alt="${sanitizeHTML(location.title)}">
+              <h3 class="location-title">${sanitizeHTML(location.title)}</h3>
+              <div class="card-footer">
+                ${isAdmin ? `
+                  <button class="card-btn edit-btn" data-id="${id}">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="card-btn delete-btn" data-id="${id}">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                ` : ''}
+              </div>
+              <div class="character-grid" id="characterGrid-${id}">
+                ${location.characters ? Object.entries(location.characters).map(([charId, char]) => `
+                  <div class="character-card">
+                    <img src="${sanitizeHTML(char.image)}" alt="${sanitizeHTML(char.name)}">
+                    <div class="character-name">${sanitizeHTML(char.name)}</div>
+                  </div>
+                `).join('') : ''}
+              </div>
+            `;
+            galleryGrid.appendChild(card);
+            const characterGrid = document.getElementById(`characterGrid-${id}`);
+            card.querySelector('img').addEventListener('click', () => {
+              galleryModalTitle.textContent = location.title;
+              galleryModalImage.src = location.image;
+              galleryModalImage.alt = location.title;
+              galleryModal.style.display = 'flex';
+            });
+            card.querySelector('.location-title').addEventListener('click', () => {
+              characterGrid.classList.toggle('active');
+            });
+          });
+          galleryEmptyState.style.display = 'none';
+        } else {
+          galleryEmptyState.style.display = 'block';
+        }
+        updateGalleryStatus('online', 'Галерея загружена');
+      } catch (error) {
+        console.error('Error loading gallery:', error);
+        updateGalleryStatus('offline', 'Ошибка загрузки');
+        showToast('Ошибка загрузки галереи', 'error');
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function loadBookCover() {
+      try {
+        const snapshot = await database.ref('book_cover').once('value');
+        const cover = snapshot.val();
+        if (cover && cover.url) {
+          bookCoverImage.src = sanitizeHTML(cover.url);
+        }
+      } catch (error) {
+        console.error('Error loading book cover:', error);
+        showToast('Ошибка загрузки обложки', 'error');
+      }
     }
 
     function showChapters() {
@@ -1364,64 +1518,30 @@
       gallerySection.scrollIntoView({ behavior: 'smooth' });
     }
 
-    function showBookCover() {
-      bookCoverSection.classList.add('visible');
-      gallerySection.classList.remove('visible');
-      chaptersSection.classList.remove('visible');
-      bookCoverSection.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    exploreChaptersBtn.addEventListener('click', showChapters);
-    exploreChaptersBtnSecondary.addEventListener('click', showChapters);
-    exploreGalleryBtn.addEventListener('click', showGallery);
-    exploreGalleryBtnSecondary.addEventListener('click', showGallery);
-
-    function showLoginModal() {
-      loginModal.style.display = 'flex';
-      usernameInput.focus();
-    }
-
-    function handleLogin() {
-      const username = usernameInput.value.trim();
-      if (!username) {
-        showToast('Введите имя пользователя', 'error');
-        return;
-      }
-      isAdmin = username === 'Михаил Калепназ';
-      localStorage.setItem('username', username);
-      localStorage.setItem('isAdmin', isAdmin);
-      loginModal.style.display = 'none';
-      updateButtonVisibility();
-      showToast(`Добро пожаловать, ${username}!`, 'success');
-    }
-
-    function updateButtonVisibility() {
-      document.querySelectorAll('.admin-only, .edit-btn, .delete-btn').forEach(btn => {
-        btn.classList.toggle('hidden-btn', !isAdmin);
-      });
-    }
-
-    loginBtn.addEventListener('click', showLoginModal);
-    submitLoginBtn.addEventListener('click', handleLogin);
-    cancelLoginBtn.addEventListener('click', () => {
-      loginModal.style.display = 'none';
-      usernameInput.value = '';
-    });
-
     toggleChapterFormBtn.addEventListener('click', () => {
       if (!isAdmin) {
         showToast('Только администратор может добавлять главы', 'error');
         return;
       }
-      chapterForm.style.display = chapterForm.style.display === 'block' ? 'none' : 'block';
-      if (chapterForm.style.display === 'block') {
-        resetChapterForm();
-      }
+      isEditingChapter = false;
+      chapterForm.style.display = 'block';
+      chapterFormTitle.textContent = 'Новая глава';
+      chapterTitle.value = '';
+      chapterTitleEn.value = '';
+      chapterContent.value = '';
+      chapterContentEn.value = '';
+      chapterTitle.focus();
+      chaptersSection.scrollIntoView({ behavior: 'smooth' });
     });
 
     cancelChapterBtn.addEventListener('click', () => {
       chapterForm.style.display = 'none';
-      resetChapterForm();
+      chapterTitle.value = '';
+      chapterTitleEn.value = '';
+      chapterContent.value = '';
+      chapterContentEn.value = '';
+      isEditingChapter = false;
+      editingChapterId = null;
     });
 
     saveChapterBtn.addEventListener('click', async () => {
@@ -1431,214 +1551,45 @@
       }
       const title = chapterTitle.value.trim();
       const content = chapterContent.value.trim();
+      const titleEn = chapterTitleEn.value.trim();
+      const contentEn = chapterContentEn.value.trim();
       if (!title || !content) {
-        showToast('Заполните все поля', 'error');
+        showToast('Заполните обязательные поля на русском', 'error');
         return;
       }
-      showLoader();
-      const chapterData = {
-        title,
-        content,
-        timestamp: Date.now()
-      };
       try {
+        showLoader();
+        const chapterData = { title, content };
+        const chapterDataEn = titleEn && contentEn ? { title: titleEn, content: contentEn } : null;
         if (isEditingChapter) {
           await database.ref(`precursor_chapters/${editingChapterId}`).update(chapterData);
-          showToast('Глава обновлена!', 'success');
+          if (chapterDataEn) {
+            await database.ref(`precursor_chapters_en/${editingChapterId}`).update(chapterDataEn);
+          } else {
+            await database.ref(`precursor_chapters_en/${editingChapterId}`).remove();
+          }
+          showToast('Глава обновлена', 'success');
         } else {
-          await database.ref('precursor_chapters').push(chapterData);
-          showToast('Глава сохранена!', 'success');
+          const newChapterRef = await database.ref('precursor_chapters').push(chapterData);
+          if (chapterDataEn) {
+            await database.ref(`precursor_chapters_en/${newChapterRef.key}`).set(chapterDataEn);
+          }
+          showToast('Глава добавлена', 'success');
         }
         chapterForm.style.display = 'none';
-        resetChapterForm();
-        hideLoader();
+        chapterTitle.value = '';
+        chapterTitleEn.value = '';
+        chapterContent.value = '';
+        chapterContentEn.value = '';
+        isEditingChapter = false;
+        editingChapterId = null;
+        loadChapters();
       } catch (error) {
-        showToast(`Ошибка: ${error.message}`, 'error');
+        console.error('Error saving chapter:', error);
+        showToast('Ошибка сохранения главы', 'error');
+      } finally {
         hideLoader();
       }
-    });
-
-    function resetChapterForm() {
-      chapterTitle.value = '';
-      chapterContent.value = '';
-      chapterFormTitle.textContent = 'Новая глава';
-      isEditingChapter = false;
-      editingChapterId = null;
-    }
-
-    function copyChapter(id) {
-      showLoader();
-      database.ref(`precursor_chapters/${id}`).once('value')
-        .then((snapshot) => {
-          const chapter = snapshot.val();
-          if (chapter) {
-            const text = `# ${chapter.title}\n\n${chapter.content}`;
-            navigator.clipboard.writeText(text)
-              .then(() => {
-                showToast('Текст главы скопирован в буфер обмена!', 'success');
-              })
-              .catch((err) => {
-                showToast('Ошибка копирования: ' + err.message, 'error');
-              });
-          } else {
-            showToast('Глава не найдена', 'error');
-          }
-          hideLoader();
-        })
-        .catch((error) => {
-          showToast(`Ошибка загрузки главы: ${error.message}`, 'error');
-          hideLoader();
-        });
-    }
-
-    function loadChapters() {
-      showLoader();
-      try {
-        database.ref('precursor_chapters').on('value', (snapshot) => {
-          chapterGrid.innerHTML = '';
-          const chapters = snapshot.val();
-          if (!chapters) {
-            chapterEmptyState.style.display = 'block';
-            hideLoader();
-            updateChapterStatus('online', 'Соединение с базой данных');
-            return;
-          }
-          chapterEmptyState.style.display = 'none';
-          Object.entries(chapters).forEach(([id, chapter]) => {
-            const card = document.createElement('div');
-            card.className = 'chapter-card';
-            card.innerHTML = `
-              <div class="card-content">
-                <h3>${sanitizeHTML(chapter.title)}</h3>
-                <p>${sanitizeHTML(chapter.content.substring(0, 150))}...</p>
-              </div>
-              <div class="card-footer">
-                <button class="card-btn view-btn" data-id="${id}">
-                  <i class="fas fa-eye"></i>
-                </button>
-                <button class="card-btn edit-btn admin-only" data-id="${id}">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="card-btn delete-btn admin-only" data-id="${id}">
-                  <i class="fas fa-trash"></i>
-                </button>
-                <button class="card-btn copy-btn" data-id="${id}">
-                  <i class="fas fa-copy"></i>
-                </button>
-              </div>
-            `;
-            chapterGrid.appendChild(card);
-          });
-          document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-              viewChapter(btn.dataset.id);
-            });
-          });
-          document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-              if (!isAdmin) {
-                showToast('Только администратор может редактировать главы', 'error');
-                return;
-              }
-              editChapter(btn.dataset.id);
-            });
-          });
-          document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-              if (!isAdmin) {
-                showToast('Только администратор может удалять главы', 'error');
-                return;
-              }
-              deleteChapter(btn.dataset.id);
-            });
-          });
-          document.querySelectorAll('.copy-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-              copyChapter(btn.dataset.id);
-            });
-          });
-          updateButtonVisibility();
-          hideLoader();
-          updateChapterStatus('online', 'Соединение с базой данных');
-        }, (error) => {
-          console.error('Error loading chapters:', error);
-          let userMessage = 'Ошибка загрузки глав';
-          if (error.code === 'PERMISSION_DENIED') {
-            userMessage = 'Нет доступа к данным. Проверьте настройки.';
-          } else if (error.code === 'NETWORK_ERROR') {
-            userMessage = 'Нет подключения к интернету.';
-          }
-          updateChapterStatus('offline', userMessage);
-          showToast(userMessage, 'error');
-          hideLoader();
-        });
-      } catch (error) {
-        console.error('Error in loadChapters:', error);
-        showToast(`Ошибка загрузки глав: ${error.message}`, 'error');
-        hideLoader();
-      }
-    }
-
-    function viewChapter(id) {
-      showLoader();
-      database.ref(`precursor_chapters/${id}`).once('value')
-        .then((snapshot) => {
-          const chapter = snapshot.val();
-          if (chapter) {
-            modalTitle.textContent = sanitizeHTML(chapter.title);
-            modalContent.textContent = chapter.content;
-            chapterModal.style.display = 'flex';
-          } else {
-            showToast('Глава не найдена', 'error');
-          }
-          hideLoader();
-        })
-        .catch((error) => {
-          showToast(`Ошибка загрузки главы: ${error.message}`, 'error');
-          hideLoader();
-        });
-    }
-
-    function editChapter(id) {
-      showLoader();
-      database.ref(`precursor_chapters/${id}`).once('value')
-        .then((snapshot) => {
-          const chapter = snapshot.val();
-          if (chapter) {
-            chapterTitle.value = chapter.title;
-            chapterContent.value = chapter.content;
-            chapterFormTitle.textContent = 'Редактировать главу';
-            isEditingChapter = true;
-            editingChapterId = id;
-            chapterForm.style.display = 'block';
-          } else {
-            showToast('Глава не найдена', 'error');
-          }
-          hideLoader();
-        })
-        .catch((error) => {
-          showToast(`Ошибка загрузки главы: ${error.message}`, 'error');
-          hideLoader();
-        });
-    }
-
-    function deleteChapter(id) {
-      if (confirm('Вы уверены, что хотите удалить эту главу?')) {
-        showLoader();
-        database.ref(`precursor_chapters/${id}`).remove()
-          .then(() => {
-            showToast('Глава удалена!', 'success');
-            hideLoader();
-          })
-          .catch((error) => {
-            showToast(`Ошибка удаления: ${error.message}`, 'error');
-            hideLoader();
-          });
-      }
-    }
-
-    closeModalBtn.addEventListener('click', () => {
-      chapterModal.style.display = 'none';
     });
 
     toggleGalleryFormBtn.addEventListener('click', () => {
@@ -1646,39 +1597,58 @@
         showToast('Только администратор может добавлять локации', 'error');
         return;
       }
-      galleryForm.style.display = galleryForm.style.display === 'block' ? 'none' : 'block';
-      if (galleryForm.style.display === 'block') {
-        resetGalleryForm();
-      }
+      isEditingLocation = false;
+      galleryForm.style.display = 'block';
+      galleryFormTitle.textContent = 'Новая локация';
+      locationTitle.value = '';
+      locationImage.value = '';
+      characterInputs.innerHTML = `
+        <div class="character-input-group">
+          <input type="text" class="character-name" placeholder="Имя персонажа" required>
+          <input type="url" class="character-image" placeholder="Ссылка на изображение" required>
+          <button class="remove-character-btn" title="Удалить персонажа">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      `;
+      locationTitle.focus();
+      gallerySection.scrollIntoView({ behavior: 'smooth' });
     });
 
     cancelGalleryBtn.addEventListener('click', () => {
       galleryForm.style.display = 'none';
-      resetGalleryForm();
+      locationTitle.value = '';
+      locationImage.value = '';
+      characterInputs.innerHTML = `
+        <div class="character-input-group">
+          <input type="text" class="character-name" placeholder="Имя персонажа" required>
+          <input type="url" class="character-image" placeholder="Ссылка на изображение" required>
+          <button class="remove-character-btn" title="Удалить персонажа">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      `;
+      isEditingLocation = false;
+      editingLocationId = null;
     });
 
-    function addCharacterInput(name = '', image = '') {
-      const characterGroup = document.createElement('div');
-      characterGroup.className = 'character-input-group';
-      characterGroup.innerHTML = `
-        <input type="text" class="character-name" placeholder="Имя персонажа" value="${sanitizeHTML(name)}" required>
-        <input type="url" class="character-image" placeholder="Ссылка на изображение" value="${sanitizeHTML(image)}" required>
+    addCharacterBtn.addEventListener('click', () => {
+      const characterInputGroup = document.createElement('div');
+      characterInputGroup.className = 'character-input-group';
+      characterInputGroup.innerHTML = `
+        <input type="text" class="character-name" placeholder="Имя персонажа" required>
+        <input type="url" class="character-image" placeholder="Ссылка на изображение" required>
         <button class="remove-character-btn" title="Удалить персонажа">
           <i class="fas fa-trash"></i>
         </button>
       `;
-      characterInputs.appendChild(characterGroup);
-      characterGroup.querySelector('.remove-character-btn').addEventListener('click', () => {
-        if (characterInputs.querySelectorAll('.character-input-group').length > 1) {
-          characterGroup.remove();
-        } else {
-          showToast('Должен быть хотя бы один персонаж', 'warning');
-        }
-      });
-    }
+      characterInputs.appendChild(characterInputGroup);
+    });
 
-    addCharacterBtn.addEventListener('click', () => {
-      addCharacterInput();
+    characterInputs.addEventListener('click', (e) => {
+      if (e.target.closest('.remove-character-btn') && characterInputs.children.length > 1) {
+        e.target.closest('.character-input-group').remove();
+      }
     });
 
     saveGalleryBtn.addEventListener('click', async () => {
@@ -1688,228 +1658,278 @@
       }
       const title = locationTitle.value.trim();
       const image = locationImage.value.trim();
-      const characters = Array.from(characterInputs.querySelectorAll('.character-input-group')).map(group => ({
-        name: group.querySelector('.character-name').value.trim(),
-        image: group.querySelector('.character-image').value.trim()
-      }));
-      if (!title || !image || characters.some(char => !char.name || !char.image)) {
-        showToast('Заполните все поля', 'error');
+      const characters = {};
+      let isValid = true;
+      document.querySelectorAll('.character-input-group').forEach((group, index) => {
+        const name = group.querySelector('.character-name').value.trim();
+        const charImage = group.querySelector('.character-image').value.trim();
+        if (name && charImage) {
+          characters[`char${index}`] = { name, image: charImage };
+        } else if (name || charImage) {
+          isValid = false;
+        }
+      });
+      if (!title || !image || !isValid) {
+        showToast('Заполните все обязательные поля корректно', 'error');
         return;
       }
-      showLoader();
-      const locationData = {
-        location: { title, image },
-        characters,
-        timestamp: Date.now()
-      };
       try {
+        showLoader();
+        const locationData = { title, image, characters };
         if (isEditingLocation) {
           await database.ref(`gallery_locations/${editingLocationId}`).update(locationData);
-          showToast('Локация обновлена!', 'success');
+          showToast('Локация обновлена', 'success');
         } else {
           await database.ref('gallery_locations').push(locationData);
-          showToast('Локация сохранена!', 'success');
+          showToast('Локация добавлена', 'success');
         }
         galleryForm.style.display = 'none';
-        resetGalleryForm();
-        hideLoader();
+        locationTitle.value = '';
+        locationImage.value = '';
+        characterInputs.innerHTML = `
+          <div class="character-input-group">
+            <input type="text" class="character-name" placeholder="Имя персонажа" required>
+            <input type="url" class="character-image" placeholder="Ссылка на изображение" required>
+            <button class="remove-character-btn" title="Удалить персонажа">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        `;
+        isEditingLocation = false;
+        editingLocationId = null;
+        loadGallery();
       } catch (error) {
-        showToast(`Ошибка: ${error.message}`, 'error');
+        console.error('Error saving location:', error);
+        showToast('Ошибка сохранения локации', 'error');
+      } finally {
         hideLoader();
       }
     });
 
-    function resetGalleryForm() {
-      locationTitle.value = '';
-      locationImage.value = '';
-      characterInputs.innerHTML = '';
-      addCharacterInput();
-      galleryFormTitle.textContent = 'Новая локация';
-      isEditingLocation = false;
-      editingLocationId = null;
-    }
+    chapterGrid.addEventListener('click', async (e) => {
+      const viewBtn = e.target.closest('.view-btn');
+      const editBtn = e.target.closest('.edit-btn');
+      const deleteBtn = e.target.closest('.delete-btn');
+      const copyBtn = e.target.closest('.copy-btn');
+      if (viewBtn) {
+        const id = viewBtn.dataset.id;
+        try {
+          showLoader();
+          const snapshot = await database.ref(`precursor_chapters${currentLanguage === 'en' ? '_en' : ''}/${id}`).once('value');
+          const chapter = snapshot.val();
+          if (chapter) {
+            modalTitle.textContent = chapter.title;
+            modalContent.innerHTML = sanitizeHTML(chapter.content.replace(/\n/g, '<br>'));
+            chapterModal.style.display = 'flex';
+          }
+        } catch (error) {
+          console.error('Error viewing chapter:', error);
+          showToast('Ошибка загрузки главы', 'error');
+        } finally {
+          hideLoader();
+        }
+      } else if (editBtn && isAdmin) {
+        const id = editBtn.dataset.id;
+        try {
+          showLoader();
+          const snapshotRu = await database.ref(`precursor_chapters/${id}`).once('value');
+          const snapshotEn = await database.ref(`precursor_chapters_en/${id}`).once('value');
+          const chapterRu = snapshotRu.val();
+          const chapterEn = snapshotEn.val() || { title: '', content: '' };
+          if (chapterRu) {
+            isEditingChapter = true;
+            editingChapterId = id;
+            chapterForm.style.display = 'block';
+            chapterFormTitle.textContent = 'Редактировать главу';
+            chapterTitle.value = chapterRu.title;
+            chapterContent.value = chapterRu.content;
+            chapterTitleEn.value = chapterEn.title;
+            chapterContentEn.value = chapterEn.content;
+            chaptersSection.scrollIntoView({ behavior: 'smooth' });
+          }
+        } catch (error) {
+          console.error('Error editing chapter:', error);
+          showToast('Ошибка загрузки главы для редактирования', 'error');
+        } finally {
+          hideLoader();
+        }
+      } else if (deleteBtn && isAdmin) {
+        const id = deleteBtn.dataset.id;
+        if (confirm('Вы уверены, что хотите удалить эту главу?')) {
+          try {
+            showLoader();
+            await database.ref(`precursor_chapters/${id}`).remove();
+            await database.ref(`precursor_chapters_en/${id}`).remove();
+            showToast('Глава удалена', 'success');
+            loadChapters();
+          } catch (error) {
+            console.error('Error deleting chapter:', error);
+            showToast('Ошибка удаления главы', 'error');
+          } finally {
+            hideLoader();
+          }
+        }
+      } else if (copyBtn) {
+        const id = copyBtn.dataset.id;
+        try {
+          showLoader();
+          const snapshot = await database.ref(`precursor_chapters${currentLanguage === 'en' ? '_en' : ''}/${id}`).once('value');
+          const chapter = snapshot.val();
+          if (chapter) {
+            await navigator.clipboard.writeText(chapter.content);
+            showToast('Текст главы скопирован в буфер обмена', 'success');
+          }
+        } catch (error) {
+          console.error('Error copying chapter:', error);
+          showToast('Ошибка при копировании текста главы', 'error');
+        } finally {
+          hideLoader();
+        }
+      }
+    });
 
-    function showGalleryModal(title, imageUrl) {
-      galleryModalTitle.textContent = sanitizeHTML(title);
-      galleryModalImage.src = sanitizeHTML(imageUrl) + '?v=' + Date.now();
-      galleryModalImage.onerror = () => {
-        galleryModalImage.src = 'https://via.placeholder.com/600x400/1a0033/b100cd?text=Image+Not+Found';
-        showToast('Не удалось загрузить изображение', 'error');
-      };
-      galleryModal.style.display = 'flex';
-    }
+    galleryGrid.addEventListener('click', async (e) => {
+      const editBtn = e.target.closest('.edit-btn');
+      const deleteBtn = e.target.closest('.delete-btn');
+      if (editBtn && isAdmin) {
+        const id = editBtn.dataset.id;
+        try {
+          showLoader();
+          const snapshot = await database.ref(`gallery_locations/${id}`).once('value');
+          const location = snapshot.val();
+          if (location) {
+            isEditingLocation = true;
+            editingLocationId = id;
+            galleryForm.style.display = 'block';
+            galleryFormTitle.textContent = 'Редактировать локацию';
+            locationTitle.value = location.title;
+            locationImage.value = location.image;
+            characterInputs.innerHTML = '';
+            if (location.characters) {
+              Object.values(location.characters).forEach(char => {
+                const characterInputGroup = document.createElement('div');
+                characterInputGroup.className = 'character-input-group';
+                characterInputGroup.innerHTML = `
+                  <input type="text" class="character-name" value="${sanitizeHTML(char.name)}" placeholder="Имя персонажа" required>
+                  <input type="url" class="character-image" value="${sanitizeHTML(char.image)}" placeholder="Ссылка на изображение" required>
+                  <button class="remove-character-btn" title="Удалить персонажа">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                `;
+                characterInputs.appendChild(characterInputGroup);
+              });
+            } else {
+              characterInputs.innerHTML = `
+                <div class="character-input-group">
+                  <input type="text" class="character-name" placeholder="Имя персонажа" required>
+                  <input type="url" class="character-image" placeholder="Ссылка на изображение" required>
+                  <button class="remove-character-btn" title="Удалить персонажа">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              `;
+            }
+            gallerySection.scrollIntoView({ behavior: 'smooth' });
+          }
+        } catch (error) {
+          console.error('Error editing location:', error);
+          showToast('Ошибка загрузки локации для редактирования', 'error');
+        } finally {
+          hideLoader();
+        }
+      } else if (deleteBtn && isAdmin) {
+        const id = deleteBtn.dataset.id;
+        if (confirm('Вы уверены, что хотите удалить эту локацию?')) {
+          try {
+            showLoader();
+            await database.ref(`gallery_locations/${id}`).remove();
+            showToast('Локация удалена', 'success');
+            loadGallery();
+          } catch (error) {
+            console.error('Error deleting location:', error);
+            showToast('Ошибка удаления локации', 'error');
+          } finally {
+            hideLoader();
+          }
+        }
+      }
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      chapterModal.style.display = 'none';
+    });
 
     closeGalleryModalBtn.addEventListener('click', () => {
       galleryModal.style.display = 'none';
     });
 
-    function loadGallery() {
-      showLoader();
-      try {
-        database.ref('gallery_locations').on('value', (snapshot) => {
-          galleryGrid.innerHTML = '';
-          const locations = snapshot.val();
-          if (!locations) {
-            galleryEmptyState.style.display = 'block';
-            hideLoader();
-            updateGalleryStatus('online', 'Соединение с базой данных');
-            return;
-          }
-          galleryEmptyState.style.display = 'none';
-          Object.entries(locations).forEach(([id, item]) => {
-            const locationCard = document.createElement('div');
-            locationCard.className = 'location-card';
-            locationCard.dataset.locationId = id;
-            locationCard.innerHTML = `
-              <img src="${sanitizeHTML(item.location.image)}" alt="${sanitizeHTML(item.location.title)}" class="location-image" onerror="this.src='https://via.placeholder.com/600x400/1a0033/b100cd?text=Image+Not+Found'">
-              <div class="location-title">${sanitizeHTML(item.location.title)}</div>
-              <div class="character-grid" id="characterGrid-${id}">
-                ${item.characters
-                  .map(
-                    (char) => `
-                  <div class="character-card">
-                    <img src="${sanitizeHTML(char.image)}" alt="${sanitizeHTML(char.name)}" class="character-image" onerror="this.src='https://via.placeholder.com/300x300/1a0033/b100cd?text=Character+Not+Found'">
-                    <div class="character-name">${sanitizeHTML(char.name)}</div>
-                  </div>
-                `
-                  )
-                  .join('')}
-              </div>
-              <div class="card-footer">
-                <button class="card-btn edit-btn admin-only" data-id="${id}">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="card-btn delete-btn admin-only" data-id="${id}">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
-            `;
-            galleryGrid.appendChild(locationCard);
-            locationCard.querySelector('.location-image').addEventListener('click', (e) => {
-              e.stopPropagation();
-              showGalleryModal(item.location.title, item.location.image);
-            });
-            locationCard.querySelectorAll('.character-image').forEach((img, charIndex) => {
-              img.addEventListener('click', (e) => {
-                e.stopPropagation();
-                showGalleryModal(item.characters[charIndex].name, item.characters[charIndex].image);
-              });
-            });
-            locationCard.querySelector('.edit-btn').addEventListener('click', (e) => {
-              e.stopPropagation();
-              if (!isAdmin) {
-                showToast('Только администратор может редактировать локации', 'error');
-                return;
-              }
-              editLocation(id);
-            });
-            locationCard.querySelector('.delete-btn').addEventListener('click', (e) => {
-              e.stopPropagation();
-              if (!isAdmin) {
-                showToast('Только администратор может удалять локации', 'error');
-                return;
-              }
-              deleteLocation(id);
-            });
-            locationCard.addEventListener('click', (e) => {
-              if (!e.target.classList.contains('location-image') && !e.target.classList.contains('character-image')) {
-                const characterGrid = document.getElementById(`characterGrid-${id}`);
-                const isActive = characterGrid.classList.contains('active');
-                document.querySelectorAll('.character-grid').forEach((grid) => {
-                  grid.classList.remove('active');
-                });
-                if (!isActive) {
-                  characterGrid.classList.add('active');
-                }
-              }
-            });
-          });
-          updateButtonVisibility();
-          hideLoader();
-          updateGalleryStatus('online', 'Соединение с базой данных');
-        }, (error) => {
-          console.error('Error loading gallery:', error);
-          let userMessage = 'Ошибка загрузки галереи';
-          if (error.code === 'PERMISSION_DENIED') {
-            userMessage = 'Нет доступа к данным. Проверьте настройки.';
-          } else if (error.code === 'NETWORK_ERROR') {
-            userMessage = 'Нет подключения к интернету.';
-          }
-          updateGalleryStatus('offline', userMessage);
-          showToast(userMessage, 'error');
-          hideLoader();
-        });
-      } catch (error) {
-        console.error('Error in loadGallery:', error);
-        showToast(`Ошибка загрузки галереи: ${error.message}`, 'error');
-        hideLoader();
-      }
-    }
+    exploreChaptersBtn.addEventListener('click', showChapters);
+    exploreChaptersBtnSecondary.addEventListener('click', showChapters);
+    exploreGalleryBtn.addEventListener('click', showGallery);
+    exploreGalleryBtnSecondary.addEventListener('click', showGallery);
+    themeToggle.addEventListener('click', toggleTheme);
 
-    function editLocation(id) {
-      if (!isAdmin) {
-        showToast('Только администратор может редактировать локации', 'error');
+    submitLoginBtn.addEventListener('click', () => {
+      const username = usernameInput.value.trim();
+      if (!username) {
+        showToast('Введите имя пользователя', 'error');
         return;
       }
-      showLoader();
-      database.ref(`gallery_locations/${id}`).once('value')
-        .then((snapshot) => {
-          const location = snapshot.val();
-          if (location) {
-            locationTitle.value = location.location.title;
-            locationImage.value = location.location.image;
-            characterInputs.innerHTML = '';
-            location.characters.forEach((char) => {
-              addCharacterInput(char.name, char.image);
-            });
-            galleryFormTitle.textContent = 'Редактировать локацию';
-            isEditingLocation = true;
-            editingLocationId = id;
-            galleryForm.style.display = 'block';
-          } else {
-            showToast('Локация не найдена', 'error');
-          }
-          hideLoader();
-        })
-        .catch((error) => {
-          showToast(`Ошибка загрузки локации: ${error.message}`, 'error');
-          hideLoader();
-        });
-    }
+      isAdmin = username === 'Михаил Калепназ';
+      localStorage.setItem('username', username);
+      localStorage.setItem('isAdmin', isAdmin);
+      hideLoginModal();
+      updateButtonVisibility();
+      showToast(`Добро пожаловать, ${username}!`, 'success');
+    });
 
-    function deleteLocation(id) {
-      if (confirm('Вы уверены, что хотите удалить эту локацию?')) {
-        showLoader();
-        database.ref(`gallery_locations/${id}`).remove()
-          .then(() => {
-            showToast('Локация удалена!', 'success');
-            hideLoader();
-          })
-          .catch((error) => {
-            showToast(`Ошибка удаления: ${error.message}`, 'error');
-            hideLoader();
-          });
+    cancelLoginBtn.addEventListener('click', () => {
+      hideLoginModal();
+    });
+
+    loginBtn.addEventListener('click', () => {
+      if (localStorage.getItem('username')) {
+        localStorage.removeItem('username');
+        localStorage.removeItem('isAdmin');
+        isAdmin = false;
+        updateButtonVisibility();
+        showToast('Вы вышли из системы', 'success');
+        showLoginModal();
+      } else {
+        showLoginModal();
       }
-    }
+    });
+
+    toggleLanguageBtn.addEventListener('click', () => {
+      console.log('Language toggle clicked, currentLanguage:', currentLanguage);
+      toggleLanguage();
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
-  console.log('App initialized');
-  updateChapterStatus('online', 'Соединение с базой данных');
-  updateGalleryStatus('online', 'Соединение с базой данных');
-  loadTheme();
-  loadChapters();
-  loadBookCover();
-  loadGallery();
-  bookCoverSection.classList.add('visible');
-  const savedUsername = localStorage.getItem('username');
-  if (savedUsername) {
-    isAdmin = savedUsername === 'Михаил Калепназ';
-    localStorage.setItem('isAdmin', isAdmin);
-    updateButtonVisibility();
-  } else {
-    showLoginModal(); // Показываем модальное окно входа, если пользователь не авторизован
-  }
-});
+      console.log('App initialized');
+      try {
+        updateChapterStatus('online', 'Соединение с базой данных');
+        updateGalleryStatus('online', 'Соединение с базой данных');
+        loadTheme();
+        loadChapters();
+        loadBookCover();
+        loadGallery();
+        bookCoverSection.classList.add('visible');
+        const savedUsername = localStorage.getItem('username');
+        if (savedUsername) {
+          isAdmin = savedUsername === 'Михаил Калепназ';
+          localStorage.setItem('isAdmin', isAdmin);
+          updateButtonVisibility();
+        } else {
+          showLoginModal();
+        }
+      } catch (error) {
+        console.error('Initialization error:', error);
+        showToast('Ошибка инициализации приложения', 'error');
+        updateChapterStatus('offline', 'Ошибка соединения');
+        updateGalleryStatus('offline', 'Ошибка соединения');
+      }
+    });
   </script>
 </body>
 </html>
