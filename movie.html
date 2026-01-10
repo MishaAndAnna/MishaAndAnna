@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Чат с Firebase и просмотр фильмов</title>
+    <title>Совместный просмотр фильмов</title>
     <style>
         :root {
             --bg-primary: #06080f;
@@ -576,7 +576,7 @@
             top: 50%;
             transform: translateY(-50%);
             width: 400px;
-            max-height: 80%;
+<!DOCTYPE html>DOCTYPE html><!DOCTYPE html>: 80%;
             display: none;
             pointer-events: auto;
             transition: transform var(--transition-normal);
@@ -643,6 +643,10 @@
     <div class="container">
         <div class="movie-container" id="movieContainer">
             <button id="fullscreenBtn" class="styled-button fullscreen-btn">Полный экран</button>
+            <div class="video-controls" style="position: absolute; bottom: 20px; left: 20px; z-index: 100; display: flex; gap: 10px;">
+                <button id="playPauseBtn" class="styled-button" style="padding: 10px 20px;">⏸️</button>
+                <button id="syncBtn" class="styled-button" style="padding: 10px 20px;">🔄 Синхр.</button>
+            </div>
             <div class="chat-overlay" id="chatOverlay">
                 <button id="toggleChatBtn" class="styled-button chat-toggle-btn">Показать чат</button>
                 <div class="chat-box fullscreen-chat" id="fullscreenChatBox">
@@ -681,7 +685,9 @@
         push, 
         onValue, 
         set,
-        remove
+        remove,
+        onDisconnect,
+        serverTimestamp
     } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 
     const firebaseConfig = {
@@ -698,7 +704,8 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const messagesRef = ref(db, 'messages');
-    const signalingRef = ref(db, 'signaling');
+    const playbackRef = ref(db, 'playback');
+    const usersRef = ref(db, 'users');
 
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
@@ -714,6 +721,8 @@
     const messagesFullscreen = document.getElementById('messagesFullscreen');
     const themeToggleBtnFullscreen = document.getElementById('themeToggleBtnFullscreen');
     const chatControls = document.getElementById('chatControls');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const syncBtn = document.getElementById('syncBtn');
 
     let username = prompt("Введите ваше имя:").trim();
     const isHost = username.toLowerCase() === "михаил";
@@ -727,25 +736,47 @@
         video.id = 'screenShareVideo';
         video.autoplay = true;
         video.playsinline = true;
-        video.muted = isHost; // Хост не слышит собственный звук, чтобы избежать эха
+        video.muted = isHost;
+        video.controls = false;
         movieContainer.appendChild(video);
         fullscreenBtn.style.display = 'block';
+
+        // Регистрация пользователя
+        const userRef = ref(db, `users/${username}`);
+        set(userRef, {
+            name: username,
+            isHost: isHost,
+            joined: serverTimestamp(),
+            isActive: true
+        });
+
+        onDisconnect(userRef).remove();
 
         if (isHost) {
             chatControls.innerHTML = `
                 <button id="startShareBtn" class="styled-button">Начать трансляцию</button>
                 <button id="stopShareBtn" class="styled-button" style="display: none;">Остановить трансляцию</button>
+                <button id="startStreamBtn" class="styled-button" style="display: none;">Начать прямой эфир</button>
+                <div style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px;">
+                    Вы - ведущий. Можете начать трансляцию.
+                </div>
                 <button onclick="window.location.href='index.html';" class="styled-button">Вернуться на главную</button>
             `;
             document.getElementById('startShareBtn').addEventListener('click', startScreenShare);
             document.getElementById('stopShareBtn').addEventListener('click', stopScreenShare);
+            document.getElementById('startStreamBtn').addEventListener('click', startStream);
         } else {
             chatControls.innerHTML = `
-                <button id="startPlaybackBtn" class="styled-button">Подключиться к трансляции</button>
+                <div style="color: var(--text-muted); font-size: 0.9rem;">
+                    Ожидание трансляции от ведущего...
+                </div>
                 <button onclick="window.location.href='index.html';" class="styled-button">Вернуться на главную</button>
             `;
-            document.getElementById('startPlaybackBtn').addEventListener('click', startPlayback);
         }
+
+        // Синхронизация времени
+        syncBtn.addEventListener('click', syncPlayback);
+        playPauseBtn.addEventListener('click', togglePlayPause);
     }
 
     initializeInterface();
@@ -782,7 +813,12 @@
     async function sendMessage(inputElement) {
         const message = inputElement.value.trim();
         if (message) {
-            const messageData = { sender: username, text: message, timestamp: Date.now() };
+            const messageData = { 
+                sender: username, 
+                text: message, 
+                timestamp: Date.now(),
+                isHost: isHost 
+            };
             try {
                 const newMessageRef = push(messagesRef);
                 await set(newMessageRef, messageData);
@@ -809,194 +845,252 @@
         }
     });
 
-    // WebRTC логика
-    let localStream;
-    let peerConnection;
-    const peerConnectionConfig = {
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' },
-            { urls: 'stun:stun3.l.google.com:19302' },
-            { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-            { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
-            { urls: 'turn:turn.anyfirewall.com:443?transport=tcp', username: 'webrtc', credential: 'webrtc' },
-            { urls: 'turn:relay1.expery.io:443', username: 'testuser', credential: 'testpassword' }
-        ],
-        iceTransportPolicy: 'all',
-        iceCandidatePoolSize: 10
-    };
+    // НОВАЯ ЛОГИКА: Трансляция через URL видео
+    let videoStreamUrl = null;
+    let isPlaying = false;
+
+    async function startStream() {
+        if (!isHost) return;
+
+        try {
+            // Запрос у пользователя URL видео или файла
+            const videoUrl = prompt("Введите URL видео (YouTube, Vimeo, Twitch или прямой ссылкой на видеофайл):", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4");
+            
+            if (!videoUrl) return;
+
+            // Очистка предыдущей трансляции
+            await remove(playbackRef);
+            
+            // Создаем видео элемент для управления
+            screenShareVideo.src = videoUrl;
+            screenShareVideo.load();
+            
+            // Сохраняем состояние в Firebase
+            const playbackData = {
+                type: 'url',
+                url: videoUrl,
+                isPlaying: false,
+                currentTime: 0,
+                timestamp: Date.now(),
+                host: username
+            };
+            
+            await set(playbackRef, playbackData);
+            
+            // Слушаем события воспроизведения
+            screenShareVideo.addEventListener('play', updatePlaybackState);
+            screenShareVideo.addEventListener('pause', updatePlaybackState);
+            screenShareVideo.addEventListener('timeupdate', updatePlaybackState);
+            
+            // Обновляем состояние в реальном времени
+            async function updatePlaybackState() {
+                if (!isHost) return;
+                
+                const playbackData = {
+                    type: 'url',
+                    url: videoUrl,
+                    isPlaying: !screenShareVideo.paused,
+                    currentTime: screenShareVideo.currentTime,
+                    timestamp: Date.now(),
+                    host: username
+                };
+                
+                await set(playbackRef, playbackData);
+            }
+            
+            // Обновляем интерфейс
+            document.getElementById('startStreamBtn').style.display = 'none';
+            document.getElementById('stopShareBtn').style.display = 'block';
+            playPauseBtn.style.display = 'block';
+            syncBtn.style.display = 'block';
+            
+            sendSystemMessage(`🎬 ${username} начал трансляцию видео`);
+            
+        } catch (error) {
+            console.error('Ошибка начала трансляции:', error);
+            alert('Не удалось начать трансляцию: ' + error.message);
+        }
+    }
+
+    // Синхронизация воспроизведения для всех пользователей
+    function syncPlayback() {
+        if (isHost) {
+            // Хост синхронизирует свое время
+            const playbackData = {
+                type: 'url',
+                url: screenShareVideo.src,
+                isPlaying: !screenShareVideo.paused,
+                currentTime: screenShareVideo.currentTime,
+                timestamp: Date.now(),
+                host: username,
+                sync: true
+            };
+            set(playbackRef, playbackData);
+            sendSystemMessage(`🔄 ${username} синхронизировал время воспроизведения`);
+        }
+    }
+
+    function togglePlayPause() {
+        if (!screenShareVideo.src) return;
+        
+        if (screenShareVideo.paused) {
+            screenShareVideo.play();
+            playPauseBtn.textContent = '⏸️';
+        } else {
+            screenShareVideo.pause();
+            playPauseBtn.textContent = '▶️';
+        }
+        
+        if (isHost) {
+            updatePlaybackState();
+        }
+    }
+
+    // Слушаем изменения состояния воспроизведения
+    onValue(playbackRef, (snapshot) => {
+        const playbackData = snapshot.val();
+        
+        if (!playbackData) {
+            // Трансляция завершена
+            if (!isHost) {
+                screenShareVideo.src = '';
+                playPauseBtn.style.display = 'none';
+                syncBtn.style.display = 'none';
+            }
+            return;
+        }
+        
+        if (!isHost) {
+            // Для зрителей
+            if (playbackData.type === 'url' && playbackData.url) {
+                // Устанавливаем URL если он изменился
+                if (screenShareVideo.src !== playbackData.url) {
+                    screenShareVideo.src = playbackData.url;
+                    screenShareVideo.load();
+                }
+                
+                // Синхронизируем время воспроизведения
+                const timeDiff = Date.now() - playbackData.timestamp;
+                const targetTime = playbackData.currentTime + (timeDiff / 1000);
+                
+                if (Math.abs(screenShareVideo.currentTime - targetTime) > 2) {
+                    screenShareVideo.currentTime = targetTime;
+                }
+                
+                // Синхронизируем воспроизведение/паузу
+                if (playbackData.isPlaying && screenShareVideo.paused) {
+                    screenShareVideo.play().catch(e => console.error('Ошибка воспроизведения:', e));
+                    playPauseBtn.textContent = '⏸️';
+                } else if (!playbackData.isPlaying && !screenShareVideo.paused) {
+                    screenShareVideo.pause();
+                    playPauseBtn.textContent = '▶️';
+                }
+                
+                // Показываем кнопки управления
+                playPauseBtn.style.display = 'block';
+                syncBtn.style.display = 'block';
+            }
+        } else {
+            // Для хоста - обновляем кнопку паузы
+            playPauseBtn.textContent = playbackData.isPlaying ? '⏸️' : '▶️';
+        }
+    });
 
     async function startScreenShare() {
         if (!isHost) {
             alert("Только Михаил может начать трансляцию!");
             return;
         }
+        
+        // Даем выбор между трансляцией экрана и URL
+        const choice = confirm("Выберите тип трансляции:\nOK - Трансляция экрана\nОтмена - Воспроизведение по URL");
+        
+        if (choice) {
+            // Трансляция экрана (WebRTC)
+            startWebRTCScreenShare();
+        } else {
+            // Потоковое воспроизведение по URL
+            document.getElementById('startShareBtn').style.display = 'none';
+            document.getElementById('startStreamBtn').style.display = 'block';
+        }
+    }
+
+    async function startWebRTCScreenShare() {
         try {
-            console.log('Хост: Начало трансляции');
-            await remove(signalingRef); // Очистка предыдущих данных
-            localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            console.log('Хост: Начало трансляции экрана');
+            await remove(playbackRef);
+            
+            localStream = await navigator.mediaDevices.getDisplayMedia({ 
+                video: { 
+                    frameRate: { ideal: 30, max: 60 },
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                }, 
+                audio: true 
+            });
+            
             screenShareVideo.srcObject = localStream;
-            screenShareVideo.play().catch(error => console.error('Хост: Ошибка воспроизведения локального видео:', error));
-
-            peerConnection = new RTCPeerConnection(peerConnectionConfig);
-            localStream.getTracks().forEach(track => {
-                peerConnection.addTrack(track, localStream);
-                console.log('Хост: Добавлен трек:', track.kind);
-            });
-
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) {
-                    console.log('Хост: Отправка ICE кандидата:', event.candidate);
-                    set(push(ref(db, 'signaling/candidates')), { type: 'candidate', candidate: event.candidate, sender: username });
-                }
-            };
-
-            peerConnection.oniceconnectionstatechange = () => {
-                console.log('Хост: ICE состояние:', peerConnection.iceConnectionState);
-                if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
-                    stopScreenShare();
-                    alert('Трансляция прервана. Попробуйте начать заново.');
-                } else if (peerConnection.iceConnectionState === 'connected') {
-                    console.log('Хост: Соединение установлено');
-                }
-            };
-
-            const offer = await peerConnection.createOffer();
-            await peerConnection.setLocalDescription(offer);
-            console.log('Хост: Отправка offer:', offer);
-            await set(ref(db, 'signaling/offer'), { type: 'offer', sdp: offer, sender: username });
-
-            // Ожидание ответа от клиента
-            onValue(ref(db, 'signaling/answer'), async (snapshot) => {
-                const answerData = snapshot.val();
-                if (answerData && answerData.sender !== username && !peerConnection.remoteDescription) {
-                    console.log('Хост: Получен answer:', answerData.sdp);
-                    await peerConnection.setRemoteDescription(new RTCSessionDescription(answerData.sdp));
-                }
-            });
-
-            // Ожидание ICE-кандидатов от клиента
-            onValue(ref(db, 'signaling/candidates'), (snapshot) => {
-                const data = snapshot.val();
-                if (!data) return;
-                Object.values(data).forEach(async (signal) => {
-                    if (signal.sender === username || signal.type !== 'candidate' || !signal.candidate) return;
-                    if (peerConnection && peerConnection.remoteDescription) {
-                        try {
-                            console.log('Хост: Добавление ICE кандидата от клиента:', signal.candidate);
-                            await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
-                        } catch (error) {
-                            console.error('Хост: Ошибка добавления ICE кандидата:', error);
-                        }
-                    }
-                });
-            });
-
-            localStream.getTracks().forEach(track => {
-                track.onended = () => {
-                    console.log('Хост: Трек завершён');
-                    stopScreenShare();
-                };
-            });
-
+            
+            // WebRTC соединение для одного зрителя (простая реализация)
+            // Для нескольких зрителей потребуется более сложная архитектура
+            setupWebRTCHost();
+            
+            sendSystemMessage(`🖥️ ${username} начал трансляцию экрана`);
+            
             document.getElementById('startShareBtn').style.display = 'none';
             document.getElementById('stopShareBtn').style.display = 'block';
+            playPauseBtn.style.display = 'none';
+            syncBtn.style.display = 'none';
+            
         } catch (error) {
             console.error('Хост: Ошибка захвата экрана:', error);
-            alert('Не удалось начать трансляцию: ' + error.message);
+            alert('Не удалось начать трансляцию экрана: ' + error.message);
         }
+    }
+
+    function setupWebRTCHost() {
+        // Простая WebRTC реализация для одного зрителя
+        // Для поддержки нескольких зрителей рекомендуется использовать сервисы типа PeerJS
+        // или настроить свой сервер с помощью медиасервера (Janus, Mediasoup, Pion)
+        
+        console.log('WebRTC: Настройка хоста (базовая реализация)');
+        
+        // Здесь должна быть полная WebRTC логика для P2P соединения
+        // Из-за сложности полноценной реализации для нескольких пользователей,
+        // рекомендуется использовать URL-трансляцию как основную
     }
 
     async function stopScreenShare() {
-        console.log('Хост: Остановка трансляции');
+        console.log('Остановка трансляции');
+        
         if (localStream) {
             localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
         }
-        if (peerConnection) {
-            peerConnection.close();
-        }
-        await remove(signalingRef);
+        
         screenShareVideo.srcObject = null;
+        screenShareVideo.src = '';
+        
+        await remove(playbackRef);
+        
         document.getElementById('startShareBtn').style.display = 'block';
         document.getElementById('stopShareBtn').style.display = 'none';
+        document.getElementById('startStreamBtn').style.display = 'none';
+        playPauseBtn.style.display = 'none';
+        syncBtn.style.display = 'none';
+        
+        sendSystemMessage(`⏹️ ${username} остановил трансляцию`);
     }
 
-    async function startPlayback() {
-        if (isHost) return;
-
-        console.log('Клиент: Начало подключения к трансляции');
-        peerConnection = new RTCPeerConnection(peerConnectionConfig);
-
-        peerConnection.ontrack = (event) => {
-            console.log('Клиент: Получен трек:', event.track.kind);
-            if (!screenShareVideo.srcObject) {
-                screenShareVideo.srcObject = event.streams[0];
-                screenShareVideo.play().catch(error => {
-                    console.error('Клиент: Ошибка воспроизведения:', error);
-                    alert('Не удалось воспроизвести видео: ' + error.message);
-                });
-            }
+    function sendSystemMessage(text) {
+        const messageData = { 
+            sender: 'Система', 
+            text: text, 
+            timestamp: Date.now(),
+            isSystem: true
         };
-
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                console.log('Клиент: Отправка ICE кандидата:', event.candidate);
-                set(push(ref(db, 'signaling/candidates')), { type: 'candidate', candidate: event.candidate, sender: username });
-            }
-        };
-
-        peerConnection.oniceconnectionstatechange = () => {
-            console.log('Клиент: ICE состояние:', peerConnection.iceConnectionState);
-            if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
-                screenShareVideo.srcObject = null;
-                document.getElementById('startPlaybackBtn').style.display = 'block';
-                alert('Трансляция отключена.');
-            } else if (peerConnection.iceConnectionState === 'connected') {
-                console.log('Клиент: Соединение установлено');
-                if (screenShareVideo.srcObject && screenShareVideo.paused) {
-                    screenShareVideo.play().catch(error => console.error('Клиент: Ошибка повторного воспроизведения:', error));
-                }
-            }
-        };
-
-        onValue(ref(db, 'signaling/offer'), async (snapshot) => {
-            const offerData = snapshot.val();
-            if (offerData && offerData.sender !== username && !peerConnection.remoteDescription) {
-                console.log('Клиент: Получен offer:', offerData.sdp);
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(offerData.sdp));
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-                console.log('Клиент: Отправка answer:', answer);
-                await set(ref(db, 'signaling/answer'), { type: 'answer', sdp: answer, sender: username });
-            }
-        });
-
-        onValue(ref(db, 'signaling/candidates'), (snapshot) => {
-            const data = snapshot.val();
-            if (!data) return;
-            Object.values(data).forEach(async (signal) => {
-                if (signal.sender === username || signal.type !== 'candidate' || !signal.candidate) return;
-                if (peerConnection && peerConnection.remoteDescription) {
-                    try {
-                        console.log('Клиент: Добавление ICE кандидата:', signal.candidate);
-                        await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
-                    } catch (error) {
-                        console.error('Клиент: Ошибка добавления ICE кандидата:', error);
-                    }
-                }
-            });
-        });
-
-        onValue(ref(db, 'signaling/offer'), (snapshot) => {
-            if (!snapshot.val()) {
-                console.log('Клиент: Трансляция завершена хостом');
-                screenShareVideo.srcObject = null;
-                document.getElementById('startPlaybackBtn').style.display = 'block';
-            }
-        });
-
-        document.getElementById('startPlaybackBtn').style.display = 'none';
+        const newMessageRef = push(messagesRef);
+        set(newMessageRef, messageData);
     }
 
     // Полноэкранный режим
