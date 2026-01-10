@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Совместный просмотр фильмов</title>
+    <style>
+         :root {
+            --bg-primary: #06080f;
+            --bg-secondary: #0f172a;
+            --bg-tertiary: #1e293b;
+            --accent-primary: #06b6d4;
+            --accent-secondary: #3b82f6;
+            --accent-tertiary: #8b5cf6;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --glow-primary: rgba(6, 182, 212, 0.5);
+            --glow-secondary: rgba(59, 130, 246, 0.5);
+            --gradient-bg: linear-gradient(to bottom right, var(--bg-primary), var(--bg-secondary));
+            --gradient-accent: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            --gradient-accent-hover: linear-gradient(135deg, var(--accent-secondary), var(--accent-tertiary));
+            --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+            --border-radius-sm: 0.75rem;
+            --border-radius-md: 1rem;
+            --border-radius-lg: 1.5rem;
+            --border-radius-full: 9999px;
+            --space-xs: 0.5rem;
+            --space-sm: 0.75rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 10px 20px -5px rgba(0, 0, 0, 0.25), 0 8px 16px -8px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+            --shadow-glow: 0 0 15px var(--glow-primary);
+            --font-primary: 'Inter', 'SF Pro Text', -apple-system, system-ui, sans-serif;
+            --font-display: 'Clash Display', 'Ginto Nord', 'SF Pro Display', sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+            --transition-fast: 0.15s cubic-bezier(0.3, 0, 0.8, 1);
+            --transition-normal: 0.25s cubic-bezier(0.3, 0, 0.8, 1);
+            --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            --container-width: 1800px;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #f1f5f9;
+            --bg-tertiary: #e2e8f0;
+            --accent-primary: #0891b2;
+            --accent-secondary: #2563eb;
+            --accent-tertiary: #7c3aed;
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --glow-primary: rgba(8, 145, 178, 0.25);
+            --glow-secondary: rgba(37, 99, 235, 0.25);
+            --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3));
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+            --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.04);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            color: var(--text-primary);
+            background-color: var(--bg-primary);
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(6, 182, 212, 0.1), transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(139, 92, 246, 0.1), transparent 40%),
+                var(--gradient-bg);
+            background-attachment: fixed;
+            min-height: 100vh;
+            line-height: 1.6;
+            padding: var(--space-lg);
+            transition: background-color var(--transition-slow);
+            overflow-x: hidden;
+        }
+
+        a {
+            color: var(--accent-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        a:hover {
+            color: var(--accent-secondary);
+        }
+
+        .container {
+            width: 100%;
+            max-width: var(--container-width);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-xl);
+            height: calc(100vh - 2 * var(--space-lg));
+            position: relative;
+        }
+
+        .movie-container {
+            position: relative;
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            height: 100%;
+            box-shadow: var(--shadow-lg);
+            isolation: isolate;
+            transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+            background: black;
+        }
+
+        .movie-container:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+        }
+
+        .movie-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: inherit;
+            z-index: -1;
+        }
+
+        .movie-container::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 20%;
+            right: 20%;
+            height: 2px;
+            background: var(--gradient-accent);
+            border-radius: var(--border-radius-full);
+            filter: blur(1px);
+        }
+
+        video, iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: black;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        video {
+            object-fit: contain;
+        }
+
+        iframe {
+            border-radius: var(--border-radius-lg);
+        }
+
+        #playerContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .chat-box {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            isolation: isolate;
+        }
+
+        .chat-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: inherit;
+            z-index: -1;
+        }
+
+        .chat-header {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-lg);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .chat-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-accent);
+            opacity: 0.6;
+            filter: blur(2px);
+        }
+
+        .chat-title {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 600;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            position: relative;
+        }
+
+        .theme-toggle-btn {
+            position: relative;
+            background: none;
+            color: var(--text-primary);
+            font-family: var(--font-primary);
+            font-weight: 500;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            border-radius: var(--border-radius-full);
+            cursor: pointer;
+            overflow: hidden;
+            isolation: isolate;
+            user-select: none;
+        }
+
+        .theme-toggle-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-glass);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: inherit;
+            z-index: -1;
+            transition: all var(--transition-normal);
+        }
+
+        .theme-toggle-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-accent);
+            border-radius: inherit;
+            z-index: -2;
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+        }
+
+        .theme-toggle-btn:hover::before {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .theme-toggle-btn:hover::after {
+            opacity: 0.7;
+        }
+
+        .theme-toggle-btn:active {
+            transform: translateY(1px);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: var(--space-lg);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-primary) transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius-full);
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, var(--accent-primary), var(--accent-secondary));
+            border-radius: var(--border-radius-full);
+        }
+
+        .message {
+            position: relative;
+            max-width: 80%;
+            margin-bottom: var(--space-md);
+            transform-origin: bottom;
+            animation: messageSlide 0.4s var(--transition-normal);
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            --message-gradient: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            --message-color: var(--text-primary);
+            --message-border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .message.received {
+            align-self: flex-start;
+            --message-gradient: var(--gradient-glass);
+            --message-color: var(--text-primary);
+            --message-border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .message-content {
+            position: relative;
+            padding: var(--space-lg);
+            border-radius: var(--border-radius-md);
+            color: var(--message-color);
+            font-size: 1rem;
+            line-height: 1.6;
+            overflow: hidden;
+            isolation: isolate;
+            z-index: 1;
+        }
+
+        .message-content::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--message-gradient);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: var(--message-border);
+            border-radius: inherit;
+            z-index: -1;
+        }
+
+        .message.sent .message-content {
+            border-bottom-right-radius: 0;
+            color: white;
+        }
+
+        .message.received .message-content {
+            border-bottom-left-radius: 0;
+        }
+
+        .message::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            width: 20px;
+            height: 20px;
+            z-index: 0;
+        }
+
+        .message.sent::after {
+            right: -8px;
+            border-right: 10px solid transparent;
+            border-top: 10px solid transparent;
+            border-left: 10px solid var(--accent-secondary);
+            border-bottom: 10px solid transparent;
+            transform: rotate(-45deg);
+        }
+
+        .message.received::after {
+            left: -8px;
+            border-right: 10px solid transparent;
+            border-top: 10px solid transparent;
+            border-left: 10px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 10px solid transparent;
+            transform: rotate(135deg);
+        }
+
+        .message-meta {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            font-size: 0.85rem;
+            margin-top: var(--space-xs);
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .chat-input-container {
+            position: relative;
+            margin: var(--space-lg);
+            border-radius: var(--border-radius-md);
+            overflow: hidden;
+            isolation: isolate;
+            transition: transform var(--transition-normal);
+        }
+
+        .chat-input-container:focus-within {
+            transform: translateY(-2px);
+        }
+
+        .chat-input-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: inherit;
+            z-index: -1;
+        }
+
+        .chat-input-container:focus-within::before {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 1px var(--accent-primary), var(--shadow-glow);
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: var(--space-lg);
+            padding-right: 60px;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: var(--font-primary);
+            resize: none;
+            line-height: 1.5;
+        }
+
+        .chat-input:focus {
+            outline: none;
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        #sendBtn, #sendBtnFullscreen {
+            position: absolute;
+            right: var(--space-md);
+            bottom: var(--space-md);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            overflow: hidden;
+            isolation: isolate;
+            transition: all var(--transition-normal);
+        }
+
+        #sendBtn::before, #sendBtnFullscreen::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-accent);
+            border-radius: inherit;
+            z-index: -1;
+            transition: all var(--transition-normal);
+        }
+
+        #sendBtn::after, #sendBtnFullscreen::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 18px;
+            height: 18px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            transform: translate(-75%, -50%) rotate(-45deg);
+            transition: all var(--transition-normal);
+        }
+
+        #sendBtn:hover::before, #sendBtnFullscreen:hover::before {
+            background: var(--gradient-accent-hover);
+        }
+
+        #sendBtn:hover::after, #sendBtnFullscreen:hover::after {
+            transform: translate(-60%, -50%) rotate(-45deg);
+        }
+
+        #sendBtn:active, #sendBtnFullscreen:active {
+            transform: scale(0.95);
+        }
+
+        .styled-button {
+            position: relative;
+            padding: var(--space-md) var(--space-xl);
+            border: none;
+            border-radius: var(--border-radius-full);
+            font-family: var(--font-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            background: transparent;
+            cursor: pointer;
+            overflow: hidden;
+            isolation: isolate;
+            transition: transform var(--transition-normal);
+        }
+
+        .styled-button::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-accent);
+            border-radius: inherit;
+            z-index: -1;
+            transition: all var(--transition-normal);
+        }
+
+        .styled-button::after {
+            content: '';
+            position: absolute;
+            inset: -100% -200%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: rotate(45deg);
+            z-index: -1;
+            transition: all var(--transition-normal);
+        }
+
+        .styled-button:hover {
+            transform: translateY(-3px);
+        }
+
+        .styled-button:hover::before {
+            filter: brightness(1.1);
+        }
+
+        .styled-button:hover::after {
+            transform: rotate(45deg) translateX(100%);
+        }
+
+        .styled-button:active {
+            transform: translateY(-1px);
+        }
+
+        .fullscreen-btn {
+            position: absolute;
+            top: var(--space-md);
+            right: var(--space-md);
+            z-index: 10;
+        }
+
+        .chat-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .chat-overlay.active {
+            display: block;
+        }
+
+        .chat-toggle-btn {
+            position: absolute;
+            top: var(--space-md);
+            right: var(--space-md);
+            pointer-events: auto;
+        }
+
+        .fullscreen-chat {
+            position: absolute;
+            right: var(--space-md);
+            top: 50%;
+            transform: translateY(-50%);
+            width: 400px;
+            max-width: 80%;
+            display: none;
+            pointer-events: auto;
+            transition: transform var(--transition-normal);
+        }
+
+        .fullscreen-chat.active {
+            display: flex;
+        }
+
+        body.fullscreen .container > .chat-box {
+            display: none;
+        }
+
+        body.fullscreen .movie-container {
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            top: 0;
+            left: 0;
+            margin: 0;
+            z-index: 1000;
+        }
+
+        .loading-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            z-index: 5;
+            display: none;
+        }
+
+        .loading-indicator.active {
+            display: block;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr 1fr;
+                height: auto;
+                gap: var(--space-lg);
+            }
+            .movie-container, .chat-box { height: 600px; }
+        }
+
+        @media (max-width: 768px) {
+            :root { --space-lg: 1rem; --space-xl: 1.5rem; }
+            body { padding: var(--space-md); }
+            .container { gap: var(--space-lg); }
+            .chat-title { font-size: 1.5rem; }
+            .movie-container, .chat-box { height: 500px; }
+            .message { max-width: 90%; }
+            .message-content { padding: var(--space-md); }
+            .fullscreen-chat { width: 300px; }
+        }
+
+        @media (max-width: 480px) {
+            .movie-container, .chat-box { height: 400px; }
+            .chat-title { font-size: 1.25rem; }
+            .fullscreen-chat { width: 250px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="movie-container" id="movieContainer">
+            <div id="playerContainer"></div>
+            <div class="loading-indicator" id="loadingIndicator">Загрузка...</div>
+            <button id="fullscreenBtn" class="styled-button fullscreen-btn">Полный экран</button>
+            <div class="video-controls" style="position: absolute; bottom: 20px; left: 20px; z-index: 100; display: flex; gap: 10px;">
+                <button id="playPauseBtn" class="styled-button" style="padding: 10px 20px; display: none;">⏸️</button>
+                <button id="syncBtn" class="styled-button" style="padding: 10px 20px; display: none;">🔄 Синхр.</button>
+            </div>
+            <div class="chat-overlay" id="chatOverlay">
+                <button id="toggleChatBtn" class="styled-button chat-toggle-btn">Показать чат</button>
+                <div class="chat-box fullscreen-chat" id="fullscreenChatBox">
+                    <div class="chat-header">
+                        <div class="chat-title">Чат</div>
+                        <button class="theme-toggle-btn" id="themeToggleBtnFullscreen">Переключить тему</button>
+                    </div>
+                    <div class="chat-messages" id="messagesFullscreen"></div>
+                    <div class="chat-input-container">
+                        <textarea id="messageInputFullscreen" class="chat-input" placeholder="Введите сообщение..."></textarea>
+                        <button id="sendBtnFullscreen" class="send-btn">Отправить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-box" id="defaultChatBox">
+            <div class="chat-header">
+                <div class="chat-title">Чат</div>
+                <button class="theme-toggle-btn" id="themeToggleBtn">Переключить тему</button>
+            </div>
+            <div class="chat-messages" id="messages"></div>
+            <div class="chat-input-container">
+                <textarea id="messageInput" class="chat-input" placeholder="Введите сообщение..."></textarea>
+                <button id="sendBtn" class="send-btn">Отправить</button>
+            </div>
+            <div id="chatControls" style="margin: var(--space-lg); display: flex; flex-direction: column; gap: var(--space-md);"></div>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+    import { 
+        getDatabase, 
+        ref, 
+        push, 
+        onValue, 
+        set,
+        remove,
+        onDisconnect,
+        serverTimestamp
+    } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
+        authDomain: "misha-and-anna-48e4c.firebaseapp.com",
+        databaseURL: "https://misha-and-anna-48e4c-default-rtdb.europe-west1.firebasedatabase.app/",
+        projectId: "misha-and-anna-48e4c",
+        storageBucket: "misha-and-anna-48e4c.appspot.com",
+        messagingSenderId: "822036073579",
+        appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e",
+        measurementId: "G-XR86X6PXMX"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const messagesRef = ref(db, 'messages');
+    const playbackRef = ref(db, 'playback');
+    const usersRef = ref(db, 'users');
+
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const messagesContainer = document.getElementById('messages');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const movieContainer = document.getElementById('movieContainer');
+    const playerContainer = document.getElementById('playerContainer');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const chatOverlay = document.getElementById('chatOverlay');
+    const toggleChatBtn = document.getElementById('toggleChatBtn');
+    const fullscreenChatBox = document.getElementById('fullscreenChatBox');
+    const messageInputFullscreen = document.getElementById('messageInputFullscreen');
+    const sendBtnFullscreen = document.getElementById('sendBtnFullscreen');
+    const messagesFullscreen = document.getElementById('messagesFullscreen');
+    const themeToggleBtnFullscreen = document.getElementById('themeToggleBtnFullscreen');
+    const chatControls = document.getElementById('chatControls');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const syncBtn = document.getElementById('syncBtn');
+
+    let username = prompt("Введите ваше имя:").trim();
+    const isHost = username.toLowerCase() === "михаил";
+    while (!username) {
+        username = prompt("Имя не может быть пустым. Введите ваше имя:").trim();
+    }
+
+    // Глобальные переменные для плееров
+    let localStream = null;
+    let currentVideoUrl = '';
+    let currentPlayerType = null; // 'youtube', 'vimeo', 'twitch', 'direct', 'screen'
+    let youtubePlayer = null;
+    let vimeoPlayer = null;
+    let twitchPlayer = null;
+    let directVideo = null;
+    let syncInterval = null;
+
+    // Загрузка YouTube IFrame API
+    let youtubeAPIReady = false;
+    const youtubeScript = document.createElement('script');
+    youtubeScript.src = 'https://www.youtube.com/iframe_api';
+    youtubeScript.async = true;
+    document.head.appendChild(youtubeScript);
+
+    window.onYouTubeIframeAPIReady = function() {
+        youtubeAPIReady = true;
+        console.log('YouTube API готов');
+    };
+
+    // Определение типа URL
+    function detectVideoType(url) {
+        if (!url) return null;
+        
+        // YouTube
+        const youtubeRegexes = [
+            /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/,
+            /youtube\.com\/watch\?v=([^"&?\/\s]{11})/,
+            /youtu\.be\/([^"&?\/\s]{11})/,
+            /youtube\.com\/embed\/([^"&?\/\s]{11})/
+        ];
+        
+        for (const regex of youtubeRegexes) {
+            const match = url.match(regex);
+            if (match && match[1]) {
+                return { type: 'youtube', id: match[1] };
+            }
+        }
+        
+        // Vimeo
+        const vimeoRegexes = [
+            /vimeo\.com\/(\d+)/,
+            /player\.vimeo\.com\/video\/(\d+)/
+        ];
+        
+        for (const regex of vimeoRegexes) {
+            const match = url.match(regex);
+            if (match && match[1]) {
+                return { type: 'vimeo', id: match[1] };
+            }
+        }
+        
+        // Twitch
+        if (url.includes('twitch.tv')) {
+            const twitchVideoRegex = /twitch\.tv\/videos\/(\d+)/;
+            const twitchChannelRegex = /twitch\.tv\/([a-zA-Z0-9_]+)/;
+            
+            const videoMatch = url.match(twitchVideoRegex);
+            if (videoMatch) {
+                return { type: 'twitch', id: videoMatch[1], isVideo: true };
+            }
+            
+            const channelMatch = url.match(twitchChannelRegex);
+            if (channelMatch) {
+                return { type: 'twitch', id: channelMatch[1], isVideo: false };
+            }
+        }
+        
+        // Прямое видео (mp4, webm, etc.)
+        if (/\.(mp4|webm|ogg|mov|avi|mkv|m3u8)(\?|$)/i.test(url)) {
+            return { type: 'direct', url: url };
+        }
+        
+        return null;
+    }
+
+    // Инициализация YouTube плеера
+    function initYouTubePlayer(videoId) {
+        return new Promise((resolve, reject) => {
+            if (!youtubeAPIReady) {
+                // Ждем загрузки API
+                const checkAPI = setInterval(() => {
+                    if (youtubeAPIReady && window.YT && window.YT.Player) {
+                        clearInterval(checkAPI);
+                        initYouTubePlayer(videoId).then(resolve).catch(reject);
+                    }
+                }, 100);
+                return;
+            }
+
+            destroyCurrentPlayer();
+            loadingIndicator.classList.add('active');
+            
+            youtubePlayer = new YT.Player('playerContainer', {
+                videoId: videoId,
+                width: '100%',
+                height: '100%',
+                playerVars: {
+                    autoplay: 0,
+                    controls: 1,
+                    rel: 0,
+                    modestbranding: 1,
+                    playsinline: 1,
+                    enablejsapi: 1,
+                    origin: window.location.origin
+                },
+                events: {
+                    onReady: (event) => {
+                        currentPlayerType = 'youtube';
+                        currentVideoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                        loadingIndicator.classList.remove('active');
+                        playPauseBtn.style.display = 'block';
+                        syncBtn.style.display = 'block';
+                        resolve(event.target);
+                    },
+                    onStateChange: (event) => {
+                        if (isHost) {
+                            setTimeout(() => updatePlaybackState(), 100);
+                        }
+                    },
+                    onError: (event) => {
+                        console.error('YouTube error:', event.data);
+                        alert('Ошибка загрузки YouTube видео. Проверьте ID видео и доступность.');
+                        loadingIndicator.classList.remove('active');
+                        reject(new Error('YouTube error: ' + event.data));
+                    }
+                }
+            });
+        });
+    }
+
+    // Инициализация Vimeo плеера
+    function initVimeoPlayer(videoId) {
+        destroyCurrentPlayer();
+        loadingIndicator.classList.add('active');
+        
+        const iframe = document.createElement('iframe');
+        iframe.id = 'vimeoPlayer';
+        iframe.src = `https://player.vimeo.com/video/${videoId}?autoplay=0&responsive=1&api=1`;
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+        iframe.setAttribute('frameborder', '0');
+        playerContainer.appendChild(iframe);
+        
+        // Загружаем Vimeo Player API если еще не загружен
+        if (typeof Vimeo === 'undefined') {
+            const vimeoScript = document.createElement('script');
+            vimeoScript.src = 'https://player.vimeo.com/api/player.js';
+            vimeoScript.onload = () => {
+                vimeoPlayer = new Vimeo.Player(iframe);
+                currentPlayerType = 'vimeo';
+                currentVideoUrl = `https://vimeo.com/${videoId}`;
+                
+                vimeoPlayer.ready().then(() => {
+                    loadingIndicator.classList.remove('active');
+                    playPauseBtn.style.display = 'block';
+                    syncBtn.style.display = 'block';
+                    
+                    if (isHost) {
+                        vimeoPlayer.on('play', () => updatePlaybackState());
+                        vimeoPlayer.on('pause', () => updatePlaybackState());
+                        vimeoPlayer.on('timeupdate', (data) => {
+                            if (!syncInterval) {
+                                updatePlaybackState();
+                            }
+                        });
+                    }
+                }).catch(error => {
+                    console.error('Vimeo error:', error);
+                    alert('Ошибка загрузки Vimeo видео. Проверьте ID видео.');
+                    loadingIndicator.classList.remove('active');
+                });
+            };
+            document.head.appendChild(vimeoScript);
+        } else {
+            vimeoPlayer = new Vimeo.Player(iframe);
+            currentPlayerType = 'vimeo';
+            currentVideoUrl = `https://vimeo.com/${videoId}`;
+            
+            vimeoPlayer.ready().then(() => {
+                loadingIndicator.classList.remove('active');
+                playPauseBtn.style.display = 'block';
+                syncBtn.style.display = 'block';
+                
+                if (isHost) {
+                    vimeoPlayer.on('play', () => updatePlaybackState());
+                    vimeoPlayer.on('pause', () => updatePlaybackState());
+                    vimeoPlayer.on('timeupdate', (data) => {
+                        if (!syncInterval) {
+                            updatePlaybackState();
+                        }
+                    });
+                }
+            }).catch(error => {
+                console.error('Vimeo error:', error);
+                alert('Ошибка загрузки Vimeo видео. Проверьте ID видео.');
+                loadingIndicator.classList.remove('active');
+            });
+        }
+    }
+
+    // Инициализация Twitch плеера
+    function initTwitchPlayer(channelOrVideoId, isVideo = false) {
+        destroyCurrentPlayer();
+        loadingIndicator.classList.add('active');
+        
+        const iframe = document.createElement('iframe');
+        iframe.id = 'twitchPlayer';
+        iframe.src = isVideo 
+            ? `https://player.twitch.tv/?video=${channelOrVideoId}&parent=${window.location.hostname}&muted=false`
+            : `https://player.twitch.tv/?channel=${channelOrVideoId}&parent=${window.location.hostname}&muted=false`;
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+        iframe.allowFullscreen = true;
+        iframe.setAttribute('frameborder', '0');
+        iframe.setAttribute('scrolling', 'no');
+        playerContainer.appendChild(iframe);
+        
+        currentPlayerType = 'twitch';
+        currentVideoUrl = isVideo 
+            ? `https://www.twitch.tv/videos/${channelOrVideoId}`
+            : `https://www.twitch.tv/${channelOrVideoId}`;
+        twitchPlayer = iframe;
+        
+        iframe.onload = () => {
+            loadingIndicator.classList.remove('active');
+            playPauseBtn.style.display = 'block';
+            syncBtn.style.display = 'block';
+        };
+        
+        iframe.onerror = () => {
+            console.error('Twitch error');
+            alert('Ошибка загрузки Twitch трансляции. Проверьте URL.');
+            loadingIndicator.classList.remove('active');
+        };
+    }
+
+    // Инициализация прямого видео
+    function initDirectVideo(url) {
+        destroyCurrentPlayer();
+        loadingIndicator.classList.add('active');
+        
+        directVideo = document.createElement('video');
+        directVideo.id = 'directVideo';
+        directVideo.src = url;
+        directVideo.controls = true;
+        directVideo.autoplay = false;
+        directVideo.playsinline = true;
+        directVideo.style.width = '100%';
+        directVideo.style.height = '100%';
+        directVideo.style.objectFit = 'contain';
+        playerContainer.appendChild(directVideo);
+        
+        currentPlayerType = 'direct';
+        currentVideoUrl = url;
+        
+        directVideo.addEventListener('loadedmetadata', () => {
+            loadingIndicator.classList.remove('active');
+            playPauseBtn.style.display = 'block';
+            syncBtn.style.display = 'block';
+        });
+        
+        directVideo.addEventListener('error', (e) => {
+            console.error('Video error:', e);
+            alert('Ошибка загрузки видео. Проверьте URL и формат файла.');
+            loadingIndicator.classList.remove('active');
+        });
+        
+        if (isHost) {
+            directVideo.addEventListener('play', () => updatePlaybackState());
+            directVideo.addEventListener('pause', () => updatePlaybackState());
+            directVideo.addEventListener('timeupdate', () => {
+                if (!syncInterval) {
+                    updatePlaybackState();
+                }
+            });
+        }
+    }
+
+    // Уничтожение текущего плеера
+    function destroyCurrentPlayer() {
+        if (youtubePlayer) {
+            try {
+                youtubePlayer.destroy();
+            } catch (e) {
+                console.log('YouTube player already destroyed');
+            }
+            youtubePlayer = null;
+        }
+        if (vimeoPlayer) {
+            try {
+                vimeoPlayer.destroy();
+            } catch (e) {
+                console.log('Vimeo player already destroyed');
+            }
+            vimeoPlayer = null;
+        }
+        if (twitchPlayer) {
+            try {
+                twitchPlayer.remove();
+            } catch (e) {}
+            twitchPlayer = null;
+        }
+        if (directVideo && directVideo.srcObject) {
+            // Не останавливаем если это screen share
+            directVideo.srcObject = null;
+        } else if (directVideo) {
+            try {
+                directVideo.pause();
+                directVideo.src = '';
+                directVideo.remove();
+            } catch (e) {}
+            directVideo = null;
+        }
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
+        }
+        playerContainer.innerHTML = '';
+        currentPlayerType = null;
+        currentVideoUrl = '';
+        if (syncInterval) {
+            clearInterval(syncInterval);
+            syncInterval = null;
+        }
+        playPauseBtn.style.display = 'none';
+        syncBtn.style.display = 'none';
+    }
+
+    // Загрузка видео по типу
+    async function loadVideo(videoInfo) {
+        loadingIndicator.classList.add('active');
+        
+        try {
+            if (videoInfo.type === 'youtube') {
+                await initYouTubePlayer(videoInfo.id);
+            } else if (videoInfo.type === 'vimeo') {
+                initVimeoPlayer(videoInfo.id);
+            } else if (videoInfo.type === 'twitch') {
+                initTwitchPlayer(videoInfo.id, videoInfo.isVideo);
+            } else if (videoInfo.type === 'direct') {
+                initDirectVideo(videoInfo.url);
+            } else {
+                throw new Error('Неподдерживаемый тип видео');
+            }
+            
+            if (isHost) {
+                setTimeout(() => updatePlaybackState(), 500);
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки видео:', error);
+            alert('Не удалось загрузить видео: ' + error.message);
+            loadingIndicator.classList.remove('active');
+        }
+    }
+
+    // Получение текущего времени воспроизведения
+    async function getCurrentTime() {
+        if (!currentPlayerType) return 0;
+        
+        try {
+            switch (currentPlayerType) {
+                case 'youtube':
+                    return youtubePlayer ? youtubePlayer.getCurrentTime() : 0;
+                case 'vimeo':
+                    return vimeoPlayer ? await vimeoPlayer.getCurrentTime() : 0;
+                case 'direct':
+                    return directVideo ? directVideo.currentTime : 0;
+                case 'twitch':
+                case 'screen':
+                    return 0; // Twitch и screen share не поддерживают синхронизацию времени
+                default:
+                    return 0;
+            }
+        } catch (error) {
+            console.error('Ошибка получения времени:', error);
+            return 0;
+        }
+    }
+
+    // Получение состояния воспроизведения
+    async function getPlayState() {
+        if (!currentPlayerType) return false;
+        
+        try {
+            switch (currentPlayerType) {
+                case 'youtube':
+                    if (!youtubePlayer) return false;
+                    const state = youtubePlayer.getPlayerState();
+                    return state === YT.PlayerState.PLAYING;
+                case 'vimeo':
+                    return vimeoPlayer ? !(await vimeoPlayer.getPaused()) : false;
+                case 'direct':
+                    return directVideo ? !directVideo.paused : false;
+                case 'twitch':
+                case 'screen':
+                    return true; // Предполагаем что воспроизводится
+                default:
+                    return false;
+            }
+        } catch (error) {
+            console.error('Ошибка получения состояния:', error);
+            return false;
+        }
+    }
+
+    // Установка времени воспроизведения
+    async function setCurrentTime(time) {
+        if (!currentPlayerType) return;
+        
+        try {
+            switch (currentPlayerType) {
+                case 'youtube':
+                    if (youtubePlayer) youtubePlayer.seekTo(time, true);
+                    break;
+                case 'vimeo':
+                    if (vimeoPlayer) await vimeoPlayer.setCurrentTime(time);
+                    break;
+                case 'direct':
+                    if (directVideo) directVideo.currentTime = time;
+                    break;
+                case 'twitch':
+                    // Twitch API ограничен
+                    break;
+            }
+        } catch (error) {
+            console.error('Ошибка установки времени:', error);
+        }
+    }
+
+    // Воспроизведение/пауза
+    async function playPause() {
+        if (!currentPlayerType) return;
+        
+        try {
+            switch (currentPlayerType) {
+                case 'youtube':
+                    if (youtubePlayer) {
+                        const state = youtubePlayer.getPlayerState();
+                        if (state === YT.PlayerState.PLAYING) {
+                            youtubePlayer.pauseVideo();
+                            playPauseBtn.textContent = '▶️';
+                        } else {
+                            youtubePlayer.playVideo();
+                            playPauseBtn.textContent = '⏸️';
+                        }
+                    }
+                    break;
+                case 'vimeo':
+                    if (vimeoPlayer) {
+                        const paused = await vimeoPlayer.getPaused();
+                        if (paused) {
+                            await vimeoPlayer.play();
+                            playPauseBtn.textContent = '⏸️';
+                        } else {
+                            await vimeoPlayer.pause();
+                            playPauseBtn.textContent = '▶️';
+                        }
+                    }
+                    break;
+                case 'direct':
+                    if (directVideo) {
+                        if (directVideo.paused) {
+                            directVideo.play().catch(e => {
+                                console.error('Ошибка воспроизведения:', e);
+                            });
+                            playPauseBtn.textContent = '⏸️';
+                        } else {
+                            directVideo.pause();
+                            playPauseBtn.textContent = '▶️';
+                        }
+                    }
+                    break;
+            }
+            
+            if (isHost) {
+                setTimeout(() => updatePlaybackState(), 200);
+            }
+        } catch (error) {
+            console.error('Ошибка play/pause:', error);
+        }
+    }
+
+    // Инициализация интерфейса
+    function initializeInterface() {
+        fullscreenBtn.style.display = 'block';
+
+        // Регистрация пользователя
+        const userRef = ref(db, `users/${username}`);
+        set(userRef, {
+            name: username,
+            isHost: isHost,
+            joined: serverTimestamp(),
+            isActive: true
+        });
+
+        onDisconnect(userRef).remove();
+
+        if (isHost) {
+            chatControls.innerHTML = `
+                <button id="startShareBtn" class="styled-button">Начать трансляцию экрана</button>
+                <button id="stopShareBtn" class="styled-button" style="display: none;">Остановить трансляцию</button>
+                <button id="startStreamBtn" class="styled-button">Начать трансляцию по URL</button>
+                <div style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                    <strong>Поддерживаемые форматы:</strong><br>
+                    • YouTube: https://www.youtube.com/watch?v=ID или https://youtu.be/ID<br>
+                    • Vimeo: https://vimeo.com/ID<br>
+                    • Twitch: https://www.twitch.tv/CHANNEL или https://www.twitch.tv/videos/ID<br>
+                    • Прямые ссылки: mp4, webm, m3u8 и другие видео форматы
+                </div>
+                <button onclick="window.location.href='index.html';" class="styled-button">Вернуться на главную</button>
+            `;
+            document.getElementById('startShareBtn').addEventListener('click', startScreenShare);
+            document.getElementById('stopShareBtn').addEventListener('click', stopScreenShare);
+            document.getElementById('startStreamBtn').addEventListener('click', startStream);
+        } else {
+            chatControls.innerHTML = `
+                <div style="color: var(--text-muted); font-size: 0.9rem;">
+                    Ожидание трансляции от ведущего...
+                </div>
+                <button onclick="window.location.href='index.html';" class="styled-button">Вернуться на главную</button>
+            `;
+        }
+
+        syncBtn.addEventListener('click', syncPlayback);
+        playPauseBtn.addEventListener('click', playPause);
+    }
+
+    initializeInterface();
+
+    // Рендеринг сообщений чата
+    function renderMessages(messagesContainerTarget) {
+        return function(snapshot) {
+            messagesContainerTarget.innerHTML = '';
+            const messages = snapshot.val();
+            if (messages) {
+                Object.entries(messages).forEach(([id, message]) => {
+                    const messageElement = document.createElement('div');
+                    messageElement.className = message.sender === username ? 'message sent' : 'message received';
+                    const time = new Date(message.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+                    messageElement.innerHTML = `
+                        <div class="message-content">${message.text}</div>
+                        <div class="message-meta">
+                            <span>${message.sender}</span>
+                            <span>${time}</span>
+                        </div>
+                    `;
+                    messagesContainerTarget.appendChild(messageElement);
+                });
+                messagesContainerTarget.scrollTop = messagesContainerTarget.scrollHeight;
+            }
+        };
+    }
+
+    onValue(messagesRef, renderMessages(messagesContainer));
+    onValue(messagesRef, renderMessages(messagesFullscreen));
+
+    // Отправка сообщений
+    async function sendMessage(inputElement) {
+        const message = inputElement.value.trim();
+        if (message) {
+            const messageData = { 
+                sender: username, 
+                text: message, 
+                timestamp: Date.now(),
+                isHost: isHost 
+            };
+            try {
+                const newMessageRef = push(messagesRef);
+                await set(newMessageRef, messageData);
+                inputElement.value = '';
+            } catch (error) {
+                console.error('Ошибка при отправке сообщения:', error);
+                alert('Не удалось отправить сообщение');
+            }
+        }
+    }
+
+    sendBtn.addEventListener('click', () => sendMessage(messageInput));
+    sendBtnFullscreen.addEventListener('click', () => sendMessage(messageInputFullscreen));
+    messageInput.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage(messageInput);
+        }
+    });
+    messageInputFullscreen.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage(messageInputFullscreen);
+        }
+    });
+
+    // Трансляция через URL видео
+    async function startStream() {
+        if (!isHost) return;
+
+        try {
+            const videoUrl = prompt(
+                "Введите URL видео:\n\n" +
+                "Примеры:\n" +
+                "• YouTube: https://www.youtube.com/watch?v=dQw4w9WgXcQ\n" +
+                "• Vimeo: https://vimeo.com/123456789\n" +
+                "• Twitch: https://www.twitch.tv/channel_name\n" +
+                "• Прямая ссылка: https://example.com/video.mp4",
+                ""
+            );
+            
+            if (!videoUrl) return;
+
+            await stopScreenShare();
+            
+            const videoInfo = detectVideoType(videoUrl);
+            
+            if (!videoInfo) {
+                alert('Не удалось распознать тип видео. Пожалуйста, проверьте URL и убедитесь, что он правильный.');
+                return;
+            }
+            
+            await loadVideo(videoInfo);
+            
+            const playbackData = {
+                type: videoInfo.type,
+                videoId: videoInfo.id || videoInfo.url,
+                isVideo: videoInfo.isVideo || false,
+                url: currentVideoUrl,
+                isPlaying: false,
+                currentTime: 0,
+                timestamp: Date.now(),
+                host: username
+            };
+            
+            await set(playbackRef, playbackData);
+            
+            sendSystemMessage(`🎬 ${username} начал трансляцию: ${currentVideoUrl}`);
+            
+        } catch (error) {
+            console.error('Ошибка начала трансляции:', error);
+            alert('Не удалось начать трансляцию: ' + error.message);
+        }
+    }
+
+    // Обновление состояния воспроизведения
+    async function updatePlaybackState() {
+        if (!isHost || !currentPlayerType) return;
+        
+        try {
+            let currentTime = await getCurrentTime();
+            let isPlaying = await getPlayState();
+            
+            const playbackData = {
+                type: currentPlayerType,
+                url: currentVideoUrl,
+                videoId: currentPlayerType === 'youtube' && youtubePlayer ? currentVideoUrl.match(/[?&]v=([^&]+)/)?.[1] : 
+                         currentPlayerType === 'vimeo' && vimeoPlayer ? currentVideoUrl.match(/vimeo\.com\/(\d+)/)?.[1] :
+                         currentPlayerType === 'direct' ? currentVideoUrl : null,
+                isVideo: currentPlayerType === 'twitch' ? currentVideoUrl.includes('/videos/') : false,
+                isPlaying: isPlaying,
+                currentTime: currentTime,
+                timestamp: Date.now(),
+                host: username
+            };
+            
+            await set(playbackRef, playbackData);
+            
+            playPauseBtn.textContent = isPlaying ? '⏸️' : '▶️';
+        } catch (error) {
+            console.error('Ошибка обновления состояния:', error);
+        }
+    }
+
+    // Синхронизация воспроизведения
+    async function syncPlayback() {
+        if (isHost && currentPlayerType) {
+            const playbackData = {
+                type: currentPlayerType,
+                url: currentVideoUrl,
+                videoId: currentPlayerType === 'youtube' && youtubePlayer ? currentVideoUrl.match(/[?&]v=([^&]+)/)?.[1] : 
+                         currentPlayerType === 'vimeo' && vimeoPlayer ? currentVideoUrl.match(/vimeo\.com\/(\d+)/)?.[1] :
+                         currentPlayerType === 'direct' ? currentVideoUrl : null,
+                isVideo: currentPlayerType === 'twitch' ? currentVideoUrl.includes('/videos/') : false,
+                isPlaying: await getPlayState(),
+                currentTime: await getCurrentTime(),
+                timestamp: Date.now(),
+                host: username,
+                sync: true
+            };
+            set(playbackRef, playbackData);
+            sendSystemMessage(`🔄 ${username} синхронизировал время воспроизведения`);
+        }
+    }
+
+    // Слушаем изменения состояния воспроизведения
+    onValue(playbackRef, async (snapshot) => {
+        const playbackData = snapshot.val();
+        
+        if (!playbackData) {
+            if (!isHost) {
+                destroyCurrentPlayer();
+            }
+            return;
+        }
+        
+        if (!isHost) {
+            // Для зрителей - загружаем видео если нужно
+            if (playbackData.type && playbackData.type !== 'screen' && playbackData.url) {
+                if (currentVideoUrl !== playbackData.url) {
+                    let videoInfo;
+                    
+                    if (playbackData.type === 'youtube' && playbackData.videoId) {
+                        videoInfo = { type: 'youtube', id: playbackData.videoId };
+                    } else if (playbackData.type === 'vimeo' && playbackData.videoId) {
+                        videoInfo = { type: 'vimeo', id: playbackData.videoId };
+                    } else if (playbackData.type === 'twitch' && playbackData.videoId) {
+                        videoInfo = { type: 'twitch', id: playbackData.videoId, isVideo: playbackData.isVideo };
+                    } else if (playbackData.type === 'direct' && playbackData.videoId) {
+                        videoInfo = { type: 'direct', url: playbackData.videoId };
+                    } else {
+                        videoInfo = detectVideoType(playbackData.url);
+                    }
+                    
+                    if (videoInfo) {
+                        await loadVideo(videoInfo);
+                    }
+                }
+                
+                // Синхронизируем время воспроизведения
+                if (playbackData.currentTime !== undefined && playbackData.currentTime !== null) {
+                    const timeDiff = Date.now() - playbackData.timestamp;
+                    const targetTime = playbackData.currentTime + (timeDiff / 1000);
+                    
+                    if (currentPlayerType === 'youtube' && youtubePlayer) {
+                        const current = youtubePlayer.getCurrentTime();
+                        if (Math.abs(current - targetTime) > 2 || playbackData.sync) {
+                            youtubePlayer.seekTo(targetTime, true);
+                        }
+                        if (playbackData.isPlaying !== undefined) {
+                            const state = youtubePlayer.getPlayerState();
+                            if (playbackData.isPlaying && state !== YT.PlayerState.PLAYING) {
+                                youtubePlayer.playVideo();
+                            } else if (!playbackData.isPlaying && state === YT.PlayerState.PLAYING) {
+                                youtubePlayer.pauseVideo();
+                            }
+                        }
+                        playPauseBtn.textContent = playbackData.isPlaying ? '⏸️' : '▶️';
+                    } else if (currentPlayerType === 'vimeo' && vimeoPlayer) {
+                        try {
+                            const current = await vimeoPlayer.getCurrentTime();
+                            if (Math.abs(current - targetTime) > 2 || playbackData.sync) {
+                                await vimeoPlayer.setCurrentTime(targetTime);
+                            }
+                            if (playbackData.isPlaying !== undefined) {
+                                const paused = await vimeoPlayer.getPaused();
+                                if (playbackData.isPlaying && paused) {
+                                    await vimeoPlayer.play();
+                                } else if (!playbackData.isPlaying && !paused) {
+                                    await vimeoPlayer.pause();
+                                }
+                            }
+                            playPauseBtn.textContent = playbackData.isPlaying ? '⏸️' : '▶️';
+                        } catch (e) {
+                            console.error('Vimeo sync error:', e);
+                        }
+                    } else if (currentPlayerType === 'direct' && directVideo) {
+                        if (Math.abs(directVideo.currentTime - targetTime) > 2 || playbackData.sync) {
+                            directVideo.currentTime = targetTime;
+                        }
+                        if (playbackData.isPlaying !== undefined) {
+                            if (playbackData.isPlaying && directVideo.paused) {
+                                directVideo.play().catch(e => console.error('Ошибка воспроизведения:', e));
+                            } else if (!playbackData.isPlaying && !directVideo.paused) {
+                                directVideo.pause();
+                            }
+                        }
+                        playPauseBtn.textContent = playbackData.isPlaying ? '⏸️' : '▶️';
+                    }
+                }
+            } else if (playbackData.type === 'screen') {
+                // Для screen share показываем сообщение
+                if (currentPlayerType !== 'screen') {
+                    alert('Ведущий начал трансляцию экрана. Эта функция доступна только ведущему.');
+                }
+            }
+        }
+    });
+
+    // Начало трансляции экрана
+    async function startScreenShare() {
+        if (!isHost) {
+            alert("Только ведущий может начать трансляцию!");
+            return;
+        }
+        
+        try {
+            console.log('Хост: Начало трансляции экрана');
+            
+            destroyCurrentPlayer();
+            await remove(playbackRef);
+            
+            localStream = await navigator.mediaDevices.getDisplayMedia({ 
+                video: { 
+                    frameRate: { ideal: 30, max: 60 },
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                }, 
+                audio: true 
+            });
+            
+            directVideo = document.createElement('video');
+            directVideo.id = 'screenShareVideo';
+            directVideo.srcObject = localStream;
+            directVideo.autoplay = true;
+            directVideo.muted = true;
+            directVideo.playsinline = true;
+            directVideo.style.width = '100%';
+            directVideo.style.height = '100%';
+            directVideo.style.objectFit = 'contain';
+            playerContainer.appendChild(directVideo);
+            
+            currentPlayerType = 'screen';
+            currentVideoUrl = 'screen://share';
+            
+            document.getElementById('startShareBtn').style.display = 'none';
+            document.getElementById('startStreamBtn').style.display = 'none';
+            document.getElementById('stopShareBtn').style.display = 'block';
+            playPauseBtn.style.display = 'none';
+            syncBtn.style.display = 'none';
+            
+            const playbackData = {
+                type: 'screen',
+                url: 'screen://share',
+                isPlaying: true,
+                currentTime: 0,
+                timestamp: Date.now(),
+                host: username
+            };
+            await set(playbackRef, playbackData);
+            
+            sendSystemMessage(`🖥️ ${username} начал трансляцию экрана`);
+            
+            localStream.getTracks().forEach(track => {
+                track.onended = () => {
+                    console.log('Трек трансляции завершен пользователем');
+                    stopScreenShare();
+                };
+            });
+            
+        } catch (error) {
+            console.error('Хост: Ошибка захвата экрана:', error);
+            if (error.name !== 'NotAllowedError') {
+                alert('Не удалось начать трансляцию экрана: ' + error.message);
+            }
+        }
+    }
+
+    // Остановка трансляции
+    async function stopScreenShare() {
+        console.log('Остановка трансляции');
+        
+        destroyCurrentPlayer();
+        
+        await remove(playbackRef);
+        
+        document.getElementById('startShareBtn').style.display = 'block';
+        document.getElementById('startStreamBtn').style.display = 'block';
+        document.getElementById('stopShareBtn').style.display = 'none';
+        playPauseBtn.style.display = 'none';
+        syncBtn.style.display = 'none';
+        
+        sendSystemMessage(`⏹️ ${username} остановил трансляцию`);
+    }
+
+    function sendSystemMessage(text) {
+        const messageData = { 
+            sender: 'Система', 
+            text: text, 
+            timestamp: Date.now(),
+            isSystem: true
+        };
+        const newMessageRef = push(messagesRef);
+        set(newMessageRef, messageData);
+    }
+
+    // Полноэкранный режим
+    let isFullscreen = false;
+    fullscreenBtn.addEventListener('click', () => {
+        if (!isFullscreen) {
+            movieContainer.requestFullscreen();
+            document.body.classList.add('fullscreen');
+            chatOverlay.classList.add('active');
+            fullscreenBtn.textContent = 'Выход из полного экрана';
+            isFullscreen = true;
+        } else {
+            document.exitFullscreen();
+            document.body.classList.remove('fullscreen');
+            chatOverlay.classList.remove('active');
+            fullscreenChatBox.classList.remove('active');
+            fullscreenBtn.textContent = 'Полный экран';
+            toggleChatBtn.textContent = 'Показать чат';
+            isFullscreen = false;
+        }
+    });
+
+    toggleChatBtn.addEventListener('click', () => {
+        if (fullscreenChatBox.classList.contains('active')) {
+            fullscreenChatBox.classList.remove('active');
+            toggleChatBtn.textContent = 'Показать чат';
+        } else {
+            fullscreenChatBox.classList.add('active');
+            toggleChatBtn.textContent = 'Скрыть чат';
+        }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) {
+            document.body.classList.remove('fullscreen');
+            chatOverlay.classList.remove('active');
+            fullscreenChatBox.classList.remove('active');
+            fullscreenBtn.textContent = 'Полный экран';
+            toggleChatBtn.textContent = 'Показать чат';
+            isFullscreen = false;
+        }
+    });
+
+    // Переключение темы
+    function setupThemeToggle(btn, altBtn) {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+            btn.textContent = 'Темная тема';
+            altBtn.textContent = 'Темная тема';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            btn.textContent = 'Светлая тема';
+            altBtn.textContent = 'Светлая тема';
+        }
+        btn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                btn.textContent = 'Светлая тема';
+                altBtn.textContent = 'Светлая тема';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+                btn.textContent = 'Темная тема';
+                altBtn.textContent = 'Темная тема';
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setupThemeToggle(themeToggleBtn, themeToggleBtnFullscreen);
+    });
+</script>
+</body>
+</html>
