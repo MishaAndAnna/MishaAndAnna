@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Совместный просмотр фильмов</title>
     <style>
-        :root {
+         :root {
             --bg-primary: #06080f;
             --bg-secondary: #0f172a;
             --bg-tertiary: #1e293b;
@@ -730,6 +730,11 @@
         username = prompt("Имя не может быть пустым. Введите ваше имя:").trim();
     }
 
+    // Глобальные переменные для потоков и соединений
+    let localStream = null;
+    let peerConnections = new Map();
+    let currentVideoUrl = '';
+
     // Инициализация интерфейса
     function initializeInterface() {
         const video = document.createElement('video');
@@ -756,7 +761,7 @@
             chatControls.innerHTML = `
                 <button id="startShareBtn" class="styled-button">Начать трансляцию</button>
                 <button id="stopShareBtn" class="styled-button" style="display: none;">Остановить трансляцию</button>
-                <button id="startStreamBtn" class="styled-button" style="display: none;">Начать прямой эфир</button>
+                <button id="startStreamBtn" class="styled-button">Начать трансляцию по URL</button>
                 <div style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px;">
                     Вы - ведущий. Можете начать трансляцию.
                 </div>
@@ -845,25 +850,32 @@
         }
     });
 
-    // НОВАЯ ЛОГИКА: Трансляция через URL видео
-    let videoStreamUrl = null;
-    let isPlaying = false;
-
+    // Трансляция через URL видео
     async function startStream() {
         if (!isHost) return;
 
         try {
-            // Запрос у пользователя URL видео или файла
+            // Запрос у пользователя URL видео
             const videoUrl = prompt("Введите URL видео (YouTube, Vimeo, Twitch или прямой ссылкой на видеофайл):", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4");
             
             if (!videoUrl) return;
 
-            // Очистка предыдущей трансляции
-            await remove(playbackRef);
+            // Останавливаем предыдущую трансляцию если есть
+            await stopScreenShare();
             
-            // Создаем видео элемент для управления
+            // Устанавливаем URL видео
             screenShareVideo.src = videoUrl;
+            currentVideoUrl = videoUrl;
             screenShareVideo.load();
+            
+            // Инициализируем событие загрузки метаданных
+            screenShareVideo.onloadedmetadata = () => {
+                console.log('Метаданные видео загружены');
+                // Начинаем воспроизведение
+                screenShareVideo.play().catch(e => {
+                    console.log('Автовоспроизведение заблокировано, ждем пользовательского взаимодействия');
+                });
+            };
             
             // Сохраняем состояние в Firebase
             const playbackData = {
@@ -878,27 +890,13 @@
             await set(playbackRef, playbackData);
             
             // Слушаем события воспроизведения
-            screenShareVideo.addEventListener('play', updatePlaybackState);
-            screenShareVideo.addEventListener('pause', updatePlaybackState);
-            screenShareVideo.addEventListener('timeupdate', updatePlaybackState);
-            
-            // Обновляем состояние в реальном времени
-            async function updatePlaybackState() {
-                if (!isHost) return;
-                
-                const playbackData = {
-                    type: 'url',
-                    url: videoUrl,
-                    isPlaying: !screenShareVideo.paused,
-                    currentTime: screenShareVideo.currentTime,
-                    timestamp: Date.now(),
-                    host: username
-                };
-                
-                await set(playbackRef, playbackData);
-            }
+            const updateHandler = () => updatePlaybackState();
+            screenShareVideo.addEventListener('play', updateHandler);
+            screenShareVideo.addEventListener('pause', updateHandler);
+            screenShareVideo.addEventListener('timeupdate', updateHandler);
             
             // Обновляем интерфейс
+            document.getElementById('startShareBtn').style.display = 'none';
             document.getElementById('startStreamBtn').style.display = 'none';
             document.getElementById('stopShareBtn').style.display = 'block';
             playPauseBtn.style.display = 'block';
@@ -912,13 +910,32 @@
         }
     }
 
+    // Обновление состояния воспроизведения
+    async function updatePlaybackState() {
+        if (!isHost || !screenShareVideo.src) return;
+        
+        const playbackData = {
+            type: 'url',
+            url: currentVideoUrl,
+            isPlaying: !screenShareVideo.paused,
+            currentTime: screenShareVideo.currentTime,
+            timestamp: Date.now(),
+            host: username
+        };
+        
+        try {
+            await set(playbackRef, playbackData);
+        } catch (error) {
+            console.error('Ошибка обновления состояния:', error);
+        }
+    }
+
     // Синхронизация воспроизведения для всех пользователей
     function syncPlayback() {
-        if (isHost) {
-            // Хост синхронизирует свое время
+        if (isHost && screenShareVideo.src) {
             const playbackData = {
                 type: 'url',
-                url: screenShareVideo.src,
+                url: currentVideoUrl,
                 isPlaying: !screenShareVideo.paused,
                 currentTime: screenShareVideo.currentTime,
                 timestamp: Date.now(),
@@ -931,22 +948,25 @@
     }
 
     function togglePlayPause() {
-        if (!screenShareVideo.src) return;
+        if (!screenShareVideo.src && !screenShareVideo.srcObject) return;
         
         if (screenShareVideo.paused) {
-            screenShareVideo.play();
+            screenShareVideo.play().catch(e => {
+                console.error('Ошибка воспроизведения:', e);
+                alert('Не удалось воспроизвести видео. Проверьте URL или разрешения.');
+            });
             playPauseBtn.textContent = '⏸️';
         } else {
             screenShareVideo.pause();
             playPauseBtn.textContent = '▶️';
         }
         
-        if (isHost) {
+        if (isHost && screenShareVideo.src) {
             updatePlaybackState();
         }
     }
 
-    // Слушаем изменения состояния воспроизведения
+    // Слушаем изменения состояния воспроизведения для зрителей
     onValue(playbackRef, (snapshot) => {
         const playbackData = snapshot.val();
         
@@ -954,6 +974,7 @@
             // Трансляция завершена
             if (!isHost) {
                 screenShareVideo.src = '';
+                screenShareVideo.srcObject = null;
                 playPauseBtn.style.display = 'none';
                 syncBtn.style.display = 'none';
             }
@@ -966,7 +987,11 @@
                 // Устанавливаем URL если он изменился
                 if (screenShareVideo.src !== playbackData.url) {
                     screenShareVideo.src = playbackData.url;
+                    currentVideoUrl = playbackData.url;
                     screenShareVideo.load();
+                    screenShareVideo.play().catch(e => {
+                        console.log('Автовоспроизведение заблокировано');
+                    });
                 }
                 
                 // Синхронизируем время воспроизведения
@@ -991,35 +1016,31 @@
                 syncBtn.style.display = 'block';
             }
         } else {
-            // Для хоста - обновляем кнопку паузы
-            playPauseBtn.textContent = playbackData.isPlaying ? '⏸️' : '▶️';
+            // Для хоста - обновляем кнопку паузы если это URL трансляция
+            if (playbackData.type === 'url') {
+                playPauseBtn.textContent = playbackData.isPlaying ? '⏸️' : '▶️';
+            }
         }
     });
 
+    // Начало трансляции экрана
     async function startScreenShare() {
         if (!isHost) {
             alert("Только Михаил может начать трансляцию!");
             return;
         }
         
-        // Даем выбор между трансляцией экрана и URL
-        const choice = confirm("Выберите тип трансляции:\nOK - Трансляция экрана\nОтмена - Воспроизведение по URL");
-        
-        if (choice) {
-            // Трансляция экрана (WebRTC)
-            startWebRTCScreenShare();
-        } else {
-            // Потоковое воспроизведение по URL
-            document.getElementById('startShareBtn').style.display = 'none';
-            document.getElementById('startStreamBtn').style.display = 'block';
-        }
-    }
-
-    async function startWebRTCScreenShare() {
         try {
             console.log('Хост: Начало трансляции экрана');
+            
+            // Останавливаем предыдущую трансляцию если есть
+            if (screenShareVideo.src) {
+                screenShareVideo.src = '';
+                currentVideoUrl = '';
+            }
             await remove(playbackRef);
             
+            // Получаем поток с экрана
             localStream = await navigator.mediaDevices.getDisplayMedia({ 
                 video: { 
                     frameRate: { ideal: 30, max: 60 },
@@ -1029,56 +1050,63 @@
                 audio: true 
             });
             
+            // Устанавливаем поток в видео элемент
             screenShareVideo.srcObject = localStream;
             
-            // WebRTC соединение для одного зрителя (простая реализация)
-            // Для нескольких зрителей потребуется более сложная архитектура
-            setupWebRTCHost();
-            
+            // Отправляем системное сообщение
             sendSystemMessage(`🖥️ ${username} начал трансляцию экрана`);
             
+            // Обновляем интерфейс
             document.getElementById('startShareBtn').style.display = 'none';
+            document.getElementById('startStreamBtn').style.display = 'none';
             document.getElementById('stopShareBtn').style.display = 'block';
-            playPauseBtn.style.display = 'none';
+            playPauseBtn.style.display = 'none'; // Убираем кнопки управления для трансляции экрана
             syncBtn.style.display = 'none';
+            
+            // Обработка завершения трансляции пользователем
+            localStream.getTracks().forEach(track => {
+                track.onended = () => {
+                    console.log('Трек трансляции завершен пользователем');
+                    stopScreenShare();
+                };
+            });
             
         } catch (error) {
             console.error('Хост: Ошибка захвата экрана:', error);
-            alert('Не удалось начать трансляцию экрана: ' + error.message);
+            if (error.name !== 'NotAllowedError') {
+                alert('Не удалось начать трансляцию экрана: ' + error.message);
+            }
         }
     }
 
-    function setupWebRTCHost() {
-        // Простая WebRTC реализация для одного зрителя
-        // Для поддержки нескольких зрителей рекомендуется использовать сервисы типа PeerJS
-        // или настроить свой сервер с помощью медиасервера (Janus, Mediasoup, Pion)
-        
-        console.log('WebRTC: Настройка хоста (базовая реализация)');
-        
-        // Здесь должна быть полная WebRTC логика для P2P соединения
-        // Из-за сложности полноценной реализации для нескольких пользователей,
-        // рекомендуется использовать URL-трансляцию как основную
-    }
-
+    // Остановка трансляции
     async function stopScreenShare() {
         console.log('Остановка трансляции');
         
+        // Останавливаем медиапоток если есть
         if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
+            localStream.getTracks().forEach(track => {
+                track.stop();
+            });
             localStream = null;
         }
         
+        // Очищаем видео
         screenShareVideo.srcObject = null;
         screenShareVideo.src = '';
+        currentVideoUrl = '';
         
+        // Очищаем данные в Firebase
         await remove(playbackRef);
         
+        // Обновляем интерфейс
         document.getElementById('startShareBtn').style.display = 'block';
+        document.getElementById('startStreamBtn').style.display = 'block';
         document.getElementById('stopShareBtn').style.display = 'none';
-        document.getElementById('startStreamBtn').style.display = 'none';
         playPauseBtn.style.display = 'none';
         syncBtn.style.display = 'none';
         
+        // Отправляем системное сообщение
         sendSystemMessage(`⏹️ ${username} остановил трансляцию`);
     }
 
@@ -1167,4 +1195,4 @@
     });
 </script>
 </body>
-</html>
+</html>a
