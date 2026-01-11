@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Совместный просмотр фильмов</title>
     <style>
+        /* ... existing styles ... */
         :root {
             --bg-primary: #000000;
             --bg-secondary: #0f0f0f;
@@ -327,7 +328,7 @@
 
         .chat-messages::-webkit-scrollbar-thumb {
             background: var(--gradient-accent);
-            border-radius: var(--border-radius-full);
+            border-radius: 9999px;
         }
 
         .message {
@@ -801,11 +802,36 @@
     
     // WebRTC переменные
     let peerConnection = null;
+    let iceCandidatesQueue = [];
+    let isSettingRemoteDescription = false;
+    
+    // Оптимизированная конфигурация WebRTC для лучшего качества и производительности
     const configuration = {
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' }
-        ]
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'stun:stun3.l.google.com:19302' },
+            { urls: 'stun:stun4.l.google.com:19302' }
+        ],
+        iceTransportPolicy: 'all',
+        bundlePolicy: 'max-bundle',
+        rtcpMuxPolicy: 'require'
+    };
+
+    // Оптимизированные настройки для захвата экрана
+    const screenShareConstraints = {
+        video: {
+            width: { ideal: 1280, max: 1920 },
+            height: { ideal: 720, max: 1080 },
+            frameRate: { ideal: 30, max: 30 },
+            cursor: 'always'
+        },
+        audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+        }
     };
 
     let youtubeAPIReady = false;
@@ -819,34 +845,150 @@
         console.log('YouTube API готов');
     };
 
-    // WebRTC функции для трансляции экрана
+    // Оптимизированная функция создания PeerConnection
     async function createPeerConnection() {
+        if (peerConnection) {
+            peerConnection.close();
+        }
+        
         peerConnection = new RTCPeerConnection(configuration);
         
-        if (localStream) {
+        // Настройка битрейта для лучшего качества
+        const transceivers = peerConnection.getTransceivers();
+        if (transceivers.length === 0 && localStream) {
             localStream.getTracks().forEach(track => {
-                peerConnection.addTrack(track, localStream);
+                const sender = peerConnection.addTrack(track, localStream);
+                
+                // Настройка параметров кодека и битрейта
+                if (track.kind === 'video') {
+                    const params = sender.getParameters();
+                    if (!params.encodings) {
+                        params.encodings = [{}];
+                    }
+                    params.encodings[0] = {
+                        maxBitrate: 5000000, // 5 Mbps
+                        maxFramerate: 30,
+                        scaleResolutionDownBy: 1.0
+                    };
+                    sender.setParameters(params).catch(err => console.error('Ошибка настройки параметров:', err));
+                }
             });
         }
         
         peerConnection.onicecandidate = (event) => {
             if (event.candidate) {
-                set(ref(db, 'screenShare/iceCandidates'), {
+                const candidateRef = push(ref(db, 'screenShare/iceCandidates'));
+                set(candidateRef, {
                     candidate: event.candidate.candidate,
                     sdpMLineIndex: event.candidate.sdpMLineIndex,
-                    sdpMid: event.candidate.sdpMid
+                    sdpMid: event.candidate.sdpMid,
+                    timestamp: Date.now()
                 });
             }
         };
         
+        peerConnection.oniceconnectionstatechange = () => {
+            console.log('ICE connection state:', peerConnection.iceConnectionState);
+            if (peerConnection.iceConnectionState === 'connected' || 
+                peerConnection.iceConnectionState === 'completed') {
+                loadingIndicator.classList.remove('active');
+            } else if (peerConnection.iceConnectionState === 'failed' || 
+                       peerConnection.iceConnectionState === 'disconnected') {
+                console.warn('ICE connection failed, attempting to restart...');
+                // Попытка переподключения
+                setTimeout(() => {
+                    if (peerConnection && peerConnection.iceConnectionState !== 'closed') {
+                        peerConnection.restartIce();
+                    }
+                }, 1000);
+            }
+        };
+        
         peerConnection.ontrack = (event) => {
-            if (directVideo && !directVideo.srcObject) {
+            console.log('Получен трек:', event.track.kind);
+            if (event.streams && event.streams[0]) {
+                if (!directVideo) {
+                    directVideo = document.createElement('video');
+                    directVideo.id = 'screenShareVideo';
+                    directVideo.autoplay = true;
+                    directVideo.playsinline = true;
+                    directVideo.muted = false;
+                    directVideo.style.width = '100%';
+                    directVideo.style.height = '100%';
+                    directVideo.style.objectFit = 'contain';
+                    playerContainer.appendChild(directVideo);
+                }
+                
                 directVideo.srcObject = event.streams[0];
-                directVideo.play();
+                currentPlayerType = 'screen';
+                
+                directVideo.onloadedmetadata = () => {
+                    loadingIndicator.classList.remove('active');
+                    console.log('Видео готово к воспроизведению');
+                    directVideo.play().catch(err => {
+                        console.error('Ошибка автовоспроизведения:', err);
+                        loadingIndicator.classList.remove('active');
+                    });
+                };
+                
+                directVideo.onplay = () => {
+                    loadingIndicator.classList.remove('active');
+                };
+                
+                directVideo.onerror = (e) => {
+                    console.error('Ошибка видео:', e);
+                    loadingIndicator.classList.remove('active');
+                };
+            }
+        };
+        
+        // Обработка изменения состояния соединения
+        peerConnection.onconnectionstatechange = () => {
+            console.log('Connection state:', peerConnection.connectionState);
+            if (peerConnection.connectionState === 'connected') {
+                loadingIndicator.classList.remove('active');
+            } else if (peerConnection.connectionState === 'failed') {
+                loadingIndicator.classList.remove('active');
+                alert('Соединение прервано. Попробуйте перезапустить трансляцию.');
             }
         };
         
         return peerConnection;
+    }
+
+    // Функция для обработки ICE кандидатов с очередью
+    async function addIceCandidateToQueue(candidateData) {
+        if (!peerConnection) return;
+        
+        if (isSettingRemoteDescription) {
+            iceCandidatesQueue.push(candidateData);
+        } else {
+            try {
+                await peerConnection.addIceCandidate(new RTCIceCandidate({
+                    candidate: candidateData.candidate,
+                    sdpMLineIndex: candidateData.sdpMLineIndex,
+                    sdpMid: candidateData.sdpMid
+                }));
+            } catch (error) {
+                console.error('Ошибка добавления ICE кандидата:', error);
+            }
+        }
+    }
+
+    // Функция для обработки очереди ICE кандидатов
+    async function processIceCandidateQueue() {
+        while (iceCandidatesQueue.length > 0 && peerConnection && !isSettingRemoteDescription) {
+            const candidateData = iceCandidatesQueue.shift();
+            try {
+                await peerConnection.addIceCandidate(new RTCIceCandidate({
+                    candidate: candidateData.candidate,
+                    sdpMLineIndex: candidateData.sdpMLineIndex,
+                    sdpMid: candidateData.sdpMid
+                }));
+            } catch (error) {
+                console.error('Ошибка обработки ICE кандидата из очереди:', error);
+            }
+        }
     }
 
     async function startScreenShare() {
@@ -857,16 +999,10 @@
         
         try {
             destroyCurrentPlayer();
+            await remove(ref(db, 'screenShare'));
             await remove(playbackRef);
             
-            localStream = await navigator.mediaDevices.getDisplayMedia({ 
-                video: { 
-                    frameRate: { ideal: 30, max: 60 },
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 }
-                }, 
-                audio: true 
-            });
+            localStream = await navigator.mediaDevices.getDisplayMedia(screenShareConstraints);
             
             directVideo = document.createElement('video');
             directVideo.id = 'screenShareVideo';
@@ -885,7 +1021,18 @@
             // Создаём WebRTC соединение
             await createPeerConnection();
             
-            const offer = await peerConnection.createOffer();
+            // Оптимизация SDP для лучшего качества
+            const offerOptions = {
+                offerToReceiveAudio: false,
+                offerToReceiveVideo: false
+            };
+            
+            const offer = await peerConnection.createOffer(offerOptions);
+            
+            // Модификация SDP для лучшего качества
+            offer.sdp = offer.sdp.replace(/a=mid:0\r\n/g, 'a=mid:0\r\nb=AS:5000\r\n');
+            offer.sdp = offer.sdp.replace(/a=rtpmap:(\d+) VP8/gi, 'a=rtpmap:$1 VP8/90000\r\na=rtcp-fb:$1 goog-remb\r\na=rtcp-fb:$1 transport-cc\r\na=rtcp-fb:$1 ccm fir\r\na=rtcp-fb:$1 nack\r\na=rtcp-fb:$1 nack pli');
+            
             await peerConnection.setLocalDescription(offer);
             
             await set(ref(db, 'screenShare/offer'), {
@@ -913,10 +1060,19 @@
                 track.onended = () => {
                     stopScreenShare();
                 };
+                
+                // Обработка изменений состояния трека
+                track.onmute = () => {
+                    console.warn('Трек приглушён');
+                };
+                track.onunmute = () => {
+                    console.log('Трек восстановлен');
+                };
             });
             
         } catch (error) {
             console.error('Ошибка захвата экрана:', error);
+            loadingIndicator.classList.remove('active');
             if (error.name !== 'NotAllowedError') {
                 alert('Не удалось начать трансляцию экрана: ' + error.message);
             }
@@ -934,6 +1090,9 @@
             localStream = null;
         }
         
+        iceCandidatesQueue = [];
+        isSettingRemoteDescription = false;
+        
         await remove(ref(db, 'screenShare'));
         destroyCurrentPlayer();
         await remove(playbackRef);
@@ -941,45 +1100,101 @@
         document.getElementById('startShareBtn').style.display = 'inline-flex';
         document.getElementById('startStreamBtn').style.display = 'inline-flex';
         document.getElementById('stopShareBtn').style.display = 'none';
+        loadingIndicator.classList.remove('active');
     }
 
-    // Слушаем предложения для зрителей
+    // Слушаем предложения для зрителей - оптимизированная версия
+    let lastOfferTimestamp = 0;
     onValue(ref(db, 'screenShare/offer'), async (snapshot) => {
         if (isHost || !snapshot.exists()) return;
         
         const offerData = snapshot.val();
-        if (!offerData || offerData.host === username) return;
+        if (!offerData || offerData.host === username || offerData.timestamp === lastOfferTimestamp) return;
+        
+        lastOfferTimestamp = offerData.timestamp;
         
         try {
             destroyCurrentPlayer();
+            loadingIndicator.classList.add('active');
+            loadingIndicator.textContent = 'Подключение к трансляции...';
+            
+            iceCandidatesQueue = [];
+            isSettingRemoteDescription = true;
             
             if (!directVideo) {
                 directVideo = document.createElement('video');
                 directVideo.id = 'screenShareVideo';
                 directVideo.autoplay = true;
                 directVideo.playsinline = true;
+                directVideo.muted = false;
                 directVideo.style.width = '100%';
                 directVideo.style.height = '100%';
                 directVideo.style.objectFit = 'contain';
                 playerContainer.appendChild(directVideo);
             }
             
+            if (peerConnection) {
+                peerConnection.close();
+            }
+            
             peerConnection = new RTCPeerConnection(configuration);
             
             peerConnection.ontrack = (event) => {
-                directVideo.srcObject = event.streams[0];
-                directVideo.play();
-                currentPlayerType = 'screen';
-                loadingIndicator.classList.remove('active');
+                console.log('Получен трек:', event.track.kind);
+                if (event.streams && event.streams[0]) {
+                    directVideo.srcObject = event.streams[0];
+                    currentPlayerType = 'screen';
+                    
+                    directVideo.onloadedmetadata = () => {
+                        console.log('Метаданные загружены');
+                        loadingIndicator.classList.remove('active');
+                        directVideo.play().catch(err => {
+                            console.error('Ошибка воспроизведения:', err);
+                            loadingIndicator.classList.remove('active');
+                        });
+                    };
+                    
+                    directVideo.onplay = () => {
+                        loadingIndicator.classList.remove('active');
+                        loadingIndicator.textContent = 'Загрузка...';
+                    };
+                }
             };
             
             peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
-                    set(ref(db, 'screenShare/answerIceCandidates'), {
+                    const candidateRef = push(ref(db, 'screenShare/answerIceCandidates'));
+                    set(candidateRef, {
                         candidate: event.candidate.candidate,
                         sdpMLineIndex: event.candidate.sdpMLineIndex,
-                        sdpMid: event.candidate.sdpMid
+                        sdpMid: event.candidate.sdpMid,
+                        viewer: username,
+                        timestamp: Date.now()
                     });
+                }
+            };
+            
+            peerConnection.oniceconnectionstatechange = () => {
+                console.log('ICE connection state:', peerConnection.iceConnectionState);
+                if (peerConnection.iceConnectionState === 'connected' || 
+                    peerConnection.iceConnectionState === 'completed') {
+                    loadingIndicator.classList.remove('active');
+                } else if (peerConnection.iceConnectionState === 'failed') {
+                    loadingIndicator.textContent = 'Ошибка подключения...';
+                    setTimeout(() => {
+                        if (peerConnection && peerConnection.iceConnectionState === 'failed') {
+                            peerConnection.restartIce();
+                        }
+                    }, 2000);
+                }
+            };
+            
+            peerConnection.onconnectionstatechange = () => {
+                console.log('Connection state:', peerConnection.connectionState);
+                if (peerConnection.connectionState === 'connected') {
+                    loadingIndicator.classList.remove('active');
+                } else if (peerConnection.connectionState === 'failed') {
+                    loadingIndicator.classList.remove('active');
                 }
             };
             
@@ -987,6 +1202,9 @@
                 type: offerData.type,
                 sdp: offerData.sdp
             }));
+            
+            isSettingRemoteDescription = false;
+            await processIceCandidateQueue();
             
             const answer = await peerConnection.createAnswer();
             await peerConnection.setLocalDescription(answer);
@@ -998,65 +1216,73 @@
                 timestamp: Date.now()
             });
             
-            loadingIndicator.classList.add('active');
-            
         } catch (error) {
             console.error('Ошибка подключения к трансляции:', error);
             loadingIndicator.classList.remove('active');
+            loadingIndicator.textContent = 'Загрузка...';
+            alert('Не удалось подключиться к трансляции. Попробуйте позже.');
+            isSettingRemoteDescription = false;
         }
     }, { onlyOnce: false });
 
     // Слушаем ответы для хоста
+    let lastAnswerTimestamp = 0;
     onValue(ref(db, 'screenShare/answer'), async (snapshot) => {
         if (!isHost || !snapshot.exists() || !peerConnection) return;
         
         const answerData = snapshot.val();
-        if (!answerData) return;
+        if (!answerData || answerData.viewer === username || answerData.timestamp === lastAnswerTimestamp) return;
+        
+        lastAnswerTimestamp = answerData.timestamp;
         
         try {
+            isSettingRemoteDescription = true;
             await peerConnection.setRemoteDescription(new RTCSessionDescription({
                 type: answerData.type,
                 sdp: answerData.sdp
             }));
+            isSettingRemoteDescription = false;
+            await processIceCandidateQueue();
         } catch (error) {
             console.error('Ошибка установки ответа:', error);
+            isSettingRemoteDescription = false;
         }
     }, { onlyOnce: false });
 
-    // Слушаем ICE кандидаты
+    // Слушаем ICE кандидаты от хоста
     onValue(ref(db, 'screenShare/iceCandidates'), async (snapshot) => {
         if (isHost || !snapshot.exists() || !peerConnection) return;
         
-        const candidateData = snapshot.val();
-        if (candidateData && candidateData.candidate) {
-            try {
-                await peerConnection.addIceCandidate(new RTCIceCandidate({
-                    candidate: candidateData.candidate,
-                    sdpMLineIndex: candidateData.sdpMLineIndex,
-                    sdpMid: candidateData.sdpMid
-                }));
-            } catch (error) {
-                console.error('Ошибка добавления ICE кандидата:', error);
+        const candidates = snapshot.val();
+        if (!candidates) return;
+        
+        Object.values(candidates).forEach(candidateData => {
+            if (candidateData && candidateData.candidate) {
+                addIceCandidateToQueue(candidateData);
             }
-        }
+        });
     }, { onlyOnce: false });
 
+    // Слушаем ICE кандидаты от зрителей
     onValue(ref(db, 'screenShare/answerIceCandidates'), async (snapshot) => {
         if (!isHost || !snapshot.exists() || !peerConnection) return;
         
-        const candidateData = snapshot.val();
-        if (candidateData && candidateData.candidate) {
-            try {
-                await peerConnection.addIceCandidate(new RTCIceCandidate({
-                    candidate: candidateData.candidate,
-                    sdpMLineIndex: candidateData.sdpMLineIndex,
-                    sdpMid: candidateData.sdpMid
-                }));
-            } catch (error) {
-                console.error('Ошибка добавления ICE кандидата:', error);
+        const candidates = snapshot.val();
+        if (!candidates) return;
+        
+        Object.values(candidates).forEach(candidateData => {
+            if (candidateData && candidateData.candidate && candidateData.viewer !== username) {
+                addIceCandidateToQueue(candidateData);
             }
-        }
+        });
     }, { onlyOnce: false });
+
+    // Остальной код остаётся таким же...
+    // (detectVideoType, initYouTubePlayer, initVimeoPlayer, initTwitchPlayer, initDirectVideo, 
+    // destroyCurrentPlayer, loadVideo, getCurrentTime, getPlayState, playPause, initializeInterface,
+    // escapeHtml, createMessageElement, editMessage, saveMessageEdit, cancelEdit, deleteMessage,
+    // clearAllChat, renderMessages, sendMessage, startStream, updatePlaybackState, syncPlayback,
+    // обработка playbackRef, полноэкранный режим, тема)
 
     function detectVideoType(url) {
         if (!url) return null;
@@ -1327,17 +1553,17 @@
             } catch (e) {}
             twitchPlayer = null;
         }
-        if (directVideo && directVideo.srcObject) {
-            if (currentPlayerType !== 'screen') {
-                directVideo.srcObject = null;
-            }
-        } else if (directVideo && !directVideo.srcObject) {
+        if (directVideo && directVideo.srcObject && currentPlayerType !== 'screen') {
+            directVideo.srcObject = null;
+        } else if (directVideo && !directVideo.srcObject && currentPlayerType !== 'screen') {
             try {
                 directVideo.pause();
                 directVideo.src = '';
                 directVideo.remove();
             } catch (e) {}
-            directVideo = null;
+            if (currentPlayerType !== 'screen') {
+                directVideo = null;
+            }
         }
         if (localStream && currentPlayerType !== 'screen') {
             localStream.getTracks().forEach(track => track.stop());
@@ -1345,7 +1571,6 @@
         }
         if (currentPlayerType !== 'screen') {
             playerContainer.innerHTML = '';
-            currentPlayerType = null;
             currentVideoUrl = '';
         }
         if (syncInterval) {
@@ -1355,6 +1580,7 @@
         if (currentPlayerType !== 'screen') {
             playPauseBtn.style.display = 'none';
             syncBtn.style.display = 'none';
+            currentPlayerType = null;
         }
     }
 
@@ -1394,9 +1620,8 @@
                 case 'vimeo':
                     return vimeoPlayer ? await vimeoPlayer.getCurrentTime() : 0;
                 case 'direct':
-                    return directVideo ? directVideo.currentTime : 0;
                 case 'screen':
-                    return 0;
+                    return directVideo ? directVideo.currentTime : 0;
                 default:
                     return 0;
             }
@@ -1417,7 +1642,6 @@
                 case 'vimeo':
                     return vimeoPlayer ? !(await vimeoPlayer.getPaused()) : false;
                 case 'direct':
-                    return directVideo ? !directVideo.paused : false;
                 case 'screen':
                     return directVideo ? !directVideo.paused : false;
                 default:
@@ -1853,7 +2077,6 @@
         
         if (!isHost) {
             if (playbackData.type === 'screen') {
-                // Обработка трансляции экрана уже в onValue(screenShareRef)
                 return;
             }
             
@@ -2001,4 +2224,4 @@
     });
 </script>
 </body>
-</html>
+</
