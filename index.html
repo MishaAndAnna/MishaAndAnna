@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>M & A — The Chronicle</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;700;900&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <style>
+        :root {
+            --bg:           #100c03;
+            --bg2:          #1b1408;
+            --ink:          #f0e6cc;
+            --ink-dim:      #b09a70;
+            --ink-faint:    #6b5738;
+            --gold:         #c8a84b;
+            --gold-bright:  #e8c96a;
+            --gold-dim:     #7a6030;
+            --red:          #7a1a1a;
+            --red-bright:   #b82222;
+            --rule:         rgba(200,168,75,0.22);
+            --rule-strong:  rgba(200,168,75,0.5);
+            --card-bg:      rgba(255,255,255,0.025);
+            --card-border:  rgba(200,168,75,0.18);
+            --shadow:       rgba(0,0,0,0.8);
+        }
+
+        body.light-mode {
+            --bg:           #dfd6bc;
+            --bg2:          #cfc5a8;
+            --ink:          #18120a;
+            --ink-dim:      #4a3820;
+            --ink-faint:    #7a6244;
+            --gold:         #6a4c10;
+            --gold-bright:  #8a6420;
+            --gold-dim:     #4e3a0c;
+            --red:          #7a1a1a;
+            --red-bright:   #9a1212;
+            --rule:         rgba(74,56,32,0.28);
+            --rule-strong:  rgba(74,56,32,0.55);
+            --card-bg:      rgba(0,0,0,0.03);
+            --card-border:  rgba(74,56,32,0.22);
+            --shadow:       rgba(20,14,4,0.25);
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: var(--bg);
+            color: var(--ink);
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: background 0.5s, color 0.5s;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+            opacity: 0.45;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23g)' opacity='0.08'/%3E%3C/svg%3E");
+        }
+        body::after {
+            content: '';
+            position: fixed; inset: 0; z-index: 9998; pointer-events: none;
+            background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.45) 100%);
+        }
+        body.light-mode::after {
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(40,28,8,0.22) 100%);
+        }
+
+        /* ═══════ LOADER ═══════ */
+        #loader {
+            position: fixed; inset: 0; z-index: 10000;
+            background: var(--bg);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 14px;
+        }
+        .ld-fraktur { font-family:'UnifrakturMaguntia',cursive; font-size:4.2em; color:var(--gold); text-shadow:0 0 50px rgba(200,168,75,0.35); animation:ldPulse 2s ease-in-out infinite; }
+        .ld-sub { font-family:'IM Fell English',serif; font-style:italic; font-size:.95em; color:var(--ink-dim); letter-spacing:.35em; text-transform:uppercase; }
+        .ld-bar { width:0; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); animation:ldBar 2.4s ease forwards; }
+        .ld-dots { display:flex; gap:9px; }
+        .ld-dots span { width:5px; height:5px; background:var(--gold-dim); border-radius:50%; animation:ldDot 1.2s ease-in-out infinite; }
+        .ld-dots span:nth-child(2) { animation-delay:.2s; }
+        .ld-dots span:nth-child(3) { animation-delay:.4s; }
+        @keyframes ldPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.75;transform:scale(1.04)} }
+        @keyframes ldBar   { 0%{width:0} 100%{width:230px} }
+        @keyframes ldDot   { 0%,100%{opacity:.3;transform:scale(1)} 50%{opacity:1;transform:scale(1.6)} }
+
+        /* ═══════ GATE ═══════ */
+        #password-section {
+            display:none; position:fixed; inset:0; z-index:500;
+            background:var(--bg);
+            align-items:center; justify-content:center; flex-direction:column;
+        }
+        #password-section.active { display:flex; }
+        .gate-paper { position:relative; padding:52px 62px; text-align:center; border:1px solid var(--rule-strong); background:var(--card-bg); max-width:470px; width:90%; }
+        .gate-paper::before { content:''; position:absolute; top:8px; left:8px; width:20px; height:20px; border-top:2px solid var(--gold); border-left:2px solid var(--gold); }
+        .gate-paper::after  { content:''; position:absolute; top:8px; right:8px; width:20px; height:20px; border-top:2px solid var(--gold); border-right:2px solid var(--gold); }
+        .gate-bl { position:absolute; bottom:8px; left:8px; width:20px; height:20px; border-bottom:2px solid var(--gold); border-left:2px solid var(--gold); }
+        .gate-br { position:absolute; bottom:8px; right:8px; width:20px; height:20px; border-bottom:2px solid var(--gold); border-right:2px solid var(--gold); }
+        .gate-eyebrow { font-family:'Cinzel',serif; font-size:.68em; letter-spacing:.5em; color:var(--gold-dim); text-transform:uppercase; margin-bottom:10px; }
+        .gate-fraktur  { font-family:'UnifrakturMaguntia',cursive; font-size:3em; color:var(--gold); text-shadow:0 2px 18px rgba(200,168,75,.3); line-height:1.1; margin-bottom:6px; }
+        .gate-hrule    { height:1px; background:linear-gradient(90deg,transparent,var(--rule-strong),transparent); margin:12px 0; }
+        .gate-italic   { font-family:'IM Fell English',serif; font-style:italic; font-size:.92em; color:var(--ink-dim); letter-spacing:.07em; margin-bottom:26px; }
+        .gate-input { width:100%; background:transparent; border:none; border-bottom:2px solid var(--rule-strong); color:var(--ink); font-family:'Cormorant Garamond',serif; font-size:1.2em; letter-spacing:.22em; padding:10px 4px; text-align:center; outline:none; transition:border-color .3s; margin-bottom:18px; }
+        .gate-input:focus { border-bottom-color:var(--gold); }
+        .gate-input::placeholder { color:var(--ink-faint); font-style:italic; }
+        .gate-btn { background:transparent; border:1px solid var(--gold-dim); color:var(--gold); font-family:'Cinzel',serif; font-size:.76em; letter-spacing:.35em; padding:13px 34px; cursor:pointer; position:relative; overflow:hidden; transition:color .4s; }
+        .gate-btn::after { content:''; position:absolute; inset:0; background:var(--gold); transform:translateY(100%); transition:transform .35s cubic-bezier(.4,0,.2,1); z-index:-1; }
+        .gate-btn:hover { color:var(--bg); border-color:var(--gold); }
+        .gate-btn:hover::after { transform:translateY(0); }
+        .gate-error { margin-top:14px; font-family:'IM Fell English',serif; font-style:italic; font-size:.86em; color:var(--red-bright); opacity:0; transition:opacity .3s; }
+        .gate-error.show { opacity:1; }
+
+        /* ═══════ THEME ═══════ */
+        #themeToggle { position:fixed; top:20px; right:22px; z-index:200; background:var(--bg2); border:1px solid var(--rule-strong); color:var(--gold); font-family:'Cinzel',serif; font-size:.63em; letter-spacing:.3em; padding:9px 17px; cursor:pointer; transition:all .3s; }
+        #themeToggle:hover { background:var(--gold); color:var(--bg); border-color:var(--gold); }
+
+        /* ═══════ CONTENT ═══════ */
+        #content-section { display:none; }
+        #content-section.visible { display:block; }
+
+        /* ═══════ MASTHEAD ═══════ */
+        .masthead { padding:26px 52px 0; border-bottom:4px double var(--rule-strong); }
+        .mast-meta { display:flex; justify-content:space-between; align-items:center; font-family:'Cormorant Garamond',serif; font-size:.76em; letter-spacing:.18em; color:var(--ink-faint); text-transform:uppercase; padding-bottom:9px; border-bottom:1px solid var(--rule); margin-bottom:9px; }
+        .ox-rule { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin:6px 0; }
+        .ox-line { height:1px; background:var(--rule-strong); }
+        .ox-line.thick { height:3px; background:var(--ink-dim); }
+        .ox-orn { font-size:.88em; color:var(--gold-dim); user-select:none; }
+        .mast-title-wrap { text-align:center; padding:10px 0 6px; }
+        .mast-fraktur { font-family:'UnifrakturMaguntia',cursive; font-size:6em; color:var(--ink); line-height:1; letter-spacing:.02em; text-shadow:2px 2px 0 var(--gold-dim); }
+        body.light-mode .mast-fraktur { text-shadow:2px 3px 0 rgba(74,56,32,.35); }
+        .mast-byline { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.02em; color:var(--ink-dim); letter-spacing:.13em; margin:4px 0 9px; }
+        .mast-cols { display:grid; grid-template-columns:1fr auto 1fr; gap:18px; align-items:center; padding:10px 0; font-size:.78em; font-family:'Cormorant Garamond',serif; color:var(--ink-faint); letter-spacing:.1em; }
+        .mast-col-l { text-align:left; }
+        .mast-col-r { text-align:right; }
+        .mast-col-c { text-align:center; font-family:'Cinzel',serif; font-size:1.1em; color:var(--gold); letter-spacing:.3em; }
+
+        /* ═══════ TICKER ═══════ */
+        .ticker-band { overflow:hidden; background:var(--gold); padding:7px 0; border-bottom:2px solid var(--gold-dim); }
+        body.light-mode .ticker-band { background:var(--ink-dim); }
+        .ticker-track { display:flex; animation:tkScroll 38s linear infinite; white-space:nowrap; }
+        .ticker-item { font-family:'Cinzel',serif; font-size:.68em; font-weight:700; letter-spacing:.22em; color:var(--bg); padding:0 32px; }
+        body.light-mode .ticker-item { color:var(--bg2); }
+        .ticker-sep { color:rgba(0,0,0,.3); }
+        @keyframes tkScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+        /* ═══════ BROADSHEET ═══════ */
+        .broadsheet { max-width:1260px; margin:0 auto; padding:44px 44px 58px; }
+
+        .sec-head { margin-bottom:26px; padding-bottom:10px; border-bottom:3px double var(--rule-strong); }
+        .sec-rubric { font-family:'Cinzel',serif; font-size:.66em; letter-spacing:.45em; color:var(--gold-dim); text-transform:uppercase; display:block; margin-bottom:3px; }
+        .sec-hl { font-family:'Playfair Display',serif; font-size:2em; font-weight:900; font-style:italic; color:var(--ink); line-height:1.1; }
+        .sec-deck { font-family:'IM Fell English',serif; font-size:.97em; color:var(--ink-dim); margin-top:5px; font-style:italic; }
+
+        .article { border:1px solid var(--card-border); border-top:3px solid var(--gold-dim); background:var(--card-bg); padding:30px 34px 34px; margin-bottom:34px; position:relative; transition:border-top-color .4s, box-shadow .4s; }
+        .article:hover { border-top-color:var(--gold); box-shadow:0 16px 60px var(--shadow); }
+        .article::after { content:'✦'; position:absolute; bottom:10px; right:13px; color:var(--gold-dim); opacity:.3; font-size:1.05em; }
+
+        .pull-quote { border-top:2px solid var(--rule-strong); border-bottom:2px solid var(--rule-strong); padding:13px 22px; margin:16px 0 22px; font-family:'Playfair Display',serif; font-style:italic; font-size:1.05em; color:var(--ink-dim); text-align:center; position:relative; }
+        .pull-quote::before { content:'❝'; font-size:2.2em; color:var(--gold-dim); opacity:.28; position:absolute; top:-6px; left:10px; line-height:1; }
+
+        /* ═══════ GAMES ═══════ */
+        .games-grid { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--card-border); }
+        .game-cell { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px 16px; text-align:center; text-decoration:none; color:var(--ink); border-right:1px solid var(--card-border); position:relative; overflow:hidden; transition:all .4s; }
+        .game-cell:last-child { border-right:none; }
+        .game-cell::before { content:''; position:absolute; inset:0; background:var(--gold); opacity:0; transition:opacity .4s; }
+        .game-cell:hover::before { opacity:.07; }
+        .game-cell:hover .game-num { color:var(--gold-bright); }
+        .game-cell:hover .game-icon-wrap { border-color:var(--gold); transform:rotate(5deg) scale(1.1); }
+        .game-num { font-family:'Cinzel',serif; font-size:.62em; letter-spacing:.4em; color:var(--ink-faint); margin-bottom:11px; position:relative; z-index:1; transition:color .3s; }
+        .game-icon-wrap { width:50px; height:50px; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; margin-bottom:13px; transition:border-color .4s,transform .4s; position:relative; z-index:1; }
+        .game-icon-wrap i { font-size:1.45em; color:var(--gold); }
+        .game-name { font-family:'Playfair Display',serif; font-size:1.12em; font-weight:700; color:var(--ink); position:relative; z-index:1; margin-bottom:4px; }
+        .game-sub  { font-family:'IM Fell English',serif; font-style:italic; font-size:.76em; color:var(--ink-faint); position:relative; z-index:1; }
+
+        /* ═══════ ACTIVITIES ═══════ */
+        .act-grid { display:grid; grid-template-columns:1fr 1fr; }
+        .act-entry { display:flex; gap:18px; align-items:flex-start; padding:20px 26px; text-decoration:none; color:var(--ink); border-bottom:1px solid var(--rule); border-right:1px solid var(--rule); position:relative; transition:background .3s; }
+        .act-entry:nth-child(2n) { border-right:none; }
+        .act-entry:nth-last-child(-n+2) { border-bottom:none; }
+        .act-entry:hover { background:rgba(200,168,75,.05); }
+        .act-entry:hover .act-num { color:var(--gold); }
+        .act-entry:hover .act-arrow { opacity:1; transform:translateX(0); }
+        .act-num { font-family:'Cinzel',serif; font-size:1.7em; color:var(--rule-strong); line-height:1; min-width:34px; font-weight:900; transition:color .3s; }
+        .act-body { flex:1; }
+        .act-title { font-family:'Playfair Display',serif; font-size:1.18em; font-weight:700; color:var(--ink); margin-bottom:3px; }
+        .act-desc  { font-family:'IM Fell English',serif; font-style:italic; font-size:.86em; color:var(--ink-faint); }
+        .act-arrow { font-size:1.1em; color:var(--gold); opacity:0; transform:translateX(-8px); transition:all .3s; align-self:center; }
+
+        /* ═══════ VIDEO ═══════ */
+        .vid-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+        .vid-frame { position:relative; padding-bottom:56.25%; border:1px solid var(--card-border); }
+        .vid-frame iframe { position:absolute; inset:0; width:100%; height:100%; }
+        .vid-btn { background:transparent; border:1px solid var(--rule-strong); color:var(--gold); font-family:'Cinzel',serif; font-size:.63em; letter-spacing:.27em; padding:8px 18px; cursor:pointer; transition:all .3s; }
+        .vid-btn:hover { background:var(--gold); color:var(--bg); border-color:var(--gold); }
+
+        /* ═══════ TWO COL ═══════ */
+        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:34px; }
+
+        /* dates */
+        .date-item { display:flex; align-items:center; gap:14px; padding:13px 0; border-bottom:1px solid var(--rule); transition:padding-left .3s; }
+        .date-item:last-child { border-bottom:none; }
+        .date-item:hover { padding-left:5px; }
+        .date-item:hover .date-loz { background:var(--gold); height:46px; }
+        .date-loz { width:5px; height:36px; background:var(--gold-dim); flex-shrink:0; transition:all .3s; }
+        .date-text { flex:1; }
+        .date-name { font-family:'Playfair Display',serif; font-size:.98em; font-weight:700; color:var(--ink); margin-bottom:2px; }
+        .date-when { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:.82em; color:var(--ink-faint); }
+        .date-del { background:transparent; border:1px solid rgba(120,26,26,.3); color:rgba(184,34,34,.5); padding:4px 10px; font-family:'Cinzel',serif; font-size:.58em; letter-spacing:.2em; cursor:pointer; transition:all .3s; }
+        .date-del:hover { background:var(--red); color:var(--ink); border-color:var(--red); }
+
+        /* wishes */
+        .wish-item { position:relative; padding:14px 0; border-bottom:1px solid var(--rule); transition:padding-left .3s; }
+        .wish-item:last-child { border-bottom:none; }
+        .wish-item:hover { padding-left:5px; }
+        .wish-name { font-family:'Playfair Display',serif; font-style:italic; font-size:1.02em; color:var(--ink); margin-bottom:3px; padding-right:26px; }
+        .wish-when { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:.81em; color:var(--ink-faint); }
+        .wish-del { position:absolute; top:13px; right:0; background:transparent; border:none; color:rgba(184,34,34,.38); cursor:pointer; font-size:.85em; transition:color .3s; }
+        .wish-del:hover { color:var(--red-bright); }
+
+        .empty-note { font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faint); font-size:.88em; padding:12px 0; }
+
+        .classified { margin-top:20px; padding-top:16px; border-top:1px solid var(--rule); }
+        .cl-toggle { background:transparent; border:none; color:var(--gold-dim); font-family:'Cinzel',serif; font-size:.7em; letter-spacing:.3em; cursor:pointer; padding:0; transition:color .3s; text-transform:uppercase; }
+        .cl-toggle:hover { color:var(--gold); }
+        .cl-form { display:none; margin-top:14px; flex-direction:column; gap:9px; }
+        .cl-form.open { display:flex; }
+        .c-input { background:transparent; border:none; border-bottom:1px solid var(--rule-strong); color:var(--ink); font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1em; padding:8px 4px; outline:none; transition:border-color .3s; width:100%; }
+        .c-input:focus { border-bottom-color:var(--gold); }
+        .c-input::placeholder { color:var(--ink-faint); }
+        .c-submit { align-self:flex-start; background:transparent; border:1px solid var(--gold-dim); color:var(--gold); font-family:'Cinzel',serif; font-size:.68em; letter-spacing:.28em; padding:9px 22px; cursor:pointer; transition:all .3s; }
+        .c-submit:hover { background:var(--gold); color:var(--bg); border-color:var(--gold); }
+
+        /* ═══════ SOCIETY CHRONICLE ═══════ */
+        .chronicle-layout {
+            display: grid;
+            grid-template-columns: 1fr 1px 1fr 1px 1fr;
+            gap: 0;
+        }
+        .chronicle-divider {
+            background: var(--rule-strong);
+            margin: 0 22px;
+        }
+        .chron-col { padding: 0 4px; }
+        .chron-item { padding-bottom: 22px; margin-bottom: 22px; border-bottom: 1px solid var(--rule); }
+        .chron-item:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+        .chron-kicker {
+            font-family: 'Cinzel', serif;
+            font-size: .6em;
+            letter-spacing: .4em;
+            color: var(--gold-dim);
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .chron-hl {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.12em;
+            font-weight: 700;
+            color: var(--ink);
+            line-height: 1.25;
+            margin-bottom: 8px;
+        }
+        .chron-body {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: .97em;
+            color: var(--ink-dim);
+            line-height: 1.65;
+        }
+        .chron-body em {
+            font-style: italic;
+            color: var(--gold);
+        }
+        .chron-sig {
+            display: block;
+            margin-top: 10px;
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: .8em;
+            color: var(--ink-faint);
+            text-align: right;
+        }
+        /* decorative initial cap */
+        .dropcap::first-letter {
+            font-family: 'UnifrakturMaguntia', cursive;
+            font-size: 3.4em;
+            color: var(--gold);
+            float: left;
+            line-height: .78;
+            margin-right: 6px;
+            margin-top: 5px;
+        }
+        /* star divider */
+        .star-rule {
+            text-align: center;
+            color: var(--gold-dim);
+            font-size: .9em;
+            letter-spacing: .5em;
+            margin: 18px 0;
+        }
+
+        /* ═══════ EDITORIAL COLUMN ═══════ */
+        .editorial-wrap {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 36px;
+            align-items: start;
+        }
+        .editor-portrait {
+            text-align: center;
+        }
+        .editor-medallion {
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            border: 2px solid var(--rule-strong);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 14px;
+            position: relative;
+            background: var(--bg2);
+            overflow: hidden;
+        }
+        .editor-medallion::before {
+            content: '';
+            position: absolute; inset: 4px;
+            border-radius: 50%;
+            border: 1px solid var(--gold-dim);
+        }
+        .editor-medallion i { font-size: 2.8em; color: var(--gold-dim); }
+        .editor-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1em;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 3px;
+        }
+        .editor-title {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: .76em;
+            color: var(--ink-faint);
+            line-height: 1.4;
+        }
+        .editor-seal {
+            margin-top: 16px;
+            font-family: 'Cinzel', serif;
+            font-size: .55em;
+            letter-spacing: .3em;
+            color: var(--gold-dim);
+            border: 1px solid var(--rule);
+            padding: 6px 10px;
+            display: inline-block;
+        }
+        .editorial-body { border-left: 2px solid var(--rule-strong); padding-left: 30px; }
+        .editorial-headline {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.55em;
+            font-weight: 900;
+            font-style: italic;
+            color: var(--ink);
+            line-height: 1.2;
+            margin-bottom: 5px;
+        }
+        .editorial-dek {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: .9em;
+            color: var(--gold-dim);
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--rule);
+        }
+        .editorial-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.04em;
+            color: var(--ink-dim);
+            line-height: 1.78;
+            column-count: 2;
+            column-gap: 28px;
+            column-rule: 1px solid var(--rule);
+        }
+        .editorial-text p { margin-bottom: 14px; }
+        .editorial-text p:first-child { column-span: none; }
+        .editorial-sign {
+            margin-top: 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .editorial-sign-line { flex: 1; height: 1px; background: var(--rule-strong); }
+        .editorial-sign-name {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.2em;
+            color: var(--ink);
+        }
+
+        /* colophon */
+        .colophon { text-align:center; border-top:4px double var(--rule-strong); padding:28px 50px 38px; }
+        .col-fraktur { font-family:'UnifrakturMaguntia',cursive; font-size:2.2em; color:var(--gold-dim); margin-bottom:7px; }
+        .col-text { font-family:'IM Fell English',serif; font-style:italic; font-size:.83em; color:var(--ink-faint); letter-spacing:.07em; }
+        .col-rule { width:110px; height:1px; background:var(--rule-strong); margin:10px auto; }
+
+        .reveal { opacity:0; transform:translateY(22px); transition:opacity .72s ease,transform .72s ease; }
+        .reveal.in { opacity:1; transform:none; }
+
+        @media(max-width:1000px) {
+            .chronicle-layout { grid-template-columns:1fr 1px 1fr; }
+            .chron-col:last-of-type { display:none; }
+            .editorial-wrap { grid-template-columns:1fr; }
+            .editor-portrait { display:none; }
+            .editorial-body { border-left:none; padding-left:0; }
+        }
+        @media(max-width:900px) {
+            .games-grid { grid-template-columns:1fr 1fr; }
+            .act-grid   { grid-template-columns:1fr; }
+            .two-col    { grid-template-columns:1fr; }
+            .chronicle-layout { grid-template-columns:1fr; }
+            .chronicle-divider { display:none; }
+            .editorial-text { column-count:1; }
+            .mast-fraktur { font-size:3.8em; }
+            .masthead { padding:18px 22px 0; }
+            .broadsheet { padding:28px 18px 50px; }
+        }
+        @media(max-width:540px) {
+            .games-grid { grid-template-columns:1fr; }
+            .mast-fraktur { font-size:2.7em; }
+            .mast-cols { grid-template-columns:1fr; text-align:center; }
+            .mast-col-l,.mast-col-r { display:none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+    <div class="ld-fraktur">The Chronicle</div>
+    <div class="ld-dots"><span></span><span></span><span></span></div>
+    <div class="ld-bar"></div>
+    <div class="ld-sub">Composing the edition&hellip;</div>
+</div>
+
+<!-- GATE -->
+<div id="password-section">
+    <div class="gate-paper">
+        <div class="gate-bl"></div><div class="gate-br"></div>
+        <div class="gate-eyebrow">Private Members&rsquo; Edition</div>
+        <div class="gate-fraktur">M &amp; A Chronicle</div>
+        <div class="gate-hrule"></div>
+        <div class="gate-italic">Admission by passphrase only.<br>Strangers &amp; uninvited guests, begone.</div>
+        <input class="gate-input" type="password" id="password" placeholder="Enter the passphrase&hellip;" />
+        <button class="gate-btn" id="submit-password">ENTER THE HALL</button>
+        <div class="gate-error" id="gate-error">&#10005; &ensp; Incorrect passphrase, dear visitor</div>
+    </div>
+</div>
+
+<!-- THEME -->
+<button id="themeToggle">&#9681; &ensp;THEME</button>
+
+<!-- CONTENT -->
+<div id="content-section">
+
+    <!-- MASTHEAD -->
+    <header class="masthead">
+        <div class="mast-meta">
+            <span>Vol. I &mdash; No. 1 &mdash; 2025</span>
+            <span id="hdr-date"></span>
+            <span>Price: One Fond Memory</span>
+        </div>
+        <div class="ox-rule">
+            <div class="ox-line thick"></div>
+            <span class="ox-orn">&mdash; &#10022; &mdash;</span>
+            <div class="ox-line thick"></div>
+        </div>
+        <div class="mast-title-wrap">
+            <h1 class="mast-fraktur">The M &amp; A Chronicle</h1>
+            <div class="mast-byline">The Official Gazette of Misha &amp; Anna &mdash; Adventures, Amusements &amp; Schemes of the Highest Order</div>
+        </div>
+        <div class="ox-rule">
+            <div class="ox-line"></div>
+            <span class="ox-orn">&#9772;</span>
+            <div class="ox-line"></div>
+        </div>
+        <div class="mast-cols">
+            <div class="mast-col-l">London, England &ensp;&bull;&ensp; Est. 2025</div>
+            <div class="mast-col-c" id="hdr-greeting"></div>
+            <div class="mast-col-r">Members Only &ensp;&bull;&ensp; Private Edition</div>
+        </div>
+    </header>
+
+    <!-- TICKER -->
+    <div class="ticker-band" aria-hidden="true">
+        <div class="ticker-track">
+            <span class="ticker-item">&#9772; THE CHRONICLE</span>
+            <span class="ticker-item ticker-sep">&#10022;</span>
+            <span class="ticker-item">DISPATCHES FROM MISHA &amp; ANNA</span>
+            <span class="ticker-item ticker-sep">&#10022;</span>
+            <span class="ticker-item">TEA TIME IS SACROSANCT &mdash; DO NOT DISTURB</span>
+            <span class="ticker-item ticker-sep">&#10022;</span>
+            <span class="ticker-item">GAMES &bull; FEASTS &bull; FILMS &bull; PROMENADES</span>
+            <span class="ticker-item ticker-sep">&#10022;</span>
+            <span class="ticker-item">BEST FRIENDS SINCE THE VERY BEGINNING</span>
+            <span class="ticker-item ticker-sep">&#10022;</span>
+            <span class="ticker-item">LONDON &bull; MMXXV</span>
+            <span class="ticker-item ticker-sep">&#10022;</span>
+            <span class="ticker-item">&#9772; THE CHRONICLE</span>
+            <span class="ticker-item ticker-sep">&#10022;</span>
+            <span class="ticker-item">DISPATCHES FROM MISHA &amp; ANNA</span>
+            <span class="ticker-item ticker-sep">&#10022;</span>
+            <span class="ticker-item">TEA TIME IS SACROSANCT &mdash; DO NOT DISTURB</span>
+            <span class="ticker-item ticker-sep">&#10022;</span>
+            <span class="ticker-item">GAMES &bull; FEASTS &bull; FILMS &bull; PROMENADES</span>
+            <span class="ticker-item ticker-sep">&#10022;</span>
+            <span class="ticker-item">BEST FRIENDS SINCE THE VERY BEGINNING</span>
+            <span class="ticker-item ticker-sep">&#10022;</span>
+            <span class="ticker-item">LONDON &bull; MMXXV</span>
+            <span class="ticker-item ticker-sep">&#10022;</span>
+        </div>
+    </div>
+
+    <!-- BODY -->
+    <main class="broadsheet">
+
+        <!-- I: GAMING HALL -->
+        <div class="article reveal">
+            <div class="sec-head">
+                <span class="sec-rubric">Section the First &ensp;&bull;&ensp; Gaming &amp; Leisure</span>
+                <div class="sec-hl">The Gaming Hall</div>
+                <div class="sec-deck">A curated selection of parlour games befitting persons of distinguished taste and competitive spirit.</div>
+            </div>
+            <div class="pull-quote">
+                &ldquo;A gentleman who cannot abide a fair game of draughts is no gentleman at all.&rdquo;
+            </div>
+            <div class="games-grid">
+                <a href="battleship.html" class="game-cell">
+                    <div class="game-num">I.</div>
+                    <div class="game-icon-wrap"><i class="fas fa-ship"></i></div>
+                    <div class="game-name">Battleship</div>
+                    <div class="game-sub">Naval Warfare &bull; Est. 1931</div>
+                </a>
+                <a href="shashki.html" class="game-cell">
+                    <div class="game-num">II.</div>
+                    <div class="game-icon-wrap"><i class="fas fa-chess-board"></i></div>
+                    <div class="game-name">Draughts</div>
+                    <div class="game-sub">Board Strategy &bull; Classic</div>
+                </a>
+                <a href="tetris.html" class="game-cell" style="border-right:none;">
+                    <div class="game-num">III.</div>
+                    <div class="game-icon-wrap"><i class="fas fa-th-large"></i></div>
+                    <div class="game-name">Tetris</div>
+                    <div class="game-sub">Block Puzzles &bull; 1984</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- II: SOCIETY CHRONICLE — NEW -->
+        <div class="article reveal">
+            <div class="sec-head">
+                <span class="sec-rubric">Section the Second &ensp;&bull;&ensp; Society &amp; Intelligence</span>
+                <div class="sec-hl">The Society Chronicle</div>
+                <div class="sec-deck">Dispatches of consequence from our most distinguished correspondents — all the news fit to whisper.</div>
+            </div>
+
+            <div class="chronicle-layout">
+                <!-- Column 1 -->
+                <div class="chron-col">
+                    <div class="chron-item">
+                        <span class="chron-kicker">Metropolitan Intelligence</span>
+                        <div class="chron-hl">A Most Spirited Evening in the Kitchens of Albion Street</div>
+                        <p class="chron-body dropcap">It is reported by no fewer than three reliable witnesses that <em>Miss A.</em> and <em>Mr. M.</em> did, on a recent Tuesday eve, embark upon a culinary experiment of singular ambition — the preparation of a dish hitherto unknown to London society. The aromas, it is said, reached as far as the second landing. The results were received with great enthusiasm by the assembled company of two.</p>
+                        <span class="chron-sig">— Our Kitchen Correspondent</span>
+                    </div>
+                    <div class="star-rule">&#10022; &ensp; &#10022; &ensp; &#10022;</div>
+                    <div class="chron-item">
+                        <span class="chron-kicker">Brief Intelligence</span>
+                        <div class="chron-hl">The Sofa Dispute Resolved in Characteristic Fashion</div>
+                        <p class="chron-body">After a prolonged negotiation of some forty minutes, a treaty has been reached regarding the allocation of the western cushion. Terms remain undisclosed.</p>
+                        <span class="chron-sig">— Our Domestic Affairs Desk</span>
+                    </div>
+                </div>
+
+                <div class="chronicle-divider"></div>
+
+                <!-- Column 2 -->
+                <div class="chron-col">
+                    <div class="chron-item">
+                        <span class="chron-kicker">Naval &amp; Gaming Affairs</span>
+                        <div class="chron-hl">Battleship Championship Descends into Cheerful Controversy</div>
+                        <p class="chron-body dropcap">The quarterly Battleship tournament, held under the auspices of <em>The M &amp; A Chronicle</em>, concluded this fortnight in scenes of considerable animation. The victor — whose identity this publication declines to confirm — was met with an accusation of &ldquo;implausible good fortune&rdquo; by the defeated party. A rematch has been formally demanded. A rematch has been formally promised. Whether it shall be honoured remains, as of press time, an open question.</p>
+                        <span class="chron-sig">— Our Gaming Correspondent</span>
+                    </div>
+                    <div class="star-rule">&#10022; &ensp; &#10022; &ensp; &#10022;</div>
+                    <div class="chron-item">
+                        <span class="chron-kicker">Theatrical Intelligence</span>
+                        <div class="chron-hl">A Film of Uncertain Genre Divides the Critics</div>
+                        <p class="chron-body">The Cinematograph screening of last Saturday provoked a spirited critical exchange. One party declared the denouement &ldquo;quite moving.&rdquo; The other maintained it was &ldquo;perfectly obvious from the first reel.&rdquo; Neither party has yet conceded the point.</p>
+                        <span class="chron-sig">— Our Cinematograph Desk</span>
+                    </div>
+                </div>
+
+                <div class="chronicle-divider"></div>
+
+                <!-- Column 3 -->
+                <div class="chron-col">
+                    <div class="chron-item">
+                        <span class="chron-kicker">Promenades &amp; Excursions</span>
+                        <div class="chron-hl">London Explored on Foot; Much Admired, Some Complained Of</div>
+                        <p class="chron-body dropcap">A promenade of considerable duration was undertaken by our two most distinguished members this past weekend, traversing streets of varying character. The expedition was declared a success, notwithstanding one wrong turning near the market quarter and a vigorous debate regarding the optimal route home. Refreshments were taken at an establishment of some repute. The tea was pronounced adequate. The cake, rather better.</p>
+                        <span class="chron-sig">— Our Metropolitan Correspondent</span>
+                    </div>
+                    <div class="star-rule">&#10022; &ensp; &#10022; &ensp; &#10022;</div>
+                    <div class="chron-item">
+                        <span class="chron-kicker">Notices &amp; Announcements</span>
+                        <div class="chron-hl">Tea: Once Again Declared Sacrosanct</div>
+                        <p class="chron-body">By unanimous resolution of the Chronicle&rsquo;s editorial board, tea-time remains inviolable. Interruptions will not be tolerated. The biscuits are not to be pre-eaten.</p>
+                        <span class="chron-sig">— The Editors</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- III: PURSUITS -->
+        <div class="article reveal">
+            <div class="sec-head">
+                <span class="sec-rubric">Section the Third &ensp;&bull;&ensp; Social &amp; Cultural Pursuits</span>
+                <div class="sec-hl">Pursuits &amp; Amusements</div>
+                <div class="sec-deck">Activities sanctioned by the editors as worthy of the Chronicle&rsquo;s distinguished readership.</div>
+            </div>
+            <div class="act-grid">
+                <a href="coupons_for_us.html" class="act-entry">
+                    <div class="act-num">I.</div>
+                    <div class="act-body">
+                        <div class="act-title">Coupons &amp; Vouchers</div>
+                        <div class="act-desc">Redeemable privileges &amp; standing agreements</div>
+                    </div>
+                    <span class="act-arrow">&rarr;</span>
+                </a>
+                <a href="cooking.html" class="act-entry">
+                    <div class="act-num">II.</div>
+                    <div class="act-body">
+                        <div class="act-title">Culinary Arts</div>
+                        <div class="act-desc">Recipes, feasts &amp; kitchen adventures</div>
+                    </div>
+                    <span class="act-arrow">&rarr;</span>
+                </a>
+                <a href="movie.html" class="act-entry">
+                    <div class="act-num">III.</div>
+                    <div class="act-body">
+                        <div class="act-title">Cinematograph</div>
+                        <div class="act-desc">Moving pictures &amp; televisual entertainments</div>
+                    </div>
+                    <span class="act-arrow">&rarr;</span>
+                </a>
+                <a href="walking.html" class="act-entry">
+                    <div class="act-num">IV.</div>
+                    <div class="act-body">
+                        <div class="act-title">Promenades</div>
+                        <div class="act-desc">Walks, excursions &amp; metropolitan explorations</div>
+                    </div>
+                    <span class="act-arrow">&rarr;</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- IV: EDITORIAL COLUMN — NEW -->
+        <div class="article reveal">
+            <div class="sec-head">
+                <span class="sec-rubric">Section the Fourth &ensp;&bull;&ensp; Opinion &amp; Commentary</span>
+                <div class="sec-hl">The Editor&rsquo;s Column</div>
+                <div class="sec-deck">A personal address from the Chief Editor upon matters of the gravest consequence to civilised society.</div>
+            </div>
+
+            <div class="editorial-wrap">
+                <div class="editor-portrait">
+                    <div class="editor-medallion">
+                        <i class="fas fa-feather-alt"></i>
+                    </div>
+                    <div class="editor-name">The Chief Editor</div>
+                    <div class="editor-title">
+                        Editor-in-Chief<br>
+                        <em style="font-size:.9em;color:var(--gold-dim)">The M &amp; A Chronicle</em><br>
+                        <span style="font-size:.85em;">Est. London, MMXXV</span>
+                    </div>
+                    <div class="editor-seal">IN AMICITIA VERITAS</div>
+                </div>
+
+                <div class="editorial-body">
+                    <div class="editorial-headline">On the Indispensable Nature of Good Company &amp; the Singular Virtue of Doing Absolutely Nothing Together</div>
+                    <div class="editorial-dek">Being a considered argument that the finest hours are those spent in the company of one's best friend, engaged in no particular purpose whatsoever.</div>
+
+                    <div class="editorial-text">
+                        <p class="dropcap">It has come to the attention of this editorship that certain quarters of modern society persist in the misguided belief that an afternoon is only well spent if it produces something of measurable utility. The Chronicle begs to differ, and begs strenuously.</p>
+
+                        <p>We have it on the highest authority — indeed, upon the evidence of our own most carefully observed experience — that the hours passed in a comfortable room with a trusted companion, with no agenda beyond mutual contentment, represent the very pinnacle of civilised existence. No minutes of a board meeting, no schedule of improving lectures, no regimen of self-betterment has ever produced the warmth that arises naturally from simply being present with the right person.</p>
+
+                        <p>We note with some concern the prevailing fashion for what is euphemistically termed &ldquo;productivity.&rdquo; The Chronicle has no quarrel with productivity in its proper place — accounts must be balanced, correspondence attended to, draughts tournaments organised with due rigour. But productivity elevated to a virtue above companionship is a confusion this publication cannot countenance.</p>
+
+                        <p>Let it be resolved, then — and this publication resolves it formally, for the record — that an evening spent laughing over a game of Battleship, or arguing amiably about a film whose plot neither party fully understood, or simply sitting in agreeable silence with a good cup of tea, is an evening that has discharged its duties to human happiness with complete distinction.</p>
+
+                        <p>The editors commend this view to their readership without reservation, and note that the readership is, in its entirety, already well aware of it.</p>
+                    </div>
+
+                    <div class="editorial-sign">
+                        <div class="editorial-sign-line"></div>
+                        <div class="editorial-sign-name">The Editors, M &amp; A Chronicle</div>
+                        <div class="editorial-sign-line"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- V: VIDEO -->
+        <div class="article reveal">
+            <div class="vid-bar">
+                <div>
+                    <span class="sec-rubric">Section the Fifth</span>
+                    <div class="sec-hl" style="font-size:1.6em;">Tonight&rsquo;s Feature</div>
+                </div>
+                <button class="vid-btn" onclick="changeVideo()">&#8634; &ensp;NEXT FEATURE</button>
+            </div>
+            <div class="vid-frame">
+                <iframe id="youtube-video"
+                    src="https://www.youtube.com/embed/b3GoZMfHJT4"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+
+        <!-- VI + VII: CALENDAR & DREAMS -->
+        <div class="two-col">
+            <div class="article reveal">
+                <div class="sec-head">
+                    <span class="sec-rubric">Section the Sixth</span>
+                    <div class="sec-hl">The Calendar of Occasions</div>
+                    <div class="sec-deck">Important dates, duly noted in the official register.</div>
+                </div>
+                <div id="calendar-container"></div>
+                <div class="classified">
+                    <button class="cl-toggle" onclick="toggleForm('dateForm')">+ &ensp;Record an Occasion</button>
+                    <div class="cl-form" id="dateForm">
+                        <form id="date-form">
+                            <input class="c-input" type="text" id="date-title" placeholder="Name of the occasion&hellip;" required /><br><br>
+                            <input class="c-input" type="date" id="date-date" required /><br><br>
+                            <button class="c-submit" type="submit">INSCRIBE</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="article reveal">
+                <div class="sec-head">
+                    <span class="sec-rubric">Section the Seventh</span>
+                    <div class="sec-hl">Dreams &amp; Grand Schemes</div>
+                    <div class="sec-deck">Aspirations, fancies &amp; adventures yet to be undertaken.</div>
+                </div>
+                <div id="saved-wishes-list"></div>
+                <div class="classified">
+                    <button class="cl-toggle" onclick="toggleForm('wishForm')">+ &ensp;Add a Dream</button>
+                    <div class="cl-form" id="wishForm">
+                        <form id="wish-form">
+                            <input class="c-input" type="text" id="wish-title" placeholder="The dream itself&hellip;" required /><br><br>
+                            <input class="c-input" type="date" id="wish-date" required /><br><br>
+                            <button class="c-submit" type="submit">INSCRIBE</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- COLOPHON -->
+    <footer class="colophon">
+        <div class="col-rule"></div>
+        <div class="col-fraktur">The M &amp; A Chronicle</div>
+        <div class="col-text">Printed for the exclusive use of Misha &amp; Anna &mdash; London, MMXXV</div>
+        <div class="col-rule"></div>
+        <div class="col-text" style="font-size:.78em;margin-top:7px;opacity:.6;">
+            &ldquo;Good friends, good books, and a sleepy conscience: this is the ideal life.&rdquo; &mdash; Mark Twain
+        </div>
+    </footer>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc }
+        from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+    const app = initializeApp({
+        apiKey: "AIzaSyA-qRTFlszcMafJv1eesYg-PUxsxYoo28U",
+        authDomain: "misha-and-anna-48e4c.firebaseapp.com",
+        projectId: "misha-and-anna-48e4c",
+        storageBucket: "misha-and-anna-48e4c.firebasestorage.app",
+        messagingSenderId: "822036073579",
+        appId: "1:822036073579:web:cd59fd4f5362b5f0bb752e"
+    });
+    const db = getFirestore(app);
+
+    /* LOADER */
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            gsap.to('#loader', { opacity:0, duration:.9, onComplete:() => {
+                document.getElementById('loader').style.display = 'none';
+                const ps = document.getElementById('password-section');
+                ps.classList.add('active');
+                gsap.from(['.gate-fraktur','.gate-hrule','.gate-italic','.gate-input','.gate-btn'], {
+                    y:20, opacity:0, duration:.7, stagger:.12, ease:'power2.out'
+                });
+            }});
+        }, 2700);
+    });
+
+    /* HEADER */
+    const now = new Date();
+    const hdDate = document.getElementById('hdr-date');
+    if (hdDate) hdDate.textContent = now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const hdGreet = document.getElementById('hdr-greeting');
+    if (hdGreet) {
+        const h = now.getHours();
+        hdGreet.textContent = h < 12 ? 'GOOD MORNING' : h < 18 ? 'GOOD AFTERNOON' : 'GOOD EVENING';
+    }
+
+    /* THEME */
+    if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        document.body.classList.toggle('light-mode');
+        localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+    });
+
+    /* PASSWORD */
+    const SECRET = "AnnaAndMisha2025";
+    function unlock() {
+        const val = document.getElementById('password').value;
+        const err = document.getElementById('gate-error');
+        if (val === SECRET) {
+            gsap.to('#password-section', { opacity:0, duration:.6, onComplete:() => {
+                document.getElementById('password-section').classList.remove('active');
+                const cs = document.getElementById('content-section');
+                cs.classList.add('visible');
+                gsap.from('.masthead',    { y:-28, opacity:0, duration:.9, ease:'power2.out' });
+                gsap.from('.ticker-band', { opacity:0, duration:.5, delay:.4 });
+                loadData();
+                initReveal();
+            }});
+        } else {
+            err.classList.add('show');
+            gsap.to('.gate-paper', { x:-7, duration:.05, repeat:8, yoyo:true, ease:'power1.inOut',
+                onComplete:() => gsap.set('.gate-paper',{x:0}) });
+            setTimeout(() => err.classList.remove('show'), 3200);
+        }
+    }
+    document.getElementById('submit-password').addEventListener('click', unlock);
+    document.getElementById('password').addEventListener('keydown', e => { if (e.key==='Enter') unlock(); });
+
+    /* FIREBASE */
+    async function loadData() { await displayDates(); await displayWishes(); }
+
+    async function displayDates() {
+        const c = document.getElementById('calendar-container');
+        c.innerHTML = '';
+        const snap = await getDocs(collection(db,'dates'));
+        if (snap.empty) { c.innerHTML='<div class="empty-note">No occasions recorded yet, dear correspondents.</div>'; return; }
+        snap.forEach(d => {
+            const data = d.data();
+            const el = document.createElement('div');
+            el.className = 'date-item';
+            el.innerHTML = `<div class="date-loz"></div>
+                <div class="date-text">
+                    <div class="date-name">${data.title}</div>
+                    <div class="date-when">${fmt(data.date)}</div>
+                </div>
+                <button class="date-del">&#10005; EXPUNGE</button>`;
+            el.querySelector('.date-del').addEventListener('click', async () => {
+                await deleteDoc(doc(db,'dates',d.id)); displayDates();
+            });
+            c.appendChild(el);
+            gsap.from(el, {x:-14, opacity:0, duration:.4, ease:'power2.out'});
+        });
+    }
+
+    async function displayWishes() {
+        const c = document.getElementById('saved-wishes-list');
+        c.innerHTML = '';
+        const snap = await getDocs(collection(db,'wishes'));
+        if (snap.empty) { c.innerHTML='<div class="empty-note">No dreams inscribed yet, dear dreamers.</div>'; return; }
+        snap.forEach(d => {
+            const data = d.data();
+            const el = document.createElement('div');
+            el.className = 'wish-item';
+            el.innerHTML = `<button class="wish-del"><i class="fas fa-times"></i></button>
+                <div class="wish-name">${data.title}</div>
+                <div class="wish-when">By ${fmt(data.date)}</div>`;
+            el.querySelector('.wish-del').addEventListener('click', async () => {
+                await deleteDoc(doc(db,'wishes',d.id)); displayWishes();
+            });
+            c.appendChild(el);
+            gsap.from(el, {x:14, opacity:0, duration:.4, ease:'power2.out'});
+        });
+    }
+
+    document.getElementById('date-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        await addDoc(collection(db,'dates'), {
+            title: document.getElementById('date-title').value,
+            date:  document.getElementById('date-date').value
+        });
+        e.target.reset(); displayDates();
+    });
+
+    document.getElementById('wish-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        await addDoc(collection(db,'wishes'), {
+            title: document.getElementById('wish-title').value,
+            date:  document.getElementById('wish-date').value
+        });
+        e.target.reset(); displayWishes();
+    });
+
+    function fmt(str) {
+        if (!str) return '';
+        return new Date(str+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+    }
+
+    /* VIDEO */
+    const videos = ["b3GoZMfHJT4","EYG4ROejmyI","FxB6_qaqHlY","c_yCRwh97M8","cFm8fTRW_so",
+        "jDQ4-C4AHmA","KCT3ZagR9-M","8DrQDURiYeQ","Q_TzqcWKz00","u1Wp2coFDB4",
+        "zlJDTxahav0","MxBQEGMFeEU","sGk520me6Ik"];
+    window.changeVideo = function() {
+        const id = videos[Math.floor(Math.random()*videos.length)];
+        const f = document.getElementById('youtube-video');
+        gsap.to(f,{opacity:0,duration:.4,onComplete:()=>{ f.src=`https://www.youtube.com/embed/${id}`; gsap.to(f,{opacity:1,duration:.4}); }});
+    };
+    setInterval(window.changeVideo, 360000);
+
+    /* FORMS */
+    window.toggleForm = id => document.getElementById(id).classList.toggle('open');
+
+    /* REVEAL */
+    function initReveal() {
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+        }, {threshold:.08});
+        document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    }
+</script>
+</body>
+</html>
