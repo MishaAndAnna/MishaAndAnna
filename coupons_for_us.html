@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Coupon Gazette — M & A Chronicle</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;700;900&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <style>
+        /* ════ DARK (default) ════ */
+        :root {
+            --bg:          #100c03;
+            --bg2:         #1b1408;
+            --ink:         #f0e6cc;
+            --ink-dim:     #b09a70;
+            --ink-faint:   #6b5738;
+            --gold:        #c8a84b;
+            --gold-bright: #e8c96a;
+            --gold-dim:    #7a6030;
+            --red:         #7a1a1a;
+            --red-b:       #b82222;
+            --green:       #2a5a2a;
+            --green-b:     #3a8a3a;
+            --rule:        rgba(200,168,75,0.22);
+            --rule-s:      rgba(200,168,75,0.5);
+            --card-bg:     rgba(255,255,255,0.025);
+            --card-b:      rgba(200,168,75,0.18);
+            --shadow:      rgba(0,0,0,0.8);
+        }
+
+        /* ════ LIGHT ════ */
+        body.light-mode {
+            --bg:          #dfd6bc;
+            --bg2:         #cfc5a8;
+            --ink:         #18120a;
+            --ink-dim:     #4a3820;
+            --ink-faint:   #7a6244;
+            --gold:        #6a4c10;
+            --gold-bright: #8a6420;
+            --gold-dim:    #4e3a0c;
+            --red:         #7a1a1a;
+            --red-b:       #9a1212;
+            --green:       #1a4a1a;
+            --green-b:     #2a6a2a;
+            --rule:        rgba(74,56,32,0.28);
+            --rule-s:      rgba(74,56,32,0.55);
+            --card-bg:     rgba(0,0,0,0.03);
+            --card-b:      rgba(74,56,32,0.22);
+            --shadow:      rgba(20,14,4,0.25);
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: var(--bg);
+            color: var(--ink);
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: background .5s, color .5s;
+        }
+
+        /* grain */
+        body::before {
+            content:''; position:fixed; inset:0; z-index:9999; pointer-events:none; opacity:.4;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23g)' opacity='0.08'/%3E%3C/svg%3E");
+        }
+        /* vignette */
+        body::after {
+            content:''; position:fixed; inset:0; z-index:9998; pointer-events:none;
+            background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.45) 100%);
+        }
+        body.light-mode::after { background: radial-gradient(ellipse at center, transparent 40%, rgba(40,28,8,.22) 100%); }
+
+        /* ════ MASTHEAD ════ */
+        .masthead {
+            padding: 22px 50px 0;
+            border-bottom: 4px double var(--rule-s);
+        }
+        .mast-meta {
+            display:flex; justify-content:space-between; align-items:center;
+            font-family:'Cormorant Garamond',serif; font-size:.76em; letter-spacing:.18em;
+            color:var(--ink-faint); text-transform:uppercase;
+            padding-bottom:8px; border-bottom:1px solid var(--rule); margin-bottom:8px;
+        }
+        .mast-meta a {
+            color:var(--gold-dim); text-decoration:none; font-family:'Cinzel',serif;
+            font-size:1em; letter-spacing:.3em; transition:color .3s;
+        }
+        .mast-meta a:hover { color:var(--gold); }
+        .ox-rule { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin:5px 0; }
+        .ox-line { height:1px; background:var(--rule-s); }
+        .ox-line.thick { height:3px; background:var(--ink-dim); }
+        .ox-orn { font-size:.88em; color:var(--gold-dim); user-select:none; }
+        .mast-title { text-align:center; padding:8px 0 5px; }
+        .mast-fraktur {
+            font-family:'UnifrakturMaguntia',cursive; font-size:4.8em; color:var(--ink); line-height:1;
+            letter-spacing:.02em; text-shadow:2px 2px 0 var(--gold-dim);
+        }
+        body.light-mode .mast-fraktur { text-shadow:2px 3px 0 rgba(74,56,32,.35); }
+        .mast-byline {
+            font-family:'Cormorant Garamond',serif; font-style:italic; font-size:.98em;
+            color:var(--ink-dim); letter-spacing:.13em; margin:3px 0 8px;
+        }
+        .mast-cols {
+            display:grid; grid-template-columns:1fr auto 1fr; gap:18px; align-items:center;
+            padding:9px 0; font-size:.76em; font-family:'Cormorant Garamond',serif;
+            color:var(--ink-faint); letter-spacing:.1em;
+        }
+        .mc-l { text-align:left; }
+        .mc-r { text-align:right; }
+        .mc-c { text-align:center; font-family:'Cinzel',serif; font-size:1.1em; color:var(--gold); letter-spacing:.3em; }
+
+        /* ════ TICKER ════ */
+        .ticker-band { overflow:hidden; background:var(--gold); padding:6px 0; border-bottom:2px solid var(--gold-dim); }
+        body.light-mode .ticker-band { background:var(--ink-dim); }
+        .ticker-track { display:flex; animation:tkScroll 38s linear infinite; white-space:nowrap; }
+        .ticker-item { font-family:'Cinzel',serif; font-size:.67em; font-weight:700; letter-spacing:.22em; color:var(--bg); padding:0 30px; }
+        body.light-mode .ticker-item { color:var(--bg2); }
+        @keyframes tkScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+        /* ════ TOP CONTROLS ════ */
+        .controls-bar {
+            display:flex; gap:12px; align-items:center; justify-content:flex-end;
+            padding:14px 50px;
+            border-bottom:1px solid var(--rule);
+            flex-wrap:wrap;
+        }
+        .ctrl-btn {
+            background:transparent; border:1px solid var(--rule-s); color:var(--gold);
+            font-family:'Cinzel',serif; font-size:.63em; letter-spacing:.25em; padding:8px 16px;
+            cursor:pointer; transition:all .3s;
+        }
+        .ctrl-btn:hover { background:var(--gold); color:var(--bg); border-color:var(--gold); }
+        .ctrl-btn.danger { color:rgba(184,34,34,.7); border-color:rgba(184,34,34,.35); }
+        .ctrl-btn.danger:hover { background:var(--red-b); color:var(--ink); border-color:var(--red-b); }
+
+        /* ════ BROADSHEET ════ */
+        .broadsheet { max-width:1280px; margin:0 auto; padding:38px 44px 60px; }
+
+        /* section head */
+        .sec-head { margin-bottom:22px; padding-bottom:9px; border-bottom:3px double var(--rule-s); }
+        .sec-rubric { font-family:'Cinzel',serif; font-size:.65em; letter-spacing:.45em; color:var(--gold-dim); text-transform:uppercase; display:block; margin-bottom:2px; }
+        .sec-hl { font-family:'Playfair Display',serif; font-size:1.9em; font-weight:900; font-style:italic; color:var(--ink); line-height:1.1; }
+        .sec-deck { font-family:'IM Fell English',serif; font-size:.95em; color:var(--ink-dim); margin-top:4px; font-style:italic; }
+
+        /* ════ FILTERS ════ */
+        .filter-strip {
+            display:flex; gap:8px; margin-bottom:28px; flex-wrap:wrap; align-items:center;
+        }
+        .f-btn {
+            background:transparent; border:1px solid var(--card-b); color:var(--ink-dim);
+            font-family:'Cinzel',serif; font-size:.62em; letter-spacing:.25em; padding:7px 16px;
+            cursor:pointer; transition:all .3s; text-transform:uppercase;
+        }
+        .f-btn:hover { border-color:var(--gold-dim); color:var(--ink); }
+        .f-btn.active { background:var(--gold-dim); color:var(--bg); border-color:var(--gold-dim); }
+
+        /* ════ COUPON GRID ════ */
+        .coupon-grid {
+            display:grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap:24px;
+        }
+
+        /* ════ COUPON CARD (flip) ════ */
+        .coupon-wrap {
+            height:340px;
+            perspective:1200px;
+        }
+        .coupon-inner {
+            position:relative; width:100%; height:100%;
+            transform-style:preserve-3d;
+            transition:transform .75s cubic-bezier(.4,0,.2,1);
+        }
+        .coupon-wrap.flipped .coupon-inner { transform:rotateY(180deg); }
+
+        .coupon-front, .coupon-back {
+            position:absolute; inset:0;
+            backface-visibility:hidden;
+            display:flex; flex-direction:column;
+            border:1px solid var(--card-b);
+            background:var(--card-bg);
+            overflow:hidden;
+        }
+        .coupon-back { transform:rotateY(180deg); }
+
+        /* front */
+        .coupon-stamp {
+            background: var(--gold-dim);
+            padding:14px 20px; text-align:center; position:relative;
+        }
+        body.light-mode .coupon-stamp { background:var(--ink-dim); }
+        .coupon-stamp::after {
+            content:'';
+            position:absolute; bottom:-10px; left:0; right:0; height:10px;
+            background:
+                radial-gradient(circle at 10px 0, var(--bg) 8px, transparent 9px),
+                radial-gradient(circle at 30px 0, var(--bg) 8px, transparent 9px),
+                radial-gradient(circle at 50px 0, var(--bg) 8px, transparent 9px),
+                radial-gradient(circle at 70px 0, var(--bg) 8px, transparent 9px),
+                radial-gradient(circle at 90px 0, var(--bg) 8px, transparent 9px),
+                radial-gradient(circle at 110px 0, var(--bg) 8px, transparent 9px),
+                radial-gradient(circle at 130px 0, var(--bg) 8px, transparent 9px),
+                radial-gradient(circle at 150px 0, var(--bg) 8px, transparent 9px),
+                radial-gradient(circle at 170px 0, var(--bg) 8px, transparent 9px),
+                radial-gradient(circle at 190px 0, var(--bg) 8px, transparent 9px),
+                radial-gradient(circle at 210px 0, var(--bg) 8px, transparent 9px),
+                radial-gradient(circle at 230px 0, var(--bg) 8px, transparent 9px),
+                radial-gradient(circle at 250px 0, var(--bg) 8px, transparent 9px),
+                radial-gradient(circle at 270px 0, var(--bg) 8px, transparent 9px),
+                radial-gradient(circle at 290px 0, var(--bg) 8px, transparent 9px),
+                radial-gradient(circle at 310px 0, var(--bg) 8px, transparent 9px);
+            background-size:20px 10px;
+            z-index:2;
+        }
+        .coupon-num {
+            font-family:'Cinzel',serif; font-size:.6em; letter-spacing:.4em; color:rgba(240,230,204,.6);
+            margin-bottom:3px;
+        }
+        .coupon-title {
+            font-family:'Playfair Display',serif; font-style:italic; font-size:1.05em;
+            font-weight:700; color:var(--ink); line-height:1.2;
+        }
+
+        .coupon-body {
+            flex:1; padding:20px 20px 14px; display:flex; flex-direction:column; justify-content:space-between;
+            margin-top:8px;
+        }
+        .coupon-cat-badge {
+            display:inline-block; font-family:'Cinzel',serif; font-size:.55em; letter-spacing:.3em;
+            color:var(--gold-dim); border:1px solid var(--rule); padding:2px 8px; text-transform:uppercase;
+            margin-bottom:8px; align-self:flex-start;
+        }
+        .coupon-icon { font-size:2.2em; color:var(--gold); margin-bottom:8px; display:block; }
+        .coupon-desc {
+            font-family:'Cormorant Garamond',serif; font-size:.95em; color:var(--ink-dim);
+            line-height:1.5; flex:1;
+        }
+        .coupon-actions {
+            display:flex; gap:8px; margin-top:14px; align-items:center;
+        }
+        .ca-use {
+            flex:1; background:var(--gold-dim); border:none; color:var(--bg);
+            font-family:'Cinzel',serif; font-size:.62em; letter-spacing:.25em; padding:10px 12px;
+            cursor:pointer; transition:all .3s; text-transform:uppercase;
+        }
+        .ca-use:hover:not(:disabled) { background:var(--gold); }
+        .ca-use:disabled { opacity:.4; cursor:not-allowed; }
+        .ca-flip {
+            background:transparent; border:1px solid var(--rule); color:var(--gold-dim);
+            padding:10px 12px; cursor:pointer; transition:all .3s; font-size:.8em;
+        }
+        .ca-flip:hover { border-color:var(--gold); color:var(--gold); }
+        .ca-del {
+            background:transparent; border:1px solid rgba(120,26,26,.4); color:rgba(184,34,34,.5);
+            padding:10px 12px; cursor:pointer; transition:all .3s; font-size:.8em;
+        }
+        .ca-del:hover { background:var(--red-b); color:var(--ink); border-color:var(--red-b); }
+
+        /* USED stamp */
+        .coupon-wrap.used .coupon-front { opacity:.65; }
+        .coupon-wrap.used .coupon-front::after {
+            content:'REDEEMED';
+            position:absolute; top:50%; left:50%;
+            transform:translate(-50%,-50%) rotate(-22deg);
+            font-family:'Cinzel',serif; font-size:1.4em; font-weight:900; letter-spacing:.15em;
+            color:var(--red-b); border:3px solid var(--red-b); padding:8px 18px;
+            opacity:.75; white-space:nowrap; pointer-events:none; z-index:10;
+        }
+
+        /* back */
+        .coupon-back {
+            padding:26px 24px; justify-content:center; align-items:center; text-align:center;
+            background:var(--bg2);
+        }
+        .cb-ornament { font-size:2em; color:var(--gold-dim); margin-bottom:12px; }
+        .cb-title { font-family:'Playfair Display',serif; font-style:italic; font-size:1.3em; color:var(--ink); margin-bottom:12px; }
+        .cb-text { font-family:'IM Fell English',serif; font-style:italic; font-size:.92em; color:var(--ink-dim); line-height:1.6; margin-bottom:18px; }
+        .cb-back {
+            background:transparent; border:1px solid var(--rule-s); color:var(--gold);
+            font-family:'Cinzel',serif; font-size:.62em; letter-spacing:.3em; padding:9px 22px;
+            cursor:pointer; transition:all .3s;
+        }
+        .cb-back:hover { background:var(--gold); color:var(--bg); border-color:var(--gold); }
+
+        /* ════ MODALS ════ */
+        .modal {
+            display:none; position:fixed; inset:0; z-index:1000;
+            background:rgba(0,0,0,.65); align-items:center; justify-content:center; padding:20px;
+        }
+        .modal.open { display:flex; }
+        .modal-box {
+            background:var(--bg2); border:1px solid var(--rule-s);
+            max-width:500px; width:100%; padding:38px 42px; position:relative;
+            animation:modalIn .35s ease;
+        }
+        @keyframes modalIn { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:none} }
+        .modal-box::before { content:''; position:absolute; top:8px; left:8px; width:16px; height:16px; border-top:1px solid var(--gold-dim); border-left:1px solid var(--gold-dim); }
+        .modal-box::after  { content:''; position:absolute; top:8px; right:8px; width:16px; height:16px; border-top:1px solid var(--gold-dim); border-right:1px solid var(--gold-dim); }
+        .modal-box-bl { position:absolute; bottom:8px; left:8px; width:16px; height:16px; border-bottom:1px solid var(--gold-dim); border-left:1px solid var(--gold-dim); }
+        .modal-box-br { position:absolute; bottom:8px; right:8px; width:16px; height:16px; border-bottom:1px solid var(--gold-dim); border-right:1px solid var(--gold-dim); }
+
+        .modal-rubric { font-family:'Cinzel',serif; font-size:.63em; letter-spacing:.4em; color:var(--gold-dim); text-transform:uppercase; margin-bottom:4px; }
+        .modal-hl { font-family:'Playfair Display',serif; font-style:italic; font-size:1.7em; font-weight:700; color:var(--ink); margin-bottom:14px; }
+        .modal-p { font-family:'IM Fell English',serif; font-style:italic; font-size:.96em; color:var(--ink-dim); line-height:1.6; margin-bottom:24px; }
+        .modal-actions { display:flex; gap:12px; }
+        .modal-actions button { flex:1; }
+
+        /* form inside modal */
+        .form-group { margin-bottom:18px; }
+        .form-label { display:block; font-family:'Cinzel',serif; font-size:.65em; letter-spacing:.3em; color:var(--gold-dim); text-transform:uppercase; margin-bottom:7px; }
+        .form-field {
+            width:100%; background:transparent; border:none; border-bottom:1px solid var(--rule-s);
+            color:var(--ink); font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.05em;
+            padding:8px 4px; outline:none; transition:border-color .3s;
+        }
+        .form-field:focus { border-bottom-color:var(--gold); }
+        .form-field::placeholder { color:var(--ink-faint); }
+        select.form-field { background:var(--bg2); }
+
+        /* ════ FAB ════ */
+        .fab {
+            position:fixed; bottom:30px; right:30px; z-index:200;
+            width:54px; height:54px;
+            background:var(--gold-dim); border:none; color:var(--bg);
+            font-size:1.4em; cursor:pointer; transition:all .3s;
+            display:flex; align-items:center; justify-content:center;
+        }
+        .fab:hover { background:var(--gold); transform:scale(1.08) rotate(90deg); }
+
+        /* ════ COLOPHON ════ */
+        .colophon {
+            text-align:center; border-top:4px double var(--rule-s); padding:24px 50px 34px;
+        }
+        .col-fraktur { font-family:'UnifrakturMaguntia',cursive; font-size:2em; color:var(--gold-dim); margin-bottom:6px; }
+        .col-text { font-family:'IM Fell English',serif; font-style:italic; font-size:.82em; color:var(--ink-faint); letter-spacing:.07em; }
+        .col-rule { width:100px; height:1px; background:var(--rule-s); margin:9px auto; }
+
+        /* ════ REVEAL ════ */
+        .reveal { opacity:0; transform:translateY(20px); transition:opacity .7s ease, transform .7s ease; }
+        .reveal.in { opacity:1; transform:none; }
+
+        /* empty state */
+        .empty-state {
+            grid-column: 1/-1; text-align:center; padding:60px 20px;
+        }
+        .empty-state-orn { font-size:3em; color:var(--gold-dim); opacity:.4; margin-bottom:16px; }
+        .empty-state-text { font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faint); font-size:1.1em; }
+
+        /* confetti */
+        .confetti-piece {
+            position:fixed; top:-10px; z-index:9000; pointer-events:none;
+            border-radius:1px;
+        }
+
+        /* ════ RESPONSIVE ════ */
+        @media(max-width:900px) {
+            .masthead { padding:18px 22px 0; }
+            .mast-fraktur { font-size:3.2em; }
+            .controls-bar { padding:12px 22px; }
+            .broadsheet { padding:28px 18px 50px; }
+        }
+        @media(max-width:540px) {
+            .mast-fraktur { font-size:2.4em; }
+            .mast-cols { grid-template-columns:1fr; text-align:center; }
+            .mc-l, .mc-r { display:none; }
+            .coupon-grid { grid-template-columns:1fr; }
+            .modal-box { padding:28px 22px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ════ MASTHEAD ════ -->
+<header class="masthead">
+    <div class="mast-meta">
+        <span>Vol. I &mdash; Supplement No. 3</span>
+        <a href="index.html">&#9772; Return to The Chronicle</a>
+        <span id="hdr-date"></span>
+    </div>
+    <div class="ox-rule">
+        <div class="ox-line thick"></div>
+        <span class="ox-orn">&mdash; &#10022; &mdash;</span>
+        <div class="ox-line thick"></div>
+    </div>
+    <div class="mast-title">
+        <h1 class="mast-fraktur">The Coupon Gazette</h1>
+        <div class="mast-byline">An Official Supplement to The M &amp; A Chronicle &mdash; Redeemable Vouchers, Privileges &amp; Promises</div>
+    </div>
+    <div class="ox-rule">
+        <div class="ox-line"></div>
+        <span class="ox-orn">&#9772;</span>
+        <div class="ox-line"></div>
+    </div>
+    <div class="mast-cols">
+        <div class="mc-l">London, England &ensp;&bull;&ensp; Private Edition</div>
+        <div class="mc-c" id="hdr-greeting"></div>
+        <div class="mc-r">M &amp; A Chronicle &ensp;&bull;&ensp; 2025</div>
+    </div>
+</header>
+
+<!-- ════ TICKER ════ -->
+<div class="ticker-band" aria-hidden="true">
+    <div class="ticker-track">
+        <span class="ticker-item">&#9772; THE COUPON GAZETTE</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">PRESENT YOUR VOUCHER TO CLAIM YOUR PRIVILEGE</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">EACH COUPON REDEEMABLE AT ANY HOUR OF CHOOSING</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">NO QUESTIONS ASKED &mdash; NO EXCUSES ACCEPTED</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">MMXXV &bull; PRIVATE MEMBERS ONLY</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">&#9772; THE COUPON GAZETTE</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">PRESENT YOUR VOUCHER TO CLAIM YOUR PRIVILEGE</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">EACH COUPON REDEEMABLE AT ANY HOUR OF CHOOSING</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">NO QUESTIONS ASKED &mdash; NO EXCUSES ACCEPTED</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">MMXXV &bull; PRIVATE MEMBERS ONLY</span>
+        <span class="ticker-item">&bull;</span>
+    </div>
+</div>
+
+<!-- ════ CONTROLS ════ -->
+<div class="controls-bar">
+    <button class="ctrl-btn" id="themeToggle">&#9681; &ensp;THEME</button>
+    <button class="ctrl-btn danger" id="resetBtn">&#8635; &ensp;RESTORE ALL</button>
+</div>
+
+<!-- ════ BROADSHEET ════ -->
+<main class="broadsheet">
+    <div class="sec-head reveal">
+        <span class="sec-rubric">Supplement the Third &ensp;&bull;&ensp; Redeemable Vouchers</span>
+        <div class="sec-hl">The Book of Privileges</div>
+        <div class="sec-deck">Each coupon below constitutes a solemn promise, redeemable in full at any moment the bearer desires. Simply present the voucher and it shall be honoured without delay or question.</div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filter-strip reveal">
+        <button class="f-btn active" data-filter="all">All Vouchers</button>
+        <button class="f-btn" data-filter="fun">Recreation</button>
+        <button class="f-btn" data-filter="practical">Practical</button>
+        <button class="f-btn" data-filter="surprise">Surprises</button>
+        <button class="f-btn" data-filter="best">Finest</button>
+        <button class="f-btn" data-filter="used">Redeemed</button>
+    </div>
+
+    <!-- COUPONS -->
+    <div class="coupon-grid" id="couponGrid"></div>
+</main>
+
+<!-- FAB -->
+<button class="fab" id="fabAdd" title="Add new coupon"><i class="fas fa-plus"></i></button>
+
+<!-- ════ MODALS ════ -->
+
+<!-- Use coupon -->
+<div class="modal" id="useModal">
+    <div class="modal-box">
+        <div class="modal-box-bl"></div><div class="modal-box-br"></div>
+        <div class="modal-rubric">Redemption of Voucher</div>
+        <div class="modal-hl">Redeem this Coupon?</div>
+        <p class="modal-p">You are about to redeem this voucher. Once marked as redeemed, it shall be noted in the register accordingly. The bearer&rsquo;s claim will be honoured forthwith.</p>
+        <div class="modal-actions">
+            <button class="ctrl-btn" id="useCancelBtn">CANCEL</button>
+            <button class="ctrl-btn" id="useConfirmBtn" style="background:var(--gold-dim);color:var(--bg);border-color:var(--gold-dim);">REDEEM</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete coupon -->
+<div class="modal" id="deleteModal">
+    <div class="modal-box">
+        <div class="modal-box-bl"></div><div class="modal-box-br"></div>
+        <div class="modal-rubric">Removal from the Register</div>
+        <div class="modal-hl">Delete this Voucher?</div>
+        <p class="modal-p">This action shall permanently remove the voucher from the register. This deed cannot be undone. Proceed with due consideration.</p>
+        <div class="modal-actions">
+            <button class="ctrl-btn" id="delCancelBtn">CANCEL</button>
+            <button class="ctrl-btn danger" id="delConfirmBtn">DELETE</button>
+        </div>
+    </div>
+</div>
+
+<!-- Reset -->
+<div class="modal" id="resetModal">
+    <div class="modal-box">
+        <div class="modal-box-bl"></div><div class="modal-box-br"></div>
+        <div class="modal-rubric">Full Register Reset</div>
+        <div class="modal-hl">Restore All Coupons?</div>
+        <p class="modal-p">All redeemed vouchers shall be restored to their original unused state. The register will be reset in full.</p>
+        <div class="modal-actions">
+            <button class="ctrl-btn" id="resetCancelBtn">CANCEL</button>
+            <button class="ctrl-btn" id="resetConfirmBtn" style="background:var(--gold-dim);color:var(--bg);border-color:var(--gold-dim);">RESTORE ALL</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add coupon -->
+<div class="modal" id="addModal">
+    <div class="modal-box">
+        <div class="modal-box-bl"></div><div class="modal-box-br"></div>
+        <div class="modal-rubric">New Entry to the Register</div>
+        <div class="modal-hl">Issue a New Voucher</div>
+        <form id="addForm">
+            <div class="form-group">
+                <label class="form-label">Title of the Voucher</label>
+                <input class="form-field" type="text" id="fTitle" placeholder="e.g. A Grand Dinner at Your Choosing&hellip;" required />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-field" id="fDesc" rows="3" placeholder="Describe what this voucher entitles the bearer to&hellip;" required></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <select class="form-field" id="fCat">
+                    <option value="best">Finest</option>
+                    <option value="fun">Recreation</option>
+                    <option value="practical">Practical</option>
+                    <option value="surprise">Surprise</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Emblem</label>
+                <select class="form-field" id="fIcon">
+                    <option value="fa-gift">Gift</option>
+                    <option value="fa-star">Star</option>
+                    <option value="fa-mug-hot">Tea &amp; Coffee</option>
+                    <option value="fa-utensils">Dinner</option>
+                    <option value="fa-film">Cinema</option>
+                    <option value="fa-music">Music</option>
+                    <option value="fa-car">Journey</option>
+                    <option value="fa-puzzle-piece">Game</option>
+                    <option value="fa-hiking">Promenade</option>
+                    <option value="fa-spa">Rest &amp; Repose</option>
+                    <option value="fa-smile">Cheer</option>
+                </select>
+            </div>
+            <div class="modal-actions" style="margin-top:22px;">
+                <button type="button" class="ctrl-btn" id="addCancelBtn">CANCEL</button>
+                <button type="submit" class="ctrl-btn" style="background:var(--gold-dim);color:var(--bg);border-color:var(--gold-dim);">ISSUE VOUCHER</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ════ COLOPHON ════ -->
+<footer class="colophon">
+    <div class="col-rule"></div>
+    <div class="col-fraktur">The Coupon Gazette</div>
+    <div class="col-text">A Supplement of The M &amp; A Chronicle &mdash; London, MMXXV</div>
+    <div class="col-rule"></div>
+</footer>
+
+<script>
+    /* ── TELEGRAM ── */
+    const TG_TOKEN = '8055216192:AAGYBAVgLaVUinW-YqnB7QTSLWljuT9s3Pg';
+    const TG_CHAT  = '1042168412';
+    async function tgNotify(msg) {
+        try { await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT}&text=${encodeURIComponent(msg)}`); } catch(e){}
+    }
+
+    /* ── THEME ── */
+    if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        document.body.classList.toggle('light-mode');
+        localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+    });
+
+    /* ── HEADER ── */
+    const now = new Date();
+    const hdDate = document.getElementById('hdr-date');
+    if (hdDate) hdDate.textContent = now.toLocaleDateString('en-GB', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const hdGreet = document.getElementById('hdr-greeting');
+    if (hdGreet) { const h=now.getHours(); hdGreet.textContent = h<12?'GOOD MORNING':h<18?'GOOD AFTERNOON':'GOOD EVENING'; }
+
+    /* ── DATA ── */
+    const INITIAL = [
+        { id:'c1', title:'Promenade to a Café of Your Choosing', desc:'This coupon grants an outing to any café the bearer desires. All preparations shall be made, and a pleasant atmosphere assured.', category:'best', icon:'fa-utensils', used:false },
+        { id:'c2', title:'A Voucher for the Quest Room', desc:'Present this coupon and we shall immediately repair to an escape room or a board game café of your selection.', category:'fun', icon:'fa-puzzle-piece', used:false },
+        { id:'c3', title:'An Evening at the Cinematograph', desc:'This coupon permits the bearer to select any film or serial for joint viewing. Shall we venture to the cinema?', category:'fun', icon:'fa-film', used:false },
+        { id:'c4', title:'One Wish, Granted Without Question', desc:'Present this coupon and I shall fulfil one wish of yours, without question or objection — within the bounds of reason, naturally.', category:'surprise', icon:'fa-star', used:false },
+        { id:'c5', title:'A Grand Promenade in the Park', desc:'This coupon guarantees my full participation in any manner of outdoor leisure and recreation the bearer may desire.', category:'best', icon:'fa-hiking', used:false },
+        { id:'c6', title:'A Day Without Dispute', desc:'Use this coupon on any day and I shall refrain from all argument — viewing matters solely from your perspective, whatever may arise.', category:'practical', icon:'fa-smile', used:false },
+        { id:'c7', title:'A Spontaneous Excursion', desc:'Present this coupon and we shall depart at once for an unusual destination of your choosing — or a surprise, should you prefer.', category:'surprise', icon:'fa-car', used:false },
+        { id:'c8', title:'One Full Day of Misha\'s Service', desc:'This coupon entitles the bearer to a full day of domestic assistance: washing up, tidying, and whatever else is required. All shall be done.', category:'practical', icon:'fa-bed', used:false },
+    ];
+
+    let coupons = JSON.parse(localStorage.getItem('maCoupons')) || INITIAL;
+    if (!coupons.length) { coupons = INITIAL; save(); }
+
+    function save() { localStorage.setItem('maCoupons', JSON.stringify(coupons)); }
+
+    /* ── RENDER ── */
+    let currentFilter = 'all';
+    let pendingId = null;
+
+    const catLabels = { best:'Finest', fun:'Recreation', practical:'Practical', surprise:'Surprise' };
+
+    function render() {
+        const grid = document.getElementById('couponGrid');
+        grid.innerHTML = '';
+
+        const visible = coupons.filter(c => {
+            if (currentFilter === 'all')    return true;
+            if (currentFilter === 'used')   return c.used;
+            return c.category === currentFilter && !c.used;
+        });
+
+        if (!visible.length) {
+            grid.innerHTML = `<div class="empty-state"><div class="empty-state-orn">&#9772;</div><div class="empty-state-text">No vouchers to display in this register section.</div></div>`;
+            return;
+        }
+
+        visible.forEach((c, i) => {
+            const wrap = document.createElement('div');
+            wrap.className = `coupon-wrap${c.used?' used':''}`;
+            wrap.dataset.id = c.id;
+            wrap.innerHTML = `
+                <div class="coupon-inner">
+                    <div class="coupon-front">
+                        <div class="coupon-stamp">
+                            <div class="coupon-num">VOUCHER NO. ${String(i+1).padStart(3,'0')}</div>
+                            <div class="coupon-title">${c.title}</div>
+                        </div>
+                        <div class="coupon-body">
+                            <div>
+                                <span class="coupon-cat-badge">${catLabels[c.category]||c.category}</span><br>
+                                <i class="fas ${c.icon} coupon-icon"></i>
+                                <div class="coupon-desc">${c.desc}</div>
+                            </div>
+                            <div class="coupon-actions">
+                                <button class="ca-use" ${c.used?'disabled':''}>REDEEM</button>
+                                <button class="ca-flip" title="See reverse"><i class="fas fa-sync-alt"></i></button>
+                                <button class="ca-del" title="Delete"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="coupon-back">
+                        <div class="cb-ornament">&#9772;</div>
+                        <div class="cb-title">How to Redeem</div>
+                        <div class="cb-text">Simply press the &ldquo;Redeem&rdquo; button on the front of this voucher at the moment you wish to exercise your privilege. The promise contained herein shall be honoured immediately and without question.</div>
+                        <button class="cb-back">RETURN</button>
+                    </div>
+                </div>`;
+
+            wrap.querySelector('.ca-use').addEventListener('click', e => {
+                e.stopPropagation();
+                pendingId = c.id; openModal('useModal');
+            });
+            wrap.querySelector('.ca-flip').addEventListener('click', e => {
+                e.stopPropagation(); wrap.classList.toggle('flipped');
+            });
+            wrap.querySelector('.ca-del').addEventListener('click', e => {
+                e.stopPropagation(); pendingId = c.id; openModal('deleteModal');
+            });
+            wrap.querySelector('.cb-back').addEventListener('click', e => {
+                e.stopPropagation(); wrap.classList.remove('flipped');
+            });
+            wrap.addEventListener('click', () => { if(!wrap.classList.contains('flipped')) wrap.classList.add('flipped'); });
+
+            grid.appendChild(wrap);
+            gsap.from(wrap, { y:20, opacity:0, duration:.5, delay:i*.07, ease:'power2.out' });
+        });
+    }
+
+    /* ── FILTERS ── */
+    document.querySelectorAll('.f-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            render();
+        });
+    });
+
+    /* ── MODALS ── */
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    // Use
+    document.getElementById('useCancelBtn').addEventListener('click', () => closeModal('useModal'));
+    document.getElementById('useConfirmBtn').addEventListener('click', () => {
+        const c = coupons.find(x=>x.id===pendingId);
+        if(c){ c.used=true; save(); tgNotify(`Anna redeemed the coupon: "${c.title}" 🎉`); showConfetti(); }
+        closeModal('useModal'); render(); pendingId=null;
+    });
+
+    // Delete
+    document.getElementById('delCancelBtn').addEventListener('click', () => closeModal('deleteModal'));
+    document.getElementById('delConfirmBtn').addEventListener('click', () => {
+        const c = coupons.find(x=>x.id===pendingId);
+        if(c){ tgNotify(`Anna deleted the coupon: "${c.title}" 🗑️`); coupons = coupons.filter(x=>x.id!==pendingId); save(); }
+        closeModal('deleteModal'); render(); pendingId=null;
+    });
+
+    // Reset
+    document.getElementById('resetBtn').addEventListener('click', () => openModal('resetModal'));
+    document.getElementById('resetCancelBtn').addEventListener('click', () => closeModal('resetModal'));
+    document.getElementById('resetConfirmBtn').addEventListener('click', () => {
+        coupons = coupons.map(c=>({...c,used:false})); save();
+        tgNotify(`Anna restored all redeemed coupons 🎉`);
+        closeModal('resetModal'); render(); showConfetti(); pendingId=null;
+    });
+
+    // Add
+    document.getElementById('fabAdd').addEventListener('click', () => openModal('addModal'));
+    document.getElementById('addCancelBtn').addEventListener('click', () => closeModal('addModal'));
+    document.getElementById('addForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const nc = {
+            id: 'c'+Date.now(),
+            title: document.getElementById('fTitle').value,
+            desc:  document.getElementById('fDesc').value,
+            category: document.getElementById('fCat').value,
+            icon: document.getElementById('fIcon').value,
+            used: false
+        };
+        coupons.push(nc); save();
+        e.target.reset(); closeModal('addModal');
+        currentFilter='all';
+        document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelector('[data-filter="all"]').classList.add('active');
+        render(); showConfetti();
+    });
+
+    // Close modals by backdrop
+    document.querySelectorAll('.modal').forEach(m => {
+        m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+    });
+
+    /* ── CONFETTI ── */
+    function showConfetti() {
+        const colors = ['#c8a84b','#e8c96a','#7a6030','#dfd6bc','#b09a70'];
+        for(let i=0;i<80;i++){
+            const el = document.createElement('div');
+            el.className='confetti-piece';
+            el.style.cssText=`left:${Math.random()*100}vw;width:${Math.random()*8+4}px;height:${Math.random()*8+4}px;background:${colors[Math.floor(Math.random()*colors.length)]};opacity:${Math.random()*.6+.4};transform:rotate(${Math.random()*360}deg)`;
+            document.body.appendChild(el);
+            el.animate([
+                {transform:`translate(0,0) rotate(0deg)`,opacity:1},
+                {transform:`translate(${Math.random()*120-60}px,${Math.random()*700+300}px) rotate(${Math.random()*360}deg)`,opacity:0}
+            ],{duration:Math.random()*2000+1500,easing:'cubic-bezier(0,.9,.57,1)',delay:Math.random()*1000}).onfinish=()=>el.remove();
+        }
+    }
+
+    /* ── SCROLL REVEAL ── */
+    const revObs = new IntersectionObserver(entries=>{
+        entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });
+    },{threshold:.08});
+    document.querySelectorAll('.reveal').forEach(el=>revObs.observe(el));
+
+    /* ── INIT ── */
+    render();
+</script>
+</body>
+</html>
