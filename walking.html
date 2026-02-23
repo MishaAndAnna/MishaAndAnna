@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>The Promenade Gazette — M & A Chronicle</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;700;900&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <style>
+        /* ════ DARK ════ */
+        :root {
+            --bg:          #100c03;
+            --bg2:         #1b1408;
+            --bg3:         #231a0a;
+            --ink:         #f0e6cc;
+            --ink-dim:     #b09a70;
+            --ink-faint:   #6b5738;
+            --gold:        #c8a84b;
+            --gold-bright: #e8c96a;
+            --gold-dim:    #7a6030;
+            --red:         #7a1a1a;
+            --red-b:       #b82222;
+            --rule:        rgba(200,168,75,0.22);
+            --rule-s:      rgba(200,168,75,0.5);
+            --card-bg:     rgba(255,255,255,0.025);
+            --card-b:      rgba(200,168,75,0.18);
+            --shadow:      rgba(0,0,0,0.8);
+        }
+        /* ════ LIGHT ════ */
+        body.light-mode {
+            --bg:          #dfd6bc;
+            --bg2:         #cfc5a8;
+            --bg3:         #e8dfc8;
+            --ink:         #18120a;
+            --ink-dim:     #4a3820;
+            --ink-faint:   #7a6244;
+            --gold:        #6a4c10;
+            --gold-bright: #8a6420;
+            --gold-dim:    #4e3a0c;
+            --rule:        rgba(74,56,32,0.28);
+            --rule-s:      rgba(74,56,32,0.55);
+            --card-bg:     rgba(0,0,0,0.03);
+            --card-b:      rgba(74,56,32,0.22);
+            --shadow:      rgba(20,14,4,0.25);
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: var(--bg);
+            color: var(--ink);
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: background .5s, color .5s;
+        }
+
+        /* grain */
+        body::before {
+            content:''; position:fixed; inset:0; z-index:9999; pointer-events:none; opacity:.4;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23g)' opacity='0.08'/%3E%3C/svg%3E");
+        }
+        body::after {
+            content:''; position:fixed; inset:0; z-index:9998; pointer-events:none;
+            background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.45) 100%);
+        }
+        body.light-mode::after { background: radial-gradient(ellipse at center, transparent 40%, rgba(40,28,8,.22) 100%); }
+
+        /* ════ MASTHEAD ════ */
+        .masthead { padding:22px 50px 0; border-bottom:4px double var(--rule-s); }
+        .mast-meta {
+            display:flex; justify-content:space-between; align-items:center;
+            font-family:'Cormorant Garamond',serif; font-size:.76em; letter-spacing:.18em;
+            color:var(--ink-faint); text-transform:uppercase;
+            padding-bottom:8px; border-bottom:1px solid var(--rule); margin-bottom:8px;
+        }
+        .mast-meta a { color:var(--gold-dim); text-decoration:none; font-family:'Cinzel',serif; font-size:1em; letter-spacing:.3em; transition:color .3s; }
+        .mast-meta a:hover { color:var(--gold); }
+        .ox-rule { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin:5px 0; }
+        .ox-line { height:1px; background:var(--rule-s); }
+        .ox-line.thick { height:3px; background:var(--ink-dim); }
+        .ox-orn { font-size:.88em; color:var(--gold-dim); user-select:none; }
+        .mast-title { text-align:center; padding:8px 0 5px; }
+        .mast-fraktur { font-family:'UnifrakturMaguntia',cursive; font-size:4.8em; color:var(--ink); line-height:1; letter-spacing:.02em; text-shadow:2px 2px 0 var(--gold-dim); }
+        body.light-mode .mast-fraktur { text-shadow:2px 3px 0 rgba(74,56,32,.35); }
+        .mast-byline { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:.98em; color:var(--ink-dim); letter-spacing:.13em; margin:3px 0 8px; }
+        .mast-cols { display:grid; grid-template-columns:1fr auto 1fr; gap:18px; align-items:center; padding:9px 0; font-size:.76em; font-family:'Cormorant Garamond',serif; color:var(--ink-faint); letter-spacing:.1em; }
+        .mc-l { text-align:left; }
+        .mc-r { text-align:right; }
+        .mc-c { text-align:center; font-family:'Cinzel',serif; font-size:1.1em; color:var(--gold); letter-spacing:.3em; }
+
+        /* ════ TICKER ════ */
+        .ticker-band { overflow:hidden; background:var(--gold); padding:6px 0; border-bottom:2px solid var(--gold-dim); }
+        body.light-mode .ticker-band { background:var(--ink-dim); }
+        .ticker-track { display:flex; animation:tkScroll 42s linear infinite; white-space:nowrap; }
+        .ticker-item { font-family:'Cinzel',serif; font-size:.67em; font-weight:700; letter-spacing:.22em; color:var(--bg); padding:0 30px; }
+        body.light-mode .ticker-item { color:var(--bg2); }
+        @keyframes tkScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+        /* ════ CONTROLS ════ */
+        .controls-bar { display:flex; gap:10px; align-items:center; justify-content:flex-end; padding:13px 50px; border-bottom:1px solid var(--rule); flex-wrap:wrap; }
+        .ctrl-btn { background:transparent; border:1px solid var(--rule-s); color:var(--gold); font-family:'Cinzel',serif; font-size:.62em; letter-spacing:.25em; padding:8px 16px; cursor:pointer; transition:all .3s; }
+        .ctrl-btn:hover { background:var(--gold); color:var(--bg); border-color:var(--gold); }
+        .ctrl-btn.primary { background:var(--gold-dim); color:var(--bg); border-color:var(--gold-dim); font-size:.7em; padding:10px 22px; }
+        .ctrl-btn.primary:hover { background:var(--gold); border-color:var(--gold); }
+
+        /* ════ BROADSHEET ════ */
+        .broadsheet { max-width:1280px; margin:0 auto; padding:38px 44px 60px; }
+
+        /* two-column layout */
+        .broadsheet-cols { display:grid; grid-template-columns:1fr 1.55fr; gap:32px; align-items:start; }
+
+        /* article */
+        .article {
+            border:1px solid var(--card-b); border-top:3px solid var(--gold-dim);
+            background:var(--card-bg); padding:28px 30px 30px; margin-bottom:28px;
+            position:relative; transition:border-top-color .4s, box-shadow .4s;
+        }
+        .article:hover { border-top-color:var(--gold); box-shadow:0 12px 50px var(--shadow); }
+        .article::after { content:'✦'; position:absolute; bottom:9px; right:12px; color:var(--gold-dim); opacity:.3; font-size:1em; }
+
+        /* sec head */
+        .sec-head { margin-bottom:18px; padding-bottom:8px; border-bottom:3px double var(--rule-s); }
+        .sec-rubric { font-family:'Cinzel',serif; font-size:.63em; letter-spacing:.42em; color:var(--gold-dim); text-transform:uppercase; display:block; margin-bottom:2px; }
+        .sec-hl { font-family:'Playfair Display',serif; font-size:1.6em; font-weight:900; font-style:italic; color:var(--ink); line-height:1.1; }
+        .sec-deck { font-family:'IM Fell English',serif; font-size:.88em; color:var(--ink-dim); margin-top:3px; font-style:italic; }
+
+        /* ════ CALENDAR ════ */
+        .cal-nav {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:10px 14px; border:1px solid var(--card-b); background:var(--card-bg); margin-bottom:14px;
+        }
+        .cal-nav-btn {
+            background:transparent; border:1px solid var(--rule-s); color:var(--gold);
+            font-family:'Cinzel',serif; font-size:.7em; width:30px; height:30px;
+            cursor:pointer; transition:all .3s; display:flex; align-items:center; justify-content:center;
+        }
+        .cal-nav-btn:hover { background:var(--gold); color:var(--bg); }
+        .cal-month { font-family:'Playfair Display',serif; font-style:italic; font-size:1em; color:var(--ink); }
+
+        .cal-table { width:100%; border-collapse:separate; border-spacing:3px; }
+        .cal-table th {
+            font-family:'Cinzel',serif; font-size:.55em; letter-spacing:.3em; color:var(--ink-faint);
+            text-transform:uppercase; padding:8px 4px; text-align:center;
+        }
+        .cal-table td {
+            width:36px; height:34px; text-align:center;
+            font-family:'Cormorant Garamond',serif; font-size:.92em; color:var(--ink-dim);
+            cursor:pointer; border:1px solid transparent; transition:all .25s;
+        }
+        .cal-table td:hover:not(.dis) { border-color:var(--gold-dim); color:var(--ink); background:rgba(200,168,75,.07); }
+        .cal-table td.sel { background:var(--gold-dim); color:var(--bg); font-weight:700; border-color:var(--gold-dim); }
+        .cal-table td.today-cell { border-color:var(--rule-s); color:var(--ink); font-weight:700; }
+        .cal-table td.dis { color:var(--ink-faint); opacity:.35; cursor:not-allowed; }
+
+        /* ════ TIME PILLS ════ */
+        .subsec { font-family:'Cinzel',serif; font-size:.6em; letter-spacing:.38em; color:var(--gold-dim); text-transform:uppercase; margin:18px 0 10px; display:block; }
+        .time-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+        .tpill {
+            background:transparent; border:1px solid var(--card-b); color:var(--ink-dim);
+            font-family:'Cinzel',serif; font-size:.58em; letter-spacing:.15em; padding:8px 4px;
+            cursor:pointer; transition:all .3s; text-align:center;
+        }
+        .tpill:hover { border-color:var(--gold-dim); color:var(--ink); }
+        .tpill.sel { background:var(--gold-dim); color:var(--bg); border-color:var(--gold-dim); }
+
+        /* ════ ACTIVITY CARDS ════ */
+        .act-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+        .act-card {
+            border:1px solid var(--card-b); background:var(--card-bg);
+            padding:14px 8px; text-align:center; cursor:pointer; transition:all .35s;
+            position:relative; overflow:hidden;
+        }
+        .act-card:hover { border-color:var(--gold-dim); }
+        .act-card.sel { border-color:var(--gold); background:rgba(200,168,75,.08); }
+        .act-card.sel::after { content:'✓'; position:absolute; top:5px; right:7px; font-family:'Cinzel',serif; font-size:.55em; color:var(--gold); }
+        .act-icon { font-size:1.7em; margin-bottom:5px; display:block; transition:transform .3s; }
+        .act-card:hover .act-icon { transform:scale(1.15) rotate(5deg); }
+        .act-card.sel .act-icon { transform:scale(1.1); }
+        .act-label { font-family:'Cinzel',serif; font-size:.55em; letter-spacing:.2em; color:var(--ink-dim); text-transform:uppercase; }
+        .act-card.sel .act-label { color:var(--gold); }
+
+        /* ════ NOTES ════ */
+        .note-area {
+            width:100%; background:transparent; border:none; border-bottom:1px solid var(--rule-s);
+            color:var(--ink); font-family:'Cormorant Garamond',serif; font-style:italic;
+            font-size:.97em; padding:8px 4px; resize:none; outline:none;
+            transition:border-color .3s; height:62px;
+        }
+        .note-area:focus { border-bottom-color:var(--gold); }
+        .note-area::placeholder { color:var(--ink-faint); }
+
+        /* ════ RIGHT PANEL — PLANNED PROMENADES ════ */
+        .planned-list { display:flex; flex-direction:column; gap:0; }
+
+        .promenade-card {
+            display:flex; align-items:center; gap:16px;
+            padding:15px 0; border-bottom:1px solid var(--rule);
+            transition:padding-left .3s;
+            position:relative;
+        }
+        .promenade-card:last-child { border-bottom:none; }
+        .promenade-card:hover { padding-left:6px; }
+        .promenade-card:hover .prom-loz { background:var(--gold); height:50px; }
+
+        .prom-loz { width:4px; height:38px; background:var(--gold-dim); flex-shrink:0; transition:all .3s; }
+        .prom-act-icon { font-size:1.6em; min-width:30px; text-align:center; }
+        .prom-info { flex:1; }
+        .prom-activity { font-family:'Playfair Display',serif; font-style:italic; font-size:1em; font-weight:700; color:var(--ink); margin-bottom:2px; }
+        .prom-datetime { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:.84em; color:var(--ink-faint); }
+        .prom-note { font-family:'IM Fell English',serif; font-style:italic; font-size:.8em; color:var(--ink-faint); opacity:.8; margin-top:2px; }
+        .prom-del {
+            background:transparent; border:1px solid rgba(120,26,26,.3); color:rgba(184,34,34,.5);
+            padding:5px 10px; font-family:'Cinzel',serif; font-size:.55em; letter-spacing:.2em;
+            cursor:pointer; transition:all .3s; flex-shrink:0;
+        }
+        .prom-del:hover { background:var(--red-b); color:var(--ink); border-color:var(--red-b); }
+
+        /* empty state */
+        .empty-state { text-align:center; padding:50px 20px; }
+        .empty-orn { font-size:2.8em; color:var(--gold-dim); opacity:.35; margin-bottom:12px; }
+        .empty-text { font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faint); font-size:.95em; line-height:1.7; }
+
+        /* ════ TOAST ════ */
+        .toast {
+            position:fixed; bottom:24px; right:24px; z-index:10000;
+            background:var(--bg2); border:1px solid var(--rule-s); color:var(--gold);
+            font-family:'Cinzel',serif; font-size:.66em; letter-spacing:.2em; padding:11px 20px;
+            opacity:0; transform:translateY(10px); transition:all .3s; pointer-events:none;
+        }
+        .toast.show { opacity:1; transform:none; }
+
+        /* confetti */
+        .cpie { position:fixed; top:-10px; z-index:9000; pointer-events:none; border-radius:1px; }
+
+        /* ════ COLOPHON ════ */
+        .colophon { text-align:center; border-top:4px double var(--rule-s); padding:22px 50px 32px; }
+        .col-fraktur { font-family:'UnifrakturMaguntia',cursive; font-size:2em; color:var(--gold-dim); margin-bottom:5px; }
+        .col-text { font-family:'IM Fell English',serif; font-style:italic; font-size:.8em; color:var(--ink-faint); letter-spacing:.07em; }
+        .col-rule { width:100px; height:1px; background:var(--rule-s); margin:8px auto; }
+
+        /* reveal */
+        .reveal { opacity:0; transform:translateY(20px); transition:opacity .7s ease, transform .7s ease; }
+        .reveal.in { opacity:1; transform:none; }
+
+        /* responsive */
+        @media(max-width:960px) {
+            .broadsheet-cols { grid-template-columns:1fr; }
+            .masthead { padding:18px 22px 0; }
+            .mast-fraktur { font-size:3.2em; }
+            .controls-bar { padding:11px 22px; }
+            .broadsheet { padding:26px 18px 50px; }
+        }
+        @media(max-width:540px) {
+            .mast-fraktur { font-size:2.4em; }
+            .mast-cols { grid-template-columns:1fr; text-align:center; }
+            .mc-l,.mc-r { display:none; }
+            .act-grid { grid-template-columns:repeat(3,1fr); }
+            .time-grid { grid-template-columns:repeat(2,1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ════ MASTHEAD ════ -->
+<header class="masthead">
+    <div class="mast-meta">
+        <span>Vol. I &mdash; Supplement No. 5</span>
+        <a href="index.html">&#9772; Return to The Chronicle</a>
+        <span id="hdr-date"></span>
+    </div>
+    <div class="ox-rule">
+        <div class="ox-line thick"></div>
+        <span class="ox-orn">&mdash; &#10022; &mdash;</span>
+        <div class="ox-line thick"></div>
+    </div>
+    <div class="mast-title">
+        <h1 class="mast-fraktur">The Promenade Gazette</h1>
+        <div class="mast-byline">An Official Supplement to The M &amp; A Chronicle &mdash; Excursions, Outings &amp; Planned Rendezvous</div>
+    </div>
+    <div class="ox-rule">
+        <div class="ox-line"></div>
+        <span class="ox-orn">&#9772;</span>
+        <div class="ox-line"></div>
+    </div>
+    <div class="mast-cols">
+        <div class="mc-l">London, England &ensp;&bull;&ensp; Private Edition</div>
+        <div class="mc-c" id="hdr-greeting"></div>
+        <div class="mc-r">M &amp; A Chronicle &ensp;&bull;&ensp; 2025</div>
+    </div>
+</header>
+
+<!-- ════ TICKER ════ -->
+<div class="ticker-band" aria-hidden="true">
+    <div class="ticker-track">
+        <span class="ticker-item">&#9772; THE PROMENADE GAZETTE</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">PLAN YOUR NEXT EXCURSION &amp; SCHEDULE IT IN THE REGISTER</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">NOTIFICATIONS DISPATCHED 24 HOURS PRIOR TO YOUR OUTING</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">PARKS &bull; CAF&Eacute;S &bull; CONCERTS &bull; MUSEUMS &bull; RESTAURANTS</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">MMXXV &bull; PRIVATE MEMBERS ONLY</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">&#9772; THE PROMENADE GAZETTE</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">PLAN YOUR NEXT EXCURSION &amp; SCHEDULE IT IN THE REGISTER</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">NOTIFICATIONS DISPATCHED 24 HOURS PRIOR TO YOUR OUTING</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">PARKS &bull; CAF&Eacute;S &bull; CONCERTS &bull; MUSEUMS &bull; RESTAURANTS</span>
+        <span class="ticker-item">&bull;</span>
+        <span class="ticker-item">MMXXV &bull; PRIVATE MEMBERS ONLY</span>
+        <span class="ticker-item">&bull;</span>
+    </div>
+</div>
+
+<!-- ════ CONTROLS ════ -->
+<div class="controls-bar">
+    <button class="ctrl-btn" id="themeToggle">&#9681; &ensp;THEME</button>
+</div>
+
+<!-- ════ BROADSHEET ════ -->
+<main class="broadsheet">
+    <div class="broadsheet-cols">
+
+        <!-- LEFT: PLANNER ══════════════════════ -->
+        <div>
+
+            <!-- CALENDAR -->
+            <div class="article reveal">
+                <div class="sec-head">
+                    <span class="sec-rubric">Appointment Register &bull; Step I</span>
+                    <div class="sec-hl">Select a Date</div>
+                </div>
+                <div class="cal-nav">
+                    <button class="cal-nav-btn" id="prevMonth">&#10094;</button>
+                    <span class="cal-month" id="calMonth"></span>
+                    <button class="cal-nav-btn" id="nextMonth">&#10095;</button>
+                </div>
+                <table class="cal-table">
+                    <thead>
+                        <tr>
+                            <th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th><th>Su</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calBody"></tbody>
+                </table>
+            </div>
+
+            <!-- TIME -->
+            <div class="article reveal">
+                <div class="sec-head">
+                    <span class="sec-rubric">Appointment Register &bull; Step II</span>
+                    <div class="sec-hl">Select the Hour</div>
+                </div>
+                <div class="time-grid" id="timeGrid">
+                    <div class="tpill" data-t="10:00">10:00</div>
+                    <div class="tpill" data-t="11:00">11:00</div>
+                    <div class="tpill" data-t="12:00">12:00</div>
+                    <div class="tpill" data-t="13:00">13:00</div>
+                    <div class="tpill" data-t="14:00">14:00</div>
+                    <div class="tpill" data-t="15:00">15:00</div>
+                    <div class="tpill" data-t="16:00">16:00</div>
+                    <div class="tpill" data-t="17:00">17:00</div>
+                </div>
+            </div>
+
+            <!-- ACTIVITY -->
+            <div class="article reveal">
+                <div class="sec-head">
+                    <span class="sec-rubric">Appointment Register &bull; Step III</span>
+                    <div class="sec-hl">Nature of the Outing</div>
+                </div>
+                <div class="act-grid">
+                    <div class="act-card" data-act="cafe" data-icon="☕" data-label="Café">
+                        <span class="act-icon">☕</span>
+                        <span class="act-label">Café</span>
+                    </div>
+                    <div class="act-card" data-act="park" data-icon="🌳" data-label="Park">
+                        <span class="act-icon">🌳</span>
+                        <span class="act-label">Park</span>
+                    </div>
+                    <div class="act-card" data-act="cinema" data-icon="🎬" data-label="Cinema">
+                        <span class="act-icon">🎬</span>
+                        <span class="act-label">Cinema</span>
+                    </div>
+                    <div class="act-card" data-act="restaurant" data-icon="🍽" data-label="Restaurant">
+                        <span class="act-icon">🍽</span>
+                        <span class="act-label">Restaurant</span>
+                    </div>
+                    <div class="act-card" data-act="museum" data-icon="🏛" data-label="Museum">
+                        <span class="act-icon">🏛</span>
+                        <span class="act-label">Museum</span>
+                    </div>
+                    <div class="act-card" data-act="concert" data-icon="🎵" data-label="Concert">
+                        <span class="act-icon">🎵</span>
+                        <span class="act-label">Concert</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NOTES + SUBMIT -->
+            <div class="article reveal">
+                <div class="sec-head">
+                    <span class="sec-rubric">Appointment Register &bull; Step IV</span>
+                    <div class="sec-hl">Additional Remarks</div>
+                </div>
+                <textarea class="note-area" id="noteArea" placeholder="Add any remarks to this entry&hellip; (name of establishment, special requests, &amp;c.)"></textarea>
+                <div style="margin-top:18px;">
+                    <button class="ctrl-btn primary" id="addBtn">&#10022; &ensp;ENTER IN THE REGISTER</button>
+                </div>
+            </div>
+
+        </div><!-- /left -->
+
+        <!-- RIGHT: REGISTER ══════════════════════ -->
+        <div>
+            <div class="article reveal" style="min-height:400px;">
+                <div class="sec-head">
+                    <span class="sec-rubric">The Official Register of Promenades</span>
+                    <div class="sec-hl">Planned Excursions</div>
+                    <div class="sec-deck">All forthcoming outings duly entered. Reminders dispatched 24 hours &amp; 2 hours before each appointment.</div>
+                </div>
+                <div id="plannedList"></div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<!-- ════ COLOPHON ════ -->
+<footer class="colophon">
+    <div class="col-rule"></div>
+    <div class="col-fraktur">The Promenade Gazette</div>
+    <div class="col-text">A Supplement of The M &amp; A Chronicle &mdash; London, MMXXV</div>
+    <div class="col-rule"></div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    /* ── THEME ── */
+    if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        document.body.classList.toggle('light-mode');
+        localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+    });
+
+    /* ── HEADER ── */
+    const now = new Date();
+    const hdDate = document.getElementById('hdr-date');
+    if (hdDate) hdDate.textContent = now.toLocaleDateString('en-GB', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const hdGreet = document.getElementById('hdr-greeting');
+    if (hdGreet) { const h=now.getHours(); hdGreet.textContent = h<12?'GOOD MORNING':h<18?'GOOD AFTERNOON':'GOOD EVENING'; }
+
+    /* ── TELEGRAM ── */
+    const TG_TOKEN = '7236920382:AAFoDyrXdr-p3ZCCqKIqWfb2OvRT9oB91R4';
+    const TG_CHAT  = '1042168412';
+    async function tgSend(msg) {
+        try { await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:msg})}); } catch(e){}
+    }
+
+    /* ── TOAST ── */
+    let tTimer;
+    function toast(msg) {
+        const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+        clearTimeout(tTimer); tTimer=setTimeout(()=>t.classList.remove('show'),3200);
+    }
+
+    /* ── CONFETTI ── */
+    function confetti() {
+        const cols=['#c8a84b','#e8c96a','#7a6030','#b09a70','#f0e6cc'];
+        for(let i=0;i<70;i++){
+            const el=document.createElement('div'); el.className='cpie';
+            el.style.cssText=`left:${Math.random()*100}vw;width:${Math.random()*8+4}px;height:${Math.random()*8+4}px;background:${cols[~~(Math.random()*cols.length)]};opacity:${Math.random()*.6+.4};transform:rotate(${Math.random()*360}deg)`;
+            document.body.appendChild(el);
+            el.animate([{transform:`translate(0,0) rotate(0deg)`,opacity:1},{transform:`translate(${Math.random()*130-65}px,${Math.random()*700+300}px) rotate(${Math.random()*360}deg)`,opacity:0}],{duration:Math.random()*2000+1500,easing:'cubic-bezier(0,.9,.57,1)',delay:Math.random()*900}).onfinish=()=>el.remove();
+        }
+    }
+
+    /* ── CALENDAR ── */
+    const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const MONTHS_RU = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+    const DAYS_EN   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+    let dispMonth = now.getMonth();
+    let dispYear  = now.getFullYear();
+    let selDate   = null;
+    let selTime   = null;
+    let selAct    = null;
+
+    function buildCal() {
+        document.getElementById('calMonth').textContent = MONTHS_EN[dispMonth] + ' ' + dispYear;
+        const body = document.getElementById('calBody');
+        body.innerHTML = '';
+        const first = new Date(dispYear, dispMonth, 1);
+        const last  = new Date(dispYear, dispMonth+1, 0);
+        let dow = first.getDay(); // 0=Sun
+        dow = dow===0 ? 6 : dow-1; // Mon-based
+
+        const today = new Date(); today.setHours(0,0,0,0);
+        let date = 1;
+        for(let r=0; r<6; r++){
+            const row = document.createElement('tr');
+            for(let c=0; c<7; c++){
+                const td = document.createElement('td');
+                if(r===0 && c<dow){ row.appendChild(td); continue; }
+                if(date > last.getDate()){ break; }
+                td.textContent = date;
+                const d = new Date(dispYear, dispMonth, date);
+                if(d < today){ td.classList.add('dis'); }
+                else {
+                    if(d.getTime()===today.getTime()) td.classList.add('today-cell');
+                    td.addEventListener('click', ()=>{
+                        document.querySelectorAll('.cal-table td.sel').forEach(x=>x.classList.remove('sel'));
+                        td.classList.add('sel');
+                        selDate = new Date(dispYear, dispMonth, parseInt(td.textContent));
+                    });
+                }
+                row.appendChild(td);
+                date++;
+            }
+            body.appendChild(row);
+            if(date > last.getDate()) break;
+        }
+    }
+
+    document.getElementById('prevMonth').addEventListener('click', ()=>{
+        dispMonth--; if(dispMonth<0){dispMonth=11;dispYear--;} buildCal();
+    });
+    document.getElementById('nextMonth').addEventListener('click', ()=>{
+        dispMonth++; if(dispMonth>11){dispMonth=0;dispYear++;} buildCal();
+    });
+    buildCal();
+
+    /* ── TIME PILLS ── */
+    document.querySelectorAll('.tpill').forEach(p=>{
+        p.addEventListener('click',()=>{
+            document.querySelectorAll('.tpill.sel').forEach(x=>x.classList.remove('sel'));
+            p.classList.add('sel'); selTime=p.dataset.t;
+        });
+    });
+
+    /* ── ACTIVITY ── */
+    document.querySelectorAll('.act-card').forEach(c=>{
+        c.addEventListener('click',()=>{
+            document.querySelectorAll('.act-card.sel').forEach(x=>x.classList.remove('sel'));
+            c.classList.add('sel'); selAct=c.dataset.act;
+            gsap.from(c,{scale:.95,duration:.25,ease:'power2.out'});
+        });
+    });
+
+    /* ── DATA ── */
+    let planned = JSON.parse(localStorage.getItem('maPromenades')) || [];
+    function save(){ localStorage.setItem('maPromenades',JSON.stringify(planned)); }
+
+    function fmtDateEn(d){
+        const dt = new Date(d);
+        return DAYS_EN[dt.getDay()] + ', ' + dt.getDate() + ' ' + MONTHS_EN[dt.getMonth()] + ' ' + dt.getFullYear();
+    }
+    function fmtDateTG(d){
+        const dt = new Date(d);
+        return dt.getDate() + ' ' + MONTHS_RU[dt.getMonth()] + ' ' + dt.getFullYear();
+    }
+
+    function actLabel(code){ return document.querySelector(`.act-card[data-act="${code}"]`)?.dataset.label || code; }
+    function actIcon(code){ return document.querySelector(`.act-card[data-act="${code}"]`)?.dataset.icon || '📍'; }
+
+    /* ── RENDER ── */
+    function renderPlanned(){
+        const cont = document.getElementById('plannedList');
+        if(!planned.length){
+            cont.innerHTML=`<div class="empty-state"><div class="empty-orn">&#9772;</div><div class="empty-text">No excursions recorded yet.<br>Enter your first appointment in the register.</div></div>`;
+            return;
+        }
+        const sorted = [...planned].sort((a,b)=>new Date(a.date)-new Date(b.date));
+        cont.innerHTML='';
+        const list = document.createElement('div');
+        list.className='planned-list';
+        sorted.forEach(p=>{
+            const card=document.createElement('div');
+            card.className='promenade-card';
+            card.innerHTML=`
+                <div class="prom-loz"></div>
+                <div class="prom-act-icon">${actIcon(p.act)}</div>
+                <div class="prom-info">
+                    <div class="prom-activity">${actLabel(p.act)}</div>
+                    <div class="prom-datetime">${fmtDateEn(p.date)} &ensp;&bull;&ensp; ${p.time}</div>
+                    ${p.note?`<div class="prom-note">${p.note}</div>`:''}
+                </div>
+                <button class="prom-del" data-id="${p.id}">&#10005; REMOVE</button>`;
+            card.querySelector('.prom-del').addEventListener('click',()=>{
+                planned=planned.filter(x=>x.id!==p.id); save(); renderPlanned();
+            });
+            list.appendChild(card);
+            gsap.from(card,{x:-12,opacity:0,duration:.4,ease:'power2.out'});
+        });
+        cont.appendChild(list);
+    }
+    renderPlanned();
+
+    /* ── ADD ── */
+    document.getElementById('addBtn').addEventListener('click', async ()=>{
+        if(!selDate||!selTime||!selAct){ toast('Please select a date, hour and activity.'); return; }
+        const note = document.getElementById('noteArea').value.trim();
+        const entry = { id:Date.now(), date:selDate, time:selTime, act:selAct, note };
+        planned.push(entry); save();
+
+        /* Telegram */
+        const noteStr = note ? `\nRemarks: ${note}` : '';
+        await tgSend(`🗓 New promenade entered in the register!\n${fmtDateEn(selDate)} at ${selTime}\nActivity: ${actLabel(selAct)}${noteStr}`);
+
+        /* schedule reminders */
+        scheduleReminders(entry);
+
+        confetti();
+        toast('Outing entered in the register!');
+        renderPlanned();
+
+        /* reset */
+        document.querySelectorAll('.cal-table td.sel').forEach(x=>x.classList.remove('sel'));
+        document.querySelectorAll('.tpill.sel').forEach(x=>x.classList.remove('sel'));
+        document.querySelectorAll('.act-card.sel').forEach(x=>x.classList.remove('sel'));
+        document.getElementById('noteArea').value='';
+        selDate=selTime=selAct=null;
+    });
+
+    /* ── REMINDERS ── */
+    function scheduleReminders(p){
+        const ev = new Date(p.date);
+        const [h,m] = p.time.split(':');
+        ev.setHours(+h,+m,0,0);
+        const note = p.note ? `\nRemarks: ${p.note}` : '';
+
+        const d24 = ev.getTime()-24*3600000-Date.now();
+        if(d24>0) setTimeout(()=>tgSend(`⏰ Reminder: Tomorrow at ${p.time} — ${actLabel(p.act)}${note}`),d24);
+
+        const d2  = ev.getTime()-2*3600000-Date.now();
+        if(d2>0)  setTimeout(()=>tgSend(`✨ In 2 hours: ${actLabel(p.act)} at ${p.time}${note}`),d2);
+    }
+
+    /* reschedule on load */
+    planned.forEach(p=>scheduleReminders(p));
+
+    /* ── SCROLL REVEAL ── */
+    const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');});},{threshold:.06});
+    document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
